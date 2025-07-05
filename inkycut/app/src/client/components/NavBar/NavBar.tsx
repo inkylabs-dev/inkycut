@@ -6,7 +6,7 @@ import { Dialog } from '@headlessui/react';
 import { BiLogIn } from 'react-icons/bi';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import { HiBars3 } from 'react-icons/hi2';
-import logo from '../../static/logo.webp';
+import logo from '/logos/logo_notext.png';
 import DropdownUser from '../../../user/DropdownUser';
 import { UserMenuItems } from '../../../user/UserMenuItems';
 import DarkModeSwitcher from '../DarkModeSwitcher';
@@ -18,7 +18,7 @@ export interface NavigationItem {
   to: string;
 }
 
-const NavLogo = () => <img className='h-8 w-8' src={logo} alt='Your SaaS App' />;
+const NavLogo = () => <img className='h-8 w-8' src={logo} alt='InkyCut' />;
 
 export default function AppNavBar({ navigationItems }: { navigationItems: NavigationItem[] }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -41,7 +41,7 @@ export default function AppNavBar({ navigationItems }: { navigationItems: Naviga
           >
             <NavLogo />
             {isLandingPage && (
-              <span className='ml-2 text-sm font-semibold leading-6 dark:text-white'>Your SaaS</span>
+              <span className='ml-2 text-sm font-semibold leading-6 dark:text-white'>InkyCut</span>
             )}
           </WaspRouterLink>
         </div>

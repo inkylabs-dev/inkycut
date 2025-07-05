@@ -8,15 +8,15 @@ app OpenSaaS {
   head: [
     "<link rel='icon' href='/favicon.ico' />",
     "<meta charset='utf-8' />",
-    "<meta name='description' content='Remix stunning visuals with your brillient stories.' />",
+    "<meta name='description' content='Remix stunning visuals with your brilliant stories. Create, tweak, and bring AI-generated tales to life.' />",
     "<meta name='author' content='INKYLABS LIMITED' />",
     "<meta name='keywords' content='saas, inkycut, video editing, storyboard' />",
     
     "<meta property='og:type' content='website' />",
     "<meta property='og:title' content='InkyCut' />",
-    "<meta property='og:site_name' content='Your Open SaaS App' />",
+    "<meta property='og:site_name' content='InkyCut' />",
     "<meta property='og:url' content='https://inkycut.com' />",
-    "<meta property='og:description' content='Remix stunning visuals with your brillient stories.' />",
+    "<meta property='og:description' content='Remix stunning visuals with your brilliant stories. Create, tweak, and bring AI-generated tales to life.' />",
     "<meta property='og:image' content='https://inkycut.com/public-banner.webp' />",
     "<meta name='twitter:image' content='https://inkycut.com/public-banner.webp' />",
     "<meta name='twitter:image:width' content='800' />",
