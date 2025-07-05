@@ -3,22 +3,22 @@ app OpenSaaS {
     version: "^0.16.0"
   },
 
-  title: "My Open SaaS App",
+  title: "InkyCut",
 
   head: [
     "<link rel='icon' href='/favicon.ico' />",
     "<meta charset='utf-8' />",
-    "<meta name='description' content='Your apps main description and features.' />",
-    "<meta name='author' content='Your (App) Name' />",
-    "<meta name='keywords' content='saas, solution, product, app, service' />",
+    "<meta name='description' content='Remix stunning visuals with your brillient stories.' />",
+    "<meta name='author' content='INKYLABS LIMITED' />",
+    "<meta name='keywords' content='saas, inkycut, video editing, storyboard' />",
     
     "<meta property='og:type' content='website' />",
-    "<meta property='og:title' content='Your Open SaaS App' />",
+    "<meta property='og:title' content='InkyCut' />",
     "<meta property='og:site_name' content='Your Open SaaS App' />",
-    "<meta property='og:url' content='https://your-saas-app.com' />",
-    "<meta property='og:description' content='Your apps main description and features.' />",
-    "<meta property='og:image' content='https://your-saas-app.com/public-banner.webp' />",
-    "<meta name='twitter:image' content='https://your-saas-app.com/public-banner.webp' />",
+    "<meta property='og:url' content='https://inkycut.com' />",
+    "<meta property='og:description' content='Remix stunning visuals with your brillient stories.' />",
+    "<meta property='og:image' content='https://inkycut.com/public-banner.webp' />",
+    "<meta name='twitter:image' content='https://inkycut.com/public-banner.webp' />",
     "<meta name='twitter:image:width' content='800' />",
     "<meta name='twitter:image:height' content='400' />",
     "<meta name='twitter:card' content='summary_large_image' />",
