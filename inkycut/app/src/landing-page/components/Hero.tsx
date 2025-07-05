@@ -1,4 +1,4 @@
-import openSaasBannerWebp from '../../client/static/open-saas-banner.webp';
+import inkycutBanner from '/public-banner.webp';
 import { DocsUrl } from '../../shared/common';
 
 export default function Hero() {
@@ -27,8 +27,8 @@ export default function Hero() {
           <div className='mt-14 flow-root sm:mt-14'>
             <div className='-m-2  flex justify-center rounded-xl lg:-m-4 lg:rounded-2xl lg:p-4'>
               <img
-                src={openSaasBannerWebp}
-                alt='App screenshot'
+                src={inkycutBanner}
+                alt='InkyCut App Banner'
                 width={1000}
                 height={530}
                 loading='lazy'

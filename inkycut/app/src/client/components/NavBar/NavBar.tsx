@@ -140,7 +140,7 @@ function renderNavigationItems(
   });
 }
 
-const ContestURL = 'https://github.com/wasp-lang/wasp';
+const ContestURL = 'https://github.com/inkycut/inkycut';
 
 function Announcement() {
   return (

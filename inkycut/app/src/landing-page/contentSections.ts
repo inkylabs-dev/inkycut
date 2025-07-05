@@ -42,21 +42,21 @@ export const testimonials = [
     role: 'VTuber',
     avatarSrc: daBoiAvatar,
     socialUrl: 'https://twitter.com/soasme',
-    quote: "I love how easy it is to create engaging content with this tool! It's like having a personal video editor that understands my style.",
+    quote: "I love how easy it is to create engaging content with this tool!",
   },
   {
     name: '@coofykids',
-    role: 'Founder @ Cool Startup',
+    role: 'VTuber',
     avatarSrc: '/logos/coofykids_logo.jpg',
     socialUrl: 'https://youtube.com/@coofykids',
     quote: "This product makes me cooler than I already am.  I don't use Canva or CapCut anymore.",
   },
   {
-    name: 'Jamie',
-    role: 'Happy Customer',
+    name: '@enqueuezero',
+    role: "Content Creator",
     avatarSrc: avatarPlaceholder,
     socialUrl: '#',
-    quote: 'My cats love it!',
+    quote: "It's like having a personal video editor that understands my style.",
   },
 ];
 
@@ -88,7 +88,7 @@ export const faqs = [
 ];
 export const footerNavigation = {
   app: [
-    { name: 'Documentation', href: DocsUrl },
+    { name: 'Documentation', href:  DocsUrl},
     { name: 'Blog', href: BlogUrl },
   ],
   company: [
