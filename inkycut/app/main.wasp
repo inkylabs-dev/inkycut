@@ -256,6 +256,51 @@ job dailyStatsJob {
 }
 //#endregion
 
+//#region Library
+route LibraryRoute { path: "/library", to: LibraryPage }
+page LibraryPage {
+  authRequired: true,
+  component: import LibraryPage from "@src/library-app/LibraryPage"
+}
+
+route AddLibraryRoute { path: "/library/add", to: AddLibraryPage }
+page AddLibraryPage {
+  authRequired: true,
+  component: import AddLibraryPage from "@src/library-app/AddLibraryPage"
+}
+
+route EditLibraryRoute { path: "/library/edit/:id", to: EditLibraryPage }
+page EditLibraryPage {
+  authRequired: true,
+  component: import EditLibraryPage from "@src/library-app/EditLibraryPage"
+}
+
+query getPaginatedLibraries {
+  fn: import { getPaginatedLibraries } from "@src/library-app/operations",
+  entities: [User, Library, File]
+}
+
+query getLibraryById {
+  fn: import { getLibraryById } from "@src/library-app/operations",
+  entities: [User, Library, File]
+}
+
+action createLibrary {
+  fn: import { createLibrary } from "@src/library-app/operations",
+  entities: [User, Library, File]
+}
+
+action updateLibrary {
+  fn: import { updateLibrary } from "@src/library-app/operations",
+  entities: [User, Library, File]
+}
+
+action deleteLibrary {
+  fn: import { deleteLibrary } from "@src/library-app/operations",
+  entities: [User, Library, File]
+}
+//#endregion
+
 //#region Admin Dashboard
 route AdminRoute { path: "/admin", to: AnalyticsDashboardPage }
 page AnalyticsDashboardPage {

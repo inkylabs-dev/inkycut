@@ -106,9 +106,6 @@ const PricingPage = () => {
           </h2>
         </div>
         <p className='mx-auto mt-6 max-w-2xl text-center text-lg leading-8 text-gray-600 dark:text-white'>
-          Choose between Stripe and LemonSqueezy as your payment provider. Just add your Product IDs! Try it
-          out below with test credit card number <br />
-          <span className='px-2 py-1 bg-gray-100 rounded-md text-gray-500'>4242 4242 4242 4242 4242</span>
         </p>
         {errorMessage && (
           <div className='mt-8 p-4 bg-red-100 text-red-600 rounded-md dark:bg-red-200 dark:text-red-800'>
