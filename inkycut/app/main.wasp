@@ -329,6 +329,11 @@ action generateManifest {
   fn: import { generateManifest } from "@src/library-app/operations",
   entities: [User, Library, File, Page]
 }
+
+query getLibraryFileDownloadURL {
+  fn: import { getLibraryFileDownloadURL } from "@src/library-app/operations",
+  entities: [User, Library, File, Page]
+}
 //#endregion
 
 //#region Admin Dashboard

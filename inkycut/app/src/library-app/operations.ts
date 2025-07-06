@@ -1,7 +1,7 @@
 import { type User, type Library, type File, type Page } from 'wasp/entities';
 import { type GetPaginatedLibraries, type GetLibraryById, type CreateLibrary, type UpdateLibrary, type DeleteLibrary } from 'wasp/server/operations';
 import { HttpError } from 'wasp/server';
-import crypto from 'crypto';
+import { getUploadFileSignedURLFromS3, getDownloadFileSignedURLFromS3 } from '../file-upload/s3Utils';
 
 type LibraryWithFile = Library & {
   manifestFile: File | null;
@@ -378,18 +378,20 @@ export const uploadPageVideo = async (args: {
     throw new HttpError(403, 'You do not have permission to upload to this page');
   }
 
-  // Generate a hashed filename
-  const hash = crypto.createHash('sha256').update(`${context.user.id}-${Date.now()}-${fileName}`).digest('hex');
-  const hashedFileName = `${hash}.mp4`;
-  const filePath = `/${context.user.id}/library/${page.libraryId}/${hashedFileName}`;
+  // Get S3 upload URL and key
+  const { s3UploadUrl, s3UploadFields, key } = await getUploadFileSignedURLFromS3({
+    fileType,
+    fileName,
+    userId: context.user.id,
+  });
 
   // Create file record
   const file = await context.entities.File.create({
     data: {
       name: fileName,
       type: fileType,
-      key: filePath,
-      uploadUrl: `https://your-storage-domain.com${filePath}`, // Replace with actual storage URL
+      key: key,
+      uploadUrl: s3UploadUrl,
       userId: context.user.id,
     },
   });
@@ -403,7 +405,11 @@ export const uploadPageVideo = async (args: {
     },
   });
 
-  return { page: updatedPage, uploadUrl: file.uploadUrl };
+  return { 
+    page: updatedPage, 
+    uploadUrl: file.uploadUrl,
+    s3UploadFields
+  };
 };
 
 export const generateManifest = async (args: { libraryId: string }, context: any) => {
@@ -454,13 +460,23 @@ export const generateManifest = async (args: { libraryId: string }, context: any
   };
 
   const manifestContent = JSON.stringify(manifest, null, 2);
-  const manifestPath = `/${context.user.id}/library/${libraryId}/manifest.json`;
+
+  // Get S3 upload URL and key for manifest
+  const { s3UploadUrl, s3UploadFields, key } = await getUploadFileSignedURLFromS3({
+    fileType: 'application/json',
+    fileName: 'manifest.json',
+    userId: context.user.id,
+  });
 
   // Create or update manifest file
   let manifestFile = await context.entities.File.findFirst({
     where: {
-      key: manifestPath,
+      name: 'manifest.json',
       userId: context.user.id,
+      // Look for existing manifest for this library
+      key: {
+        contains: `/library/${libraryId}/`,
+      },
     },
   });
 
@@ -471,7 +487,8 @@ export const generateManifest = async (args: { libraryId: string }, context: any
       data: {
         name: 'manifest.json',
         type: 'application/json',
-        uploadUrl: `https://your-storage-domain.com${manifestPath}`, // Replace with actual storage URL
+        key: key,
+        uploadUrl: s3UploadUrl,
       },
     });
   } else {
@@ -480,8 +497,8 @@ export const generateManifest = async (args: { libraryId: string }, context: any
       data: {
         name: 'manifest.json',
         type: 'application/json',
-        key: manifestPath,
-        uploadUrl: `https://your-storage-domain.com${manifestPath}`, // Replace with actual storage URL
+        key: key,
+        uploadUrl: s3UploadUrl,
         userId: context.user.id,
       },
     });
@@ -493,5 +510,29 @@ export const generateManifest = async (args: { libraryId: string }, context: any
     data: { manifestFileId: manifestFile.id },
   });
 
-  return { manifest: manifestContent, file: manifestFile };
+  return { 
+    manifest: manifestContent, 
+    file: manifestFile,
+    s3UploadFields
+  };
+};
+
+export const getLibraryFileDownloadURL = async (args: { fileId: string }, context: any) => {
+  if (!context.user) {
+    throw new HttpError(401, 'You must be logged in to access files');
+  }
+
+  const file = await context.entities.File.findUnique({
+    where: { id: args.fileId },
+  });
+
+  if (!file) {
+    throw new HttpError(404, 'File not found');
+  }
+
+  if (file.userId !== context.user.id) {
+    throw new HttpError(403, 'You do not have permission to access this file');
+  }
+
+  return await getDownloadFileSignedURLFromS3({ key: file.key });
 };

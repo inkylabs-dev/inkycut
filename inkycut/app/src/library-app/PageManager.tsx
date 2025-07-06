@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { createPage, updatePage, deletePage, reorderPages, uploadPageVideo } from 'wasp/client/operations';
+import { createPage, updatePage, deletePage, reorderPages } from 'wasp/client/operations';
 import { type Page, type File } from 'wasp/entities';
-import { FiPlus, FiTrash2, FiEdit2, FiVideo, FiUpload, FiMove } from 'react-icons/fi';
-import { CgSpinner } from 'react-icons/cg';
+import { FiPlus, FiTrash2, FiEdit2, FiVideo, FiMove } from 'react-icons/fi';
+import VideoUploadComponent from './VideoUploadComponent';
+import VideoPreview from './VideoPreview';
 
 type PageWithFile = Page & { videoFile: File | null };
 
@@ -20,12 +21,8 @@ interface EditingPage {
 
 export default function PageManager({ libraryId, pages, onPagesChange }: PageManagerProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [uploadingPageId, setUploadingPageId] = useState<string | null>(null);
   const [editingPage, setEditingPage] = useState<EditingPage | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [currentUploadPageId, setCurrentUploadPageId] = useState<string | null>(null);
-  const [dragOverPageId, setDragOverPageId] = useState<string | null>(null);
 
   const handleAddPage = async (insertIndex?: number) => {
     if (isLoading) return;
@@ -101,74 +98,12 @@ export default function PageManager({ libraryId, pages, onPagesChange }: PageMan
     setEditingPage(null);
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !currentUploadPageId) return;
-
-    await uploadVideoFile(file, currentUploadPageId);
-  };
-
-  const uploadVideoFile = async (videoFile: globalThis.File, pageId: string) => {
-    // Validate file type
-    if (!videoFile.type.startsWith('video/mp4')) {
-      alert('Please select an MP4 video file');
-      return;
-    }
-
-    setUploadingPageId(pageId);
-    try {
-      const result = await uploadPageVideo({
-        pageId,
-        fileName: videoFile.name,
-        fileType: videoFile.type,
-        fileSize: videoFile.size,
-      });
-      
-      // Update pages list with the new video file
-      const updatedPages = pages.map(page => 
-        page.id === pageId ? result.page : page
-      );
-      onPagesChange(updatedPages);
-      
-      // TODO: Actually upload the file to the storage URL
-      // This would typically involve a PUT request to result.uploadUrl
-      
-    } catch (error) {
-      console.error('Error uploading video:', error);
-    } finally {
-      setUploadingPageId(null);
-      setCurrentUploadPageId(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
-  const handleFileDrop = async (e: React.DragEvent, pageId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragOverPageId(null);
-    
-    const files = Array.from(e.dataTransfer.files);
-    const mp4File = files.find(file => file.type.startsWith('video/mp4'));
-    
-    if (mp4File) {
-      await uploadVideoFile(mp4File, pageId);
-    } else {
-      alert('Please drop an MP4 video file');
-    }
-  };
-
-  const handleFileDragOver = (e: React.DragEvent, pageId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragOverPageId(pageId);
-  };
-
-  const handleFileDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragOverPageId(null);
+  const handleVideoUploaded = (updatedPage: any, pageId: string) => {
+    // Update the pages list to reflect the new video file
+    const updatedPages = pages.map(page => 
+      page.id === pageId ? updatedPage : page
+    );
+    onPagesChange(updatedPages);
   };
 
   const handleDragStart = (index: number) => {
@@ -208,8 +143,8 @@ export default function PageManager({ libraryId, pages, onPagesChange }: PageMan
   };
 
   const triggerFileUpload = (pageId: string) => {
-    setCurrentUploadPageId(pageId);
-    fileInputRef.current?.click();
+    // This function is no longer needed as we use the VideoUploadComponent
+    console.log('Video upload for page:', pageId);
   };
 
   return (
@@ -257,26 +192,11 @@ export default function PageManager({ libraryId, pages, onPagesChange }: PageMan
               key={page.id}
               draggable
               onDragStart={() => handleDragStart(index)}
-              onDragOver={(e) => {
-                handleDragOver(e);
-                handleFileDragOver(e, page.id);
-              }}
-              onDrop={(e) => {
-                // Handle both page reordering and file drops
-                if (e.dataTransfer.files.length > 0) {
-                  handleFileDrop(e, page.id);
-                } else {
-                  handleDrop(index);
-                }
-              }}
-              onDragLeave={handleFileDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={() => handleDrop(index)}
               className={`bg-white dark:bg-gray-800 border-2 rounded-lg p-4 transition-all duration-200 ${
                 draggedIndex === index ? 'opacity-50' : ''
-              } ${
-                dragOverPageId === page.id 
-                  ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' 
-                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
+              } border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-3 flex-1">
@@ -346,58 +266,29 @@ export default function PageManager({ libraryId, pages, onPagesChange }: PageMan
                         
                         {/* Video Upload Area */}
                         <div className="mt-3">
-                          {uploadingPageId === page.id ? (
-                            <div className="border-2 border-dashed border-yellow-400 rounded-md p-4 text-center bg-yellow-50 dark:bg-yellow-900/20">
-                              <CgSpinner className="mx-auto h-6 w-6 text-yellow-600 animate-spin" />
-                              <p className="mt-1 text-xs text-yellow-600 dark:text-yellow-400">
-                                Uploading video...
-                              </p>
-                            </div>
-                          ) : page.videoFile ? (
+                          {page.videoFile ? (
                             <div className="space-y-2">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center text-xs text-green-600 dark:text-green-400">
                                   <FiVideo className="mr-1" />
                                   {page.videoFile.name}
                                 </div>
-                                <button
-                                  onClick={() => triggerFileUpload(page.id)}
-                                  className="text-xs text-gray-500 hover:text-yellow-600 dark:hover:text-yellow-400 transition-colors"
-                                >
-                                  Replace
-                                </button>
                               </div>
                               {/* Video Preview */}
                               <div className="relative">
-                                <video
-                                  src={page.videoFile.uploadUrl}
-                                  controls
-                                  className="w-full max-w-md h-32 object-cover rounded-md border border-gray-200 dark:border-gray-600"
-                                  preload="metadata"
-                                >
-                                  Your browser does not support the video tag.
-                                </video>
+                                <VideoPreview videoFile={page.videoFile} />
                               </div>
+                              <VideoUploadComponent
+                                pageId={page.id}
+                                onVideoUploaded={(uploadedFile) => handleVideoUploaded(uploadedFile, page.id)}
+                                className="mt-2"
+                              />
                             </div>
                           ) : (
-                            <div 
-                              className={`border-2 border-dashed rounded-md p-4 text-center transition-all duration-200 cursor-pointer ${
-                                dragOverPageId === page.id 
-                                  ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' 
-                                  : 'border-gray-300 dark:border-gray-600 hover:border-yellow-400 dark:hover:border-yellow-500'
-                              }`}
-                              onClick={() => triggerFileUpload(page.id)}
-                            >
-                              <FiUpload className="mx-auto h-6 w-6 text-gray-400" />
-                              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Click to upload or drag & drop MP4 file
-                              </p>
-                              {dragOverPageId === page.id && (
-                                <p className="mt-1 text-xs text-yellow-600 dark:text-yellow-400 font-medium">
-                                  Drop your MP4 file here
-                                </p>
-                              )}
-                            </div>
+                            <VideoUploadComponent
+                              pageId={page.id}
+                              onVideoUploaded={(uploadedFile) => handleVideoUploaded(uploadedFile, page.id)}
+                            />
                           )}
                         </div>
                       </div>
@@ -426,18 +317,6 @@ export default function PageManager({ libraryId, pages, onPagesChange }: PageMan
                       <FiEdit2 className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => triggerFileUpload(page.id)}
-                      disabled={uploadingPageId === page.id}
-                      className="text-gray-400 hover:text-green-600 dark:hover:text-green-500 disabled:opacity-50 transition-colors"
-                      title="Upload video"
-                    >
-                      {uploadingPageId === page.id ? (
-                        <CgSpinner className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <FiUpload className="h-4 w-4" />
-                      )}
-                    </button>
-                    <button
                       onClick={() => handleDeletePage(page.id)}
                       className="text-gray-400 hover:text-red-600 dark:hover:text-red-500 transition-colors"
                       title="Delete page"
@@ -451,15 +330,6 @@ export default function PageManager({ libraryId, pages, onPagesChange }: PageMan
           ))}
         </div>
       )}
-
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="video/mp4"
-        onChange={handleFileUpload}
-        className="hidden"
-      />
     </div>
   );
 }
