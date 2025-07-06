@@ -439,7 +439,7 @@ export const generateManifest = async (args: { libraryId: string }, context: any
       createdAt: library.createdAt,
       updatedAt: library.updatedAt,
     },
-    pages: library.pages.map(page => ({
+    pages: library.pages.map((page: any) => ({
       id: page.id,
       title: page.title,
       llmNotes: page.llmNotes,
