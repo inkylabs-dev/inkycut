@@ -96,12 +96,11 @@ export default function FileUploadPage() {
       <div className='mx-auto max-w-7xl px-6 lg:px-8'>
         <div className='mx-auto max-w-4xl text-center'>
           <h2 className='mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl dark:text-white'>
-            <span className='text-yellow-500'>AWS</span> File Upload
+            My File Uploads
           </h2>
         </div>
         <p className='mx-auto mt-6 max-w-2xl text-center text-lg leading-8 text-gray-600 dark:text-white'>
-          This is an example file upload page using AWS S3. Maybe your app needs this. Maybe it doesn't. But a
-          lot of people asked for this feature, so here you go 🤝
+          Manage all your file uploads in one place. Upload new files and download previously uploaded files.
         </p>
         <div className='my-8 border rounded-3xl border-gray-900/10 dark:border-gray-100/10'>
           <div className='space-y-10 my-10 py-8 px-4 mx-auto sm:max-w-lg'>

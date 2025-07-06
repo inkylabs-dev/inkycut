@@ -45,5 +45,5 @@ export const getDownloadFileSignedURLFromS3 = async ({ key }: { key: string }) =
 
 function getS3Key(fileName: string, userId: string) {
   const ext = path.extname(fileName).slice(1);
-  return `${userId}/${randomUUID()}.${ext}`;
+  return `uploads/${userId}/${randomUUID()}.${ext}`;
 }
