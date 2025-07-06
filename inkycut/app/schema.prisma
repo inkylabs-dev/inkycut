@@ -26,6 +26,7 @@ model User {
   contactFormMessages       ContactFormMessage[]
   tasks                     Task[]
   files                     File[]
+  libraries                 Library[]
 }
 
 model GptResponse {
@@ -62,6 +63,8 @@ model File {
   type                      String
   key                       String
   uploadUrl                 String
+
+  libraryManifests          Library[]
 }
 
 model DailyStats {
@@ -109,4 +112,22 @@ model ContactFormMessage {
   content                   String
   isRead                    Boolean         @default(false)
   repliedAt                 DateTime?
+}
+
+model Library {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
+
+  user                      User            @relation(fields: [userId], references: [id])
+  userId                    String
+
+  title                     String
+  description               String?
+  llmNotes                  String?
+  type                      String          @default("cutscene")
+  isPublic                  Boolean         @default(false)
+
+  manifestFile              File?           @relation(fields: [manifestFileId], references: [id])
+  manifestFileId            String?
 }
