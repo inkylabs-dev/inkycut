@@ -65,6 +65,7 @@ model File {
   uploadUrl                 String
 
   libraryManifests          Library[]
+  pageVideos                Page[]
 }
 
 model DailyStats {
@@ -130,4 +131,24 @@ model Library {
 
   manifestFile              File?           @relation(fields: [manifestFileId], references: [id])
   manifestFileId            String?
+
+  pages                     Page[]
+}
+
+model Page {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
+
+  library                   Library         @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+  libraryId                 String
+
+  title                     String
+  llmNotes                  String?
+  orderIndex                Int
+  
+  videoFile                 File?           @relation(fields: [videoFileId], references: [id])
+  videoFileId               String?
+
+  @@index([libraryId, orderIndex])
 }

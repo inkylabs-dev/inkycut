@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, getLibraryById, updateLibrary } from 'wasp/client/operations';
-import { type Library, type File } from 'wasp/entities';
+import { useQuery, getLibraryById, updateLibrary, generateManifest } from 'wasp/client/operations';
+import { type Library, type File, type Page } from 'wasp/entities';
 import { Link } from 'wasp/client/router';
 import { FiArrowLeft } from 'react-icons/fi';
 import { CgSpinner } from 'react-icons/cg';
+import PageManager from './PageManager';
 
 type LibraryWithFile = Library & {
   manifestFile: File | null;
+  pages: (Page & { videoFile: File | null })[];
 };
 
 export default function EditLibraryPage() {
@@ -21,6 +23,7 @@ export default function EditLibraryPage() {
     type: 'cutscene',
     isPublic: false,
   });
+  const [pages, setPages] = useState<(Page & { videoFile: File | null })[]>([]);
 
   const { data: library, isLoading, error } = useQuery(getLibraryById, { id: id! });
 
@@ -34,6 +37,7 @@ export default function EditLibraryPage() {
         type: library.type || 'cutscene',
         isPublic: library.isPublic || false,
       });
+      setPages(library.pages || []);
     }
   }, [library]);
 
@@ -52,6 +56,17 @@ export default function EditLibraryPage() {
       // You might want to show an error message to the user here
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleGenerateManifest = async () => {
+    if (!id) return;
+    
+    try {
+      await generateManifest({ libraryId: id });
+      console.log('Manifest generated successfully');
+    } catch (error) {
+      console.error('Error generating manifest:', error);
     }
   };
 
@@ -217,6 +232,20 @@ export default function EditLibraryPage() {
             </div>
           </form>
         </div>
+
+        {/* Page Manager for Cutscene Libraries */}
+        {formData.type === 'cutscene' && library && (
+          <div className="mt-8 bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-900/5 dark:ring-gray-700 sm:rounded-xl">
+            <div className="p-6">
+              <PageManager
+                libraryId={library.id}
+                pages={pages}
+                onPagesChange={setPages}
+                onGenerateManifest={handleGenerateManifest}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -277,27 +277,57 @@ page EditLibraryPage {
 
 query getPaginatedLibraries {
   fn: import { getPaginatedLibraries } from "@src/library-app/operations",
-  entities: [User, Library, File]
+  entities: [User, Library, File, Page]
 }
 
 query getLibraryById {
   fn: import { getLibraryById } from "@src/library-app/operations",
-  entities: [User, Library, File]
+  entities: [User, Library, File, Page]
 }
 
 action createLibrary {
   fn: import { createLibrary } from "@src/library-app/operations",
-  entities: [User, Library, File]
+  entities: [User, Library, File, Page]
 }
 
 action updateLibrary {
   fn: import { updateLibrary } from "@src/library-app/operations",
-  entities: [User, Library, File]
+  entities: [User, Library, File, Page]
 }
 
 action deleteLibrary {
   fn: import { deleteLibrary } from "@src/library-app/operations",
-  entities: [User, Library, File]
+  entities: [User, Library, File, Page]
+}
+
+action createPage {
+  fn: import { createPage } from "@src/library-app/operations",
+  entities: [User, Library, File, Page]
+}
+
+action updatePage {
+  fn: import { updatePage } from "@src/library-app/operations",
+  entities: [User, Library, File, Page]
+}
+
+action deletePage {
+  fn: import { deletePage } from "@src/library-app/operations",
+  entities: [User, Library, File, Page]
+}
+
+action reorderPages {
+  fn: import { reorderPages } from "@src/library-app/operations",
+  entities: [User, Library, File, Page]
+}
+
+action uploadPageVideo {
+  fn: import { uploadPageVideo } from "@src/library-app/operations",
+  entities: [User, Library, File, Page]
+}
+
+action generateManifest {
+  fn: import { generateManifest } from "@src/library-app/operations",
+  entities: [User, Library, File, Page]
 }
 //#endregion
 

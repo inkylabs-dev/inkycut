@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createLibrary } from 'wasp/client/operations';
+import { createLibrary, createPage, generateManifest } from 'wasp/client/operations';
+import { type Page, type File } from 'wasp/entities';
 import { Link } from 'wasp/client/router';
 import { FiArrowLeft } from 'react-icons/fi';
+import PageManager from './PageManager';
 
 export default function AddLibraryPage() {
   const [formData, setFormData] = useState({
@@ -13,6 +15,8 @@ export default function AddLibraryPage() {
     isPublic: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createdLibrary, setCreatedLibrary] = useState<any>(null);
+  const [pages, setPages] = useState<(Page & { videoFile: File | null })[]>([]);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,14 +24,39 @@ export default function AddLibraryPage() {
     setIsSubmitting(true);
 
     try {
-      await createLibrary(formData);
-      // Redirect to library page after successful creation
-      navigate('/library');
+      const library = await createLibrary(formData);
+      setCreatedLibrary(library);
+      
+      // If it's a cutscene library, create a default page
+      if (formData.type === 'cutscene') {
+        const defaultPage = await createPage({
+          libraryId: library.id,
+          title: 'Page 1',
+          llmNotes: '',
+        });
+        setPages([defaultPage]);
+      }
+      
+      // Don't redirect immediately, let user manage pages first
+      if (formData.type !== 'cutscene') {
+        navigate('/library');
+      }
     } catch (error) {
       console.error('Error creating library:', error);
       // You might want to show an error message to the user here
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleGenerateManifest = async () => {
+    if (!createdLibrary) return;
+    
+    try {
+      await generateManifest({ libraryId: createdLibrary.id });
+      console.log('Manifest generated successfully');
+    } catch (error) {
+      console.error('Error generating manifest:', error);
     }
   };
 
@@ -74,7 +103,8 @@ export default function AddLibraryPage() {
                 required
                 value={formData.title}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white"
+                disabled={!!createdLibrary}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Enter library title"
               />
             </div>
@@ -90,7 +120,8 @@ export default function AddLibraryPage() {
                 rows={4}
                 value={formData.description}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white"
+                disabled={!!createdLibrary}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Enter library description"
               />
             </div>
@@ -106,7 +137,8 @@ export default function AddLibraryPage() {
                 rows={4}
                 value={formData.llmNotes}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white"
+                disabled={!!createdLibrary}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Enter notes for LLM processing"
               />
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -125,13 +157,24 @@ export default function AddLibraryPage() {
                   name="type"
                   value={formData.type}
                   onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white"
+                  disabled={!!createdLibrary}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="cutscene">Cutscene</option>
                   {/* <option value="animation">Animation</option> */}
                   {/* <option value="storyboard">Storyboard</option> */}
                   {/* <option value="other">Other</option> */}
                 </select>
+                {formData.type === 'cutscene' && !createdLibrary && (
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    A default page will be created for your cutscene library
+                  </p>
+                )}
+                {formData.type === 'cutscene' && createdLibrary && (
+                  <p className="mt-1 text-xs text-green-600 dark:text-green-400">
+                    Library created! Now you can manage your pages below.
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center justify-center">
@@ -142,7 +185,8 @@ export default function AddLibraryPage() {
                     type="checkbox"
                     checked={formData.isPublic}
                     onChange={handleChange}
-                    className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded"
+                    disabled={!!createdLibrary}
+                    className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded disabled:opacity-50"
                   />
                   <label htmlFor="isPublic" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                     Make this library public
@@ -159,16 +203,40 @@ export default function AddLibraryPage() {
               >
                 Cancel
               </Link>
-              <button
-                type="submit"
-                disabled={isSubmitting || !formData.title}
-                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? 'Creating...' : 'Create Library'}
-              </button>
+              {!createdLibrary ? (
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !formData.title}
+                  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Creating...' : formData.type === 'cutscene' ? 'Create Library with Page' : 'Create Library'}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => navigate('/library')}
+                  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                  Finish & Go to Library
+                </button>
+              )}
             </div>
           </form>
         </div>
+
+        {/* Page Manager for Cutscene Libraries */}
+        {formData.type === 'cutscene' && createdLibrary && (
+          <div className="mt-8 bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-900/5 dark:ring-gray-700 sm:rounded-xl">
+            <div className="p-6">
+              <PageManager
+                libraryId={createdLibrary.id}
+                pages={pages}
+                onPagesChange={setPages}
+                onGenerateManifest={handleGenerateManifest}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
