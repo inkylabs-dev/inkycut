@@ -53,20 +53,63 @@ export const createFile: CreateFile<
   };
 };
 
-export const getAllFilesByUser: GetAllFilesByUser<void, File[]> = async (_args, context) => {
+const getAllFilesByUserInputSchema = z.object({
+  page: z.number().min(1).default(1),
+  limit: z.number().min(1).max(100).default(10),
+});
+
+type GetAllFilesByUserInput = z.infer<typeof getAllFilesByUserInputSchema>;
+
+export const getAllFilesByUser: GetAllFilesByUser<
+  GetAllFilesByUserInput,
+  {
+    files: File[];
+    totalCount: number;
+    totalPages: number;
+    currentPage: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  }
+> = async (rawArgs, context) => {
   if (!context.user) {
     throw new HttpError(401);
   }
-  return context.entities.File.findMany({
-    where: {
-      user: {
-        id: context.user.id,
+
+  const { page, limit } = ensureArgsSchemaOrThrowHttpError(getAllFilesByUserInputSchema, rawArgs);
+  const skip = (page - 1) * limit;
+
+  const whereClause = {
+    user: {
+      id: context.user.id,
+    },
+  };
+
+  const [files, totalCount] = await Promise.all([
+    context.entities.File.findMany({
+      where: whereClause,
+      orderBy: {
+        createdAt: 'desc',
       },
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+      skip,
+      take: limit,
+    }),
+    context.entities.File.count({
+      where: whereClause,
+    }),
+  ]);
+
+  const totalPages = Math.ceil(totalCount / limit);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
+
+  return {
+    files,
+    totalCount,
+    totalPages,
+    currentPage: page,
+    hasNextPage,
+    hasPrevPage,
+  };
 };
 
 const getDownloadFileSignedURLInputSchema = z.object({ key: z.string().nonempty() });
