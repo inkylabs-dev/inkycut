@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createLibrary, createPage, generateManifest } from 'wasp/client/operations';
+import { createLibrary, createPage } from 'wasp/client/operations';
 import { type Page, type File } from 'wasp/entities';
 import { Link } from 'wasp/client/router';
 import { FiArrowLeft } from 'react-icons/fi';
@@ -46,17 +46,6 @@ export default function AddLibraryPage() {
       // You might want to show an error message to the user here
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleGenerateManifest = async () => {
-    if (!createdLibrary) return;
-    
-    try {
-      await generateManifest({ libraryId: createdLibrary.id });
-      console.log('Manifest generated successfully');
-    } catch (error) {
-      console.error('Error generating manifest:', error);
     }
   };
 
@@ -232,7 +221,6 @@ export default function AddLibraryPage() {
                 libraryId={createdLibrary.id}
                 pages={pages}
                 onPagesChange={setPages}
-                onGenerateManifest={handleGenerateManifest}
               />
             </div>
           </div>

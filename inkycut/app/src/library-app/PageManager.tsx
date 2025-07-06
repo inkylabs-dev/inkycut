@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { createPage, updatePage, deletePage, reorderPages, uploadPageVideo, generateManifest } from 'wasp/client/operations';
+import { createPage, updatePage, deletePage, reorderPages, uploadPageVideo } from 'wasp/client/operations';
 import { type Page, type File } from 'wasp/entities';
-import { FiPlus, FiTrash2, FiEdit2, FiVideo, FiUpload, FiMove, FiSave } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiEdit2, FiVideo, FiUpload, FiMove } from 'react-icons/fi';
 import { CgSpinner } from 'react-icons/cg';
 
 type PageWithFile = Page & { videoFile: File | null };
@@ -10,7 +10,6 @@ interface PageManagerProps {
   libraryId: string;
   pages: PageWithFile[];
   onPagesChange: (pages: PageWithFile[]) => void;
-  onGenerateManifest: () => void;
 }
 
 interface EditingPage {
@@ -19,7 +18,7 @@ interface EditingPage {
   llmNotes: string;
 }
 
-export default function PageManager({ libraryId, pages, onPagesChange, onGenerateManifest }: PageManagerProps) {
+export default function PageManager({ libraryId, pages, onPagesChange }: PageManagerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadingPageId, setUploadingPageId] = useState<string | null>(null);
   const [editingPage, setEditingPage] = useState<EditingPage | null>(null);
@@ -227,14 +226,6 @@ export default function PageManager({ libraryId, pages, onPagesChange, onGenerat
           >
             <FiPlus className="mr-1" />
             Add Page
-          </button>
-          <button
-            onClick={onGenerateManifest}
-            disabled={isLoading}
-            className="inline-flex items-center px-3 py-1 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
-          >
-            <FiSave className="mr-1" />
-            Generate Manifest
           </button>
         </div>
       </div>
