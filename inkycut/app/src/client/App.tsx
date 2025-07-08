@@ -27,6 +27,10 @@ export default function App() {
     return location.pathname.startsWith('/admin');
   }, [location]);
 
+  const isVibeVideoCut = useMemo(() => {
+    return location.pathname.startsWith('/vibe');
+  }, [location]);
+
   useEffect(() => {
     if (location.hash) {
       const id = location.hash.replace('#', '');
@@ -40,7 +44,7 @@ export default function App() {
   return (
     <>
       <div className='min-h-screen dark:text-white dark:bg-boxdark-2'>
-        {isAdminDashboard ? (
+        {isAdminDashboard || isVibeVideoCut ? (
           <Outlet />
         ) : (
           <>

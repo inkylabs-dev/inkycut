@@ -336,6 +336,34 @@ query getLibraryFileDownloadURL {
 }
 //#endregion
 
+//#region Vibe Video Cut
+route VibeVideoCutRoute { path: "/vibe/:id", to: VibeVideoCutPage }
+page VibeVideoCutPage {
+  authRequired: true,
+  component: import VibeVideoCutPage from "@src/vibe-video-cut/VibeVideoCutPage"
+}
+
+action createVibeProject {
+  fn: import { createVibeProject } from "@src/vibe-video-cut/operations",
+  entities: [User]
+}
+
+action updateVibeProject {
+  fn: import { updateVibeProject } from "@src/vibe-video-cut/operations",
+  entities: [User]
+}
+
+query getVibeProject {
+  fn: import { getVibeProject } from "@src/vibe-video-cut/operations",
+  entities: [User]
+}
+
+query getUserVibeProjects {
+  fn: import { getUserVibeProjects } from "@src/vibe-video-cut/operations",
+  entities: [User]
+}
+//#endregion
+
 //#region Admin Dashboard
 route AdminRoute { path: "/admin", to: AnalyticsDashboardPage }
 page AnalyticsDashboardPage {
