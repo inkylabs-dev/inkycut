@@ -381,8 +381,6 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
           {showTimeline && (
             <div className="bg-gray-800 p-4 border-t border-gray-700 max-h-64 overflow-y-auto">
               <div className="mb-4">
-                <h3 className="text-white text-sm font-semibold mb-2">Pages Timeline</h3>
-                
                 {/* Time ruler */}
                 <div className="relative h-6 bg-gray-700 rounded mb-2">
                   {Array.from({ length: Math.ceil(totalDuration / 5) }, (_, i) => (
@@ -405,39 +403,35 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
                 </div>
 
                 {/* Pages Track */}
-                <div className="space-y-2">
-                  <div className="flex items-center">
-                    <div className="w-32 text-white text-xs truncate mr-2">
-                      Pages
-                    </div>
-                    <div className="flex-1 relative h-12 bg-gray-700 rounded">
-                      {compositionData.pages.map((page, index) => {
-                        const startTime = compositionData.pages
-                          .slice(0, index)
-                          .reduce((sum, p) => sum + p.duration, 0) / compositionData.fps;
-                        const pagesDuration = page.duration / compositionData.fps;
-                        const pageColors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
-                        
-                        return (
-                          <div
-                            key={page.id}
-                            className="absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center cursor-pointer hover:opacity-80 border border-white border-opacity-20"
-                            style={{
-                              left: `${(startTime / totalDuration) * 100}%`,
-                              width: `${(pagesDuration / totalDuration) * 100}%`,
-                              backgroundColor: pageColors[index % pageColors.length],
-                            }}
-                            onClick={() => handlePageClick(index)}
-                            title={`${page.name} (${formatTime(pagesDuration)})`}
-                          >
-                            <div className="text-center">
-                              <div className="font-medium">{page.name}</div>
-                              <div className="text-xs opacity-75">{formatTime(pagesDuration)}</div>
-                            </div>
+                <div className="overflow-x-auto">
+                  <div className="relative h-12 bg-gray-700 rounded" style={{ minWidth: '100%' }}>
+                    {compositionData.pages.map((page, index) => {
+                      const startTime = compositionData.pages
+                        .slice(0, index)
+                        .reduce((sum, p) => sum + p.duration, 0) / compositionData.fps;
+                      const pagesDuration = page.duration / compositionData.fps;
+                      const pageColors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
+                      
+                      return (
+                        <div
+                          key={page.id}
+                          className="absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center cursor-pointer hover:opacity-80 border border-white border-opacity-20"
+                          style={{
+                            left: `${(startTime / totalDuration) * 100}%`,
+                            width: `${(pagesDuration / totalDuration) * 100}%`,
+                            backgroundColor: pageColors[index % pageColors.length],
+                            minWidth: '60px', // Ensure minimum readable width
+                          }}
+                          onClick={() => handlePageClick(index)}
+                          title={`${page.name} (${formatTime(pagesDuration)})`}
+                        >
+                          <div className="text-center px-2">
+                            <div className="font-medium truncate">{page.name}</div>
+                            <div className="text-xs opacity-75">{formatTime(pagesDuration)}</div>
                           </div>
-                        );
-                      })}
-                    </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
