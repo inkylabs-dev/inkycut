@@ -326,9 +326,6 @@ export default function LeftPanel({ project, selectedElement, selectedPage, onEl
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-900">Project Assets</h3>
-              <button className="p-1 hover:bg-gray-100 rounded">
-                <PlusIcon className="h-4 w-4 text-gray-500" />
-              </button>
             </div>
             <div 
               className={`min-h-[200px] transition-all duration-200 ${
@@ -383,9 +380,6 @@ export default function LeftPanel({ project, selectedElement, selectedPage, onEl
               <h3 className="text-sm font-semibold text-gray-900">
                 {selectedPage ? `${selectedPage.name} Elements` : 'Page Elements'}
               </h3>
-              <button className="p-1 hover:bg-gray-100 rounded">
-                <PlusIcon className="h-4 w-4 text-gray-500" />
-              </button>
             </div>
             
             {selectedPage && selectedPage.elements ? (
