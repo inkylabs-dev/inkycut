@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   FolderIcon, 
   DocumentIcon, 
@@ -7,7 +7,10 @@ import {
   VideoCameraIcon,
   PlusIcon,
   HomeIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  Bars3Icon,
+  ArrowPathIcon,
+  HeartIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from 'wasp/client/auth';
 import { routes } from 'wasp/client/router';
@@ -165,14 +168,17 @@ interface LeftPanelProps {
   selectedElement: any;
   selectedPage?: any;
   onElementSelect: (element: any) => void;
-  onElementUpdate?: (elementId: string, updatedData: Partial<CompositionElement>) => void;
+  onElementUpdate?: (elementId: string, updatedData: Partial<CompositionElement> | any) => void;
+  onProjectReset?: (defaultProject: any) => void;
   propertiesEnabled: boolean;
 }
 
-export default function LeftPanel({ project, selectedElement, selectedPage, onElementSelect, onElementUpdate, propertiesEnabled }: LeftPanelProps) {
+export default function LeftPanel({ project, selectedElement, selectedPage, onElementSelect, onElementUpdate, onProjectReset, propertiesEnabled }: LeftPanelProps) {
   const [activeTab, setActiveTab] = useState<'explorer' | 'elements'>('explorer');
   const [isDragOver, setIsDragOver] = useState(false);
   const [recentlyUpdated, setRecentlyUpdated] = useState<{[key: string]: boolean}>({});
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const [assets, setAssets] = useState<Array<{
     id: number;
     name: string;
@@ -186,6 +192,20 @@ export default function LeftPanel({ project, selectedElement, selectedPage, onEl
   useEffect(() => {
     setRecentlyUpdated({});
   }, [selectedElement]);
+
+  // Close the dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuRef]);
 
   // Helper function to handle element updates
   const handleElementUpdate = (key: keyof CompositionElement, value: any) => {
@@ -281,16 +301,100 @@ export default function LeftPanel({ project, selectedElement, selectedPage, onEl
   return (
     <div className="h-full flex flex-col">
       <div className="p-4 border-b border-gray-200 bg-white">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Project</h2>
-          {user && (
-            <Link to={routes.LibraryRoute.to} className="text-sm text-blue-600 hover:underline flex items-center">
-              <HomeIcon className="h-4 w-4 mr-1" />
-              Dashboard
-            </Link>
-          )}
+        <div className="flex items-center mb-4">
+          <div className="relative">
+            <button 
+              className="text-gray-700 hover:text-gray-900 focus:outline-none" 
+              onClick={() => setShowMenu(!showMenu)}
+            >
+              <Bars3Icon className="h-6 w-6" />
+            </button>
+            
+            {showMenu && (
+              <div 
+                ref={menuRef}
+                className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
+              >
+                <div className="py-1">
+                  <button 
+                    onClick={() => {
+                      // Reset project to default data model
+                      const defaultProject = {
+                        id: project?.id,
+                        name: project?.name || 'Untitled Project',
+                        user: project?.user,
+                        composition: {
+                          width: 1280,
+                          height: 720,
+                          duration: 30,
+                          fps: 30,
+                          pages: [{
+                            id: "page1",
+                            name: "Main Sequence",
+                            elements: [],
+                            startTime: 0,
+                            endTime: 30
+                          }]
+                        }
+                      };
+                      
+                      // Use the dedicated onProjectReset handler if available
+                      if (onProjectReset) {
+                        onProjectReset(defaultProject);
+                      }
+                      // Fallback to onElementUpdate if onProjectReset is not available
+                      else if (onElementUpdate && project?.id) {
+                        onElementUpdate('reset', defaultProject);
+                      }
+                      
+                      // Reset assets
+                      setAssets([]);
+                      
+                      // Close the menu
+                      setShowMenu(false);
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <ArrowPathIcon className="mr-2 h-5 w-5 text-gray-500" />
+                    Reset Project
+                  </button>
+                  
+                  <hr className="my-1 border-gray-200" />
+                  
+                  <Link 
+                    to="/"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <HomeIcon className="mr-2 h-5 w-5 text-gray-500" />
+                    Home Page
+                  </Link>
+                  
+                  <a 
+                    href="https://twitter.com/inkycut" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <HeartIcon className="mr-2 h-5 w-5 text-gray-500" />
+                    Follow Us
+                  </a>
+                  
+                  <a 
+                    href="https://github.com/inkylabsio/inkycut" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <svg className="mr-2 h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+                    </svg>
+                    GitHub
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        <h1 className="text-xl font-bold mb-1">{project?.name || 'Untitled Project'}</h1>
         <div className="text-gray-500 text-sm">
           {project?.user?.email && `Created by ${project.user.email}`}
         </div>
