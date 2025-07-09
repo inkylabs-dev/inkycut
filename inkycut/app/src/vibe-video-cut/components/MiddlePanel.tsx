@@ -458,7 +458,7 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
                 <div className="relative h-6 bg-gray-700 rounded mb-2">
                   {Array.from({ length: Math.ceil(totalDuration / 5) }, (_, i) => (
                     <div
-                      key={i}
+                      key={`time-marker-${i}`}
                       className="absolute top-0 h-full border-l border-gray-500"
                       style={{ left: `${(i * 5 / totalDuration) * 100}%` }}
                     >
@@ -487,7 +487,7 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
                       
                       return (
                         <div
-                          key={page.id}
+                          key={`page-${page.id}`}
                           className="absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center cursor-pointer hover:opacity-80 border border-white border-opacity-20"
                           style={{
                             left: `${(startTime / totalDuration) * 100}%`,
