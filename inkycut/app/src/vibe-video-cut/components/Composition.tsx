@@ -23,6 +23,8 @@ export interface CompositionElement {
   color?: string;
   fontWeight?: string;
   textAlign?: 'left' | 'center' | 'right';
+  // Interactive state (for editing)
+  isDragging?: boolean;
 }
 
 export interface CompositionPage {
@@ -324,4 +326,130 @@ export const defaultCompositionData: CompositionData = {
       ]
     }
   ]
+};
+
+// Interactive version of Composition that allows for element manipulation
+
+// Interactive version of Composition that allows for element manipulation
+export interface InteractiveCompositionProps {
+  data: CompositionData;
+  currentPageIndex: number;
+  onElementSelect: (elementId: string | null) => void;
+  onElementChange: (elementId: string, updater: (element: CompositionElement) => CompositionElement) => void;
+  selectedElement: string | null;
+  editable?: boolean;
+}
+
+export const InteractiveComposition: React.FC<InteractiveCompositionProps> = ({ 
+  data, 
+  currentPageIndex = 0,
+  onElementSelect,
+  onElementChange,
+  selectedElement,
+  editable = true
+}) => {
+  const currentPage = data.pages[currentPageIndex] || data.pages[0];
+  
+  const handleElementDragStart = (elementId: string) => {
+    if (!editable) return;
+    onElementSelect(elementId);
+    
+    onElementChange(elementId, (element) => ({
+      ...element,
+      isDragging: true
+    }));
+  };
+  
+  const handleElementDragEnd = (elementId: string, newX: number, newY: number) => {
+    if (!editable) return;
+    onElementChange(elementId, (element) => ({
+      ...element,
+      x: newX,
+      y: newY,
+      isDragging: false
+    }));
+  };
+  
+  const handleElementResize = (elementId: string, width: number, height: number) => {
+    if (!editable) return;
+    onElementChange(elementId, (element) => ({
+      ...element,
+      width,
+      height
+    }));
+  };
+  
+  return (
+    <div 
+      className="relative"
+      style={{ 
+        width: data.width, 
+        height: data.height,
+        backgroundColor: currentPage.backgroundColor || '#ffffff',
+        overflow: 'hidden'
+      }}
+    >
+      {currentPage.elements.map(element => (
+        <div
+          key={element.id}
+          className={`absolute ${selectedElement === element.id ? 'ring-2 ring-blue-500' : ''} ${editable ? 'cursor-move' : ''}`}
+          style={{
+            left: element.x,
+            top: element.y,
+            width: element.width,
+            height: element.height,
+            zIndex: element.zIndex || 1,
+            opacity: element.opacity !== undefined ? element.opacity : 1,
+            transform: element.rotation ? `rotate(${element.rotation}deg)` : undefined,
+          }}
+          onClick={() => onElementSelect(element.id)}
+          onMouseDown={() => handleElementDragStart(element.id)}
+        >
+          {element.type === 'text' && (
+            <div 
+              style={{
+                fontSize: `${element.fontSize || 16}px`,
+                fontFamily: element.fontFamily || 'Arial',
+                color: element.color || '#000000',
+                fontWeight: element.fontWeight || 'normal',
+                textAlign: (element.textAlign as any) || 'left',
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: element.textAlign === 'center' ? 'center' : 
+                               element.textAlign === 'right' ? 'flex-end' : 'flex-start',
+                userSelect: 'none'
+              }}
+            >
+              {element.text}
+            </div>
+          )}
+          
+          {element.type === 'image' && element.src && (
+            <img 
+              src={element.src} 
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              alt={`Element ${element.id}`}
+              draggable={false}
+            />
+          )}
+          
+          {element.type === 'video' && element.src && (
+            <video 
+              src={element.src}
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              muted
+              loop
+              autoPlay={editable}
+            />
+          )}
+          
+          {editable && selectedElement === element.id && (
+            <div className="absolute -right-2 -bottom-2 w-4 h-4 bg-blue-500 rounded-full cursor-se-resize" />
+          )}
+        </div>
+      ))}
+    </div>
+  );
 };

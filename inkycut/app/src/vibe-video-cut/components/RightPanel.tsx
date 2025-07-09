@@ -22,9 +22,14 @@ export default function RightPanel({ messages, onSendMessage }: RightPanelProps)
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
+  // Auto-scroll to bottom when new messages are added
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current && messagesContainerRef.current) {
+      // Scroll the container to the bottom
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   const handleSendMessage = () => {
@@ -36,6 +41,10 @@ export default function RightPanel({ messages, onSendMessage }: RightPanelProps)
       // Simulate AI typing delay
       setTimeout(() => {
         setIsTyping(false);
+        // Make sure to scroll to bottom after typing indicator disappears
+        if (messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        }
       }, 1500);
     }
   };
@@ -61,9 +70,9 @@ export default function RightPanel({ messages, onSendMessage }: RightPanelProps)
   ];
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-white overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-gray-200 flex-shrink-0">
         <div className="flex items-center space-x-2">
           <CpuChipIcon className="h-6 w-6 text-blue-500" />
           <div>
@@ -73,8 +82,11 @@ export default function RightPanel({ messages, onSendMessage }: RightPanelProps)
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Messages - fixed height container with scrolling */}
+      <div 
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 space-y-4"
+      >
         {messages.map((message) => (
           <div
             key={message.id}
@@ -128,7 +140,7 @@ export default function RightPanel({ messages, onSendMessage }: RightPanelProps)
       </div>
 
       {/* Quick Actions */}
-      <div className="p-4 border-t border-gray-100">
+      <div className="p-4 border-t border-gray-100 flex-shrink-0">
         <h4 className="text-xs font-semibold text-gray-700 mb-2">Quick Actions</h4>
         <div className="grid grid-cols-1 gap-1">
           {quickActions.slice(0, 3).map((action, index) => (
@@ -148,7 +160,7 @@ export default function RightPanel({ messages, onSendMessage }: RightPanelProps)
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-gray-200 flex-shrink-0">
         <div className="flex space-x-2">
           <textarea
             value={inputMessage}

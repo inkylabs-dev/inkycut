@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import LeftPanel from './components/LeftPanel';
 import MiddlePanel from './components/MiddlePanel';
 import RightPanel from './components/RightPanel';
@@ -7,14 +7,33 @@ import { CompositionData, CompositionElement, CompositionPage } from './componen
 
 // No history stack items in offline mode
 
+// Function to generate random project ID
+const generateRandomId = () => {
+  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < 32; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+};
+
 export default function VibeVideoCutPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [selectedElement, setSelectedElement] = useState<any>(null);
   const [selectedPage, setSelectedPage] = useState<CompositionPage | null>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [project, setProject] = useState<any>(null);
   // Always allow direct JSON editing
   const [propertiesEnabled] = useState<boolean>(true);
+  
+  // Redirect if ID is 'new'
+  useEffect(() => {
+    if (id === 'new') {
+      const newProjectId = generateRandomId();
+      navigate(`/vibe/${newProjectId}`, { replace: true });
+    }
+  }, [id, navigate]);
   
   // No undo/redo state in offline mode
   
@@ -25,7 +44,7 @@ export default function VibeVideoCutPage() {
   
   // Load data from localStorage instead of API
   useEffect(() => {
-    if (id) {
+    if (id && id !== 'new') {
       try {
         setIsLoading(true);
         const storageKey = `vibe-project-${id}`;
@@ -42,6 +61,9 @@ export default function VibeVideoCutPage() {
       } finally {
         setIsLoading(false);
       }
+    } else if (id === 'new') {
+      // Skip loading for new projects as we'll redirect
+      setIsLoading(false);
     }
   }, [id]);
 
@@ -49,7 +71,7 @@ export default function VibeVideoCutPage() {
   const createDefaultPage = useCallback((): CompositionPage => {
     return {
       id: `page-${Date.now()}`,
-      name: 'Default Page',
+      name: 'Page 1',
       duration: 5 * 30, // 5 seconds at 30fps
       backgroundColor: 'white',
       elements: []
@@ -319,11 +341,11 @@ export default function VibeVideoCutPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-gray-100">
       {/* Main content area without top banner */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex w-full h-full overflow-hidden">
         {/* Left Panel - File Explorer / Elements */}
-        <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0">
+        <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0 overflow-hidden">
           <LeftPanel 
             project={project}
             selectedElement={selectedElement}
@@ -335,7 +357,7 @@ export default function VibeVideoCutPage() {
         </div>
 
         {/* Middle Panel - Remotion Player */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 overflow-hidden">
           <MiddlePanel
             project={project}
             selectedElement={selectedElement}
@@ -347,15 +369,11 @@ export default function VibeVideoCutPage() {
         </div>
 
         {/* Right Panel - Chat UI only */}
-        <div className="w-80 bg-white border-l border-gray-200 flex-shrink-0">
-          <div className="flex flex-col h-full">
-            <div className="flex-1">
-              <RightPanel
-                messages={chatMessages}
-                onSendMessage={handleChatMessage}
-              />
-            </div>
-          </div>
+        <div className="w-80 bg-white border-l border-gray-200 flex-shrink-0 overflow-hidden">
+          <RightPanel
+            messages={chatMessages}
+            onSendMessage={handleChatMessage}
+          />
         </div>
       </div>
     </div>
