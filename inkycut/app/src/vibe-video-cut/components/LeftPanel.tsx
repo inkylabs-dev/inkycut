@@ -166,9 +166,10 @@ interface LeftPanelProps {
   selectedPage?: any;
   onElementSelect: (element: any) => void;
   onElementUpdate?: (elementId: string, updatedData: Partial<CompositionElement>) => void;
+  propertiesEnabled: boolean;
 }
 
-export default function LeftPanel({ project, selectedElement, selectedPage, onElementSelect, onElementUpdate }: LeftPanelProps) {
+export default function LeftPanel({ project, selectedElement, selectedPage, onElementSelect, onElementUpdate, propertiesEnabled }: LeftPanelProps) {
   const [activeTab, setActiveTab] = useState<'explorer' | 'elements' | 'properties'>('explorer');
   const [isDragOver, setIsDragOver] = useState(false);
   const [recentlyUpdated, setRecentlyUpdated] = useState<{[key: string]: boolean}>({});
@@ -324,16 +325,18 @@ export default function LeftPanel({ project, selectedElement, selectedPage, onEl
         >
           Elements
         </button>
-        <button
-          onClick={() => setActiveTab('properties')}
-          className={`flex-1 px-4 py-2 text-sm font-medium ${
-            activeTab === 'properties'
-              ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-500'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          Properties
-        </button>
+        {propertiesEnabled && (
+          <button
+            onClick={() => setActiveTab('properties')}
+            className={`flex-1 px-4 py-2 text-sm font-medium ${
+              activeTab === 'properties'
+                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-500'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            Properties
+          </button>
+        )}
       </div>
 
       {/* Tab Content */}
@@ -446,7 +449,7 @@ export default function LeftPanel({ project, selectedElement, selectedPage, onEl
           </div>
         )}
 
-        {activeTab === 'properties' && (
+        {activeTab === 'properties' && propertiesEnabled && (
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Properties</h3>
             {selectedElement ? (

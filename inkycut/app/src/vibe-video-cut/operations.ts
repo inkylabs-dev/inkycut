@@ -27,7 +27,9 @@ export const createVibeProject: CreateVibeProject = async (
     updatedAt: new Date().toISOString(),
     timeline: [],
     assets: [],
-    composition: null
+    composition: null,
+    // Server-side control for properties editing, default to false
+    propertiesEnabled: typedArgs.propertiesEnabled !== undefined ? typedArgs.propertiesEnabled : false
   };
   
   vibeProjects.set(projectId, newProject);
@@ -54,6 +56,7 @@ export const updateVibeProject: UpdateVibeProject = async (
     ...(typedArgs.timeline && { timeline: typedArgs.timeline }),
     ...(typedArgs.assets && { assets: typedArgs.assets }),
     ...(typedArgs.composition && { composition: typedArgs.composition }),
+    ...(typedArgs.propertiesEnabled !== undefined && { propertiesEnabled: typedArgs.propertiesEnabled }),
     updatedAt: new Date().toISOString()
   };
   

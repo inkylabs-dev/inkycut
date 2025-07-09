@@ -19,6 +19,10 @@ export default function VibeVideoCutPage() {
   const [selectedPage, setSelectedPage] = useState<any>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [project, setProject] = useState<any>(null);
+  // Properties are disabled by default and controlled by server configuration
+  // This is not user-configurable - admins would need to update the project in the database
+  // to enable properties for specific projects
+  const [propertiesEnabled, setPropertiesEnabled] = useState<boolean>(false);
   
   // Undo/redo history state
   const [undoStack, setUndoStack] = useState<HistoryItem[]>([]);
@@ -44,13 +48,21 @@ export default function VibeVideoCutPage() {
   useEffect(() => {
     if (fetchedProject) {
       setProject(fetchedProject);
+      // Check if the project has a propertiesEnabled field from the server
+      // If it exists, use it; otherwise, keep it disabled (default)
+      const projectData = fetchedProject as any;
+      if (projectData.propertiesEnabled !== undefined) {
+        setPropertiesEnabled(!!projectData.propertiesEnabled);
+      }
     } else if (!isLoading && !fetchedProject && !error) {
       // Project doesn't exist, create a new one
       const initializeProject = async () => {
         try {
           const newProject = await createProject({
             name: `Vibe Project ${id}`,
-            id
+            id,
+            // Default to disabled for new projects
+            propertiesEnabled: false
           });
           setProject(newProject);
         } catch (err) {
@@ -106,11 +118,34 @@ export default function VibeVideoCutPage() {
   const handleCompositionUpdate = async (composition: CompositionData) => {
     if (project && project.id) {
       try {
-        const updatedProject = await updateProject({
-          id: project.id,
+        // Save current state to history before making changes
+        if (selectedElement) {
+          addToHistory(project.composition, selectedElement.id);
+        }
+        
+        // Update local state first for immediate UI update
+        setProject({
+          ...project,
           composition
         });
-        setProject(updatedProject);
+        
+        // If we have a selected element, find and update it in the new composition
+        if (selectedElement) {
+          const updatedElement = composition.pages
+            .flatMap(page => page.elements)
+            .find(el => el.id === selectedElement.id);
+          
+          if (updatedElement) {
+            setSelectedElement(updatedElement);
+          }
+        }
+        
+        // Mark that we have unsaved changes
+        setHasUnsavedChanges(true);
+        
+        // Note: We don't call updateProject here anymore
+        // This function is called frequently during editing, and we want to batch saves
+        // The saveChanges function will handle saving to the server
       } catch (error) {
         console.error('Failed to update composition:', error);
       }
@@ -199,7 +234,11 @@ export default function VibeVideoCutPage() {
       try {
         await updateProject({
           id: project.id,
-          composition: project.composition
+          composition: project.composition,
+          // Preserve the server-controlled propertiesEnabled setting
+          propertiesEnabled: project.propertiesEnabled !== undefined 
+            ? project.propertiesEnabled 
+            : false
         });
         console.log('Project saved successfully');
         setHasUnsavedChanges(false);
@@ -234,7 +273,8 @@ export default function VibeVideoCutPage() {
   }, [handleUndo, handleRedo, saveChanges]);
 
   const handleElementUpdate = async (elementId: string, updatedData: Partial<CompositionElement>) => {
-    if (project && project.composition) {
+    // Only allow element updates if properties are enabled
+    if (propertiesEnabled && project && project.composition) {
       // Save current state to history before making changes
       addToHistory(project.composition, elementId);
       
@@ -271,9 +311,15 @@ export default function VibeVideoCutPage() {
           });
         }
         
+        // Call handleCompositionUpdate to ensure the JSON editor is updated
+        // This is the key fix to sync with the JSON editor
+        handleCompositionUpdate(updatedComposition);
+        
         // Don't save immediately - we'll batch saves
         setHasUnsavedChanges(true);
       }
+    } else if (!propertiesEnabled) {
+      console.warn('Property editing is disabled. Enable properties to make changes.');
     }
   };
 
@@ -391,6 +437,7 @@ export default function VibeVideoCutPage() {
             selectedPage={selectedPage}
             onElementSelect={handleElementSelect}
             onElementUpdate={handleElementUpdate}
+            propertiesEnabled={propertiesEnabled}
           />
         </div>
 
@@ -402,6 +449,7 @@ export default function VibeVideoCutPage() {
             onTimelineUpdate={handleTimelineUpdate}
             onCompositionUpdate={handleCompositionUpdate}
             onPageSelect={handlePageSelect}
+            propertiesEnabled={propertiesEnabled}
           />
         </div>
 
