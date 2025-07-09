@@ -240,6 +240,11 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
       // Store the latest valid edit in our ref for persistence across view switches
       lastEditedComposition.current = { ...parsed };
       
+      // In offline mode, we automatically save to localStorage
+      if (project?.id) {
+        localStorage.setItem(`vibe-project-composition-${project.id}`, JSON.stringify(parsed));
+      }
+      
       // Then notify parent component to update the project state
       if (onCompositionUpdate) {
         onCompositionUpdate(parsed);
@@ -259,16 +264,12 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
         onCompositionUpdate(compositionData);
       }
       
-      // Store the edited composition data in the ref instead of resetting the flag
-      if (lastEditedComposition.current === null) {
-        lastEditedComposition.current = { ...compositionData };
-      } else {
-        // Update the stored version with latest edits
-        lastEditedComposition.current = { ...compositionData };
-      }
+      // Store the edited composition data in the ref
+      lastEditedComposition.current = { ...compositionData };
       
-      // Keep the userEditedJson flag true to remember we have edits
-      // setUserEditedJson(false); - Removing this line keeps the edit state
+      // In offline mode, we always save changes immediately
+      // This allows the player to immediately reflect JSON edits
+      localStorage.setItem(`vibe-project-composition-${project?.id}`, JSON.stringify(compositionData));
     }
     
     // When switching back to code view, restore the last edited version if available
@@ -519,7 +520,7 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
               {userEditedJson && (
                 <div className="text-green-400 text-sm flex items-center">
                   <span className="inline-block w-2 h-2 bg-green-400 rounded-full mr-1"></span>
-                  Changes saved
+                  Changes applied
                 </div>
               )}
               {jsonError && (
@@ -554,6 +555,11 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
                   // Update parent component
                   if (onCompositionUpdate) {
                     onCompositionUpdate(project.composition);
+                  }
+                  
+                  // In offline mode, update the localStorage as well
+                  if (project?.id) {
+                    localStorage.setItem(`vibe-project-composition-${project.id}`, JSON.stringify(project.composition));
                   }
                 }
               }}

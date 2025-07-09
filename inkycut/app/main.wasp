@@ -362,6 +362,24 @@ query getUserVibeProjects {
   fn: import { getUserVibeProjects } from "@src/vibe-video-cut/operations",
   entities: [User]
 }
+
+action renderVibeProject {
+  fn: import { renderVibeProject } from "@src/vibe-video-cut/operations",
+  entities: [User]
+}
+
+query getTaskProgress {
+  fn: import { getTaskProgress } from "@src/vibe-video-cut/operations",
+  entities: [User]
+}
+
+api taskProgressStream {
+  fn: import { renderProgressSSE } from "@src/vibe-video-cut/sse",
+  entities: [User],
+  httpRoute: (GET, "/task/:taskId/progress-stream")
+}
+
+
 //#endregion
 
 //#region Admin Dashboard
