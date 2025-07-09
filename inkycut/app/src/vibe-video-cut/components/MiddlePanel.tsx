@@ -16,9 +16,10 @@ interface MiddlePanelProps {
   selectedElement: any;
   onTimelineUpdate: (timeline: any[]) => void;
   onCompositionUpdate?: (composition: CompositionData) => void;
+  onPageSelect?: (page: any) => void;
 }
 
-export default function MiddlePanel({ project, selectedElement, onTimelineUpdate, onCompositionUpdate }: MiddlePanelProps) {
+export default function MiddlePanel({ project, selectedElement, onTimelineUpdate, onCompositionUpdate, onPageSelect }: MiddlePanelProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(0);
   const [volume, setVolume] = useState(1);
@@ -197,6 +198,11 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
       cumulativeFrames += compositionData.pages[i].duration;
     }
     handleSeek(cumulativeFrames);
+    
+    // Call onPageSelect with the selected page
+    if (onPageSelect && compositionData.pages[pageIndex]) {
+      onPageSelect(compositionData.pages[pageIndex]);
+    }
   };
 
   const handleJsonChange = (newJson: string) => {

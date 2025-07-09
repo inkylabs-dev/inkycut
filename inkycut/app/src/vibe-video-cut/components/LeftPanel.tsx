@@ -6,11 +6,13 @@ import {
   PhotoIcon,
   VideoCameraIcon,
   PlusIcon,
-  HomeIcon
+  HomeIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from 'wasp/client/auth';
 import { routes } from 'wasp/client/router';
 import { Link } from 'react-router-dom';
+import { CompositionElement } from './Composition';
 
 
 // File Preview Component
@@ -85,13 +87,87 @@ const FilePreview: React.FC<{
   );
 };
 
+// Element Preview Component
+const ElementPreview: React.FC<{ 
+  element: CompositionElement; 
+  className?: string;
+}> = ({ element, className = "w-10 h-10" }) => {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (element.src && (element.type === 'image' || element.type === 'video')) {
+      setPreviewUrl(element.src);
+    }
+  }, [element]);
+
+  if (element.type === 'image' && previewUrl) {
+    return (
+      <img 
+        src={previewUrl} 
+        alt={element.text || 'Image'}
+        className={`${className} object-cover rounded border border-gray-200`}
+      />
+    );
+  }
+
+  if (element.type === 'video' && previewUrl) {
+    return (
+      <video 
+        src={previewUrl} 
+        className={`${className} object-cover rounded border border-gray-200`}
+        muted
+        onMouseEnter={(e) => {
+          const video = e.target as HTMLVideoElement;
+          video.play().catch(() => {
+            // Handle play error silently
+          });
+        }}
+        onMouseLeave={(e) => {
+          const video = e.target as HTMLVideoElement;
+          video.pause();
+          video.currentTime = 0;
+        }}
+      />
+    );
+  }
+
+  if (element.type === 'text') {
+    return (
+      <div className={`${className} bg-gray-100 rounded border border-gray-200 flex items-center justify-center p-2`}>
+        <DocumentTextIcon className="h-5 w-5 text-gray-600" />
+      </div>
+    );
+  }
+
+  // Fallback to icon for unknown types
+  const getElementIcon = (type: string) => {
+    switch (type) {
+      case 'video':
+        return <VideoCameraIcon className="h-5 w-5 text-blue-500" />;
+      case 'image':
+        return <PhotoIcon className="h-5 w-5 text-purple-500" />;
+      case 'text':
+        return <DocumentTextIcon className="h-5 w-5 text-gray-600" />;
+      default:
+        return <DocumentIcon className="h-5 w-5 text-gray-500" />;
+    }
+  };
+
+  return (
+    <div className={`${className} bg-gray-100 rounded border border-gray-200 flex items-center justify-center`}>
+      {getElementIcon(element.type)}
+    </div>
+  );
+};
+
 interface LeftPanelProps {
   project: any;
   selectedElement: any;
+  selectedPage?: any;
   onElementSelect: (element: any) => void;
 }
 
-export default function LeftPanel({ project, selectedElement, onElementSelect }: LeftPanelProps) {
+export default function LeftPanel({ project, selectedElement, selectedPage, onElementSelect }: LeftPanelProps) {
   const [activeTab, setActiveTab] = useState<'explorer' | 'elements' | 'properties'>('explorer');
   const [isDragOver, setIsDragOver] = useState(false);
   const [assets, setAssets] = useState<Array<{
@@ -182,12 +258,6 @@ export default function LeftPanel({ project, selectedElement, onElementSelect }:
       console.log('Files dropped and added:', newAssets);
     }
   };
-
-  const mockElements = [
-    { id: 1, name: 'Text Layer 1', type: 'text', content: 'Hello World' },
-    { id: 2, name: 'Video Layer 1', type: 'video', source: 'video1.mp4' },
-    { id: 3, name: 'Audio Track 1', type: 'audio', source: 'audio1.mp3' },
-  ];
 
   return (
     <div className="h-full flex flex-col">
@@ -293,27 +363,63 @@ export default function LeftPanel({ project, selectedElement, onElementSelect }:
         {activeTab === 'elements' && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-900">Timeline Elements</h3>
+              <h3 className="text-sm font-semibold text-gray-900">
+                {selectedPage ? `${selectedPage.name} Elements` : 'Page Elements'}
+              </h3>
               <button className="p-1 hover:bg-gray-100 rounded">
                 <PlusIcon className="h-4 w-4 text-gray-500" />
               </button>
             </div>
-            <div className="space-y-2">
-              {mockElements.map((element) => (
-                <div
-                  key={element.id}
-                  className={`p-2 rounded cursor-pointer ${
-                    selectedElement?.id === element.id
-                      ? 'bg-blue-50 border border-blue-200'
-                      : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => onElementSelect(element)}
-                >
-                  <div className="text-sm font-medium text-gray-900">{element.name}</div>
-                  <div className="text-xs text-gray-500 capitalize">{element.type}</div>
+            
+            {selectedPage && selectedPage.elements ? (
+              <div className="space-y-2">
+                {selectedPage.elements.map((element: CompositionElement) => (
+                  <div
+                    key={element.id}
+                    className={`p-3 rounded cursor-pointer border ${
+                      selectedElement?.id === element.id
+                        ? 'bg-blue-50 border-blue-200'
+                        : 'bg-white border-gray-200 hover:bg-gray-50'
+                    }`}
+                    onClick={() => onElementSelect(element)}
+                  >
+                    <div className="flex items-center">
+                      <ElementPreview element={element} className="w-12 h-12 mr-3" />
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-gray-900">
+                          {element.type === 'text' ? 
+                            (element.text ? 
+                              (element.text.length > 20 ? `${element.text.substring(0, 20)}...` : element.text) 
+                              : 'Text Element'
+                            ) : 
+                            (element.src ? 
+                              element.src.split('/').pop() || `${element.type} Element` 
+                              : `${element.type} Element`)
+                          }
+                        </div>
+                        <div className="text-xs text-gray-500 capitalize flex items-center">
+                          <span className="mr-2">{element.type}</span>
+                          {element.startTime !== undefined && element.endTime !== undefined && (
+                            <span className="text-xs bg-gray-100 px-1 rounded">
+                              {element.startTime}s - {element.endTime}s
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <div className="mb-2">
+                  <DocumentIcon className="h-12 w-12 mx-auto text-gray-300" />
                 </div>
-              ))}
-            </div>
+                <p className="text-sm">
+                  {selectedPage ? 'No elements in this page' : 'Click on a page block to view its elements'}
+                </p>
+              </div>
+            )}
           </div>
         )}
 

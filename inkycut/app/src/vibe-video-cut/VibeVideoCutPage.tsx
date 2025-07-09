@@ -10,6 +10,7 @@ import { CompositionData } from './components/Composition';
 export default function VibeVideoCutPage() {
   const { id } = useParams<{ id: string }>();
   const [selectedElement, setSelectedElement] = useState<any>(null);
+  const [selectedPage, setSelectedPage] = useState<any>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [project, setProject] = useState<any>(null);
   
@@ -51,6 +52,10 @@ export default function VibeVideoCutPage() {
 
   const handleElementSelect = (element: any) => {
     setSelectedElement(element);
+  };
+
+  const handlePageSelect = (page: any) => {
+    setSelectedPage(page);
   };
 
   const handleTimelineUpdate = async (timeline: any[]) => {
@@ -132,6 +137,7 @@ export default function VibeVideoCutPage() {
         <LeftPanel 
           project={project}
           selectedElement={selectedElement}
+          selectedPage={selectedPage}
           onElementSelect={handleElementSelect}
         />
       </div>
@@ -143,6 +149,7 @@ export default function VibeVideoCutPage() {
           selectedElement={selectedElement}
           onTimelineUpdate={handleTimelineUpdate}
           onCompositionUpdate={handleCompositionUpdate}
+          onPageSelect={handlePageSelect}
         />
       </div>
 
