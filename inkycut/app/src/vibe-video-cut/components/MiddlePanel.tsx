@@ -214,22 +214,19 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
   };
 
   const handleJsonChange = (newJson: string) => {
-    // Only process JSON changes if properties are enabled
-    if (propertiesEnabled) {
-      setJsonString(newJson);
-      try {
-        const parsed = JSON.parse(newJson);
-        // Update local state first for immediate UI update
-        setCompositionData(parsed);
-        setJsonError(null);
-        
-        // Then notify parent component to update the project state
-        if (onCompositionUpdate) {
-          onCompositionUpdate(parsed);
-        }
-      } catch (error) {
-        setJsonError(error instanceof Error ? error.message : 'Invalid JSON');
+    setJsonString(newJson);
+    try {
+      const parsed = JSON.parse(newJson);
+      // Update local state first for immediate UI update
+      setCompositionData(parsed);
+      setJsonError(null);
+      
+      // Then notify parent component to update the project state
+      if (onCompositionUpdate) {
+        onCompositionUpdate(parsed);
       }
+    } catch (error) {
+      setJsonError(error instanceof Error ? error.message : 'Invalid JSON');
     }
   };
 
@@ -463,11 +460,6 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
         <div className="flex-1 flex flex-col bg-gray-900 p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-white text-lg font-semibold">Composition JSON</h3>
-            {!propertiesEnabled && (
-              <div className="text-amber-400 text-sm px-3 py-1 bg-amber-900 bg-opacity-50 rounded-md">
-                Properties editing is disabled
-              </div>
-            )}
             {jsonError && (
               <div className="text-red-400 text-sm">
                 Error: {jsonError}
@@ -476,13 +468,10 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
           </div>
           <textarea
             value={jsonString}
-            onChange={(e) => propertiesEnabled ? handleJsonChange(e.target.value) : null}
-            className={`flex-1 bg-gray-800 text-white p-4 rounded-lg font-mono text-sm resize-none border ${
-              propertiesEnabled ? 'border-gray-700 focus:border-blue-500' : 'border-red-700'
-            } focus:outline-none`}
-            placeholder={propertiesEnabled ? "Edit your composition JSON here..." : "Properties are disabled. Enable properties to edit."}
+            onChange={(e) => handleJsonChange(e.target.value)}
+            className="flex-1 bg-gray-800 text-white p-4 rounded-lg font-mono text-sm resize-none border border-gray-700 focus:border-blue-500 focus:outline-none"
+            placeholder="Edit your composition JSON here..."
             style={{ minHeight: '400px' }}
-            readOnly={!propertiesEnabled}
           />
           <div className="mt-4 text-gray-400 text-xs">
             💡 Tip: Edit the JSON directly to modify pages, elements, timing, and styling. Changes are applied in real-time.

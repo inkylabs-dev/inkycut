@@ -19,10 +19,8 @@ export default function VibeVideoCutPage() {
   const [selectedPage, setSelectedPage] = useState<CompositionPage | null>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [project, setProject] = useState<any>(null);
-  // Properties are disabled by default and controlled by server configuration
-  // This is not user-configurable - admins would need to update the project in the database
-  // to enable properties for specific projects
-  const [propertiesEnabled, setPropertiesEnabled] = useState<boolean>(false);
+  // Always allow direct JSON editing
+  const [propertiesEnabled] = useState<boolean>(true);
   
   // Undo/redo history state
   const [undoStack, setUndoStack] = useState<HistoryItem[]>([]);
@@ -59,12 +57,8 @@ export default function VibeVideoCutPage() {
   useEffect(() => {
     if (fetchedProject) {
       setProject(fetchedProject);
-      // Check if the project has a propertiesEnabled field from the server
-      // If it exists, use it; otherwise, keep it disabled (default)
+      // Always allow direct JSON editing regardless of server configuration
       const projectData = fetchedProject as any;
-      if (projectData.propertiesEnabled !== undefined) {
-        setPropertiesEnabled(!!projectData.propertiesEnabled);
-      }
       
       // Set the first page as selected page or create a default one if none exists
       if (projectData.composition && projectData.composition.pages && projectData.composition.pages.length > 0) {
@@ -91,9 +85,7 @@ export default function VibeVideoCutPage() {
         updateProject({
           id: updatedProject.id,
           composition: defaultComposition,
-          propertiesEnabled: updatedProject.propertiesEnabled !== undefined 
-            ? updatedProject.propertiesEnabled 
-            : false
+          propertiesEnabled: true
         }).catch(err => {
           console.error('Failed to save default composition:', err);
         });
@@ -114,8 +106,8 @@ export default function VibeVideoCutPage() {
           const newProject = await createProject({
             name: `Vibe Project ${id}`,
             id,
-            // Default to disabled for new projects
-            propertiesEnabled: false,
+            // Always allow direct JSON editing
+            propertiesEnabled: true,
             composition: defaultComposition
           });
           
@@ -307,10 +299,8 @@ export default function VibeVideoCutPage() {
         await updateProject({
           id: project.id,
           composition: project.composition,
-          // Preserve the server-controlled propertiesEnabled setting
-          propertiesEnabled: project.propertiesEnabled !== undefined 
-            ? project.propertiesEnabled 
-            : false
+          // Always enable direct JSON editing
+          propertiesEnabled: true
         });
         console.log('Project saved successfully');
         setHasUnsavedChanges(false);
@@ -345,8 +335,7 @@ export default function VibeVideoCutPage() {
   }, [handleUndo, handleRedo, saveChanges]);
 
   const handleElementUpdate = async (elementId: string, updatedData: Partial<CompositionElement>) => {
-    // Only allow element updates if properties are enabled
-    if (propertiesEnabled && project && project.composition) {
+    if (project && project.composition) {
       // Save current state to history before making changes
       addToHistory(project.composition, elementId);
       
@@ -390,8 +379,6 @@ export default function VibeVideoCutPage() {
         // Don't save immediately - we'll batch saves
         setHasUnsavedChanges(true);
       }
-    } else if (!propertiesEnabled) {
-      console.warn('Property editing is disabled. Enable properties to make changes.');
     }
   };
 
