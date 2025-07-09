@@ -165,11 +165,13 @@ interface LeftPanelProps {
   selectedElement: any;
   selectedPage?: any;
   onElementSelect: (element: any) => void;
+  onElementUpdate?: (elementId: string, updatedData: Partial<CompositionElement>) => void;
 }
 
-export default function LeftPanel({ project, selectedElement, selectedPage, onElementSelect }: LeftPanelProps) {
+export default function LeftPanel({ project, selectedElement, selectedPage, onElementSelect, onElementUpdate }: LeftPanelProps) {
   const [activeTab, setActiveTab] = useState<'explorer' | 'elements' | 'properties'>('explorer');
   const [isDragOver, setIsDragOver] = useState(false);
+  const [recentlyUpdated, setRecentlyUpdated] = useState<{[key: string]: boolean}>({});
   const [assets, setAssets] = useState<Array<{
     id: number;
     name: string;
@@ -183,6 +185,27 @@ export default function LeftPanel({ project, selectedElement, selectedPage, onEl
     { id: 4, name: 'image2.png', type: 'image', size: '1.8 MB', file: null },
   ]);
   const { data: user } = useAuth();
+
+  // Reset recently updated state when selected element changes
+  useEffect(() => {
+    setRecentlyUpdated({});
+  }, [selectedElement]);
+
+  // Helper function to handle element updates
+  const handleElementUpdate = (key: keyof CompositionElement, value: any) => {
+    if (onElementUpdate && selectedElement?.id) {
+      const update = { [key]: value } as Partial<CompositionElement>;
+      onElementUpdate(selectedElement.id, update);
+      
+      // Visual feedback for change
+      setRecentlyUpdated(prev => ({ ...prev, [key]: true }));
+      
+      // Clear visual feedback after a delay
+      setTimeout(() => {
+        setRecentlyUpdated(prev => ({ ...prev, [key]: false }));
+      }, 800);
+    }
+  };
 
   const getUserInitial = () => {
     if (user?.email) {
@@ -429,32 +452,388 @@ export default function LeftPanel({ project, selectedElement, selectedPage, onEl
             {selectedElement ? (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Name</label>
-                  <input
-                    type="text"
-                    value={selectedElement.name}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    readOnly
-                  />
-                </div>
-                <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
                   <input
                     type="text"
-                    value={selectedElement.type}
+                    value={selectedElement.type || ""}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                     readOnly
                   />
                 </div>
-                {selectedElement.type === 'text' && (
+                
+                {/* Position and size properties - show for all elements */}
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Content</label>
-                    <textarea
-                      value={selectedElement.content}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                      rows={3}
-                      readOnly
+                    <label className="block text-xs font-medium text-gray-700 mb-1">X Position</label>
+                    <input
+                      type="number"
+                      value={selectedElement.x}
+                      className={`w-full px-3 py-2 border rounded-md text-sm ${
+                        recentlyUpdated['x'] 
+                          ? 'border-blue-500 bg-blue-50 transition-colors duration-300' 
+                          : 'border-gray-300'
+                      }`}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10);
+                        if (!isNaN(value)) {
+                          handleElementUpdate('x', value);
+                        }
+                      }}
                     />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Y Position</label>
+                    <input
+                      type="number"
+                      value={selectedElement.y}
+                      className={`w-full px-3 py-2 border rounded-md text-sm ${
+                        recentlyUpdated['y'] 
+                          ? 'border-blue-500 bg-blue-50 transition-colors duration-300' 
+                          : 'border-gray-300'
+                      }`}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10);
+                        if (!isNaN(value)) {
+                          handleElementUpdate('y', value);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Width</label>
+                    <input
+                      type="number"
+                      value={selectedElement.width}
+                      className={`w-full px-3 py-2 border rounded-md text-sm ${
+                        recentlyUpdated['width'] 
+                          ? 'border-blue-500 bg-blue-50 transition-colors duration-300' 
+                          : 'border-gray-300'
+                      }`}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10);
+                        if (!isNaN(value) && value > 0) {
+                          handleElementUpdate('width', value);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Height</label>
+                    <input
+                      type="number"
+                      value={selectedElement.height}
+                      className={`w-full px-3 py-2 border rounded-md text-sm ${
+                        recentlyUpdated['height'] 
+                          ? 'border-blue-500 bg-blue-50 transition-colors duration-300' 
+                          : 'border-gray-300'
+                      }`}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10);
+                        if (!isNaN(value) && value > 0) {
+                          handleElementUpdate('height', value);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Rotation (deg)</label>
+                    <input
+                      type="number"
+                      value={selectedElement.rotation || 0}
+                      className={`w-full px-3 py-2 border rounded-md text-sm ${
+                        recentlyUpdated['rotation'] 
+                          ? 'border-blue-500 bg-blue-50 transition-colors duration-300' 
+                          : 'border-gray-300'
+                      }`}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10);
+                        if (!isNaN(value)) {
+                          handleElementUpdate('rotation', value);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                {/* Z-index control for layering */}
+                <div className="mt-4">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Layer Order (z-index)</label>
+                  <div className="flex items-center">
+                    <input
+                      type="number"
+                      value={selectedElement.zIndex || 0}
+                      className={`w-full px-3 py-2 border rounded-md text-sm ${
+                        recentlyUpdated['zIndex'] 
+                          ? 'border-blue-500 bg-blue-50 transition-colors duration-300' 
+                          : 'border-gray-300'
+                      }`}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10);
+                        if (!isNaN(value)) {
+                          handleElementUpdate('zIndex', value);
+                        }
+                      }}
+                    />
+                    <div className="ml-2 flex">
+                      <button
+                        className="px-2 py-1 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-l"
+                        title="Move Down"
+                        onClick={() => {
+                          const currentZ = selectedElement.zIndex || 0;
+                          handleElementUpdate('zIndex', currentZ - 1);
+                        }}
+                      >
+                        ↓
+                      </button>
+                      <button
+                        className="px-2 py-1 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-r border-l-0"
+                        title="Move Up"
+                        onClick={() => {
+                          const currentZ = selectedElement.zIndex || 0;
+                          handleElementUpdate('zIndex', currentZ + 1);
+                        }}
+                      >
+                        ↑
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Higher values appear on top</p>
+                </div>
+                
+                {/* Time properties - show for all elements */}
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
+                    <input
+                      type="number"
+                      value={selectedElement.startTime || 0}
+                      className={`w-full px-3 py-2 border rounded-md text-sm ${
+                        recentlyUpdated['startTime'] 
+                          ? 'border-blue-500 bg-blue-50 transition-colors duration-300' 
+                          : 'border-gray-300'
+                      }`}
+                      step="0.1"
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value);
+                        if (!isNaN(value)) {
+                          handleElementUpdate('startTime', value);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">End Time</label>
+                    <input
+                      type="number"
+                      value={selectedElement.endTime || 0}
+                      className={`w-full px-3 py-2 border rounded-md text-sm ${
+                        recentlyUpdated['endTime'] 
+                          ? 'border-blue-500 bg-blue-50 transition-colors duration-300' 
+                          : 'border-gray-300'
+                      }`}
+                      step="0.1"
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value);
+                        if (!isNaN(value)) {
+                          handleElementUpdate('endTime', value);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                {/* Text specific properties */}
+                {selectedElement.type === 'text' && (
+                  <div className="space-y-2">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Text</label>
+                      <textarea
+                        value={selectedElement.text || ""}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        rows={3}
+                        onChange={(e) => {
+                          if (onElementUpdate && selectedElement?.id) {
+                            onElementUpdate(selectedElement.id, { text: e.target.value });
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Font Size</label>
+                        <input
+                          type="number"
+                          value={selectedElement.fontSize || 16}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          onChange={(e) => {
+                            if (onElementUpdate && selectedElement?.id) {
+                              const value = parseInt(e.target.value, 10);
+                              if (!isNaN(value) && value > 0) {
+                                onElementUpdate(selectedElement.id, { fontSize: value });
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Font Weight</label>
+                        <select
+                          value={selectedElement.fontWeight || "normal"}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          onChange={(e) => {
+                            if (onElementUpdate && selectedElement?.id) {
+                              onElementUpdate(selectedElement.id, { fontWeight: e.target.value });
+                            }
+                          }}
+                        >
+                          <option value="normal">Normal</option>
+                          <option value="bold">Bold</option>
+                          <option value="lighter">Lighter</option>
+                          <option value="bolder">Bolder</option>
+                          <option value="100">100</option>
+                          <option value="200">200</option>
+                          <option value="300">300</option>
+                          <option value="400">400</option>
+                          <option value="500">500</option>
+                          <option value="600">600</option>
+                          <option value="700">700</option>
+                          <option value="800">800</option>
+                          <option value="900">900</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Color</label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="color"
+                          value={selectedElement.color || "#000000"}
+                          className="w-10 h-10 p-1 border border-gray-300 rounded cursor-pointer"
+                          onChange={(e) => {
+                            if (onElementUpdate && selectedElement?.id) {
+                              onElementUpdate(selectedElement.id, { color: e.target.value });
+                            }
+                          }}
+                        />
+                        <input
+                          type="text"
+                          value={selectedElement.color || "#000000"}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          onChange={(e) => {
+                            // Simple hex color validation
+                            const colorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+                            if (colorRegex.test(e.target.value) && onElementUpdate && selectedElement?.id) {
+                              onElementUpdate(selectedElement.id, { color: e.target.value });
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Text Align</label>
+                      <select
+                        value={selectedElement.textAlign || "left"}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        onChange={(e) => {
+                          if (onElementUpdate && selectedElement?.id) {
+                            onElementUpdate(selectedElement.id, { 
+                              textAlign: e.target.value as 'left' | 'center' | 'right' 
+                            });
+                          }
+                        }}
+                      >
+                        <option value="left">Left</option>
+                        <option value="center">Center</option>
+                        <option value="right">Right</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Video specific properties */}
+                {selectedElement.type === 'video' && (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Video Start Time</label>
+                        <input
+                          type="number"
+                          value={selectedElement.subclipStart || 0}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          step="0.1"
+                          min="0"
+                          onChange={(e) => {
+                            if (onElementUpdate && selectedElement?.id) {
+                              const value = parseFloat(e.target.value);
+                              if (!isNaN(value) && value >= 0) {
+                                // Using startTime as the property that exists in CompositionElement
+                                onElementUpdate(selectedElement.id, { startTime: value });
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Video End Time</label>
+                        <input
+                          type="number"
+                          value={selectedElement.subclipEnd || 0}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          step="0.1"
+                          min="0"
+                          onChange={(e) => {
+                            if (onElementUpdate && selectedElement?.id) {
+                              const value = parseFloat(e.target.value);
+                              if (!isNaN(value) && value >= 0) {
+                                // Using endTime as the property that exists in CompositionElement
+                                onElementUpdate(selectedElement.id, { endTime: value });
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                    {selectedElement.src && (
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Source</label>
+                        <div className="flex items-center">
+                          <input
+                            type="text"
+                            value={selectedElement.src}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            onChange={(e) => {
+                              if (onElementUpdate && selectedElement?.id) {
+                                onElementUpdate(selectedElement.id, { src: e.target.value });
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Opacity</label>
+                      <div className="flex items-center">
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.01"
+                          value={selectedElement.opacity ?? 1}
+                          className="flex-1 mr-2"
+                          onChange={(e) => {
+                            if (onElementUpdate && selectedElement?.id) {
+                              const value = parseFloat(e.target.value);
+                              if (!isNaN(value)) {
+                                onElementUpdate(selectedElement.id, { opacity: value });
+                              }
+                            }
+                          }}
+                        />
+                        <span className="text-sm">
+                          {Math.round((selectedElement.opacity ?? 1) * 100)}%
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

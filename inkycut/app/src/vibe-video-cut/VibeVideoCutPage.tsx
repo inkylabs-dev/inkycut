@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useAction } from 'wasp/client/operations';
 import { getVibeProject, updateVibeProject, createVibeProject } from 'wasp/client/operations';
 import LeftPanel from './components/LeftPanel';
 import MiddlePanel from './components/MiddlePanel';
 import RightPanel from './components/RightPanel';
-import { CompositionData } from './components/Composition';
+import { CompositionData, CompositionElement } from './components/Composition';
+
+// Type for history stack items
+interface HistoryItem {
+  composition: CompositionData;
+  selectedElementId: string | null;
+}
 
 export default function VibeVideoCutPage() {
   const { id } = useParams<{ id: string }>();
@@ -13,6 +19,11 @@ export default function VibeVideoCutPage() {
   const [selectedPage, setSelectedPage] = useState<any>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [project, setProject] = useState<any>(null);
+  
+  // Undo/redo history state
+  const [undoStack, setUndoStack] = useState<HistoryItem[]>([]);
+  const [redoStack, setRedoStack] = useState<HistoryItem[]>([]);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   const { data: fetchedProject, isLoading, error } = useQuery(getVibeProject, { id: id! });
   const updateProject = useAction(updateVibeProject);
@@ -106,6 +117,195 @@ export default function VibeVideoCutPage() {
     }
   };
 
+  // Add to history before making changes
+  const addToHistory = useCallback((composition: CompositionData, elementId: string | null) => {
+    setUndoStack(prev => [
+      ...prev, 
+      { 
+        composition: JSON.parse(JSON.stringify(composition)),
+        selectedElementId: elementId
+      }
+    ]);
+    // Clear redo stack when a new action is performed
+    setRedoStack([]);
+    setHasUnsavedChanges(true);
+  }, []);
+
+  // Undo last action
+  const handleUndo = useCallback(() => {
+    if (undoStack.length > 0) {
+      const lastAction = undoStack[undoStack.length - 1];
+      
+      // Save current state to redo stack
+      setRedoStack(prev => [
+        ...prev,
+        { 
+          composition: JSON.parse(JSON.stringify(project.composition)),
+          selectedElementId: selectedElement?.id || null
+        }
+      ]);
+      
+      // Restore previous state
+      setUndoStack(prev => prev.slice(0, -1));
+      setProject((prevProject: any) => ({
+        ...prevProject,
+        composition: lastAction.composition
+      }));
+      
+      // Restore selected element if it exists
+      setSelectedElement(lastAction.selectedElementId 
+        ? lastAction.composition.pages.flatMap((p: any) => p.elements).find((e: any) => e.id === lastAction.selectedElementId) 
+        : null
+      );
+      
+      setHasUnsavedChanges(true);
+    }
+  }, [undoStack, project, selectedElement]);
+
+  // Redo last undone action
+  const handleRedo = useCallback(() => {
+    if (redoStack.length > 0) {
+      const lastUndoneAction = redoStack[redoStack.length - 1];
+      
+      // Save current state to undo stack
+      setUndoStack(prev => [
+        ...prev,
+        { 
+          composition: JSON.parse(JSON.stringify(project.composition)),
+          selectedElementId: selectedElement?.id || null
+        }
+      ]);
+      
+      // Restore redone state
+      setRedoStack(prev => prev.slice(0, -1));
+      setProject((prevProject: any) => ({
+        ...prevProject,
+        composition: lastUndoneAction.composition
+      }));
+      
+      // Restore selected element if it exists
+      setSelectedElement(lastUndoneAction.selectedElementId 
+        ? lastUndoneAction.composition.pages.flatMap((p: any) => p.elements).find((e: any) => e.id === lastUndoneAction.selectedElementId) 
+        : null
+      );
+      
+      setHasUnsavedChanges(true);
+    }
+  }, [redoStack, project, selectedElement]);
+
+  // Save changes to backend
+  const saveChanges = useCallback(async () => {
+    if (project && project.composition && hasUnsavedChanges) {
+      try {
+        await updateProject({
+          id: project.id,
+          composition: project.composition
+        });
+        console.log('Project saved successfully');
+        setHasUnsavedChanges(false);
+      } catch (error) {
+        console.error('Failed to save project:', error);
+      }
+    }
+  }, [project, updateProject, hasUnsavedChanges]);
+
+  // Add keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd+Z or Ctrl+Z for Undo
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+      // Cmd+Shift+Z or Ctrl+Y for Redo
+      if ((e.metaKey || e.ctrlKey) && ((e.shiftKey && e.key === 'z') || e.key === 'y')) {
+        e.preventDefault();
+        handleRedo();
+      }
+      // Cmd+S or Ctrl+S for Save
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        saveChanges();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleUndo, handleRedo, saveChanges]);
+
+  const handleElementUpdate = async (elementId: string, updatedData: Partial<CompositionElement>) => {
+    if (project && project.composition) {
+      // Save current state to history before making changes
+      addToHistory(project.composition, elementId);
+      
+      // Create a deep copy of the composition data
+      const updatedComposition = JSON.parse(JSON.stringify(project.composition)) as CompositionData;
+      
+      // Find and update the element
+      let elementUpdated = false;
+      updatedComposition.pages = updatedComposition.pages.map(page => {
+        const elementIndex = page.elements.findIndex(el => el.id === elementId);
+        if (elementIndex !== -1) {
+          // Update element with new data
+          page.elements[elementIndex] = {
+            ...page.elements[elementIndex],
+            ...updatedData
+          };
+          elementUpdated = true;
+        }
+        return page;
+      });
+      
+      if (elementUpdated) {
+        // Update local state first for immediate UI update
+        setProject({
+          ...project,
+          composition: updatedComposition
+        });
+        
+        // Also update selected element if it was the one that changed
+        if (selectedElement && selectedElement.id === elementId) {
+          setSelectedElement({
+            ...selectedElement,
+            ...updatedData
+          });
+        }
+        
+        // Don't save immediately - we'll batch saves
+        setHasUnsavedChanges(true);
+      }
+    }
+  };
+
+  // Auto-save after a period of inactivity
+  useEffect(() => {
+    const AUTO_SAVE_DELAY = 10000; // 10 seconds
+    let autoSaveTimer: NodeJS.Timeout;
+    
+    if (hasUnsavedChanges) {
+      autoSaveTimer = setTimeout(() => {
+        console.log('Auto-saving changes...');
+        saveChanges();
+      }, AUTO_SAVE_DELAY);
+    }
+    
+    return () => {
+      if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    };
+  }, [hasUnsavedChanges, saveChanges]);
+
+  // No duplicates here
+
+  useEffect(() => {
+    if (project) {
+      // Push current state to undo stack
+      setUndoStack(prev => [...prev, { composition: project.composition, selectedElementId: selectedElement?.id }]);
+      
+      // Clear redo stack on new action
+      setRedoStack([]);
+    }
+  }, [project, selectedElement]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -131,34 +331,87 @@ export default function VibeVideoCutPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Left Panel - File Explorer / Elements */}
-      <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0">
-        <LeftPanel 
-          project={project}
-          selectedElement={selectedElement}
-          selectedPage={selectedPage}
-          onElementSelect={handleElementSelect}
-        />
+    <div className="flex flex-col h-screen bg-gray-100">
+      {/* Status bar with Save button */}
+      <div className="bg-gray-800 text-white p-2 flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <h1 className="text-lg font-semibold">{project?.name || 'Untitled Project'}</h1>
+          <div className="text-sm text-gray-300">
+            {hasUnsavedChanges ? '• Unsaved changes' : '• All changes saved'}
+          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <button 
+            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded-md text-sm flex items-center"
+            onClick={handleUndo}
+            disabled={undoStack.length === 0}
+            title="Undo (Cmd+Z)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
+            </svg>
+            Undo
+          </button>
+          <button 
+            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded-md text-sm flex items-center"
+            onClick={handleRedo}
+            disabled={redoStack.length === 0}
+            title="Redo (Cmd+Shift+Z)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+            Redo
+          </button>
+          <button 
+            className={`px-3 py-1 rounded-md text-sm flex items-center ${
+              hasUnsavedChanges
+                ? 'bg-blue-600 hover:bg-blue-700'
+                : 'bg-gray-600 cursor-default'
+            }`}
+            onClick={saveChanges}
+            disabled={!hasUnsavedChanges}
+            title="Save (Cmd+S)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+            Save
+          </button>
+        </div>
       </div>
+      
+      {/* Main content area */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Panel - File Explorer / Elements */}
+        <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0">
+          <LeftPanel 
+            project={project}
+            selectedElement={selectedElement}
+            selectedPage={selectedPage}
+            onElementSelect={handleElementSelect}
+            onElementUpdate={handleElementUpdate}
+          />
+        </div>
 
-      {/* Middle Panel - Remotion Player */}
-      <div className="flex-1 flex flex-col">
-        <MiddlePanel
-          project={project}
-          selectedElement={selectedElement}
-          onTimelineUpdate={handleTimelineUpdate}
-          onCompositionUpdate={handleCompositionUpdate}
-          onPageSelect={handlePageSelect}
-        />
-      </div>
+        {/* Middle Panel - Remotion Player */}
+        <div className="flex-1 flex flex-col">
+          <MiddlePanel
+            project={project}
+            selectedElement={selectedElement}
+            onTimelineUpdate={handleTimelineUpdate}
+            onCompositionUpdate={handleCompositionUpdate}
+            onPageSelect={handlePageSelect}
+          />
+        </div>
 
-      {/* Right Panel - Chat UI */}
-      <div className="w-80 bg-white border-l border-gray-200 flex-shrink-0">
-        <RightPanel
-          messages={chatMessages}
-          onSendMessage={handleChatMessage}
-        />
+        {/* Right Panel - Chat UI */}
+        <div className="w-80 bg-white border-l border-gray-200 flex-shrink-0">
+          <RightPanel
+            messages={chatMessages}
+            onSendMessage={handleChatMessage}
+          />
+        </div>
       </div>
     </div>
   );

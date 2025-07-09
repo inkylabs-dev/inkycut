@@ -11,6 +11,7 @@ export interface CompositionElement {
   height: number;
   rotation?: number;
   opacity?: number;
+  zIndex?: number;
   // Video/Image specific
   src?: string;
   startTime?: number;
@@ -92,6 +93,7 @@ const ElementRenderer: React.FC<{
     height: element.height,
     transform: `rotate(${element.rotation || 0}deg)`,
     opacity: calculatedOpacity,
+    zIndex: element.zIndex || 0,
   };
 
   switch (element.type) {
