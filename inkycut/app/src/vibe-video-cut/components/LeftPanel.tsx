@@ -179,12 +179,7 @@ export default function LeftPanel({ project, selectedElement, selectedPage, onEl
     type: string;
     size: string;
     file: File | null;
-  }>>([
-    { id: 1, name: 'video1.mp4', type: 'video', size: '15.2 MB', file: null },
-    { id: 2, name: 'audio1.mp3', type: 'audio', size: '3.4 MB', file: null },
-    { id: 3, name: 'image1.jpg', type: 'image', size: '2.1 MB', file: null },
-    { id: 4, name: 'image2.png', type: 'image', size: '1.8 MB', file: null },
-  ]);
+  }>>([]);
   const { data: user } = useAuth();
 
   // Reset recently updated state when selected element changes
@@ -360,19 +355,29 @@ export default function LeftPanel({ project, selectedElement, selectedPage, onEl
               onDrop={handleDrop}
             >
               <div className="space-y-2">
-                {assets.map((asset) => (
-                  <div
-                    key={asset.id}
-                    className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer"
-                    onClick={() => onElementSelect(asset)}
-                  >
-                    <FilePreview file={asset.file} type={asset.type} name={asset.name} className="w-12 h-12" />
-                    <div className="ml-3 flex-1">
-                      <div className="text-sm font-medium text-gray-900">{asset.name}</div>
-                      <div className="text-xs text-gray-500">{asset.size}</div>
+                {assets.length > 0 ? (
+                  assets.map((asset) => (
+                    <div
+                      key={asset.id}
+                      className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer"
+                      onClick={() => onElementSelect(asset)}
+                    >
+                      <FilePreview file={asset.file} type={asset.type} name={asset.name} className="w-12 h-12" />
+                      <div className="ml-3 flex-1">
+                        <div className="text-sm font-medium text-gray-900">{asset.name}</div>
+                        <div className="text-xs text-gray-500">{asset.size}</div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center py-8 text-gray-500">
+                    <div className="text-center">
+                      <DocumentIcon className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm font-medium">No assets yet</p>
+                      <p className="text-xs mt-1">Drag and drop files here to add assets</p>
                     </div>
                   </div>
-                ))}
+                )}
                 {isDragOver && (
                   <div className="flex items-center justify-center py-8 text-blue-600">
                     <div className="text-center">

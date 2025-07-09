@@ -5,7 +5,7 @@ import { getVibeProject, updateVibeProject, createVibeProject } from 'wasp/clien
 import LeftPanel from './components/LeftPanel';
 import MiddlePanel from './components/MiddlePanel';
 import RightPanel from './components/RightPanel';
-import { CompositionData, CompositionElement } from './components/Composition';
+import { CompositionData, CompositionElement, CompositionPage } from './components/Composition';
 
 // Type for history stack items
 interface HistoryItem {
@@ -16,7 +16,7 @@ interface HistoryItem {
 export default function VibeVideoCutPage() {
   const { id } = useParams<{ id: string }>();
   const [selectedElement, setSelectedElement] = useState<any>(null);
-  const [selectedPage, setSelectedPage] = useState<any>(null);
+  const [selectedPage, setSelectedPage] = useState<CompositionPage | null>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [project, setProject] = useState<any>(null);
   // Properties are disabled by default and controlled by server configuration
@@ -32,6 +32,17 @@ export default function VibeVideoCutPage() {
   const { data: fetchedProject, isLoading, error } = useQuery(getVibeProject, { id: id! });
   const updateProject = useAction(updateVibeProject);
   const createProject = useAction(createVibeProject);
+
+  // Create a default page for new projects or when no pages exist
+  const createDefaultPage = useCallback((): CompositionPage => {
+    return {
+      id: `page-${Date.now()}`,
+      name: 'Default Page',
+      duration: 5 * 30, // 5 seconds at 30fps
+      backgroundColor: 'white',
+      elements: []
+    };
+  }, []);
 
   useEffect(() => {
     // Initialize chat with welcome message
@@ -54,24 +65,85 @@ export default function VibeVideoCutPage() {
       if (projectData.propertiesEnabled !== undefined) {
         setPropertiesEnabled(!!projectData.propertiesEnabled);
       }
+      
+      // Set the first page as selected page or create a default one if none exists
+      if (projectData.composition && projectData.composition.pages && projectData.composition.pages.length > 0) {
+        setSelectedPage(projectData.composition.pages[0]);
+      } else {
+        // Create default composition with a single page if it doesn't exist
+        const defaultPage = createDefaultPage();
+        const defaultComposition: CompositionData = {
+          pages: [defaultPage],
+          fps: 30,
+          width: 1920,
+          height: 1080
+        };
+        
+        // Update the project with the default composition
+        const updatedProject = {
+          ...projectData,
+          composition: defaultComposition
+        };
+        setProject(updatedProject);
+        setSelectedPage(defaultPage);
+        
+        // Save the default composition to the server
+        updateProject({
+          id: updatedProject.id,
+          composition: defaultComposition,
+          propertiesEnabled: updatedProject.propertiesEnabled !== undefined 
+            ? updatedProject.propertiesEnabled 
+            : false
+        }).catch(err => {
+          console.error('Failed to save default composition:', err);
+        });
+      }
     } else if (!isLoading && !fetchedProject && !error) {
       // Project doesn't exist, create a new one
       const initializeProject = async () => {
         try {
+          // Create default composition with a blank page
+          const defaultPage = createDefaultPage();
+          const defaultComposition: CompositionData = {
+            pages: [defaultPage],
+            fps: 30,
+            width: 1920,
+            height: 1080
+          };
+          
           const newProject = await createProject({
             name: `Vibe Project ${id}`,
             id,
             // Default to disabled for new projects
-            propertiesEnabled: false
+            propertiesEnabled: false,
+            composition: defaultComposition
           });
+          
           setProject(newProject);
+          setSelectedPage(defaultPage);
         } catch (err) {
           console.error('Failed to create project:', err);
         }
       };
       initializeProject();
     }
-  }, [fetchedProject, isLoading, error, id, createProject]);
+  }, [fetchedProject, isLoading, error, id, createProject, updateProject, createDefaultPage]);
+
+  useEffect(() => {
+    if (project && project.composition) {
+      // Initialize selectedPage with the first page of the project
+      const initialPage = project.composition.pages?.[0] || createDefaultPage();
+      setSelectedPage(initialPage);
+      
+      // If no pages exist, add a default page
+      if (project.composition.pages?.length === 0) {
+        handleCompositionUpdate({
+          ...project.composition,
+          pages: [initialPage]
+        });
+      }
+    }
+  }, [project, createDefaultPage]);
 
   const handleElementSelect = (element: any) => {
     setSelectedElement(element);
