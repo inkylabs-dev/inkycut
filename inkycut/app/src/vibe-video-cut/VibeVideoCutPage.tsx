@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import LeftPanel from './components/LeftPanel';
 import MiddlePanel from './components/MiddlePanel';
 import RightPanel from './components/RightPanel';
-import RenderButton from './components/RenderButton';
 import { CompositionData, CompositionElement, CompositionPage } from './components/Composition';
 
 // No history stack items in offline mode
@@ -347,13 +346,9 @@ export default function VibeVideoCutPage() {
           />
         </div>
 
-        {/* Right Panel - Chat UI */}
+        {/* Right Panel - Chat UI only */}
         <div className="w-80 bg-white border-l border-gray-200 flex-shrink-0">
           <div className="flex flex-col h-full">
-            <RenderButton 
-              projectId={id || ''}
-              projectData={project}
-            />
             <div className="flex-1">
               <RightPanel
                 messages={chatMessages}
