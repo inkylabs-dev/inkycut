@@ -30,21 +30,36 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
   const [jsonString, setJsonString] = useState<string>('');
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [playerReady, setPlayerReady] = useState(false);
+  const [userEditedJson, setUserEditedJson] = useState(false);
   
   const playerRef = useRef<PlayerRef>(null);
   const frameUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Update composition data when project changes
+  // Store last edited composition to preserve changes when toggling views
+  const lastEditedComposition = useRef<CompositionData | null>(null);
+
+  // Update composition data when project changes, but only if user hasn't made direct edits
   useEffect(() => {
-    if (project?.composition) {
+    if (project?.composition && !userEditedJson) {
       setCompositionData(project.composition);
+    } else if (project?.composition && viewMode !== 'code') {
+      // Don't reset the edit flag - we need to keep track of edits across view changes
+      // If we have user edits, keep using the user's version
+      if (!userEditedJson) {
+        setCompositionData(project.composition);
+      }
     }
-  }, [project]);
+  }, [project, userEditedJson, viewMode]);
   
-  // Initialize JSON string when composition data changes
+  // Initialize JSON string when composition data changes, but avoid unnecessary updates
   useEffect(() => {
-    setJsonString(JSON.stringify(compositionData, null, 2));
-  }, [compositionData]);
+    // Avoid updating JSON string in these cases:
+    // 1. We're in code view (to prevent overwriting user's active edits)
+    // 2. User has made edits and we're just switching views
+    if ((viewMode !== 'code' && !userEditedJson) || jsonString === '') {
+      setJsonString(JSON.stringify(compositionData, null, 2));
+    }
+  }, [compositionData, viewMode, jsonString, userEditedJson]);
   
   // Calculate total duration and current time
   const totalFrames = compositionData.pages.reduce((sum, page) => sum + page.duration, 0);
@@ -220,6 +235,10 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
       // Update local state first for immediate UI update
       setCompositionData(parsed);
       setJsonError(null);
+      setUserEditedJson(true);
+      
+      // Store the latest valid edit in our ref for persistence across view switches
+      lastEditedComposition.current = { ...parsed };
       
       // Then notify parent component to update the project state
       if (onCompositionUpdate) {
@@ -231,7 +250,37 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
   };
 
   const toggleViewMode = () => {
-    setViewMode(viewMode === 'player' ? 'code' : 'player');
+    const newMode = viewMode === 'player' ? 'code' : 'player';
+    
+    // When switching to player view from code view with valid edits
+    if (newMode === 'player' && viewMode === 'code' && userEditedJson && !jsonError) {
+      // Ensure parent component has the latest data
+      if (onCompositionUpdate) {
+        onCompositionUpdate(compositionData);
+      }
+      
+      // Store the edited composition data in the ref instead of resetting the flag
+      if (lastEditedComposition.current === null) {
+        lastEditedComposition.current = { ...compositionData };
+      } else {
+        // Update the stored version with latest edits
+        lastEditedComposition.current = { ...compositionData };
+      }
+      
+      // Keep the userEditedJson flag true to remember we have edits
+      // setUserEditedJson(false); - Removing this line keeps the edit state
+    }
+    
+    // When switching back to code view, restore the last edited version if available
+    if (newMode === 'code' && userEditedJson && lastEditedComposition.current) {
+      // Make sure we're using the stored edited version
+      setCompositionData(lastEditedComposition.current);
+      
+      // Update the JSON string to match our stored version
+      setJsonString(JSON.stringify(lastEditedComposition.current, null, 2));
+    }
+    
+    setViewMode(newMode);
   };
 
   const formatTime = (seconds: number) => {
@@ -267,10 +316,16 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
             >
               <CodeBracketIcon className="h-4 w-4" />
               <span>Code</span>
+              {userEditedJson && viewMode !== 'code' && (
+                <span className="inline-block w-2 h-2 bg-green-400 rounded-full ml-1"></span>
+              )}
             </button>
           </div>
-          <div className="text-white text-sm">
+          <div className="text-white text-sm flex items-center">
             {project?.name || 'Untitled Project'}
+            {userEditedJson && (
+              <span className="ml-2 text-xs text-green-400">(Edited)</span>
+            )}
           </div>
         </div>
       </div>
@@ -460,11 +515,19 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
         <div className="flex-1 flex flex-col bg-gray-900 p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-white text-lg font-semibold">Composition JSON</h3>
-            {jsonError && (
-              <div className="text-red-400 text-sm">
-                Error: {jsonError}
-              </div>
-            )}
+            <div className="flex items-center gap-3">
+              {userEditedJson && (
+                <div className="text-green-400 text-sm flex items-center">
+                  <span className="inline-block w-2 h-2 bg-green-400 rounded-full mr-1"></span>
+                  Changes saved
+                </div>
+              )}
+              {jsonError && (
+                <div className="text-red-400 text-sm">
+                  Error: {jsonError}
+                </div>
+              )}
+            </div>
           </div>
           <textarea
             value={jsonString}
@@ -473,8 +536,36 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
             placeholder="Edit your composition JSON here..."
             style={{ minHeight: '400px' }}
           />
-          <div className="mt-4 text-gray-400 text-xs">
-            💡 Tip: Edit the JSON directly to modify pages, elements, timing, and styling. Changes are applied in real-time.
+          <div className="flex justify-between items-center mt-4">
+            <div className="text-gray-400 text-xs">
+              💡 Tip: Edit the JSON directly to modify pages, elements, timing, and styling. Changes are applied in real-time.
+            </div>
+            <button 
+              onClick={() => {
+                if (project?.composition && userEditedJson) {
+                  // Reset to the project's composition data
+                  setCompositionData(project.composition);
+                  setJsonString(JSON.stringify(project.composition, null, 2));
+                  setUserEditedJson(false);
+                  
+                  // Clear the stored edited version
+                  lastEditedComposition.current = null;
+                  
+                  // Update parent component
+                  if (onCompositionUpdate) {
+                    onCompositionUpdate(project.composition);
+                  }
+                }
+              }}
+              className={`px-3 py-1 rounded text-xs ${
+                userEditedJson 
+                  ? 'bg-gray-600 text-white hover:bg-gray-500'
+                  : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              }`}
+              disabled={!userEditedJson}
+            >
+              Reset Changes
+            </button>
           </div>
         </div>
       )}
