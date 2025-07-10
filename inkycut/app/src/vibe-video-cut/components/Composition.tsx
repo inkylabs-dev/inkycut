@@ -9,7 +9,7 @@
 
 // Basic composition component
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, Img, Video, interpolate } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, Img, Video } from 'remotion';
 import { CompositionData, CompositionElement, CompositionPage, defaultCompositionData } from './types'; // Adjust the import path as needed
 import { SortedOutlines } from './SortedOutline';
 import { Layer } from './Layer';
@@ -48,30 +48,8 @@ const ElementRenderer: React.FC<{
   
   if (!isVisible) return null;
 
-  // Calculate opacity with fade effects
-  const opacity = elementWithId.opacity || 1;
-  const fadeInDuration = 0.5; // 0.5 seconds fade in
-  const fadeOutDuration = 0.5; // 0.5 seconds fade out
-  
-  let calculatedOpacity = opacity;
-  
-  if (currentTimeInSeconds < startTime + fadeInDuration) {
-    calculatedOpacity *= interpolate(
-      currentTimeInSeconds,
-      [startTime, startTime + fadeInDuration],
-      [0, 1],
-      { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-    );
-  }
-  
-  if (endTime !== Infinity && currentTimeInSeconds > endTime - fadeOutDuration) {
-    calculatedOpacity *= interpolate(
-      currentTimeInSeconds,
-      [endTime - fadeOutDuration, endTime],
-      [1, 0],
-      { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-    );
-  }
+  // Use element opacity directly without animations
+  const calculatedOpacity = elementWithId.opacity || 1;
 
   const style: React.CSSProperties = {
     position: 'absolute',
