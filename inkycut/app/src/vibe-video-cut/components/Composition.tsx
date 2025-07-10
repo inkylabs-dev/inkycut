@@ -1,6 +1,11 @@
 import React from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, Img, Video, interpolate } from 'remotion';
 
+// Utility function to generate unique IDs
+const generateUniqueId = (): string => {
+  return `el-${Math.random().toString(36).substring(2, 9)}-${Date.now().toString(36)}`;
+};
+
 // Types for our canvas-style JSON model
 export interface CompositionElement {
   id?: string; // Now optional, though all elements should ideally have an ID
@@ -53,17 +58,26 @@ const ElementRenderer: React.FC<{
   frame: number; 
   fps: number;
 }> = ({ element, frame, fps }) => {
+  // Ensure element has an ID
+  const elementWithId = React.useMemo(() => {
+    if (element.id) return element;
+    return {
+      ...element,
+      id: generateUniqueId()
+    };
+  }, [element]);
+  
   const currentTimeInSeconds = frame / fps;
   
   // Check if element should be visible at current time
-  const startTime = element.startTime || 0;
-  const endTime = element.endTime || Infinity;
+  const startTime = elementWithId.startTime || 0;
+  const endTime = elementWithId.endTime || Infinity;
   const isVisible = currentTimeInSeconds >= startTime && currentTimeInSeconds <= endTime;
   
   if (!isVisible) return null;
 
   // Calculate opacity with fade effects
-  const opacity = element.opacity || 1;
+  const opacity = elementWithId.opacity || 1;
   const fadeInDuration = 0.5; // 0.5 seconds fade in
   const fadeOutDuration = 0.5; // 0.5 seconds fade out
   
@@ -89,28 +103,28 @@ const ElementRenderer: React.FC<{
 
   const style: React.CSSProperties = {
     position: 'absolute',
-    left: element.x,
-    top: element.y,
-    width: element.width,
-    height: element.height,
-    transform: `rotate(${element.rotation || 0}deg)`,
+    left: elementWithId.x,
+    top: elementWithId.y,
+    width: elementWithId.width,
+    height: elementWithId.height,
+    transform: `rotate(${elementWithId.rotation || 0}deg)`,
     opacity: calculatedOpacity,
-    zIndex: element.zIndex || 0,
+    zIndex: elementWithId.zIndex || 0,
   };
 
-  switch (element.type) {
+  switch (elementWithId.type) {
     case 'image':
-      return element.src ? (
+      return elementWithId.src ? (
         <Img
-          src={element.src}
+          src={elementWithId.src}
           style={style}
         />
       ) : null;
 
     case 'video':
-      return element.src ? (
+      return elementWithId.src ? (
         <Video
-          src={element.src}
+          src={elementWithId.src}
           style={style}
           startFrom={Math.floor((currentTimeInSeconds - startTime) * fps)}
         />
@@ -121,21 +135,21 @@ const ElementRenderer: React.FC<{
         <div
           style={{
             ...style,
-            fontSize: element.fontSize || 24,
-            fontFamily: element.fontFamily || 'Arial, sans-serif',
-            color: element.color || '#000000',
-            fontWeight: element.fontWeight || 'normal',
-            textAlign: element.textAlign || 'left',
+            fontSize: elementWithId.fontSize || 24,
+            fontFamily: elementWithId.fontFamily || 'Arial, sans-serif',
+            color: elementWithId.color || '#000000',
+            fontWeight: elementWithId.fontWeight || 'normal',
+            textAlign: elementWithId.textAlign || 'left',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: element.textAlign === 'center' ? 'center' : 
-                           element.textAlign === 'right' ? 'flex-end' : 'flex-start',
+            justifyContent: elementWithId.textAlign === 'center' ? 'center' : 
+                           elementWithId.textAlign === 'right' ? 'flex-end' : 'flex-start',
             padding: '8px',
             wordWrap: 'break-word',
             overflow: 'hidden',
           }}
         >
-          {element.text || 'Sample Text'}
+          {elementWithId.text || 'Sample Text'}
         </div>
       );
 
@@ -150,11 +164,23 @@ const PageRenderer: React.FC<{
   frame: number; 
   fps: number;
 }> = ({ page, frame, fps }) => {
+  // Ensure all elements on this page have IDs
+  const elementsWithIds = React.useMemo(() => {
+    return page.elements.map((element, index) => {
+      if (element.id) return element;
+      // Assign a new ID if one doesn't exist
+      return {
+        ...element,
+        id: generateUniqueId()
+      };
+    });
+  }, [page.elements]);
+  
   return (
     <AbsoluteFill style={{ backgroundColor: page.backgroundColor || '#ffffff' }}>
-      {page.elements.map((element, index) => (
+      {elementsWithIds.map((element, index) => (
         <ElementRenderer
-          key={element.id ? `element-${element.id}` : `element-fallback-${index}`}
+          key={`element-${element.id}`}
           element={element}
           frame={frame}
           fps={fps}
@@ -350,6 +376,26 @@ export const InteractiveComposition: React.FC<InteractiveCompositionProps> = ({
 }) => {
   console.log("InteractiveComposition render with:", { selectedElement, editable, currentPageIndex });
   const currentPage = data.pages[currentPageIndex] || data.pages[0];
+  
+  // Ensure all elements have IDs - run once when the component mounts or page changes
+  React.useEffect(() => {
+    if (!currentPage) return;
+    
+    // Process elements that don't have IDs
+    currentPage.elements.forEach((element, index) => {
+      if (!element.id) {
+        const newElementId = generateUniqueId();
+        console.debug(`Assigning ID ${newElementId} to element at index ${index}`);
+        
+        // Use the onElementChange callback to update the element with an ID
+        // We create a temporary ID for the callback, since the real ID will be assigned
+        onElementChange(`temp-${index}`, (el) => ({
+          ...element,
+          id: newElementId
+        }));
+      }
+    });
+  }, [currentPage, currentPageIndex, onElementChange]);
   const [dragState, setDragState] = React.useState<{
     elementId: string | null;
     isDragging: boolean;
@@ -462,15 +508,26 @@ export const InteractiveComposition: React.FC<InteractiveCompositionProps> = ({
     };
   }, [dragState.isDragging, handleMouseMove, handleMouseUp]);
   
+  // First, ensure all elements have IDs
+  const elementsWithIds = React.useMemo(() => {
+    return currentPage.elements.map((element, index) => {
+      if (element.id) return element;
+      return {
+        ...element,
+        id: generateUniqueId()
+      };
+    });
+  }, [currentPage.elements]);
+  
   // Create an array of renderable elements with explicit keys
-  const renderElements = currentPage.elements.map((element, index) => {
-    // Generate a fallback key if element.id is undefined
-    const elementKey = element.id ? `element-${element.id}` : `element-fallback-${index}`;
+  const renderElements = elementsWithIds.map((element, index) => {
+    // All elements now have IDs
+    const elementKey = `element-${element.id}`;
     
     return (
       <div
         key={elementKey}
-        className={`absolute ${element.id && selectedElement === element.id ? 'ring-4 ring-blue-500 outline-2 outline-white outline' : ''} ${editable ? 'cursor-move' : ''}`}
+        className={`absolute ${selectedElement === element.id ? 'ring-4 ring-blue-500 outline-2 outline-white outline' : ''} ${editable ? 'cursor-move' : ''}`}
         style={{
           left: element.x,
           top: element.y,
@@ -479,26 +536,22 @@ export const InteractiveComposition: React.FC<InteractiveCompositionProps> = ({
           zIndex: element.zIndex || 1,
           opacity: element.opacity !== undefined ? element.opacity : 1,
           transform: element.rotation ? `rotate(${element.rotation}deg)` : undefined,
-          boxShadow: element.id && selectedElement === element.id ? '0 0 0 4px rgba(59, 130, 246, 0.5)' : 'none',
+          boxShadow: selectedElement === element.id ? '0 0 0 4px rgba(59, 130, 246, 0.5)' : 'none',
         }}
         onClick={(e) => {
           if (!editable) return;
           e.stopPropagation();
           console.debug('Element clicked:', element);
-          // Only call onElementSelect if element has an id
-          if (element.id) {
-            console.debug('Selecting element with ID:', element.id);
-            onElementSelect(element.id);
-          }
+          // Now we know element.id always exists
+          console.debug('Selecting element with ID:', element.id);
+          // Element ID is guaranteed to exist but TS doesn't know that
+          onElementSelect(element.id!);
         }}
         onMouseDown={(e) => {
-            console.log('mouse down')
           if (!editable) return;
           e.stopPropagation();
-          // Only start drag if element has an id
-          if (element.id) {
-            handleElementDragStart(element.id, e);
-          }
+          // Element ID is guaranteed to exist but TS doesn't know that
+          handleElementDragStart(element.id!, e);
         }}
       >
         {element.type === 'text' && (
@@ -604,12 +657,41 @@ export const InteractiveVideoComposition: React.FC<{
   selectedElement = null,
   editable = true
 }) => {
+  // Create a processed copy of the data where all elements have IDs
+  const processedData = React.useMemo(() => {
+    // Clone the data object to avoid direct mutations
+    const newData = {
+      ...data,
+      pages: data.pages.map(page => ({
+        ...page,
+        elements: page.elements.map(element => {
+          // If the element already has an ID, keep it
+          if (element.id) {
+            return element;
+          }
+          // Otherwise, generate a new ID
+          return {
+            ...element,
+            id: generateUniqueId()
+          };
+        })
+      }))
+    };
+    return newData;
+  }, [data]);
+
+  // Create a wrapper for onElementChange to handle the case where an element might not have had an ID initially
+  const handleElementChange = React.useCallback((elementId: string, updater: (element: CompositionElement) => CompositionElement) => {
+    // Pass through to the original onElementChange
+    onElementChange(elementId, updater);
+  }, [onElementChange]);
+  
   return (
     <InteractiveComposition
-      data={data}
+      data={processedData}
       currentPageIndex={currentPageIndex}
       onElementSelect={onElementSelect}
-      onElementChange={onElementChange}
+      onElementChange={handleElementChange}
       selectedElement={selectedElement}
       editable={editable}
     />
