@@ -9,7 +9,9 @@ import {
   CodeBracketIcon,
   VideoCameraIcon
 } from '@heroicons/react/24/outline';
-import { MyComposition, VideoComposition, InteractiveVideoComposition, defaultCompositionData, CompositionData, CompositionElement } from './Composition';
+import { CompositionElement, CompositionData, defaultCompositionData } from './types';
+import { VideoComposition } from './Composition';
+import { fromTheme } from 'tailwind-merge';
 
 interface MiddlePanelProps {
   project: any;
@@ -413,14 +415,13 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
             <div className="w-full max-w-4xl aspect-video">
               <Player
                 ref={playerRef}
-                component={InteractiveVideoComposition}
+                component={VideoComposition}
                 inputProps={{ 
                   data: compositionData,
                   currentPageIndex: getCurrentPage().pageIndex,
-                  onElementSelect: handleElementSelect,
-                  onElementChange: handleElementChange,
-                  selectedElement: currentEditingElement,
-                  editable: true // Force enable editing mode for testing
+                  setSelectedItem: handleElementSelect,
+                  changeItem: handleElementChange,
+                  selectedItem: currentEditingElement
                 }}
                 durationInFrames={totalFrames}
                 compositionWidth={compositionData.width}

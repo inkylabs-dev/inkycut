@@ -14,7 +14,7 @@ import {
 import { useAuth } from 'wasp/client/auth';
 import { routes } from 'wasp/client/router';
 import { Link } from 'react-router-dom';
-import { CompositionElement } from './Composition';
+import { CompositionElement } from './types';
 
 
 // File Preview Component

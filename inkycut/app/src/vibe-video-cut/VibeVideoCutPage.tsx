@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import LeftPanel from './components/LeftPanel';
 import MiddlePanel from './components/MiddlePanel';
 import RightPanel from './components/RightPanel';
-import { CompositionData, CompositionElement, CompositionPage } from './components/Composition';
+import { CompositionData, CompositionElement, CompositionPage } from './components/types';
 
 // No history stack items in offline mode
 
