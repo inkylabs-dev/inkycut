@@ -10,7 +10,7 @@
 // Basic composition component
 import React from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, Img, Video } from 'remotion';
-import { CompositionData, CompositionElement, CompositionPage, defaultCompositionData } from './types'; // Adjust the import path as needed
+import { CompositionData, CompositionElement, CompositionPage, ElementRendererProps, defaultCompositionData } from './types'; // Adjust the import path as needed
 import { SortedOutlines } from './SortedOutline';
 import { Layer } from './Layer';
 
@@ -25,11 +25,7 @@ const generateUniqueId = (): string => {
 };
 
 // Individual element renderer
-const ElementRenderer: React.FC<{ 
-  element: CompositionElement; 
-  frame: number; 
-  fps: number;
-}> = ({ element, frame, fps }) => {
+const ElementRenderer: React.FC<ElementRendererProps> = ({ element, frame, fps }) => {
   // Ensure element has an ID
   const elementWithId = React.useMemo(() => {
     if (element.id) return element;
@@ -129,12 +125,18 @@ const PageRenderer: React.FC<{
   return (
     <AbsoluteFill style={{ backgroundColor: page.backgroundColor || '#ffffff' }}>
       {elementsWithIds.map((element, index) => (
-        <ElementRenderer
+        <Layer
           key={`element-${element.id}`}
           element={element}
           frame={frame}
           fps={fps}
-        />
+        >
+          <ElementRenderer
+            element={element}
+            frame={frame}
+            fps={fps}
+          />
+        </Layer>
       ))}
     </AbsoluteFill>
   );
@@ -275,14 +277,20 @@ export const MainComposition: React.FC<{
     <AbsoluteFill style={outer} onPointerDown={onPointerDown}>
       {/* Base layer with content */}
       <AbsoluteFill style={layerContainer}>
-        {/* Only use ElementRenderer for actual content rendering */}
+        {/* Wrap ElementRenderer with Layer for proper time-based sequencing */}
         {elementsWithIds.map((element) => (
-          <ElementRenderer
+          <Layer
             key={`element-${element.id}`}
             element={element}
             frame={frameOffset}
             fps={fps}
-          />
+          >
+            <ElementRenderer
+              element={element}
+              frame={frameOffset}
+              fps={fps}
+            />
+          </Layer>
         ))}
       </AbsoluteFill>
       

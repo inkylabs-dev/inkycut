@@ -1,31 +1,30 @@
-import React, {useMemo} from 'react';
-import {Sequence} from 'remotion';
-import type {CompositionElement} from './types';
+import React from 'react';
+import { Sequence } from 'remotion';
+import type { ElementRendererProps } from './types';
  
-export const Layer: React.FC<{
-  item: CompositionElement;
-}> = ({item}) => {
-  const style: React.CSSProperties = useMemo(() => {
-    return {
-      backgroundColor: item.color,
-      position: 'absolute',
-      left: item.x,
-      top: item.y,
-      width: item.width,
-      height: item.height,
-    };
-  }, [item.color, item.height, item.x, item.y, item.width]);
+interface LayerProps extends ElementRendererProps {
+  children: React.ReactNode;
+}
+
+export const Layer: React.FC<LayerProps> = ({ element, frame, fps, children }) => {
+  // Calculate from and durationInFrames based on startTime and endTime (which are in seconds)
+  const startTime = element.startTime || 0;
+  const endTime = element.endTime || Infinity;
   
-return (
+  // Convert seconds to frames
+  const fromFrame = Math.round(startTime * fps);
+  const durationInFrames = endTime !== Infinity 
+    ? Math.round((endTime - startTime) * fps) 
+    : undefined;
+  
+  return (
     <Sequence
-        key={item.id}
-        from={item.startTime}
-        {...(item.endTime !== undefined && item.startTime !== undefined
-            ? {durationInFrames: item.endTime - item.startTime}
-            : {})}
-        layout="none"
+      key={element.id}
+      from={fromFrame}
+      durationInFrames={durationInFrames}
+      layout="none"
     >
-        <div className="layer-component" style={style} />
+      {children}
     </Sequence>
-);
+  );
 };

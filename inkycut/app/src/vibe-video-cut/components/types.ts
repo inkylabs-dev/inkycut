@@ -1,4 +1,3 @@
-
 // Types for our canvas-style JSON model
 export interface CompositionElement {
   id: string; 
@@ -23,6 +22,13 @@ export interface CompositionElement {
   textAlign?: 'left' | 'center' | 'right';
   // Interactive state (for editing)
   isDragging?: boolean;
+}
+
+// Props for ElementRenderer component
+export interface ElementRendererProps {
+  element: CompositionElement;
+  frame: number;
+  fps: number;
 }
 
 export interface CompositionPage {
