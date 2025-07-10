@@ -49,8 +49,8 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({ element, frame, fps }
 
   const style: React.CSSProperties = {
     position: 'absolute',
-    left: elementWithId.x,
-    top: elementWithId.y,
+    left: elementWithId.left,
+    top: elementWithId.top,
     width: elementWithId.width,
     height: elementWithId.height,
     transform: `rotate(${elementWithId.rotation || 0}deg)`,

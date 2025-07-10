@@ -89,15 +89,15 @@ export const ResizeHandle: React.FC<{
         setItem(item.id, (i) => {
           const newWidth = item.width + (isLeft ? -offsetX : offsetX);
           const newHeight = item.height + (isTop ? -offsetY : offsetY);
-          const newLeft = item.x + (isLeft ? offsetX : 0);
-          const newTop = item.y + (isTop ? offsetY : 0);
+          const newLeft = item.left + (isLeft ? offsetX : 0);
+          const newTop = item.top + (isTop ? offsetY : 0);
  
           return {
             ...i,
             width: Math.max(1, Math.round(newWidth)),
             height: Math.max(1, Math.round(newHeight)),
-            left: Math.min(item.x + item.width - 1, Math.round(newLeft)),
-            top: Math.min(item.y + item.height - 1, Math.round(newTop)),
+            left: Math.min(item.left + item.width - 1, Math.round(newLeft)),
+            top: Math.min(item.top + item.height - 1, Math.round(newTop)),
             isDragging: true,
           };
         });

@@ -2,8 +2,8 @@
 export interface CompositionElement {
   id: string; 
   type: 'video' | 'image' | 'text';
-  x: number;
-  y: number;
+  left: number;
+  top: number;
   width: number;
   height: number;
   rotation?: number;
@@ -61,8 +61,8 @@ export const defaultCompositionData: CompositionData = {
         {
           id: 'text1',
           type: 'text',
-          x: 100,
-          y: 200,
+          left: 100,
+          top: 200,
           width: 800,
           height: 100,
           text: 'Welcome to Vibe Video Cut',
@@ -76,8 +76,8 @@ export const defaultCompositionData: CompositionData = {
         {
           id: 'text2',
           type: 'text',
-          x: 100,
-          y: 350,
+          left: 100,
+          top: 350,
           width: 800,
           height: 60,
           text: 'Create amazing videos with ease',
@@ -98,8 +98,8 @@ export const defaultCompositionData: CompositionData = {
         {
           id: 'text3',
           type: 'text',
-          x: 100,
-          y: 100,
+          left: 100,
+          top: 100,
           width: 600,
           height: 80,
           text: 'Page 2: Main Content',
@@ -112,8 +112,8 @@ export const defaultCompositionData: CompositionData = {
         {
           id: 'text4',
           type: 'text',
-          x: 100,
-          y: 250,
+          left: 100,
+          top: 250,
           width: 800,
           height: 200,
           text: 'This is where your main content goes. You can add images, videos, and text elements to create engaging stories.',
@@ -133,8 +133,8 @@ export const defaultCompositionData: CompositionData = {
         {
           id: 'text5',
           type: 'text',
-          x: 100,
-          y: 250,
+          left: 100,
+          top: 250,
           width: 800,
           height: 100,
           text: 'Thanks for watching!',

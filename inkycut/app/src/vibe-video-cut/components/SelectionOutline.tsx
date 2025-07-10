@@ -30,8 +30,8 @@ export const SelectionOutline: React.FC<{
         return {
             width: compositionElement.width,
             height: compositionElement.height,
-            left: compositionElement.x,
-            top: compositionElement.y,
+            left: compositionElement.left,
+            top: compositionElement.top,
             position: 'absolute',
             outline: isSelected 
                 ? `${scaledBorder * 2}px solid #FF3366` 
@@ -58,8 +58,8 @@ export const SelectionOutline: React.FC<{
                 changeCompositionElement(compositionElement.id, (el) => {
                     return {
                         ...el,
-                        x: Math.round(compositionElement.x + offsetX),
-                        y: Math.round(compositionElement.y + offsetY),
+                        left: Math.round(compositionElement.left + offsetX),
+                        top: Math.round(compositionElement.top + offsetY),
                         isDragging: true,
                     };
                 });
@@ -102,8 +102,8 @@ export const SelectionOutline: React.FC<{
         isSelected,
         isDragging,
         hovered,
-        x: compositionElement.x,
-        y: compositionElement.y,
+        left: compositionElement.left,
+        top: compositionElement.top,
         width: compositionElement.width,
         height: compositionElement.height
     });
