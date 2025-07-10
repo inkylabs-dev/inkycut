@@ -41,10 +41,15 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
 
   // Sync selectedElement from props with local state
   useEffect(() => {
+    console.log('Selected element from props:', selectedElement);
+    console.log('Current editing element:', currentEditingElement);
+    
     if (selectedElement?.id && selectedElement.id !== currentEditingElement) {
+      console.log('Updating currentEditingElement to:', selectedElement.id);
       setCurrentEditingElement(selectedElement.id);
     } else if (!selectedElement && currentEditingElement) {
       // If parent component clears selection, we should clear too
+      console.log('Clearing currentEditingElement');
       setCurrentEditingElement(null);
     }
   }, [selectedElement, currentEditingElement]);
@@ -307,6 +312,7 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
   };
 
   const handleElementSelect = useCallback((elementId: string | null) => {
+    console.log('Element selected:', elementId);
     setCurrentEditingElement(elementId);
     
     // Optionally propagate selection to parent component if needed
@@ -315,6 +321,8 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
       const element = compositionData.pages
         .flatMap(page => page.elements)
         .find(el => el.id === elementId);
+      
+      console.log('Found selected element:', element);
       
       if (element) {
         onPageSelect(element);
@@ -412,7 +420,7 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
                   onElementSelect: handleElementSelect,
                   onElementChange: handleElementChange,
                   selectedElement: currentEditingElement,
-                  editable: propertiesEnabled && !isPlaying
+                  editable: true // Force enable editing mode for testing
                 }}
                 durationInFrames={totalFrames}
                 compositionWidth={compositionData.width}

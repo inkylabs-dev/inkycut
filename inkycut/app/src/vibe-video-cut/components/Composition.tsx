@@ -348,6 +348,7 @@ export const InteractiveComposition: React.FC<InteractiveCompositionProps> = ({
   selectedElement,
   editable = true
 }) => {
+  console.log("InteractiveComposition render with:", { selectedElement, editable, currentPageIndex });
   const currentPage = data.pages[currentPageIndex] || data.pages[0];
   const [dragState, setDragState] = React.useState<{
     elementId: string | null;
@@ -469,7 +470,7 @@ export const InteractiveComposition: React.FC<InteractiveCompositionProps> = ({
     return (
       <div
         key={elementKey}
-        className={`absolute ${selectedElement === element.id ? 'ring-2 ring-blue-500' : ''} ${editable ? 'cursor-move' : ''}`}
+        className={`absolute ${element.id && selectedElement === element.id ? 'ring-4 ring-blue-500 outline-2 outline-white outline' : ''} ${editable ? 'cursor-move' : ''}`}
         style={{
           left: element.x,
           top: element.y,
@@ -478,16 +479,20 @@ export const InteractiveComposition: React.FC<InteractiveCompositionProps> = ({
           zIndex: element.zIndex || 1,
           opacity: element.opacity !== undefined ? element.opacity : 1,
           transform: element.rotation ? `rotate(${element.rotation}deg)` : undefined,
+          boxShadow: element.id && selectedElement === element.id ? '0 0 0 4px rgba(59, 130, 246, 0.5)' : 'none',
         }}
         onClick={(e) => {
           if (!editable) return;
           e.stopPropagation();
+          console.debug('Element clicked:', element);
           // Only call onElementSelect if element has an id
           if (element.id) {
+            console.debug('Selecting element with ID:', element.id);
             onElementSelect(element.id);
           }
         }}
         onMouseDown={(e) => {
+            console.log('mouse down')
           if (!editable) return;
           e.stopPropagation();
           // Only start drag if element has an id
@@ -558,7 +563,9 @@ export const InteractiveComposition: React.FC<InteractiveCompositionProps> = ({
       className="absolute inset-0"
       style={{ zIndex: -1 }}
       onClick={() => {
-        if (editable && selectedElement) {
+        console.log('Background clicked, editable:', editable, 'selectedElement:', selectedElement);
+        if (editable) {
+          console.log('Clearing selection');
           onElementSelect(null);
         }
       }}
