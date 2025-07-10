@@ -9,7 +9,6 @@ import {
   HomeIcon,
   DocumentTextIcon,
   Bars3Icon,
-  ArrowPathIcon,
   HeartIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from 'wasp/client/auth';
@@ -169,11 +168,10 @@ interface LeftPanelProps {
   selectedPage?: any;
   onElementSelect: (element: any) => void;
   onElementUpdate?: (elementId: string, updatedData: Partial<CompositionElement> | any) => void;
-  onProjectReset?: (defaultProject: any) => void;
   propertiesEnabled: boolean;
 }
 
-export default function LeftPanel({ project, selectedElement, selectedPage, onElementSelect, onElementUpdate, onProjectReset, propertiesEnabled }: LeftPanelProps) {
+export default function LeftPanel({ project, selectedElement, selectedPage, onElementSelect, onElementUpdate, propertiesEnabled }: LeftPanelProps) {
   const [activeTab, setActiveTab] = useState<'explorer' | 'elements'>('explorer');
   const [isDragOver, setIsDragOver] = useState(false);
   const [recentlyUpdated, setRecentlyUpdated] = useState<{[key: string]: boolean}>({});
@@ -316,50 +314,6 @@ export default function LeftPanel({ project, selectedElement, selectedPage, onEl
                 className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
               >
                 <div className="py-1">
-                  <button 
-                    onClick={() => {
-                      // Reset project to default data model
-                      const defaultProject = {
-                        id: project?.id,
-                        name: project?.name || 'Untitled Project',
-                        user: project?.user,
-                        composition: {
-                          width: 1280,
-                          height: 720,
-                          duration: 30,
-                          fps: 30,
-                          pages: [{
-                            id: "page1",
-                            name: "Main Sequence",
-                            elements: [],
-                            startTime: 0,
-                            endTime: 30
-                          }]
-                        }
-                      };
-                      
-                      // Use the dedicated onProjectReset handler if available
-                      if (onProjectReset) {
-                        onProjectReset(defaultProject);
-                      }
-                      // Fallback to onElementUpdate if onProjectReset is not available
-                      else if (onElementUpdate && project?.id) {
-                        onElementUpdate('reset', defaultProject);
-                      }
-                      
-                      // Reset assets
-                      setAssets([]);
-                      
-                      // Close the menu
-                      setShowMenu(false);
-                    }}
-                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    <ArrowPathIcon className="mr-2 h-5 w-5 text-gray-500" />
-                    Reset Project
-                  </button>
-                  
-                  <hr className="my-1 border-gray-200" />
                   
                   <Link 
                     to="/"

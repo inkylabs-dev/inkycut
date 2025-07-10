@@ -134,8 +134,8 @@ export const getTaskProgress = async (
 
 // Add a function to render the project
 export const renderVibeProject = async (
-  args,
-  context
+  args: any,
+  context: any
 ) => {
   if (!context.user) {
     throw new Error('User not authenticated');
