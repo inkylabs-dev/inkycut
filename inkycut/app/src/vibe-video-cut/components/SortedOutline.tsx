@@ -19,12 +19,12 @@ export const SortedOutlines: React.FC<{
   changeItem: (elementId: string, updater: (item: CompositionElement) => CompositionElement) => void;
   setSelectedItem: (elementId: string | null) => void;
 }> = ({items, selectedItem, changeItem, setSelectedItem}) => {
-  console.log("SortedOutlines rendering:", { 
-    itemsCount: items.length, 
-    selectedItem, 
-    hasChangeItem: !!changeItem,
-    hasSetSelectedItem: !!setSelectedItem
-  });
+//   console.log("SortedOutlines rendering:", { 
+//     itemsCount: items.length, 
+//     selectedItem, 
+//     hasChangeItem: !!changeItem,
+//     hasSetSelectedItem: !!setSelectedItem
+//   });
 
   const itemsToDisplay = React.useMemo(
     () => displaySelectedItemOnTop(items, selectedItem),
@@ -47,6 +47,8 @@ return itemsToDisplay.map((item) => {
         layout: "none",
     };
 
+    // BUG: should not use `item.startTime` and `item.endTime` directly
+    // need to apply fps.
     if (typeof item.startTime === "number" && typeof item.endTime === "number") {
         sequenceProps.from = item.startTime;
         sequenceProps.durationInFrames = item.endTime - item.startTime;

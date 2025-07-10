@@ -42,19 +42,19 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
   const lastEditedComposition = useRef<CompositionData | null>(null);
 
   // Sync selectedElement from props with local state
-  useEffect(() => {
-    console.log('Selected element from props:', selectedElement);
-    console.log('Current editing element:', currentEditingElement);
+//   useEffect(() => {
+//     console.log('Selected element from props:', selectedElement);
+//     console.log('Current editing element:', currentEditingElement);
     
-    if (selectedElement?.id && selectedElement.id !== currentEditingElement) {
-      console.log('Updating currentEditingElement to:', selectedElement.id);
-      setCurrentEditingElement(selectedElement.id);
-    } else if (!selectedElement && currentEditingElement) {
-      // If parent component clears selection, we should clear too
-      console.log('Clearing currentEditingElement');
-      setCurrentEditingElement(null);
-    }
-  }, [selectedElement, currentEditingElement]);
+//     if (selectedElement?.id && selectedElement.id !== currentEditingElement) {
+//       console.log('Updating currentEditingElement to:', selectedElement.id);
+//       setCurrentEditingElement(selectedElement.id);
+//     } else if (!selectedElement && currentEditingElement) {
+//       // If parent component clears selection, we should clear too
+//       console.log('Clearing currentEditingElement');
+//       setCurrentEditingElement(null);
+//     }
+//   }, [selectedElement, currentEditingElement]);
   
   // Update composition data when project changes, but only if user hasn't made direct edits
   useEffect(() => {
@@ -314,7 +314,6 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
   };
 
   const handleElementSelect = useCallback((elementId: string | null) => {
-    console.log('Element selected:', elementId);
     setCurrentEditingElement(elementId);
     
     // Optionally propagate selection to parent component if needed
@@ -323,8 +322,6 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
       const element = compositionData.pages
         .flatMap(page => page.elements)
         .find(el => el.id === elementId);
-      
-      console.log('Found selected element:', element);
       
       if (element) {
         onPageSelect(element);
@@ -350,6 +347,7 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
     // Update local state
     setCompositionData(updatedComposition);
     setJsonString(JSON.stringify(updatedComposition, null, 2));
+    handleJsonChange(JSON.stringify(updatedComposition, null, 2));
     setUserEditedJson(true);
     
     // Store the latest valid edit in our ref for persistence across view switches

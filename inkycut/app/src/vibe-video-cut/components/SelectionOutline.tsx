@@ -28,16 +28,16 @@ export const SelectionOutline: React.FC<{
 
     const style: React.CSSProperties = useMemo(() => {
         return {
-            width: compositionElement.width,
-            height: compositionElement.height,
+            width: compositionElement.width ?? 100,
+            height: compositionElement.height ?? 100,
             left: compositionElement.left,
             top: compositionElement.top,
             position: 'absolute',
             outline: isSelected 
-                ? `${scaledBorder * 2}px solid #FF3366` 
-                : (hovered && !isDragging)
-                  ? `${scaledBorder}px solid #0B84F3`
-                  : undefined,
+            ? `${scaledBorder * 2}px solid #FF3366` 
+            : (hovered && !isDragging)
+              ? `${scaledBorder}px solid #0B84F3`
+              : undefined,
             boxShadow: isSelected ? '0 0 0 2px rgba(255, 51, 102, 0.5)' : undefined,
             backgroundColor: isSelected ? 'rgba(255, 51, 102, 0.1)' : undefined,
             userSelect: 'none',
@@ -97,16 +97,16 @@ export const SelectionOutline: React.FC<{
         [compositionElement.id, setSelectedElement, startDragging],
     );
 
-    console.log("SelectionOutline rendering for element:", {
-        id: compositionElement.id,
-        isSelected,
-        isDragging,
-        hovered,
-        left: compositionElement.left,
-        top: compositionElement.top,
-        width: compositionElement.width,
-        height: compositionElement.height
-    });
+    // console.log("SelectionOutline rendering for element:", {
+    //     id: compositionElement.id,
+    //     isSelected,
+    //     isDragging,
+    //     hovered,
+    //     left: compositionElement.left,
+    //     top: compositionElement.top,
+    //     width: compositionElement.width,
+    //     height: compositionElement.height
+    // });
 
     return (
         <div

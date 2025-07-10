@@ -157,12 +157,12 @@ export const VideoComposition: React.FC<{
   changeItem,
 }) => {
   // Debug the props before passing them
-  console.debug("EnhancedVideoComposition passing props:", {
-    currentPageIndex,
-    selectedItem,
-    hasSetSelectedItem: !!setSelectedItem,
-    hasChangeItem: !!changeItem
-  });
+//   console.debug("EnhancedVideoComposition passing props:", {
+//     currentPageIndex,
+//     selectedItem,
+//     hasSetSelectedItem: !!setSelectedItem,
+//     hasChangeItem: !!changeItem
+//   });
 
   return (
     <MainComposition 
@@ -197,13 +197,13 @@ export const MainComposition: React.FC<{
   const { fps } = useVideoConfig();
   
   // Debug log to see what's happening
-  console.debug("MainComposition rendering:", {
-    currentPageIndex,
-    selectedItem,
-    hasSetSelectedItem: !!setSelectedItem,
-    hasChangeItem: !!changeItem,
-    elementsCount: data.pages[currentPageIndex]?.elements.length || 0
-  });
+//   console.debug("MainComposition rendering:", {
+//     currentPageIndex,
+//     selectedItem,
+//     hasSetSelectedItem: !!setSelectedItem,
+//     hasChangeItem: !!changeItem,
+//     elementsCount: data.pages[currentPageIndex]?.elements.length || 0
+//   });
   
   // Calculate which page should be shown based on frame
   let pageIndex = currentPageIndex;
@@ -255,6 +255,7 @@ export const MainComposition: React.FC<{
       if (e.currentTarget === e.target) {
         setSelectedItem(null);
       }
+
     },
     [setSelectedItem],
   );
