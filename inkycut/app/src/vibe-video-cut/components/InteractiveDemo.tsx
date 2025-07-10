@@ -66,7 +66,10 @@ export const InteractiveDemo: React.FC = () => {
     const positions: Record<string, {x: number, y: number}> = {};
     compositionData.pages.forEach(page => {
       page.elements.forEach(element => {
-        positions[element.id] = { x: element.x, y: element.y };
+        // Only add elements with valid IDs to the positions object
+        if (element.id) {
+          positions[element.id] = { x: element.x, y: element.y };
+        }
       });
     });
     setElementPositions(positions);
@@ -92,7 +95,8 @@ export const InteractiveDemo: React.FC = () => {
           pages: prevData.pages.map(page => ({
             ...page,
             elements: page.elements.map(element => {
-              if (element.id === elementId) {
+              // Only update elements that have an ID and match the target elementId
+              if (element.id && element.id === elementId) {
                 const updatedElement = updater(element);
                 // Log the changes for debugging
                 console.log(`Element ${elementId} updated:`, {

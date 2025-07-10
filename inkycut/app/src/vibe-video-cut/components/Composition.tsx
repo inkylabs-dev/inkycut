@@ -3,7 +3,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, Img, Video, interpolate 
 
 // Types for our canvas-style JSON model
 export interface CompositionElement {
-  id: string;
+  id?: string; // Now optional, though all elements should ideally have an ID
   type: 'video' | 'image' | 'text';
   x: number;
   y: number;
@@ -152,9 +152,9 @@ const PageRenderer: React.FC<{
 }> = ({ page, frame, fps }) => {
   return (
     <AbsoluteFill style={{ backgroundColor: page.backgroundColor || '#ffffff' }}>
-      {page.elements.map((element) => (
+      {page.elements.map((element, index) => (
         <ElementRenderer
-          key={element.id}
+          key={element.id ? `element-${element.id}` : `element-fallback-${index}`}
           element={element}
           frame={frame}
           fps={fps}
@@ -349,10 +349,49 @@ export const InteractiveComposition: React.FC<InteractiveCompositionProps> = ({
   editable = true
 }) => {
   const currentPage = data.pages[currentPageIndex] || data.pages[0];
+  const [dragState, setDragState] = React.useState<{
+    elementId: string | null;
+    isDragging: boolean;
+    startX: number;
+    startY: number;
+    elementStartX: number;
+    elementStartY: number;
+    isResizing: boolean;
+    startWidth: number;
+    startHeight: number;
+  }>({
+    elementId: null,
+    isDragging: false,
+    startX: 0,
+    startY: 0,
+    elementStartX: 0,
+    elementStartY: 0,
+    isResizing: false,
+    startWidth: 0,
+    startHeight: 0
+  });
   
-  const handleElementDragStart = (elementId: string) => {
-    if (!editable) return;
+  const handleElementDragStart = (elementId: string, e: React.MouseEvent, isResizing = false) => {
+    if (!editable || !elementId) return;
+    e.preventDefault(); // Prevent text selection during drag
+    
     onElementSelect(elementId);
+    
+    const element = currentPage.elements.find(el => el.id === elementId);
+    if (!element) return;
+    
+    // Set drag state
+    setDragState({
+      elementId,
+      isDragging: true,
+      startX: e.clientX,
+      startY: e.clientY,
+      elementStartX: element.x,
+      elementStartY: element.y,
+      isResizing,
+      startWidth: element.width,
+      startHeight: element.height
+    });
     
     onElementChange(elementId, (element) => ({
       ...element,
@@ -360,25 +399,172 @@ export const InteractiveComposition: React.FC<InteractiveCompositionProps> = ({
     }));
   };
   
-  const handleElementDragEnd = (elementId: string, newX: number, newY: number) => {
-    if (!editable) return;
-    onElementChange(elementId, (element) => ({
-      ...element,
-      x: newX,
-      y: newY,
-      isDragging: false
-    }));
-  };
+  const handleMouseMove = React.useCallback((e: MouseEvent) => {
+    if (!dragState.isDragging || !dragState.elementId) return;
+    
+    const deltaX = e.clientX - dragState.startX;
+    const deltaY = e.clientY - dragState.startY;
+    
+    if (dragState.isResizing) {
+      // Resize operation
+      const newWidth = Math.max(50, dragState.startWidth + deltaX);
+      const newHeight = Math.max(50, dragState.startHeight + deltaY);
+      
+      onElementChange(dragState.elementId, (element) => ({
+        ...element,
+        width: newWidth,
+        height: newHeight
+      }));
+    } else {
+      // Move operation
+      const newX = dragState.elementStartX + deltaX;
+      const newY = dragState.elementStartY + deltaY;
+      
+      onElementChange(dragState.elementId, (element) => ({
+        ...element,
+        x: newX,
+        y: newY
+      }));
+    }
+  }, [dragState, onElementChange]);
   
-  const handleElementResize = (elementId: string, width: number, height: number) => {
-    if (!editable) return;
-    onElementChange(elementId, (element) => ({
-      ...element,
-      width,
-      height
-    }));
-  };
+  const handleMouseUp = React.useCallback(() => {
+    if (dragState.isDragging && dragState.elementId) {
+      onElementChange(dragState.elementId, (element) => ({
+        ...element,
+        isDragging: false
+      }));
+      
+      setDragState({
+        elementId: null,
+        isDragging: false,
+        startX: 0,
+        startY: 0,
+        elementStartX: 0,
+        elementStartY: 0,
+        isResizing: false,
+        startWidth: 0,
+        startHeight: 0
+      });
+    }
+  }, [dragState, onElementChange]);
   
+  React.useEffect(() => {
+    if (dragState.isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [dragState.isDragging, handleMouseMove, handleMouseUp]);
+  
+  // Create an array of renderable elements with explicit keys
+  const renderElements = currentPage.elements.map((element, index) => {
+    // Generate a fallback key if element.id is undefined
+    const elementKey = element.id ? `element-${element.id}` : `element-fallback-${index}`;
+    
+    return (
+      <div
+        key={elementKey}
+        className={`absolute ${selectedElement === element.id ? 'ring-2 ring-blue-500' : ''} ${editable ? 'cursor-move' : ''}`}
+        style={{
+          left: element.x,
+          top: element.y,
+          width: element.width,
+          height: element.height,
+          zIndex: element.zIndex || 1,
+          opacity: element.opacity !== undefined ? element.opacity : 1,
+          transform: element.rotation ? `rotate(${element.rotation}deg)` : undefined,
+        }}
+        onClick={(e) => {
+          if (!editable) return;
+          e.stopPropagation();
+          // Only call onElementSelect if element has an id
+          if (element.id) {
+            onElementSelect(element.id);
+          }
+        }}
+        onMouseDown={(e) => {
+          if (!editable) return;
+          e.stopPropagation();
+          // Only start drag if element has an id
+          if (element.id) {
+            handleElementDragStart(element.id, e);
+          }
+        }}
+      >
+        {element.type === 'text' && (
+          <div 
+            style={{
+              fontSize: `${element.fontSize || 16}px`,
+              fontFamily: element.fontFamily || 'Arial',
+              color: element.color || '#000000',
+              fontWeight: element.fontWeight || 'normal',
+              textAlign: (element.textAlign as any) || 'left',
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: element.textAlign === 'center' ? 'center' : 
+                            element.textAlign === 'right' ? 'flex-end' : 'flex-start',
+              userSelect: 'none'
+            }}
+          >
+            {element.text}
+          </div>
+        )}
+        
+        {element.type === 'image' && element.src && (
+          <img 
+            src={element.src} 
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            alt={`Element ${element.id || 'unnamed'}`}
+            draggable={false}
+          />
+        )}
+        
+        {element.type === 'video' && element.src && (
+          <video 
+            src={element.src}
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            muted
+            loop
+            autoPlay={editable}
+          />
+        )}
+        
+        {editable && selectedElement === element.id && element.id && (
+          <div 
+            className="absolute -right-2 -bottom-2 w-4 h-4 bg-blue-500 rounded-full cursor-se-resize"
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              if (element.id) {
+                handleElementDragStart(element.id, e, true);
+              }
+            }}
+          />
+        )}
+      </div>
+    );
+  });
+
+  // Add the background handler with a unique key
+  const backgroundHandler = (
+    <div 
+      key="background-click-handler"
+      className="absolute inset-0"
+      style={{ zIndex: -1 }}
+      onClick={() => {
+        if (editable && selectedElement) {
+          onElementSelect(null);
+        }
+      }}
+    />
+  );
+
   return (
     <div 
       className="relative"
@@ -389,67 +575,36 @@ export const InteractiveComposition: React.FC<InteractiveCompositionProps> = ({
         overflow: 'hidden'
       }}
     >
-      {currentPage.elements.map(element => (
-        <div
-          key={element.id}
-          className={`absolute ${selectedElement === element.id ? 'ring-2 ring-blue-500' : ''} ${editable ? 'cursor-move' : ''}`}
-          style={{
-            left: element.x,
-            top: element.y,
-            width: element.width,
-            height: element.height,
-            zIndex: element.zIndex || 1,
-            opacity: element.opacity !== undefined ? element.opacity : 1,
-            transform: element.rotation ? `rotate(${element.rotation}deg)` : undefined,
-          }}
-          onClick={() => onElementSelect(element.id)}
-          onMouseDown={() => handleElementDragStart(element.id)}
-        >
-          {element.type === 'text' && (
-            <div 
-              style={{
-                fontSize: `${element.fontSize || 16}px`,
-                fontFamily: element.fontFamily || 'Arial',
-                color: element.color || '#000000',
-                fontWeight: element.fontWeight || 'normal',
-                textAlign: (element.textAlign as any) || 'left',
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: element.textAlign === 'center' ? 'center' : 
-                               element.textAlign === 'right' ? 'flex-end' : 'flex-start',
-                userSelect: 'none'
-              }}
-            >
-              {element.text}
-            </div>
-          )}
-          
-          {element.type === 'image' && element.src && (
-            <img 
-              src={element.src} 
-              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              alt={`Element ${element.id}`}
-              draggable={false}
-            />
-          )}
-          
-          {element.type === 'video' && element.src && (
-            <video 
-              src={element.src}
-              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              muted
-              loop
-              autoPlay={editable}
-            />
-          )}
-          
-          {editable && selectedElement === element.id && (
-            <div className="absolute -right-2 -bottom-2 w-4 h-4 bg-blue-500 rounded-full cursor-se-resize" />
-          )}
-        </div>
-      ))}
+      {renderElements}
+      {backgroundHandler}
     </div>
+  );
+};
+
+// Wrapper for InteractiveComposition to use with Remotion Player
+export const InteractiveVideoComposition: React.FC<{ 
+  data: CompositionData;
+  currentPageIndex?: number;
+  onElementSelect?: (elementId: string | null) => void;
+  onElementChange?: (elementId: string, updater: (element: CompositionElement) => CompositionElement) => void;
+  selectedElement?: string | null;
+  editable?: boolean;
+}> = ({ 
+  data, 
+  currentPageIndex = 0,
+  onElementSelect = () => {},
+  onElementChange = () => {},
+  selectedElement = null,
+  editable = true
+}) => {
+  return (
+    <InteractiveComposition
+      data={data}
+      currentPageIndex={currentPageIndex}
+      onElementSelect={onElementSelect}
+      onElementChange={onElementChange}
+      selectedElement={selectedElement}
+      editable={editable}
+    />
   );
 };
