@@ -1,25 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useAtom } from 'jotai';
 import { 
   PaperAirplaneIcon,
   UserIcon,
   CpuChipIcon,
   EllipsisHorizontalIcon
 } from '@heroicons/react/24/outline';
-
-interface Message {
-  id: number;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-}
+import { ChatMessage } from './types';
+import { chatMessagesAtom } from '../atoms';
 
 interface RightPanelProps {
-  messages: Message[];
   onSendMessage: (message: string) => void;
 }
 
-export default function RightPanel({ messages, onSendMessage }: RightPanelProps) {
+export default function RightPanel({ onSendMessage }: RightPanelProps) {
   const [inputMessage, setInputMessage] = useState('');
+  const [messages] = useAtom(chatMessagesAtom);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);

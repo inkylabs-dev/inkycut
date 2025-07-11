@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useAtom } from 'jotai';
 import { Player, PlayerRef } from '@remotion/player';
 import { 
   PlayIcon, 
@@ -12,17 +13,21 @@ import {
 import { CompositionElement, CompositionData, defaultCompositionData } from './types';
 import { VideoComposition } from './Composition';
 import { fromTheme } from 'tailwind-merge';
+import { projectAtom, selectedElementAtom, selectedPageAtom } from '../atoms';
 
 interface MiddlePanelProps {
-  project: any;
-  selectedElement: any;
   onTimelineUpdate: (timeline: any[]) => void;
   onCompositionUpdate?: (composition: CompositionData) => void;
   onPageSelect?: (page: any) => void;
-  propertiesEnabled: boolean;
 }
 
-export default function MiddlePanel({ project, selectedElement, onTimelineUpdate, onCompositionUpdate, onPageSelect, propertiesEnabled }: MiddlePanelProps) {
+export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onPageSelect }: MiddlePanelProps) {
+  // Use Jotai atoms instead of props
+  const [project] = useAtom(projectAtom);
+  const [selectedElement] = useAtom(selectedElementAtom);
+  
+  // Always enabled
+  const propertiesEnabled = true;
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(0);
   const [volume, setVolume] = useState(1);
@@ -349,6 +354,7 @@ export default function MiddlePanel({ project, selectedElement, onTimelineUpdate
     setJsonString(JSON.stringify(updatedComposition, null, 2));
     handleJsonChange(JSON.stringify(updatedComposition, null, 2));
     setUserEditedJson(true);
+    console.log('Element changed:', elementId, updatedComposition.pages[0].elements[0].left);
     
     // Store the latest valid edit in our ref for persistence across view switches
     lastEditedComposition.current = { ...updatedComposition };

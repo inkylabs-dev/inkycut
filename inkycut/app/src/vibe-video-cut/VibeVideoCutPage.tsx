@@ -1,31 +1,39 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAtom, useSetAtom } from 'jotai';
 import LeftPanel from './components/LeftPanel';
 import MiddlePanel from './components/MiddlePanel';
 import RightPanel from './components/RightPanel';
-import { CompositionData, CompositionElement, CompositionPage } from './components/types';
-
-// No history stack items in offline mode
-
-// Function to generate random project ID
-const generateRandomId = () => {
-  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < 32; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-};
+import { 
+  projectAtom,
+  selectedElementAtom,
+  selectedPageAtom,
+  chatMessagesAtom,
+  loadingAtom,
+  errorAtom,
+  updateElementAtom,
+  updateCompositionAtom,
+  addChatMessageAtom,
+  createDefaultProject,
+  loadProjectFromStorage,
+  generateRandomId,
+  createDefaultPage
+} from './atoms';
 
 export default function VibeVideoCutPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [selectedElement, setSelectedElement] = useState<any>(null);
-  const [selectedPage, setSelectedPage] = useState<CompositionPage | null>(null);
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
-  const [project, setProject] = useState<any>(null);
+  
+  // Jotai state atoms
+  const [project, setProject] = useAtom(projectAtom);
+  const [selectedElement, setSelectedElement] = useAtom(selectedElementAtom);
+  const [selectedPage, setSelectedPage] = useAtom(selectedPageAtom);
+  const [chatMessages] = useAtom(chatMessagesAtom);
+  const [isLoading, setIsLoading] = useAtom(loadingAtom);
+  const [error, setError] = useAtom(errorAtom);
+  
   // Always allow direct JSON editing
-  const [propertiesEnabled] = useState<boolean>(true);
+  const propertiesEnabled = true;
   
   // Redirect if ID is 'new'
   useEffect(() => {
@@ -35,29 +43,43 @@ export default function VibeVideoCutPage() {
     }
   }, [id, navigate]);
   
-  // No undo/redo state in offline mode
-  
-  // Replace API queries with local state management
-  const [fetchedProject, setFetchedProject] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
-  
-  // Load data from localStorage instead of API
+  // Load project data from localStorage
   useEffect(() => {
     if (id && id !== 'new') {
       try {
         setIsLoading(true);
-        const storageKey = `vibe-project-${id}`;
-        const storedProject = localStorage.getItem(storageKey);
+        const loadedProject = loadProjectFromStorage(id);
         
-        if (storedProject) {
-          setFetchedProject(JSON.parse(storedProject));
+        if (loadedProject) {
+          setProject(loadedProject);
+          
+          // Set the first page as selected page or create a default one if no pages exist
+          if (loadedProject.composition && loadedProject.composition.pages && loadedProject.composition.pages.length > 0) {
+            setSelectedPage(loadedProject.composition.pages[0]);
+          } else {
+            // Create default composition with a single page if it doesn't exist
+            const defaultPage = createDefaultPage();
+            
+            // Update the project with the default composition
+            const updatedProject = {
+              ...loadedProject,
+              composition: {
+                ...loadedProject.composition,
+                pages: [defaultPage]
+              }
+            };
+            setProject(updatedProject);
+            setSelectedPage(defaultPage);
+          }
         } else {
-          setFetchedProject(null);
+          // Project doesn't exist, create a new one locally
+          const newProject = createDefaultProject(id);
+          setProject(newProject);
+          setSelectedPage(newProject.composition.pages[0]);
         }
       } catch (err) {
         console.error('Error loading from localStorage:', err);
-        setError({ message: 'Failed to load project from localStorage' });
+        setError(new Error('Failed to load project from localStorage'));
       } finally {
         setIsLoading(false);
       }
@@ -65,115 +87,12 @@ export default function VibeVideoCutPage() {
       // Skip loading for new projects as we'll redirect
       setIsLoading(false);
     }
-  }, [id]);
+  }, [id, setProject, setSelectedPage, setIsLoading, setError]);
 
-  // Create a default page for new projects or when no pages exist
-  const createDefaultPage = useCallback((): CompositionPage => {
-    return {
-      id: `page-${Date.now()}`,
-      name: 'Page 1',
-      duration: 5 * 30, // 5 seconds at 30fps
-      backgroundColor: 'white',
-      elements: []
-    };
-  }, []);
-
-  useEffect(() => {
-    // Initialize chat with welcome message
-    setChatMessages([
-      {
-        id: 1,
-        role: 'assistant',
-        content: 'Welcome to Vibe Video Cut! I\'m your AI assistant. How can I help you create amazing videos today?',
-        timestamp: new Date()
-      }
-    ]);
-  }, []);
-
-  useEffect(() => {
-    if (fetchedProject) {
-      setProject(fetchedProject);
-      // Always allow direct JSON editing regardless of configuration
-      const projectData = fetchedProject as any;
-      
-      // Set the first page as selected page or create a default one if no pages exist
-      if (projectData.composition && projectData.composition.pages && projectData.composition.pages.length > 0) {
-        setSelectedPage(projectData.composition.pages[0]);
-      } else {
-        // Create default composition with a single page if it doesn't exist
-        const defaultPage = createDefaultPage();
-        const defaultComposition: CompositionData = {
-          pages: [defaultPage],
-          fps: 30,
-          width: 1920,
-          height: 1080
-        };
-        
-        // Update the project with the default composition
-        const updatedProject = {
-          ...projectData,
-          composition: defaultComposition
-        };
-        setProject(updatedProject);
-        setSelectedPage(defaultPage);
-        
-        // Save to localStorage
-        try {
-          localStorage.setItem(`vibe-project-${updatedProject.id}`, JSON.stringify(updatedProject));
-        } catch (error) {
-          console.error('Failed to save default composition to localStorage:', error);
-        }
-      }
-    } else if (!isLoading && !fetchedProject && !error) {
-      // Project doesn't exist, create a new one locally
-      const initializeProject = () => {
-        try {
-          // Create default composition with a blank page
-          const defaultPage = createDefaultPage();
-          const defaultComposition: CompositionData = {
-            pages: [defaultPage],
-            fps: 30,
-            width: 1920,
-            height: 1080
-          };
-          
-          const newProject = {
-            name: `Vibe Project ${id}`,
-            id: id || `project-${Date.now()}`,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            propertiesEnabled: true,
-            composition: defaultComposition
-          };
-          
-          // Save to localStorage
-          localStorage.setItem(`vibe-project-${newProject.id}`, JSON.stringify(newProject));
-          
-          setProject(newProject);
-          setSelectedPage(defaultPage);
-        } catch (error) {
-          console.error('Failed to create project:', error);
-        }
-      };
-      initializeProject();
-    }
-  }, [fetchedProject, isLoading, error, id, createDefaultPage]);
-
-  useEffect(() => {
-    if (project && project.composition) {
-      // Initialize selectedPage with the first page of the project
-      const initialPage = project.composition.pages?.[0] || createDefaultPage();
-      setSelectedPage(initialPage);
-      
-      // If no pages exist, add a default page
-      if (project.composition.pages?.length === 0) {
-        handleCompositionUpdate({
-          ...project.composition,
-          pages: [initialPage]
-        });
-      }
-    }
-  }, [project, createDefaultPage]);
+  // Import necessary update atoms from the atoms file
+  const setUpdateElement = useSetAtom(updateElementAtom);
+  const setUpdateComposition = useSetAtom(updateCompositionAtom);
+  const setAddChatMessage = useSetAtom(addChatMessageAtom);
 
   const handleElementSelect = (element: any) => {
     setSelectedElement(element);
@@ -183,17 +102,19 @@ export default function VibeVideoCutPage() {
     setSelectedPage(page);
   };
 
-  const handleTimelineUpdate = async (timeline: any[]) => {
+  const handleTimelineUpdate = (timeline: any[]) => {
     if (project && project.id) {
       try {
-        // Update local state first
+        // Update project with timeline
+        // Store timeline in metadata which is now properly typed
         setProject({
           ...project,
-          timeline
+          updatedAt: new Date().toISOString(),
+          metadata: {
+            ...(project.metadata || {}),
+            timeline
+          }
         });
-        
-        // Save changes to localStorage
-        saveChanges();
       } catch (error) {
         console.error('Failed to update timeline:', error);
       }
@@ -201,113 +122,20 @@ export default function VibeVideoCutPage() {
   };
 
   const handleChatMessage = (message: string) => {
-    // Add user message
-    const userMessage = {
-      id: chatMessages.length + 1,
-      role: 'user',
-      content: message,
-      timestamp: new Date()
-    };
-    
-    // Simulate AI response
-    const aiResponse = {
-      id: chatMessages.length + 2,
-      role: 'assistant',
-      content: `I received your message: "${message}". This is a mock response. In a real implementation, this would connect to an AI service.`,
-      timestamp: new Date()
-    };
-
-    setChatMessages(prev => [...prev, userMessage, aiResponse]);
+    // Use Jotai atom to add chat messages
+    setAddChatMessage(message);
   };
 
-  const handleCompositionUpdate = async (composition: CompositionData) => {
-    if (project && project.id) {
-      try {        
-        // Update local state first for immediate UI update
-        setProject({
-          ...project,
-          composition
-        });
-        
-        // If we have a selected element, find and update it in the new composition
-        if (selectedElement) {
-          const updatedElement = composition.pages
-            .flatMap(page => page.elements)
-            .find(el => el.id === selectedElement.id);
-          
-          if (updatedElement) {
-            setSelectedElement(updatedElement);
-          }
-        }
-        
-        // Save changes to localStorage
-        saveChanges();
-      } catch (error) {
-        console.error('Failed to update composition:', error);
-      }
-    }
+  const handleCompositionUpdate = async (composition: any) => {
+    // Use Jotai atom to update composition
+    setUpdateComposition(composition);
   };
 
 
-  // Local-only save to localStorage
-  const saveChanges = useCallback(() => {
-    // Save to localStorage if you want persistence between browser sessions
-    if (project && project.id) {
-      try {
-        const storageKey = `vibe-project-${project.id}`;
-        localStorage.setItem(storageKey, JSON.stringify(project));
-        console.log(`Project ${project.id} saved to localStorage`);
-      } catch (error) {
-        console.error('Failed to save to localStorage:', error);
-      }
-    }
-  }, [project]);
-
-
-
-  const handleElementUpdate = async (elementId: string, updatedData: Partial<CompositionElement>) => {
-    if (project && project.composition) {
-      // Create a deep copy of the composition data
-      const updatedComposition = JSON.parse(JSON.stringify(project.composition)) as CompositionData;
-      
-      // Find and update the element
-      let elementUpdated = false;
-      updatedComposition.pages = updatedComposition.pages.map(page => {
-        const elementIndex = page.elements.findIndex(el => el.id === elementId);
-        if (elementIndex !== -1) {
-          // Update element with new data
-          page.elements[elementIndex] = {
-            ...page.elements[elementIndex],
-            ...updatedData
-          };
-          elementUpdated = true;
-        }
-        return page;
-      });
-      
-      if (elementUpdated) {
-        // Update local state first for immediate UI update
-        setProject({
-          ...project,
-          composition: updatedComposition
-        });
-        
-        // Also update selected element if it was the one that changed
-        if (selectedElement && selectedElement.id === elementId) {
-          setSelectedElement({
-            ...selectedElement,
-            ...updatedData
-          });
-        }
-        
-        // Call handleCompositionUpdate to ensure the JSON editor is updated
-        // This is the key fix to sync with the JSON editor
-        handleCompositionUpdate(updatedComposition);
-        
-        // Save changes to localStorage
-        saveChanges();
-      }
-    }
+  // Element update now uses Jotai atom
+  const handleElementUpdate = (elementId: string, updatedData: any) => {
+    // Use Jotai atom to update element
+    setUpdateElement({ elementId, updatedData });
   };
 
   // Auto-save functionality removed to make the app fully offline
@@ -347,31 +175,23 @@ export default function VibeVideoCutPage() {
         {/* Left Panel - File Explorer / Elements */}
         <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0 overflow-hidden">
           <LeftPanel 
-            project={project}
-            selectedElement={selectedElement}
-            selectedPage={selectedPage}
             onElementSelect={handleElementSelect}
             onElementUpdate={handleElementUpdate}
-            propertiesEnabled={propertiesEnabled}
           />
         </div>
 
         {/* Middle Panel - Remotion Player */}
         <div className="flex-1 overflow-hidden">
           <MiddlePanel
-            project={project}
-            selectedElement={selectedElement}
             onTimelineUpdate={handleTimelineUpdate}
             onCompositionUpdate={handleCompositionUpdate}
             onPageSelect={handlePageSelect}
-            propertiesEnabled={propertiesEnabled}
           />
         </div>
 
         {/* Right Panel - Chat UI only */}
         <div className="w-80 bg-white border-l border-gray-200 flex-shrink-0 overflow-hidden">
           <RightPanel
-            messages={chatMessages}
             onSendMessage={handleChatMessage}
           />
         </div>

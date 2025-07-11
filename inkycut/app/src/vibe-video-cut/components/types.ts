@@ -46,6 +46,27 @@ export interface CompositionData {
   height: number;
 }
 
+// Types
+export interface Project {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  propertiesEnabled: boolean;
+  composition: CompositionData;
+  metadata?: {
+    timeline?: any[];
+    [key: string]: any;
+  };
+}
+
+export interface ChatMessage {
+  id: number;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
+
 // Default composition data for testing
 export const defaultCompositionData: CompositionData = {
   fps: 30,

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useAtom } from 'jotai';
 import { 
   FolderIcon, 
   DocumentIcon, 
@@ -15,6 +16,7 @@ import { useAuth } from 'wasp/client/auth';
 import { routes } from 'wasp/client/router';
 import { Link } from 'react-router-dom';
 import { CompositionElement } from './types';
+import { projectAtom, selectedElementAtom, selectedPageAtom } from '../atoms';
 
 
 // File Preview Component
@@ -163,15 +165,18 @@ const ElementPreview: React.FC<{
 };
 
 interface LeftPanelProps {
-  project: any;
-  selectedElement: any;
-  selectedPage?: any;
   onElementSelect: (element: any) => void;
   onElementUpdate?: (elementId: string, updatedData: Partial<CompositionElement> | any) => void;
-  propertiesEnabled: boolean;
 }
 
-export default function LeftPanel({ project, selectedElement, selectedPage, onElementSelect, onElementUpdate, propertiesEnabled }: LeftPanelProps) {
+export default function LeftPanel({ onElementSelect, onElementUpdate }: LeftPanelProps) {
+  // Use Jotai atoms instead of props
+  const [project] = useAtom(projectAtom);
+  const [selectedElement] = useAtom(selectedElementAtom);
+  const [selectedPage] = useAtom(selectedPageAtom);
+  
+  // Always enabled
+  const propertiesEnabled = true;
   const [activeTab, setActiveTab] = useState<'explorer' | 'elements'>('explorer');
   const [isDragOver, setIsDragOver] = useState(false);
   const [recentlyUpdated, setRecentlyUpdated] = useState<{[key: string]: boolean}>({});
@@ -350,7 +355,7 @@ export default function LeftPanel({ project, selectedElement, selectedPage, onEl
           </div>
         </div>
         <div className="text-gray-500 text-sm">
-          {project?.user?.email && `Created by ${project.user.email}`}
+          {/* Creator information can be shown here if available */}
         </div>
       </div>
 

@@ -23,6 +23,7 @@
     "apexcharts": "3.41.0",
     "clsx": "^2.1.0",
     "headlessui": "^0.0.0",
+    "jotai": "^2.12.5",
     "node-fetch": "3.3.0",
     "openai": "^4.55.3",
     "prettier": "3.1.1",
