@@ -53,6 +53,8 @@ export interface AppState {
   viewMode: 'edit' | 'preview';
   zoomLevel: number;
   showGrid: boolean;
+  isLoading: boolean;
+  error: string | null;
   history: {
     past: any[];
     future: any[];

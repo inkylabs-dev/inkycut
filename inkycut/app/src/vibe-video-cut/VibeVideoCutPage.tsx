@@ -15,6 +15,8 @@ import {
   chatMessagesAtom,
   loadingAtom,
   errorAtom,
+  setLoadingAtom,
+  setErrorAtom,
   updateElementAtom,
   updateCompositionAtom,
   addChatMessageAtom,
@@ -36,13 +38,15 @@ export default function VibeVideoCutPage() {
   const [selectedElement] = useAtom(selectedElementAtom);
   const [selectedPage] = useAtom(selectedPageAtom);
   const [chatMessages] = useAtom(chatMessagesAtom);
-  const [isLoading, setIsLoading] = useAtom(loadingAtom);
-  const [error, setError] = useAtom(errorAtom);
+  const [isLoading] = useAtom(loadingAtom);
+  const [error] = useAtom(errorAtom);
   
   // Set atoms
   const setSelectedElement = useSetAtom(setSelectedElementAtom);
   const setSelectedPage = useSetAtom(setSelectedPageAtom);
   const setUpdateProject = useSetAtom(updateProjectAtom);
+  const setIsLoading = useSetAtom(setLoadingAtom);
+  const setError = useSetAtom(setErrorAtom);
   
   // Always allow direct JSON editing
   const propertiesEnabled = true;

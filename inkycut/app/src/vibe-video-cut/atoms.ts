@@ -2,10 +2,6 @@ import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage, AppState } from './components/types';
 
-// UI state atoms
-export const loadingAtom = atom<boolean>(false);
-export const errorAtom = atom<Error | null>(null);
-
 // Project state atoms with automatic localStorage persistence
 // The projectIdAtom keeps track of the current project ID to load the correct project
 export const projectIdAtom = atom<string | null>(null);
@@ -156,6 +152,60 @@ export const chatMessagesAtom = atomWithStorage<ChatMessage[]>('vibe-chat-messag
   }
 ]);
 
+// UI state atoms - derived from project.appState
+export const loadingAtom = atom<boolean>(
+  (get) => {
+    const project = get(projectAtom);
+    return project?.appState?.isLoading ?? false;
+  }
+);
+
+export const setLoadingAtom = atom(
+  null,
+  (get, set, isLoading: boolean) => {
+    const project = get(projectAtom);
+    if (!project) return;
+    
+    const updatedProject = {
+      ...project,
+      appState: {
+        ...project.appState,
+        isLoading
+      }
+    };
+    
+    // Use updateProjectAtom to update the project in storage
+    set(updateProjectAtom, updatedProject);
+  }
+);
+
+export const errorAtom = atom<Error | null>(
+  (get) => {
+    const project = get(projectAtom);
+    const errorMessage = project?.appState?.error;
+    return errorMessage ? new Error(errorMessage) : null;
+  }
+);
+
+export const setErrorAtom = atom(
+  null,
+  (get, set, error: Error | null) => {
+    const project = get(projectAtom);
+    if (!project) return;
+    
+    const updatedProject = {
+      ...project,
+      appState: {
+        ...project.appState,
+        error: error?.message || null
+      }
+    };
+    
+    // Use updateProjectAtom to update the project in storage
+    set(updateProjectAtom, updatedProject);
+  }
+);
+
 // Helper functions for common operations
 export const createDefaultPage = (): CompositionPage => {
   return {
@@ -175,6 +225,8 @@ export const createDefaultAppState = (): AppState => {
     viewMode: 'edit',
     zoomLevel: 1,
     showGrid: true,
+    isLoading: false,
+    error: null,
     history: {
       past: [],
       future: []
