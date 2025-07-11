@@ -6,11 +6,31 @@ import type {
   GetUserVibeProjects,
 } from 'wasp/server/operations';
 
-// In-memory storage for demo purposes
+/**
+ * In-memory storage for vibe video cut projects
+ * Used for demo purposes instead of a permanent database storage
+ * @type {Map<string, any>} - Map of project IDs to project data
+ */
 const vibeProjects: Map<string, any> = new Map();
-// In-memory storage for render tasks - exported for SSE endpoint
+
+/**
+ * In-memory storage for render tasks
+ * Exported for Server-Sent Events (SSE) endpoint to track rendering progress
+ * @type {Map<string, any>} - Map of render task IDs to task status data
+ */
 export const renderTasks: Map<string, any> = new Map();
 
+/**
+ * Creates a new vibe video cut project for the authenticated user
+ * 
+ * @param args - Project creation arguments
+ * @param args.id - Optional custom project ID
+ * @param args.name - Optional project name (defaults to 'Untitled Project')
+ * @param args.propertiesEnabled - Whether advanced properties editing is enabled
+ * @param context - Operation context containing user authentication data
+ * @returns The newly created project object
+ * @throws Error if user is not authenticated
+ */
 export const createVibeProject: CreateVibeProject = async (
   args,
   context
@@ -38,6 +58,16 @@ export const createVibeProject: CreateVibeProject = async (
   return newProject;
 };
 
+/**
+ * Updates an existing vibe video cut project
+ * 
+ * @param args - Project update arguments
+ * @param args.id - ID of the project to update
+ * @param args.data - Project data to update
+ * @param context - Operation context containing user authentication data
+ * @returns The updated project object
+ * @throws Error if user is not authenticated or if project is not found
+ */
 export const updateVibeProject: UpdateVibeProject = async (
   args,
   context
@@ -66,6 +96,15 @@ export const updateVibeProject: UpdateVibeProject = async (
   return updatedProject;
 };
 
+/**
+ * Retrieves a specific vibe video cut project by ID
+ * 
+ * @param args - Arguments containing the project ID
+ * @param args.id - ID of the project to retrieve
+ * @param context - Operation context containing user authentication data
+ * @returns The project object or null if not found
+ * @throws Error if user is not authenticated or if user doesn't have access to the project
+ */
 export const getVibeProject: GetVibeProject = async (
   args,
   context
@@ -87,6 +126,14 @@ export const getVibeProject: GetVibeProject = async (
   return project;
 };
 
+/**
+ * Retrieves all vibe video cut projects belonging to the current user
+ * 
+ * @param args - Not used but required by type definition
+ * @param context - Operation context containing user authentication data
+ * @returns Array of project objects sorted by last updated (newest first)
+ * @throws Error if user is not authenticated
+ */
 export const getUserVibeProjects: GetUserVibeProjects = async (
   args,
   context
@@ -102,7 +149,15 @@ export const getUserVibeProjects: GetUserVibeProjects = async (
   return userProjects;
 };
 
-// Add a function to get task progress
+/**
+ * Retrieves the progress of a specific rendering task
+ * 
+ * @param args - Arguments containing the task ID
+ * @param args.taskId - ID of the task to check progress for
+ * @param context - Operation context containing user authentication data
+ * @returns The task progress data
+ * @throws Error if user is not authenticated
+ */
 export const getTaskProgress = async (
   args: { taskId: string },
   context: { user?: User }
