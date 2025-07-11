@@ -2,14 +2,24 @@ import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage, AppState } from './components/types';
 
-// Project state atoms with automatic localStorage persistence
-// The projectIdAtom keeps track of the current project ID to load the correct project
+/**
+ * Primary atom to track the currently active project ID
+ * When this ID changes, projectAtom will load the corresponding project
+ * @type {string | null} - The ID of the current project, or null if no project is active
+ */
 export const projectIdAtom = atom<string | null>(null);
 
-// Map to store projects by ID for more efficient lookup
+/**
+ * Persistent storage for all projects using atomWithStorage
+ * Stores projects in localStorage as a map keyed by project ID
+ * @type {Record<string, Project>} - Map of project IDs to Project objects
+ */
 export const projectsMapAtom = atomWithStorage<Record<string, Project>>('vibe-projects', {});
 
-// Get a project by ID from the map
+/**
+ * Utility atom that returns a function to get a project by its ID
+ * @returns {Function} - Function that takes a project ID and returns the corresponding Project or null
+ */
 export const getProjectById = atom(
   (get) => (id: string) => {
     if (!id || id === 'new') return null;
@@ -18,7 +28,11 @@ export const getProjectById = atom(
   }
 );
 
-// Current active project based on projectIdAtom
+/**
+ * Derived atom that provides the currently active project
+ * Uses projectIdAtom to determine which project to load from projectsMapAtom
+ * @type {Project | null} - The current project or null if no project is active
+ */
 export const projectAtom = atom<Project | null>(
   (get) => {
     const projectId = get(projectIdAtom);
@@ -29,7 +43,11 @@ export const projectAtom = atom<Project | null>(
   }
 );
 
-// Helper to update a project in storage
+/**
+ * Write-only atom for updating a project in storage
+ * Updates the project's timestamp, saves it to the projects map, and sets the current project ID
+ * @param {Project | null} updatedProject - The project to update or null to clear
+ */
 export const updateProjectAtom = atom(
   null,
   (get, set, updatedProject: Project | null) => {
@@ -59,21 +77,36 @@ export const updateProjectAtom = atom(
   }
 );
 
-// App state atom - derived from project.appState
+/**
+ * Derived atom providing the current application state
+ * Falls back to default app state if no project is active
+ * @type {AppState} - The current app state for the active project
+ */
 export const appStateAtom = atom(
   (get) => get(projectAtom)?.appState || createDefaultAppState()
 );
 
-// Selection state atoms - derived from appState
+/**
+ * Derived atom for the ID of the currently selected element
+ * @type {string | null} - ID of selected element or null if none selected
+ */
 export const selectedElementIdAtom = atom(
   (get) => get(appStateAtom).selectedElementId
 );
 
+/**
+ * Derived atom for the ID of the currently selected page
+ * @type {string | null} - ID of selected page or null if none selected
+ */
 export const selectedPageIdAtom = atom(
   (get) => get(appStateAtom).selectedPageId
 );
 
-// Read-only derived atom for selected element
+/**
+ * Read-only derived atom that provides the currently selected element
+ * Searches through all pages to find the element with the selected ID
+ * @type {CompositionElement | null} - The selected element object or null
+ */
 export const selectedElementAtom = atom<CompositionElement | null>((get) => {
   const project = get(projectAtom);
   const selectedElementId = get(selectedElementIdAtom);
@@ -89,7 +122,11 @@ export const selectedElementAtom = atom<CompositionElement | null>((get) => {
   return null;
 });
 
-// Read-only derived atom for selected page
+/**
+ * Read-only derived atom that provides the currently selected page
+ * Falls back to the first page if no page is explicitly selected
+ * @type {CompositionPage | null} - The selected page object or null
+ */
 export const selectedPageAtom = atom<CompositionPage | null>((get) => {
   const project = get(projectAtom);
   const selectedPageId = get(selectedPageIdAtom);
@@ -103,7 +140,11 @@ export const selectedPageAtom = atom<CompositionPage | null>((get) => {
   return project.composition.pages.find(page => page.id === selectedPageId) || null;
 });
 
-// Write-only atoms for updating selected element and page
+/**
+ * Write-only atom for selecting an element
+ * Updates the project's appState.selectedElementId and persists the change
+ * @param {CompositionElement | null} newElement - The element to select, or null to clear selection
+ */
 export const setSelectedElementAtom = atom(
   null,
   (get, set, newElement: CompositionElement | null) => {
@@ -123,6 +164,11 @@ export const setSelectedElementAtom = atom(
   }
 );
 
+/**
+ * Write-only atom for selecting a page
+ * Updates the project's appState.selectedPageId and persists the change
+ * @param {CompositionPage | null} newPage - The page to select, or null to clear selection
+ */
 export const setSelectedPageAtom = atom(
   null,
   (get, set, newPage: CompositionPage | null) => {
@@ -142,7 +188,11 @@ export const setSelectedPageAtom = atom(
   }
 );
 
-// Chat state atoms
+/**
+ * Persistent storage for chat messages using atomWithStorage
+ * Stores the entire chat history in localStorage
+ * @type {ChatMessage[]} - Array of chat messages with initial welcome message
+ */
 export const chatMessagesAtom = atomWithStorage<ChatMessage[]>('vibe-chat-messages', [
   {
     id: 1,
@@ -152,7 +202,11 @@ export const chatMessagesAtom = atomWithStorage<ChatMessage[]>('vibe-chat-messag
   }
 ]);
 
-// UI state atoms - derived from project.appState
+/**
+ * Read-only derived atom for loading state
+ * Extracted from project.appState.isLoading with fallback to false
+ * @type {boolean} - Whether the application is currently loading data
+ */
 export const loadingAtom = atom<boolean>(
   (get) => {
     const project = get(projectAtom);
@@ -160,6 +214,11 @@ export const loadingAtom = atom<boolean>(
   }
 );
 
+/**
+ * Write-only atom for updating the loading state
+ * Updates project.appState.isLoading and persists the change
+ * @param {boolean} isLoading - The new loading state
+ */
 export const setLoadingAtom = atom(
   null,
   (get, set, isLoading: boolean) => {
@@ -179,6 +238,11 @@ export const setLoadingAtom = atom(
   }
 );
 
+/**
+ * Read-only derived atom for error state
+ * Converts project.appState.error string to Error object if present
+ * @type {Error | null} - Current error or null if no error
+ */
 export const errorAtom = atom<Error | null>(
   (get) => {
     const project = get(projectAtom);
@@ -187,6 +251,11 @@ export const errorAtom = atom<Error | null>(
   }
 );
 
+/**
+ * Write-only atom for updating the error state
+ * Updates project.appState.error with the error message and persists the change
+ * @param {Error | null} error - The new error or null to clear errors
+ */
 export const setErrorAtom = atom(
   null,
   (get, set, error: Error | null) => {
@@ -206,7 +275,11 @@ export const setErrorAtom = atom(
   }
 );
 
-// Helper functions for common operations
+/**
+ * Helper function to create a default composition page
+ * Used when initializing new projects or adding pages
+ * @returns {CompositionPage} - A new page with default settings
+ */
 export const createDefaultPage = (): CompositionPage => {
   return {
     id: `page-${Date.now()}`,
@@ -217,7 +290,11 @@ export const createDefaultPage = (): CompositionPage => {
   };
 };
 
-// Default app state
+/**
+ * Creates a default application state
+ * Used when initializing new projects or resetting state
+ * @returns {AppState} - A new app state with default settings
+ */
 export const createDefaultAppState = (): AppState => {
   return {
     selectedElementId: null,
@@ -234,6 +311,12 @@ export const createDefaultAppState = (): AppState => {
   };
 };
 
+/**
+ * Creates a new project with default settings
+ * Includes a default page, composition settings, and app state
+ * @param {string} id - The ID to use for the new project
+ * @returns {Project} - A fully initialized project ready to use
+ */
 export const createDefaultProject = (id: string): Project => {
   const defaultPage = createDefaultPage();
   
@@ -253,12 +336,21 @@ export const createDefaultProject = (id: string): Project => {
   };
 };
 
-// Derived atoms
+/**
+ * Derived atom providing the composition data for the current project
+ * @type {CompositionData | null} - Composition data or null if no project is active
+ */
 export const compositionAtom = atom(
   (get) => get(projectAtom)?.composition || null
 );
 
-// Update atoms for specific operations
+/**
+ * Write-only atom for updating a specific element
+ * Finds the element across all pages and updates it with new properties
+ * @param {Object} params - The update parameters
+ * @param {string} params.elementId - ID of the element to update
+ * @param {Partial<CompositionElement>} params.updatedData - New properties to apply
+ */
 export const updateElementAtom = atom(
   null,
   (get, set, { elementId, updatedData }: { elementId: string, updatedData: Partial<CompositionElement> }) => {
@@ -296,6 +388,11 @@ export const updateElementAtom = atom(
   }
 );
 
+/**
+ * Write-only atom for updating the entire composition
+ * Preserves selection state if possible or clears it if selected elements no longer exist
+ * @param {CompositionData} composition - The new composition data
+ */
 export const updateCompositionAtom = atom(
   null,
   (get, set, composition: CompositionData) => {
@@ -329,6 +426,11 @@ export const updateCompositionAtom = atom(
   }
 );
 
+/**
+ * Write-only atom for adding a new chat message
+ * Adds both the user message and generates a mock AI response
+ * @param {string} message - The user's message content
+ */
 export const addChatMessageAtom = atom(
   null,
   (get, set, message: string) => {
@@ -354,7 +456,11 @@ export const addChatMessageAtom = atom(
   }
 );
 
-// Generate a random project ID
+/**
+ * Generates a cryptographically non-secure random ID
+ * Used for creating new project IDs, page IDs, and element IDs
+ * @returns {string} - A 32-character random alphanumeric string
+ */
 export const generateRandomId = (): string => {
   const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';
