@@ -353,6 +353,11 @@ action updateVibeProject {
   entities: [User]
 }
 
+action processVideoAIPrompt {
+  fn: import { processVideoAIPrompt } from "@src/vibe-video-cut/operations",
+  entities: [User]
+}
+
 query getVibeProject {
   fn: import { getVibeProject } from "@src/vibe-video-cut/operations",
   entities: [User]

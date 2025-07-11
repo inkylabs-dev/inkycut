@@ -198,7 +198,7 @@ export const chatMessagesAtom = atomWithStorage<ChatMessage[]>('vibe-chat-messag
     id: 1,
     role: 'assistant',
     content: 'Welcome to Vibe Video Cut! I\'m your AI assistant. How can I help you create amazing videos today?',
-    timestamp: new Date()
+    timestamp: new Date().toISOString() // Store as ISO string for localStorage compatibility
   }
 ]);
 
@@ -428,31 +428,31 @@ export const updateCompositionAtom = atom(
 
 /**
  * Write-only atom for adding a new chat message
- * Adds both the user message and generates a mock AI response
- * @param {string} message - The user's message content
+ * Adds a single message (either from user or AI) to the chat history
+ * @param {string | ChatMessage} messageOrContent - The message content as string or complete ChatMessage object
  */
 export const addChatMessageAtom = atom(
   null,
-  (get, set, message: string) => {
+  (get, set, messageOrContent: string | ChatMessage) => {
     const chatMessages = get(chatMessagesAtom);
     
-    // Add user message
-    const userMessage: ChatMessage = {
-      id: chatMessages.length + 1,
-      role: 'user',
-      content: message,
-      timestamp: new Date()
-    };
+    let newMessage: ChatMessage;
     
-    // Simulate AI response
-    const aiResponse: ChatMessage = {
-      id: chatMessages.length + 2,
-      role: 'assistant',
-      content: `I received your message: "${message}". This is a mock response. In a real implementation, this would connect to an AI service.`,
-      timestamp: new Date()
-    };
+    if (typeof messageOrContent === 'string') {
+      // Create a new message with the provided content
+      newMessage = {
+        id: chatMessages.length + 1,
+        role: 'user', // Default to user role when string is provided
+        content: messageOrContent,
+        timestamp: new Date().toISOString() // Store as ISO string for localStorage compatibility
+      };
+    } else {
+      // Use the provided message object directly
+      newMessage = messageOrContent;
+    }
     
-    set(chatMessagesAtom, [...chatMessages, userMessage, aiResponse]);
+    // Add only the single message to the chat history
+    set(chatMessagesAtom, [...chatMessages, newMessage]);
   }
 );
 

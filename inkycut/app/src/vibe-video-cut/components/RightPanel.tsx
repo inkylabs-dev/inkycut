@@ -1,3 +1,9 @@
+/**
+ * RightPanel Component - AI Assistant for Video Editing
+ * 
+ * This component implements a chat interface for AI-powered video editing.
+ * It uses the OpenSaaS pattern to communicate with the server-side AI operation.
+ */
 import React, { useState, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { 
@@ -7,7 +13,27 @@ import {
   EllipsisHorizontalIcon
 } from '@heroicons/react/24/outline';
 import { ChatMessage } from './types';
-import { chatMessagesAtom } from '../atoms';
+import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom } from '../atoms';
+import { Project } from './types';
+import { processVideoAIPrompt } from 'wasp/client/operations';
+
+// Define types for AI operations following OpenSaaS pattern
+interface ProcessVideoAIPromptInput {
+  projectId: string;
+  prompt: string;
+  projectData: Project;
+}
+
+interface VideoAIResponse {
+  message: string;
+  updatedProject?: Partial<Project>;
+  changes?: Array<{
+    type: 'add' | 'modify' | 'delete';
+    elementType: string;
+    elementId: string;
+    description: string;
+  }>;
+}
 
 interface RightPanelProps {
   onSendMessage: (message: string) => void;
@@ -17,8 +43,13 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
   const [inputMessage, setInputMessage] = useState('');
   const [messages] = useAtom(chatMessagesAtom);
   const [isTyping, setIsTyping] = useState(false);
+  const [project] = useAtom(projectAtom);
+  const [, setUpdateProject] = useAtom(updateProjectAtom);
+  const [, setAddChatMessage] = useAtom(addChatMessageAtom);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
@@ -28,13 +59,60 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
     }
   }, [messages]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (inputMessage.trim()) {
       setIsTyping(true);
-      onSendMessage(inputMessage.trim());
+      const userMessage = inputMessage.trim();
+      
+      // Pass the message to the parent component to update chat UI
+      onSendMessage(userMessage);
       setInputMessage('');
       
-      // Simulate AI typing delay
+      // Only process with AI if we have a project
+      if (project?.id) {
+        try {
+          setIsProcessing(true);
+          setError(null);
+          
+          // Call the AI processing operation - in OpenSaaS, this would be automatically 
+          // connected to the server operation defined in main.wasp
+          const result = await processVideoAIPrompt({
+            projectId: project.id,
+            prompt: userMessage,
+            projectData: project
+          });
+          console.log('AI response:', result);
+          
+          // Update the project with AI changes if we got an updated project back
+          if (result.updatedProject) {
+            setUpdateProject({
+              ...project,
+              ...result.updatedProject,
+              updatedAt: new Date().toISOString()
+            });
+          }
+          
+          // Add AI response directly to chat using the addChatMessageAtom
+          // We add it as an assistant message
+          setAddChatMessage({
+            id: Date.now(),
+            role: 'assistant',
+            content: result.message,
+            timestamp: new Date().toISOString() // Store as ISO string for localStorage compatibility
+          });
+        } catch (error) {
+          console.error('Error processing AI prompt:', error);
+          setError(
+            error instanceof Error 
+              ? error.message 
+              : 'Failed to process your request. Please try again later.'
+          );
+        } finally {
+          setIsProcessing(false);
+        }
+      }
+      
+      // Set typing to false after a short delay to simulate assistant responding
       setTimeout(() => {
         setIsTyping(false);
         // Make sure to scroll to bottom after typing indicator disappears
@@ -52,8 +130,17 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
     }
   };
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const formatTime = (date: Date | string) => {
+    if (!date) return '';
+    
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    // Make sure it's a valid date before calling toLocaleTimeString
+    if (isNaN(dateObj.getTime())) {
+      return 'Invalid time';
+    }
+    
+    return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   const quickActions = [

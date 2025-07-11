@@ -179,8 +179,12 @@ export default function VibeVideoCutPage() {
   };
 
   const handleChatMessage = (message: string) => {
-    // Use Jotai atom to add chat messages
+    // Only add the user message to chat
     setAddChatMessage(message);
+    
+    // Process AI through RightPanel component
+    // The actual AI processing and response adding will be done in the RightPanel component
+    // This keeps this component focused on message display, not processing
   };
 
   const handleCompositionUpdate = async (composition: any) => {

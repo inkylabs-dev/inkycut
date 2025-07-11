@@ -164,8 +164,8 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   /** The actual text content of the message */
   content: string;
-  /** When the message was sent */
-  timestamp: Date;
+  /** When the message was sent - can be Date object or ISO string */
+  timestamp: Date | string;
 }
 
 /**
