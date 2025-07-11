@@ -51,20 +51,43 @@ export default function VibeVideoCutPage() {
   // Always allow direct JSON editing
   const propertiesEnabled = true;
   
-  // Redirect if ID is 'new'
+  // Initialize a new project and redirect if ID is 'new'
   useEffect(() => {
     if (id === 'new') {
-      const newProjectId = generateRandomId();
-      navigate(`/vibe/${newProjectId}`, { replace: true });
+      try {
+        setIsLoading(true);
+        
+        // Generate a new unique ID
+        const newProjectId = generateRandomId();
+        
+        // Create a new project with this ID
+        const newProject = createDefaultProject(newProjectId);
+        
+        // Update both the projects map and set the current project ID
+        setUpdateProject(newProject);
+        setProjectId(newProjectId);
+        
+        // Add a small delay to ensure storage is updated
+        setTimeout(() => {
+          setIsLoading(false);
+          navigate(`/vibe/${newProjectId}`, { replace: true });
+        }, 200);
+      } catch (err) {
+        console.error('Error creating new project:', err);
+        setError(new Error('Failed to create new project'));
+        setIsLoading(false);
+      }
     }
-  }, [id, navigate]);
+  }, [id, navigate, setProjectId, setUpdateProject, setIsLoading, setError]);
   
   // Load project data from localStorage using the projectId atom
   useEffect(() => {
+    // Skip for 'new' projects as they are handled in the first useEffect
     if (id && id !== 'new') {
       try {
         setIsLoading(true);
-        // Set the projectId which will trigger the projectAtom to load the project from storage
+        
+        // Always set the projectId to ensure the projectAtom gets updated
         setProjectId(id);
         
         // Get the project directly from the map
@@ -102,9 +125,14 @@ export default function VibeVideoCutPage() {
               }
             };
             setUpdateProject(updatedProject);
+          } else {
+            // Project is valid and has pages, just ensure the projectId is properly set
+            // This is crucial for newly created projects after redirect
+            setProjectId(id);
           }
         } else {
-          // Project doesn't exist, create a new one locally
+          // Project ID exists but no corresponding project in storage,
+          // create a new one with this ID
           const newProject = createDefaultProject(id);
           setUpdateProject(newProject);
         }
@@ -114,9 +142,6 @@ export default function VibeVideoCutPage() {
       } finally {
         setIsLoading(false);
       }
-    } else if (id === 'new') {
-      // Skip loading for new projects as we'll redirect
-      setIsLoading(false);
     }
   }, [id, projectsMap, setProjectId, setUpdateProject, setIsLoading, setError]);
 
@@ -163,6 +188,24 @@ export default function VibeVideoCutPage() {
     setUpdateComposition(composition);
   };
 
+  // Special effect to ensure project is loaded when coming from a redirect
+  // This helps fix the "Project not found" issue after redirect from /vibe/new
+  useEffect(() => {
+    // If we have a valid ID but no project, and we're not already loading
+    if (id && id !== 'new' && !project && !isLoading) {
+      // Check if the project exists in storage
+      const storedProject = projectsMap[id];
+      
+      if (storedProject) {
+        // Project exists in storage but isn't loaded in state
+        setProjectId(id);
+      } else if (!project) {
+        // Project doesn't exist in storage, create it
+        const newProject = createDefaultProject(id);
+        setUpdateProject(newProject);
+      }
+    }
+  }, [id, project, projectsMap, isLoading, setProjectId, setUpdateProject]);
 
   // Element update now uses Jotai atom
   const handleElementUpdate = (elementId: string, updatedData: any) => {
@@ -176,14 +219,17 @@ export default function VibeVideoCutPage() {
 
   // No undo/redo functionality in offline mode
 
+  // Show loading indicator
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+        <div className="ml-4 text-gray-700">Loading project...</div>
       </div>
     );
   }
 
+  // Show error message
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -192,7 +238,20 @@ export default function VibeVideoCutPage() {
     );
   }
 
+  // If we just redirected from /new, projectId should be set but project may not be loaded yet
+  // Check both projectId and project to handle the transition after redirect
   if (!project) {
+    // Add a special case for when we're looking at a valid ID (not 'new')
+    if (id && id !== 'new') {
+      // Force a loading state to wait for the project to be loaded from storage
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+          <div className="mt-4 text-gray-700">Initializing project...</div>
+        </div>
+      );
+    }
+    
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-gray-500 text-xl">Project not found</div>
