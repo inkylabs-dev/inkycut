@@ -6,42 +6,62 @@ import { CompositionData, CompositionElement, CompositionPage, Project, ChatMess
 export const loadingAtom = atom<boolean>(false);
 export const errorAtom = atom<Error | null>(null);
 
-// Project state atoms
-export const projectAtom = atom<Project | null>(null);
+// Project state atoms with automatic localStorage persistence
+// The projectIdAtom keeps track of the current project ID to load the correct project
+export const projectIdAtom = atom<string | null>(null);
 
-// Function to get project from localStorage
-export const loadProjectFromStorage = (id: string): Project | null => {
-  if (!id || id === 'new') return null;
-  
-  try {
-    const storageKey = `vibe-project-${id}`;
-    const storedProject = localStorage.getItem(storageKey);
+// Map to store projects by ID for more efficient lookup
+export const projectsMapAtom = atomWithStorage<Record<string, Project>>('vibe-projects', {});
+
+// Get a project by ID from the map
+export const getProjectById = atom(
+  (get) => (id: string) => {
+    if (!id || id === 'new') return null;
+    const projectsMap = get(projectsMapAtom);
+    return projectsMap[id] || null;
+  }
+);
+
+// Current active project based on projectIdAtom
+export const projectAtom = atom<Project | null>(
+  (get) => {
+    const projectId = get(projectIdAtom);
+    const getProject = get(getProjectById);
     
-    if (storedProject) {
-      return JSON.parse(storedProject);
-    }
-  } catch (err) {
-    console.error('Error loading from localStorage:', err);
+    if (!projectId) return null;
+    return getProject(projectId);
   }
-  
-  return null;
-};
+);
 
-// Function to save project to localStorage
-export const saveProjectToStorage = (project: Project): void => {
-  if (!project || !project.id) return;
-  
-  try {
-    const storageKey = `vibe-project-${project.id}`;
-    localStorage.setItem(storageKey, JSON.stringify({
-      ...project,
+// Helper to update a project in storage
+export const updateProjectAtom = atom(
+  null,
+  (get, set, updatedProject: Project | null) => {
+    if (!updatedProject) {
+      // If clearing the project, don't update storage
+      return;
+    }
+    
+    // Set the project ID atom to the current project
+    set(projectIdAtom, updatedProject.id);
+    
+    // Update the timestamp before storing
+    const projectWithUpdatedTimestamp = {
+      ...updatedProject,
       updatedAt: new Date().toISOString()
-    }));
-    console.log(`Project ${project.id} saved to localStorage`);
-  } catch (error) {
-    console.error('Failed to save to localStorage:', error);
+    };
+    
+    // Update the project in the map
+    const projectsMap = get(projectsMapAtom);
+    set(projectsMapAtom, {
+      ...projectsMap,
+      [updatedProject.id]: projectWithUpdatedTimestamp
+    });
+    
+    // Log successful save
+    console.log(`Project ${updatedProject.id} saved to storage`);
   }
-};
+);
 
 // App state atom - derived from project.appState
 export const appStateAtom = atom(
@@ -102,8 +122,8 @@ export const setSelectedElementAtom = atom(
       }
     };
     
-    set(projectAtom, updatedProject);
-    saveProjectToStorage(updatedProject);
+    // Use updateProjectAtom to update the project in storage
+    set(updateProjectAtom, updatedProject);
   }
 );
 
@@ -121,8 +141,8 @@ export const setSelectedPageAtom = atom(
       }
     };
     
-    set(projectAtom, updatedProject);
-    saveProjectToStorage(updatedProject);
+    // Use updateProjectAtom to update the project in storage
+    set(updateProjectAtom, updatedProject);
   }
 );
 
@@ -215,17 +235,11 @@ export const updateElementAtom = atom(
       // Update project with new composition and maintain selected element
       const updatedProject = {
         ...project,
-        composition: updatedComposition,
-        updatedAt: new Date().toISOString()
+        composition: updatedComposition
       };
       
-      set(projectAtom, updatedProject);
-      
-      // No need to update selectedElementAtom separately as it's derived from projectAtom
-      // and will update automatically through appState.selectedElementId
-      
-      // Save changes to localStorage
-      saveProjectToStorage(updatedProject);
+      // Use updateProjectAtom to update the project in storage
+      set(updateProjectAtom, updatedProject);
     }
   }
 );
@@ -255,14 +269,11 @@ export const updateCompositionAtom = atom(
         ...project.appState,
         // Clear selectedElementId if element no longer exists
         selectedElementId: elementStillExists ? currentSelectedElementId : null
-      },
-      updatedAt: new Date().toISOString()
+      }
     };
     
-    set(projectAtom, updatedProject);
-    
-    // Save changes to localStorage
-    saveProjectToStorage(updatedProject);
+    // Use updateProjectAtom to update the project in storage
+    set(updateProjectAtom, updatedProject);
   }
 );
 

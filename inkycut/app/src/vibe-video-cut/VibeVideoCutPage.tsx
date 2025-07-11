@@ -6,6 +6,10 @@ import MiddlePanel from './components/MiddlePanel';
 import RightPanel from './components/RightPanel';
 import { 
   projectAtom,
+  projectIdAtom,
+  projectsMapAtom,
+  getProjectById,
+  updateProjectAtom,
   selectedElementAtom,
   selectedPageAtom,
   chatMessagesAtom,
@@ -17,7 +21,6 @@ import {
   setSelectedElementAtom,
   setSelectedPageAtom,
   createDefaultProject,
-  loadProjectFromStorage,
   generateRandomId,
   createDefaultPage
 } from './atoms';
@@ -27,7 +30,9 @@ export default function VibeVideoCutPage() {
   const navigate = useNavigate();
   
   // Jotai state atoms
-  const [project, setProject] = useAtom(projectAtom);
+  const [project] = useAtom(projectAtom);
+  const [projectsMap, setProjectsMap] = useAtom(projectsMapAtom);
+  const [projectId, setProjectId] = useAtom(projectIdAtom);
   const [selectedElement] = useAtom(selectedElementAtom);
   const [selectedPage] = useAtom(selectedPageAtom);
   const [chatMessages] = useAtom(chatMessagesAtom);
@@ -37,6 +42,7 @@ export default function VibeVideoCutPage() {
   // Set atoms
   const setSelectedElement = useSetAtom(setSelectedElementAtom);
   const setSelectedPage = useSetAtom(setSelectedPageAtom);
+  const setUpdateProject = useSetAtom(updateProjectAtom);
   
   // Always allow direct JSON editing
   const propertiesEnabled = true;
@@ -49,19 +55,24 @@ export default function VibeVideoCutPage() {
     }
   }, [id, navigate]);
   
-  // Load project data from localStorage
+  // Load project data from localStorage using the projectId atom
   useEffect(() => {
     if (id && id !== 'new') {
       try {
         setIsLoading(true);
-        const loadedProject = loadProjectFromStorage(id);
+        // Set the projectId which will trigger the projectAtom to load the project from storage
+        setProjectId(id);
+        
+        // Get the project directly from the map
+        const loadedProject = projectsMap[id];
         
         if (loadedProject) {
-          setProject(loadedProject);
-          
-          // Set the first page as selected page or create a default one if no pages exist
-          if (loadedProject.composition && loadedProject.composition.pages && loadedProject.composition.pages.length > 0) {
-            // Update appState to select the first page
+          // If the project exists but doesn't have a selected page, select the first page
+          if (loadedProject.composition && 
+              loadedProject.composition.pages && 
+              loadedProject.composition.pages.length > 0 && 
+              !loadedProject.appState?.selectedPageId) {
+            
             const updatedProject = {
               ...loadedProject,
               appState: {
@@ -69,8 +80,8 @@ export default function VibeVideoCutPage() {
                 selectedPageId: loadedProject.composition.pages[0].id
               }
             };
-            setProject(updatedProject);
-          } else {
+            setUpdateProject(updatedProject);
+          } else if (!loadedProject.composition?.pages?.length) {
             // Create default composition with a single page if it doesn't exist
             const defaultPage = createDefaultPage();
             
@@ -86,17 +97,16 @@ export default function VibeVideoCutPage() {
                 selectedPageId: defaultPage.id
               }
             };
-            setProject(updatedProject);
+            setUpdateProject(updatedProject);
           }
         } else {
           // Project doesn't exist, create a new one locally
           const newProject = createDefaultProject(id);
-          // No need to manually set selectedPage as it will be derived from appState
-          setProject(newProject);
+          setUpdateProject(newProject);
         }
       } catch (err) {
-        console.error('Error loading from localStorage:', err);
-        setError(new Error('Failed to load project from localStorage'));
+        console.error('Error loading project:', err);
+        setError(new Error('Failed to load project'));
       } finally {
         setIsLoading(false);
       }
@@ -104,7 +114,7 @@ export default function VibeVideoCutPage() {
       // Skip loading for new projects as we'll redirect
       setIsLoading(false);
     }
-  }, [id, setProject, setSelectedPage, setIsLoading, setError]);
+  }, [id, projectsMap, setProjectId, setUpdateProject, setIsLoading, setError]);
 
   // Import necessary update atoms from the atoms file
   const setUpdateElement = useSetAtom(updateElementAtom);
@@ -126,9 +136,8 @@ export default function VibeVideoCutPage() {
       try {
         // Update project with timeline
         // Store timeline in metadata which is now properly typed
-        setProject({
+        setUpdateProject({
           ...project,
-          updatedAt: new Date().toISOString(),
           metadata: {
             ...(project.metadata || {}),
             timeline
