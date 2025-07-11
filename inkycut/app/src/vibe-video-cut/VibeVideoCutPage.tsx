@@ -14,6 +14,8 @@ import {
   updateElementAtom,
   updateCompositionAtom,
   addChatMessageAtom,
+  setSelectedElementAtom,
+  setSelectedPageAtom,
   createDefaultProject,
   loadProjectFromStorage,
   generateRandomId,
@@ -26,11 +28,15 @@ export default function VibeVideoCutPage() {
   
   // Jotai state atoms
   const [project, setProject] = useAtom(projectAtom);
-  const [selectedElement, setSelectedElement] = useAtom(selectedElementAtom);
-  const [selectedPage, setSelectedPage] = useAtom(selectedPageAtom);
+  const [selectedElement] = useAtom(selectedElementAtom);
+  const [selectedPage] = useAtom(selectedPageAtom);
   const [chatMessages] = useAtom(chatMessagesAtom);
   const [isLoading, setIsLoading] = useAtom(loadingAtom);
   const [error, setError] = useAtom(errorAtom);
+  
+  // Set atoms
+  const setSelectedElement = useSetAtom(setSelectedElementAtom);
+  const setSelectedPage = useSetAtom(setSelectedPageAtom);
   
   // Always allow direct JSON editing
   const propertiesEnabled = true;
@@ -55,27 +61,38 @@ export default function VibeVideoCutPage() {
           
           // Set the first page as selected page or create a default one if no pages exist
           if (loadedProject.composition && loadedProject.composition.pages && loadedProject.composition.pages.length > 0) {
-            setSelectedPage(loadedProject.composition.pages[0]);
+            // Update appState to select the first page
+            const updatedProject = {
+              ...loadedProject,
+              appState: {
+                ...loadedProject.appState || {},
+                selectedPageId: loadedProject.composition.pages[0].id
+              }
+            };
+            setProject(updatedProject);
           } else {
             // Create default composition with a single page if it doesn't exist
             const defaultPage = createDefaultPage();
             
-            // Update the project with the default composition
+            // Update the project with the default composition and select the page
             const updatedProject = {
               ...loadedProject,
               composition: {
                 ...loadedProject.composition,
                 pages: [defaultPage]
+              },
+              appState: {
+                ...loadedProject.appState || {},
+                selectedPageId: defaultPage.id
               }
             };
             setProject(updatedProject);
-            setSelectedPage(defaultPage);
           }
         } else {
           // Project doesn't exist, create a new one locally
           const newProject = createDefaultProject(id);
+          // No need to manually set selectedPage as it will be derived from appState
           setProject(newProject);
-          setSelectedPage(newProject.composition.pages[0]);
         }
       } catch (err) {
         console.error('Error loading from localStorage:', err);
@@ -95,10 +112,12 @@ export default function VibeVideoCutPage() {
   const setAddChatMessage = useSetAtom(addChatMessageAtom);
 
   const handleElementSelect = (element: any) => {
+    // Use the set atom to update the selection in appState
     setSelectedElement(element);
   };
 
   const handlePageSelect = (page: any) => {
+    // Use the set atom to update the selection in appState
     setSelectedPage(page);
   };
 
@@ -175,7 +194,6 @@ export default function VibeVideoCutPage() {
         {/* Left Panel - File Explorer / Elements */}
         <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0 overflow-hidden">
           <LeftPanel 
-            onElementSelect={handleElementSelect}
             onElementUpdate={handleElementUpdate}
           />
         </div>

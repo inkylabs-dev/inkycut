@@ -1,8 +1,6 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage } from './components/types';
-
-
+import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage, AppState } from './components/types';
 
 // UI state atoms
 export const loadingAtom = atom<boolean>(false);
@@ -45,9 +43,88 @@ export const saveProjectToStorage = (project: Project): void => {
   }
 };
 
-// Selection state atoms
-export const selectedElementAtom = atom<CompositionElement | null>(null);
-export const selectedPageAtom = atom<CompositionPage | null>(null);
+// App state atom - derived from project.appState
+export const appStateAtom = atom(
+  (get) => get(projectAtom)?.appState || createDefaultAppState()
+);
+
+// Selection state atoms - derived from appState
+export const selectedElementIdAtom = atom(
+  (get) => get(appStateAtom).selectedElementId
+);
+
+export const selectedPageIdAtom = atom(
+  (get) => get(appStateAtom).selectedPageId
+);
+
+// Read-only derived atom for selected element
+export const selectedElementAtom = atom<CompositionElement | null>((get) => {
+  const project = get(projectAtom);
+  const selectedElementId = get(selectedElementIdAtom);
+  
+  if (!project || !selectedElementId) return null;
+  
+  // Search through all pages for the element with matching ID
+  for (const page of project.composition.pages) {
+    const element = page.elements.find(el => el.id === selectedElementId);
+    if (element) return element;
+  }
+  
+  return null;
+});
+
+// Read-only derived atom for selected page
+export const selectedPageAtom = atom<CompositionPage | null>((get) => {
+  const project = get(projectAtom);
+  const selectedPageId = get(selectedPageIdAtom);
+  
+  if (!project || !selectedPageId) {
+    // Default to first page if no page is selected
+    return project?.composition.pages[0] || null;
+  }
+  
+  // Find the page with matching ID
+  return project.composition.pages.find(page => page.id === selectedPageId) || null;
+});
+
+// Write-only atoms for updating selected element and page
+export const setSelectedElementAtom = atom(
+  null,
+  (get, set, newElement: CompositionElement | null) => {
+    const project = get(projectAtom);
+    if (!project) return;
+    
+    const updatedProject = {
+      ...project,
+      appState: {
+        ...project.appState,
+        selectedElementId: newElement?.id || null
+      }
+    };
+    
+    set(projectAtom, updatedProject);
+    saveProjectToStorage(updatedProject);
+  }
+);
+
+export const setSelectedPageAtom = atom(
+  null,
+  (get, set, newPage: CompositionPage | null) => {
+    const project = get(projectAtom);
+    if (!project) return;
+    
+    const updatedProject = {
+      ...project,
+      appState: {
+        ...project.appState,
+        selectedPageId: newPage?.id || null
+      }
+    };
+    
+    set(projectAtom, updatedProject);
+    saveProjectToStorage(updatedProject);
+  }
+);
 
 // Chat state atoms
 export const chatMessagesAtom = atomWithStorage<ChatMessage[]>('vibe-chat-messages', [
@@ -70,6 +147,21 @@ export const createDefaultPage = (): CompositionPage => {
   };
 };
 
+// Default app state
+export const createDefaultAppState = (): AppState => {
+  return {
+    selectedElementId: null,
+    selectedPageId: null,
+    viewMode: 'edit',
+    zoomLevel: 1,
+    showGrid: true,
+    history: {
+      past: [],
+      future: []
+    }
+  };
+};
+
 export const createDefaultProject = (id: string): Project => {
   const defaultPage = createDefaultPage();
   
@@ -84,7 +176,8 @@ export const createDefaultProject = (id: string): Project => {
       fps: 30,
       width: 1920,
       height: 1080
-    }
+    },
+    appState: createDefaultAppState()
   };
 };
 
@@ -119,7 +212,7 @@ export const updateElementAtom = atom(
     });
     
     if (elementUpdated) {
-      // Update project with new composition
+      // Update project with new composition and maintain selected element
       const updatedProject = {
         ...project,
         composition: updatedComposition,
@@ -128,14 +221,8 @@ export const updateElementAtom = atom(
       
       set(projectAtom, updatedProject);
       
-      // Also update selected element if it was the one that changed
-      const selectedElement = get(selectedElementAtom);
-      if (selectedElement && selectedElement.id === elementId) {
-        set(selectedElementAtom, {
-          ...selectedElement,
-          ...updatedData
-        });
-      }
+      // No need to update selectedElementAtom separately as it's derived from projectAtom
+      // and will update automatically through appState.selectedElementId
       
       // Save changes to localStorage
       saveProjectToStorage(updatedProject);
@@ -149,25 +236,30 @@ export const updateCompositionAtom = atom(
     const project = get(projectAtom);
     if (!project) return;
     
+    // Preserve the current selectedElementId if the element still exists
+    const currentSelectedElementId = project.appState.selectedElementId;
+    let elementStillExists = false;
+    
+    if (currentSelectedElementId) {
+      // Check if the element still exists in the new composition
+      elementStillExists = composition.pages.some(page => 
+        page.elements.some(el => el.id === currentSelectedElementId)
+      );
+    }
+    
+    // Update project with new composition
     const updatedProject = {
       ...project,
       composition,
+      appState: {
+        ...project.appState,
+        // Clear selectedElementId if element no longer exists
+        selectedElementId: elementStillExists ? currentSelectedElementId : null
+      },
       updatedAt: new Date().toISOString()
     };
     
     set(projectAtom, updatedProject);
-    
-    // Update selected element if needed
-    const selectedElement = get(selectedElementAtom);
-    if (selectedElement) {
-      const updatedElement = composition.pages
-        .flatMap(page => page.elements)
-        .find(el => el.id === selectedElement.id);
-      
-      if (updatedElement) {
-        set(selectedElementAtom, updatedElement);
-      }
-    }
     
     // Save changes to localStorage
     saveProjectToStorage(updatedProject);

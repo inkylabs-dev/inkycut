@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { 
   FolderIcon, 
   DocumentIcon, 
@@ -16,7 +16,7 @@ import { useAuth } from 'wasp/client/auth';
 import { routes } from 'wasp/client/router';
 import { Link } from 'react-router-dom';
 import { CompositionElement } from './types';
-import { projectAtom, selectedElementAtom, selectedPageAtom } from '../atoms';
+import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom } from '../atoms';
 
 
 // File Preview Component
@@ -165,15 +165,16 @@ const ElementPreview: React.FC<{
 };
 
 interface LeftPanelProps {
-  onElementSelect: (element: any) => void;
   onElementUpdate?: (elementId: string, updatedData: Partial<CompositionElement> | any) => void;
 }
 
-export default function LeftPanel({ onElementSelect, onElementUpdate }: LeftPanelProps) {
+export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
   // Use Jotai atoms instead of props
   const [project] = useAtom(projectAtom);
   const [selectedElement] = useAtom(selectedElementAtom);
   const [selectedPage] = useAtom(selectedPageAtom);
+  const setSelectedElement = useSetAtom(setSelectedElementAtom);
+  const setSelectedPage = useSetAtom(setSelectedPageAtom);
   
   // Always enabled
   const propertiesEnabled = true;
@@ -406,7 +407,11 @@ export default function LeftPanel({ onElementSelect, onElementUpdate }: LeftPane
                     <div
                       key={asset.id}
                       className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer"
-                      onClick={() => onElementSelect(asset)}
+                      onClick={() => {
+                        // Can't directly select assets as they're not CompositionElements
+                        // We should handle this differently or convert assets to elements
+                        console.log('Asset selected:', asset);
+                      }}
                     >
                       <FilePreview file={asset.file} type={asset.type} name={asset.name} className="w-12 h-12" />
                       <div className="ml-3 flex-1">
@@ -455,7 +460,7 @@ export default function LeftPanel({ onElementSelect, onElementUpdate }: LeftPane
                         ? 'bg-blue-50 border-blue-200'
                         : 'bg-white border-gray-200 hover:bg-gray-50'
                     }`}
-                    onClick={() => onElementSelect(element)}
+                    onClick={() => setSelectedElement(element)}
                   >
                     <div className="flex items-center">
                       <ElementPreview element={element} className="w-12 h-12 mr-3" />

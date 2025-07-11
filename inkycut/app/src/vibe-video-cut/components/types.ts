@@ -46,6 +46,20 @@ export interface CompositionData {
   height: number;
 }
 
+// App state interface
+export interface AppState {
+  selectedElementId: string | null;
+  selectedPageId: string | null;
+  viewMode: 'edit' | 'preview';
+  zoomLevel: number;
+  showGrid: boolean;
+  history: {
+    past: any[];
+    future: any[];
+  };
+  [key: string]: any; // Allow for extension
+}
+
 // Types
 export interface Project {
   id: string;
@@ -54,6 +68,7 @@ export interface Project {
   updatedAt: string;
   propertiesEnabled: boolean;
   composition: CompositionData;
+  appState: AppState;
   metadata?: {
     timeline?: any[];
     [key: string]: any;
