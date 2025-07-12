@@ -103,34 +103,34 @@ export const processVideoAIPrompt = async (
       throw new HttpError(500, 'Failed to generate AI response');
     }
 
-    // Decrement the user's credits after successful AI response
-    const decrementCredit = context.entities.User.update({
-      where: { id: context.user.id },
-      data: {
-        credits: {
-          decrement: 1,
-        },
-      },
-    });
-
-    // Create a record of this AI interaction
-    const createAIInteraction =
-      context.entities.AiInteraction?.create?.({
-        data: {
-          user: { connect: { id: context.user.id } },
-          prompt,
-          response: JSON.stringify(aiResponse),
-          type: 'VIDEO_EDITING',
-          projectId,
-        },
-      }) || Promise.resolve();
-
-    // Execute both operations in a transaction if possible
+    // Since we need to ensure both operations are Prisma Client promises,
+    // we'll handle them separately instead of using a transaction
     try {
-      await prisma.$transaction([decrementCredit, createAIInteraction]);
-    } catch (transactionError) {
-      console.error('Transaction error:', transactionError);
-      // Continue even if transaction fails (credit decrement is most important)
+      // Decrement the user's credits
+      await context.entities.User.update({
+        where: { id: context.user.id },
+        data: {
+          credits: {
+            decrement: 1,
+          },
+        },
+      });
+      
+      // Create a record of this AI interaction if the entity exists
+      if (context.entities.AiInteraction) {
+        await context.entities.AiInteraction.create({
+          data: {
+            user: { connect: { id: context.user.id } },
+            prompt,
+            response: JSON.stringify(aiResponse),
+            type: 'VIDEO_EDITING',
+            projectId,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error updating user credits or creating AI interaction:', error);
+      // Continue even if operations fail (the AI response is still valuable to the user)
     }
 
     // Store updated project data in the in-memory map
