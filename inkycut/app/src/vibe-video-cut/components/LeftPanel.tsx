@@ -4,17 +4,16 @@ import {
   DocumentIcon, 
   HomeIcon,
   Bars3Icon,
-  HeartIcon
+  HeartIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from 'wasp/client/auth';
 import { routes } from 'wasp/client/router';
 import { Link } from 'react-router-dom';
 import { CompositionElement } from './types';
-import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom } from '../atoms';
+import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject } from '../atoms';
 import FilePreview from './FilePreview';
 import ElementPreview from './ElementPreview';
-
-
 
 interface LeftPanelProps {
   onElementUpdate?: (elementId: string, updatedData: Partial<CompositionElement> | any) => void;
@@ -22,7 +21,7 @@ interface LeftPanelProps {
 
 export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
   // Use Jotai atoms instead of props
-  const [project] = useAtom(projectAtom);
+  const [project, setProject] = useAtom(projectAtom);
   const [selectedElement] = useAtom(selectedElementAtom);
   const [selectedPage] = useAtom(selectedPageAtom);
   const setSelectedElement = useSetAtom(setSelectedElementAtom);
@@ -43,6 +42,36 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
     file: File | null;
   }>>([]);
   const { data: user } = useAuth();
+  
+  // Function to reset the project to its default state
+  const handleResetProject = () => {
+    if (window.confirm('Are you sure you want to reset the project? All unsaved changes will be lost.')) {
+      // Create a new project with default settings
+      const newProject = createDefaultProject('Untitled Project');
+      
+      // Keep the current project ID if available
+      if (project?.id) {
+        newProject.id = project.id;
+      }
+      
+      // Reset the project
+      setProject(newProject);
+      
+      // Update selected page to the first page of the new project
+      if (newProject.composition.pages.length > 0) {
+        setSelectedPage(newProject.composition.pages[0]);
+      }
+      
+      // Clear selected element
+      setSelectedElement(null);
+      
+      // Clear assets
+      setAssets([]);
+      
+      // Close menu after reset
+      setShowMenu(false);
+    }
+  };
 
   // Reset recently updated state when selected element changes
   useEffect(() => {
@@ -172,6 +201,13 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
                 className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
               >
                 <div className="py-1">
+                  <button
+                    onClick={handleResetProject}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                  >
+                    <ArrowPathIcon className="mr-2 h-5 w-5 text-gray-500" />
+                    Reset Project
+                  </button>
                   
                   <Link 
                     to="/"

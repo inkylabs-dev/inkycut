@@ -61,28 +61,63 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
 //     }
 //   }, [selectedElement, currentEditingElement]);
   
+  // Refs to track previous project state for comparison
+  const prevProjectIdRef = useRef<string>('');
+  const prevCompositionRef = useRef<string>('');
+  
   // Update composition data when project changes, but only if user hasn't made direct edits
   useEffect(() => {
-    if (project?.composition && !userEditedJson) {
-      setCompositionData(project.composition);
-    } else if (project?.composition && viewMode !== 'code') {
-      // Don't reset the edit flag - we need to keep track of edits across view changes
-      // If we have user edits, keep using the user's version
-      if (!userEditedJson) {
+    // Extract current project identifiers for comparison
+    const currentProjectId = project?.id || '';
+    const currentCompositionId = project?.composition ? JSON.stringify(project.composition) : '';
+    
+    // Check if the project has been completely reset or changed
+    const isNewProject = currentProjectId !== prevProjectIdRef.current;
+    const isCompositionReset = currentCompositionId !== prevCompositionRef.current && currentCompositionId !== '';
+    
+    if (project?.composition) {
+      // Always update if this is a new project or the composition was reset
+      if (isNewProject || isCompositionReset) {
+        console.log('Project reset or changed completely - updating editor');
+        setCompositionData(project.composition);
+        setJsonString(JSON.stringify(project.composition, null, 2));
+        setUserEditedJson(false);
+        
+        // Reset our stored edited version too
+        lastEditedComposition.current = null;
+      } 
+      // Otherwise follow our normal update logic
+      else if (!userEditedJson) {
+        setCompositionData(project.composition);
+      } else if (viewMode !== 'code' && !userEditedJson) {
         setCompositionData(project.composition);
       }
     }
+    
+    // Update refs for next comparison
+    prevProjectIdRef.current = currentProjectId;
+    prevCompositionRef.current = currentCompositionId;
   }, [project, userEditedJson, viewMode]);
   
   // Initialize JSON string when composition data changes, but avoid unnecessary updates
   useEffect(() => {
-    // Avoid updating JSON string in these cases:
-    // 1. We're in code view (to prevent overwriting user's active edits)
-    // 2. User has made edits and we're just switching views
-    if ((viewMode !== 'code' && !userEditedJson) || jsonString === '') {
+    // Always update the JSON string if we're not in code view or there are no user edits
+    if (viewMode !== 'code' && !userEditedJson) {
+      setJsonString(JSON.stringify(compositionData, null, 2));
+    } 
+    // Also update if this is first initialization
+    else if (jsonString === '') {
       setJsonString(JSON.stringify(compositionData, null, 2));
     }
-  }, [compositionData, viewMode, jsonString, userEditedJson]);
+    // Special case: If we're in code view and project just got reset
+    else if (viewMode === 'code' && !userEditedJson && project?.composition) {
+      // Check if the JSON differs from what's displayed
+      const currentJson = JSON.stringify(project.composition, null, 2);
+      if (currentJson !== jsonString) {
+        setJsonString(currentJson);
+      }
+    }
+  }, [compositionData, viewMode, jsonString, userEditedJson, project]);
   
   // Calculate total duration and current time
   const totalFrames = compositionData.pages.reduce((sum, page) => sum + page.duration, 0);
@@ -297,16 +332,21 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
       
       // In offline mode, we always save changes immediately
       // This allows the player to immediately reflect JSON edits
-      localStorage.setItem(`vibe-project-composition-${project?.id}`, JSON.stringify(compositionData));
+      if (project?.id) {
+        localStorage.setItem(`vibe-project-composition-${project.id}`, JSON.stringify(compositionData));
+      }
     }
     
-    // When switching back to code view, restore the last edited version if available
-    if (newMode === 'code' && userEditedJson && lastEditedComposition.current) {
-      // Make sure we're using the stored edited version
-      setCompositionData(lastEditedComposition.current);
-      
-      // Update the JSON string to match our stored version
-      setJsonString(JSON.stringify(lastEditedComposition.current, null, 2));
+    // When switching back to code view, we have two cases:
+    if (newMode === 'code') {
+      if (userEditedJson && lastEditedComposition.current) {
+        // Case 1: User has edited the JSON - restore their edited version
+        setCompositionData(lastEditedComposition.current);
+        setJsonString(JSON.stringify(lastEditedComposition.current, null, 2));
+      } else {
+        // Case 2: No user edits or project was reset - show current composition
+        setJsonString(JSON.stringify(compositionData, null, 2));
+      }
     }
     
     setViewMode(newMode);
@@ -354,7 +394,7 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
     setJsonString(JSON.stringify(updatedComposition, null, 2));
     handleJsonChange(JSON.stringify(updatedComposition, null, 2));
     setUserEditedJson(true);
-    console.log('Element changed:', elementId, updatedComposition.pages[0].elements[0].left);
+    // console.log('Element changed:', elementId, updatedComposition.pages[0].elements[0].left);
     
     // Store the latest valid edit in our ref for persistence across view switches
     lastEditedComposition.current = { ...updatedComposition };
