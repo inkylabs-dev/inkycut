@@ -64,7 +64,8 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
       setIsTyping(true);
       const userMessage = inputMessage.trim();
       
-      // Pass the message to the parent component to update chat UI
+      // Pass the message to the parent component to add the USER message
+      // The parent component handles adding the user message to the chat
       onSendMessage(userMessage);
       setInputMessage('');
       
@@ -74,8 +75,7 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
           setIsProcessing(true);
           setError(null);
           
-          // Call the AI processing operation - in OpenSaaS, this would be automatically 
-          // connected to the server operation defined in main.wasp
+          // Call the AI processing operation
           const result = await processVideoAIPrompt({
             projectId: project.id,
             prompt: userMessage,
@@ -92,8 +92,8 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
             });
           }
           
-          // Add AI response directly to chat using the addChatMessageAtom
-          // We add it as an assistant message
+          // Add ONLY the AI response to chat
+          // The user message was already added by the parent component
           setAddChatMessage({
             id: Date.now(),
             role: 'assistant',

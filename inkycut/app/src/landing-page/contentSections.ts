@@ -5,7 +5,7 @@ import daBoiAvatar from '../client/static/da-boi.webp';
 import avatarPlaceholder from '../client/static/avatar-placeholder.webp';
 
 export const landingPageNavigationItems: NavigationItem[] = [
-  { name: 'Vibe Filming', to: '/vibe/new' },
+  { name: 'Vibe Filming', to: '/vibe' },
   { name: 'Features', to: '#features' },
   { name: 'Pricing', to: routes.PricingPageRoute.to },
   { name: 'Documentation', to: DocsUrl },

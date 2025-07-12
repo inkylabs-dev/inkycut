@@ -59,7 +59,7 @@ const getConfig = () => {
             onAccept: () => {
               try {
                 const GA_ANALYTICS_ID = import.meta.env.REACT_APP_GOOGLE_ANALYTICS_ID;
-                if (!GA_ANALYTICS_ID.length) {
+                if (GA_ANALYTICS_ID && GA_ANALYTICS_ID.length) {
                   throw new Error('Google Analytics ID is missing');
                 }
                 window.dataLayer = window.dataLayer || [];

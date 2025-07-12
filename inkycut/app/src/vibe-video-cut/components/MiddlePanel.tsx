@@ -156,7 +156,7 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
     const timer = setTimeout(() => {
       if (playerRef.current && !playerReady) {
         setPlayerReady(true);
-        console.log('Player manually set to ready');
+        // console.log('Player manually set to ready');
       }
     }, 1000); // Give the player 1 second to initialize
     
@@ -446,6 +446,7 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
                 doubleClickToFullscreen={false}
                 spaceKeyToPlayOrPause={false}
                 overflowVisible={true}
+                acknowledgeRemotionLicense={true}
               />
             </div>
             

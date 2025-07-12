@@ -3,61 +3,25 @@ import { atomWithStorage } from 'jotai/utils';
 import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage, AppState } from './components/types';
 
 /**
- * Primary atom to track the currently active project ID
- * When this ID changes, projectAtom will load the corresponding project
- * @type {string | null} - The ID of the current project, or null if no project is active
+ * Primary atom to store the project data with persistence
+ * Uses atomWithStorage to automatically save/load project from localStorage
+ * @type {Project | null} - The current project or null if no project exists
  */
-export const projectIdAtom = atom<string | null>(null);
+export const projectAtom = atomWithStorage<Project | null>('vibe-project', null);
 
 /**
- * Persistent storage for all projects using atomWithStorage
- * Stores projects in localStorage as a map keyed by project ID
- * @type {Record<string, Project>} - Map of project IDs to Project objects
- */
-export const projectsMapAtom = atomWithStorage<Record<string, Project>>('vibe-projects', {});
-
-/**
- * Utility atom that returns a function to get a project by its ID
- * @returns {Function} - Function that takes a project ID and returns the corresponding Project or null
- */
-export const getProjectById = atom(
-  (get) => (id: string) => {
-    if (!id || id === 'new') return null;
-    const projectsMap = get(projectsMapAtom);
-    return projectsMap[id] || null;
-  }
-);
-
-/**
- * Derived atom that provides the currently active project
- * Uses projectIdAtom to determine which project to load from projectsMapAtom
- * @type {Project | null} - The current project or null if no project is active
- */
-export const projectAtom = atom<Project | null>(
-  (get) => {
-    const projectId = get(projectIdAtom);
-    const getProject = get(getProjectById);
-    
-    if (!projectId) return null;
-    return getProject(projectId);
-  }
-);
-
-/**
- * Write-only atom for updating a project in storage
- * Updates the project's timestamp, saves it to the projects map, and sets the current project ID
+ * Write-only atom for updating the project
+ * Updates the project's timestamp before storing
  * @param {Project | null} updatedProject - The project to update or null to clear
  */
 export const updateProjectAtom = atom(
   null,
   (get, set, updatedProject: Project | null) => {
     if (!updatedProject) {
-      // If clearing the project, don't update storage
+      // If clearing the project, just set null
+      set(projectAtom, null);
       return;
     }
-    
-    // Set the project ID atom to the current project
-    set(projectIdAtom, updatedProject.id);
     
     // Update the timestamp before storing
     const projectWithUpdatedTimestamp = {
@@ -65,15 +29,11 @@ export const updateProjectAtom = atom(
       updatedAt: new Date().toISOString()
     };
     
-    // Update the project in the map
-    const projectsMap = get(projectsMapAtom);
-    set(projectsMapAtom, {
-      ...projectsMap,
-      [updatedProject.id]: projectWithUpdatedTimestamp
-    });
+    // Update the project in storage
+    set(projectAtom, projectWithUpdatedTimestamp);
     
     // Log successful save
-    console.log(`Project ${updatedProject.id} saved to storage`);
+    console.log(`Project saved to storage`);
   }
 );
 
@@ -114,7 +74,7 @@ export const selectedElementAtom = atom<CompositionElement | null>((get) => {
   if (!project || !selectedElementId) return null;
   
   // Search through all pages for the element with matching ID
-  for (const page of project.composition.pages) {
+  for (const page of project.composition?.pages || []) {
     const element = page.elements.find(el => el.id === selectedElementId);
     if (element) return element;
   }
@@ -131,9 +91,11 @@ export const selectedPageAtom = atom<CompositionPage | null>((get) => {
   const project = get(projectAtom);
   const selectedPageId = get(selectedPageIdAtom);
   
-  if (!project || !selectedPageId) {
+  if (!project || !project.composition) return null;
+  
+  if (!selectedPageId) {
     // Default to first page if no page is selected
-    return project?.composition.pages[0] || null;
+    return project.composition.pages?.[0] || null;
   }
   
   // Find the page with matching ID
@@ -154,7 +116,7 @@ export const setSelectedElementAtom = atom(
     const updatedProject = {
       ...project,
       appState: {
-        ...project.appState,
+        ...project.appState || {},
         selectedElementId: newElement?.id || null
       }
     };
@@ -178,7 +140,7 @@ export const setSelectedPageAtom = atom(
     const updatedProject = {
       ...project,
       appState: {
-        ...project.appState,
+        ...project.appState || {},
         selectedPageId: newPage?.id || null
       }
     };
@@ -203,75 +165,38 @@ export const chatMessagesAtom = atomWithStorage<ChatMessage[]>('vibe-chat-messag
 ]);
 
 /**
- * Read-only derived atom for loading state
- * Extracted from project.appState.isLoading with fallback to false
+ * Atom for loading state to track application loading states
+ * This is now separated from the project to avoid circular dependencies
  * @type {boolean} - Whether the application is currently loading data
  */
-export const loadingAtom = atom<boolean>(
-  (get) => {
-    const project = get(projectAtom);
-    return project?.appState?.isLoading ?? false;
-  }
-);
+export const loadingAtom = atom<boolean>(false);
 
 /**
  * Write-only atom for updating the loading state
- * Updates project.appState.isLoading and persists the change
  * @param {boolean} isLoading - The new loading state
  */
 export const setLoadingAtom = atom(
   null,
   (get, set, isLoading: boolean) => {
-    const project = get(projectAtom);
-    if (!project) return;
-    
-    const updatedProject = {
-      ...project,
-      appState: {
-        ...project.appState,
-        isLoading
-      }
-    };
-    
-    // Use updateProjectAtom to update the project in storage
-    set(updateProjectAtom, updatedProject);
+    set(loadingAtom, isLoading);
   }
 );
 
 /**
- * Read-only derived atom for error state
- * Converts project.appState.error string to Error object if present
+ * Atom for error state to track application errors
+ * This is now separated from the project to avoid circular dependencies
  * @type {Error | null} - Current error or null if no error
  */
-export const errorAtom = atom<Error | null>(
-  (get) => {
-    const project = get(projectAtom);
-    const errorMessage = project?.appState?.error;
-    return errorMessage ? new Error(errorMessage) : null;
-  }
-);
+export const errorAtom = atom<Error | null>(null);
 
 /**
  * Write-only atom for updating the error state
- * Updates project.appState.error with the error message and persists the change
  * @param {Error | null} error - The new error or null to clear errors
  */
 export const setErrorAtom = atom(
   null,
   (get, set, error: Error | null) => {
-    const project = get(projectAtom);
-    if (!project) return;
-    
-    const updatedProject = {
-      ...project,
-      appState: {
-        ...project.appState,
-        error: error?.message || null
-      }
-    };
-    
-    // Use updateProjectAtom to update the project in storage
-    set(updateProjectAtom, updatedProject);
+    set(errorAtom, error);
   }
 );
 
@@ -314,15 +239,17 @@ export const createDefaultAppState = (): AppState => {
 /**
  * Creates a new project with default settings
  * Includes a default page, composition settings, and app state
- * @param {string} id - The ID to use for the new project
+ * @param {string} [name='My Project'] - Optional name for the project
  * @returns {Project} - A fully initialized project ready to use
  */
-export const createDefaultProject = (id: string): Project => {
+export const createDefaultProject = (name: string = 'My Project'): Project => {
   const defaultPage = createDefaultPage();
+  const timestamp = Date.now();
+  const id = `project-${timestamp}`;
   
   return {
-    name: `Vibe Project ${id}`,
-    id: id || `project-${Date.now()}`,
+    name: name || 'Vibe Project',
+    id: id,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     propertiesEnabled: true,
@@ -400,7 +327,7 @@ export const updateCompositionAtom = atom(
     if (!project) return;
     
     // Preserve the current selectedElementId if the element still exists
-    const currentSelectedElementId = project.appState.selectedElementId;
+    const currentSelectedElementId = project.appState?.selectedElementId;
     let elementStillExists = false;
     
     if (currentSelectedElementId) {
@@ -415,7 +342,7 @@ export const updateCompositionAtom = atom(
       ...project,
       composition,
       appState: {
-        ...project.appState,
+        ...project.appState || {},
         // Clear selectedElementId if element no longer exists
         selectedElementId: elementStillExists ? currentSelectedElementId : null
       }
@@ -441,31 +368,21 @@ export const addChatMessageAtom = atom(
     if (typeof messageOrContent === 'string') {
       // Create a new message with the provided content
       newMessage = {
-        id: chatMessages.length + 1,
+        id: Date.now(), // Use timestamp for unique IDs
         role: 'user', // Default to user role when string is provided
         content: messageOrContent,
         timestamp: new Date().toISOString() // Store as ISO string for localStorage compatibility
       };
     } else {
-      // Use the provided message object directly
-      newMessage = messageOrContent;
+      // Use the provided message object directly, ensuring it has all required fields
+      newMessage = {
+        ...messageOrContent,
+        // Ensure timestamp is ISO string for localStorage compatibility
+        timestamp: messageOrContent.timestamp || new Date().toISOString()
+      };
     }
     
     // Add only the single message to the chat history
     set(chatMessagesAtom, [...chatMessages, newMessage]);
   }
 );
-
-/**
- * Generates a cryptographically non-secure random ID
- * Used for creating new project IDs, page IDs, and element IDs
- * @returns {string} - A 32-character random alphanumeric string
- */
-export const generateRandomId = (): string => {
-  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < 32; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-};
