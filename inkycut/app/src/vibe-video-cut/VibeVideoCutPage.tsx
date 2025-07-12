@@ -44,34 +44,65 @@ export default function VibeVideoCutPage() {
   // Always allow direct JSON editing
   const propertiesEnabled = true;
   
-  // Initialize the project if none exists
+  // Initialize the project if none exists, with proper localStorage handling
   useEffect(() => {
-    // Check if we need to create a new project
-    if (!project) {
+    let isMounted = true;
+    
+    const initProject = async () => {
+      if (!isMounted) return;
+      setIsLoading(true);
+      
       try {
-        setIsLoading(true);
+        // Check localStorage directly first to see if we have data
+        const storedProjectString = localStorage.getItem('vibe-project');
+        let storedProject = null;
         
-        // Create a new default project
-        const newProject = createDefaultProject("My Vibe Project");
+        if (storedProjectString && storedProjectString !== 'null') {
+          try {
+            storedProject = JSON.parse(storedProjectString);
+          } catch (parseErr) {
+            console.error('Error parsing stored project data:', parseErr);
+          }
+        }
         
-        // Update the project atom
-        setUpdateProject(newProject);
-        
-        // Add a small delay to ensure storage is updated
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 200);
+        // If we have valid data in localStorage but Jotai hasn't loaded it yet,
+        // let's manually set it
+        if (storedProject && !project) {
+          console.log('Found project in localStorage, restoring it');
+          setProject(storedProject);
+        } 
+        // Only create a new project if there's nothing in localStorage and no project in state
+        else if (!storedProject && !project) {
+          console.log('No project found, creating a new one');
+          const newProject = createDefaultProject("My Vibe Project");
+          setUpdateProject(newProject);
+        }
       } catch (err) {
-        console.error('Error creating new project:', err);
-        setError(new Error('Failed to create new project'));
-        setIsLoading(false);
+        console.error('Error initializing project:', err);
+        setError(new Error('Failed to initialize project'));
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
-    }
-  }, [project, setUpdateProject, setIsLoading, setError]);
+    };
+    
+    initProject();
+    
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false;
+    };
+  }, [project, setProject, setUpdateProject, setIsLoading, setError]);
   
   // Ensure the project has valid pages
   useEffect(() => {
-    if (project) {
+    // Skip if project is loading or doesn't exist
+    if (!project) return;
+    
+    let isMounted = true;
+    
+    const ensureValidPages = () => {
       try {
         // If the project exists but doesn't have a selected page, select the first page
         if (project.composition && 
@@ -86,7 +117,7 @@ export default function VibeVideoCutPage() {
               selectedPageId: project.composition.pages[0].id
             }
           };
-          setUpdateProject(updatedProject);
+          if (isMounted) setUpdateProject(updatedProject);
         } else if (!project.composition?.pages?.length) {
           // Create default composition with a single page if it doesn't exist
           const defaultPage = createDefaultPage();
@@ -95,7 +126,7 @@ export default function VibeVideoCutPage() {
           const updatedProject = {
             ...project,
             composition: {
-              ...project.composition,
+              ...project.composition || {},
               pages: [defaultPage]
             },
             appState: {
@@ -103,13 +134,20 @@ export default function VibeVideoCutPage() {
               selectedPageId: defaultPage.id
             }
           };
-          setUpdateProject(updatedProject);
+          if (isMounted) setUpdateProject(updatedProject);
         }
       } catch (err) {
-        console.error('Error updating project:', err);
-        setError(new Error('Failed to update project'));
+        console.error('Error updating project pages:', err);
+        if (isMounted) setError(new Error('Failed to update project pages'));
       }
-    }
+    };
+    
+    ensureValidPages();
+    
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false;
+    };
   }, [project, setUpdateProject, setError]);
 
   // Import necessary update atoms from the atoms file
