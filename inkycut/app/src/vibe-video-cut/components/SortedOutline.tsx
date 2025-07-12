@@ -38,12 +38,10 @@ export const SortedOutlines: React.FC<{
  
 return itemsToDisplay.map((item) => {
     const sequenceProps: {
-        key: string;
         layout: "none";
         from?: number;
         durationInFrames?: number;
     } = {
-        key: item.id,
         layout: "none",
     };
 
@@ -55,7 +53,7 @@ return itemsToDisplay.map((item) => {
     }
 
     return (
-        <Sequence {...sequenceProps}>
+        <Sequence key={item.id} {...sequenceProps}>
             <SelectionOutline
                 changeCompositionElement={changeItem}
                 compositionElement={item}
