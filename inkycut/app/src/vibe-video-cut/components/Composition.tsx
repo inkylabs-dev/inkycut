@@ -9,7 +9,7 @@
 
 // Basic composition component
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, Img, Video } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, Img, Video, Sequence } from 'remotion';
 import { CompositionData, CompositionElement, CompositionPage, ElementRendererProps, defaultCompositionData } from './types'; // Adjust the import path as needed
 import { SortedOutlines } from './SortedOutline';
 import { Layer } from './Layer';
@@ -156,14 +156,6 @@ export const VideoComposition: React.FC<{
   setSelectedItem,
   changeItem,
 }) => {
-  // Debug the props before passing them
-//   console.debug("EnhancedVideoComposition passing props:", {
-//     currentPageIndex,
-//     selectedItem,
-//     hasSetSelectedItem: !!setSelectedItem,
-//     hasChangeItem: !!changeItem
-//   });
-
   return (
     <MainComposition 
       data={data}
@@ -196,53 +188,6 @@ export const MainComposition: React.FC<{
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
-  // Debug log to see what's happening
-//   console.debug("MainComposition rendering:", {
-//     currentPageIndex,
-//     selectedItem,
-//     hasSetSelectedItem: !!setSelectedItem,
-//     hasChangeItem: !!changeItem,
-//     elementsCount: data.pages[currentPageIndex]?.elements.length || 0
-//   });
-  
-  // Calculate which page should be shown based on frame
-  let pageIndex = currentPageIndex;
-  let frameOffset = 0;
-  
-  if (currentPageIndex === undefined) {
-    // Auto-calculate page based on cumulative duration
-    let cumulativeFrames = 0;
-    for (let i = 0; i < data.pages.length; i++) {
-      if (frame < cumulativeFrames + data.pages[i].duration) {
-        pageIndex = i;
-        frameOffset = frame - cumulativeFrames;
-        break;
-      }
-      cumulativeFrames += data.pages[i].duration;
-    }
-  } else {
-    frameOffset = frame;
-  }
-  
-  const currentPage = data.pages[pageIndex];
-  
-  if (!currentPage) {
-    return (
-      <AbsoluteFill style={{ backgroundColor: '#000000' }}>
-        <div style={{ 
-          color: 'white', 
-          fontSize: 24, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          height: '100%' 
-        }}>
-          No page found
-        </div>
-      </AbsoluteFill>
-    );
-  }
-
   // Handle pointer down event to clear selection
   const onPointerDown = React.useCallback(
     (e: React.PointerEvent) => {
@@ -255,51 +200,129 @@ export const MainComposition: React.FC<{
       if (e.currentTarget === e.target) {
         setSelectedItem(null);
       }
-
     },
     [setSelectedItem],
   );
 
-  // Styles for our layers
-  const layerContainer: React.CSSProperties = {
-    backgroundColor: currentPage.backgroundColor || '#ffffff',
-  };
-
   // Outer container style
   const outer: React.CSSProperties = {};
+  
+  // When in editing mode (with a specific currentPageIndex), render only that page
+  if (currentPageIndex !== undefined) {
+    const currentPage = data.pages[currentPageIndex];
+    
+    if (!currentPage) {
+      return (
+        <AbsoluteFill style={{ backgroundColor: '#000000' }}>
+          <div style={{ 
+            color: 'white', 
+            fontSize: 24, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            height: '100%' 
+          }}>
+            No page found
+          </div>
+        </AbsoluteFill>
+      );
+    }
+    
+    // Styles for our layers
+    const layerContainer: React.CSSProperties = {
+      backgroundColor: currentPage.backgroundColor || '#ffffff',
+    };
 
-  // Process elements to ensure they all have IDs
-  const elementsWithIds = currentPage.elements.map(element => {
-    if (element.id) return element;
-    return { ...element, id: generateUniqueId() };
-  });
+    // Process elements to ensure they all have IDs
+    const elementsWithIds = currentPage.elements.map(element => {
+      if (element.id) return element;
+      return { ...element, id: generateUniqueId() };
+    });
 
+    return (
+      <AbsoluteFill style={outer} onPointerDown={onPointerDown}>
+        {/* Base layer with content */}
+        <AbsoluteFill style={layerContainer}>
+          {/* Wrap ElementRenderer with Layer for proper time-based sequencing */}
+          {elementsWithIds.map((element) => (
+            <Layer
+              key={`element-${element.id}`}
+              element={element}
+              frame={frame}
+              fps={fps}
+            >
+              <ElementRenderer
+                element={element}
+                frame={frame}
+                fps={fps}
+              />
+            </Layer>
+          ))}
+        </AbsoluteFill>
+        
+        {/* Selection outlines and interactive controls overlay */}
+        {setSelectedItem && changeItem && (
+          <SortedOutlines
+            selectedItem={selectedItem}
+            items={elementsWithIds}
+            setSelectedItem={setSelectedItem}
+            changeItem={changeItem}
+          />
+        )}
+      </AbsoluteFill>
+    );
+  }
+  
+  // When rendering the full video, wrap each page in a Sequence
+  // Calculate the frame durations for each page
+  const pageDurations = data.pages.map(page => page.duration || 0);
+  let cumulativeFrames = 0;
+  
   return (
     <AbsoluteFill style={outer} onPointerDown={onPointerDown}>
-      {/* Base layer with content */}
-      <AbsoluteFill style={layerContainer}>
-        {/* Wrap ElementRenderer with Layer for proper time-based sequencing */}
-        {elementsWithIds.map((element) => (
-          <Layer
-            key={`element-${element.id}`}
-            element={element}
-            frame={frameOffset}
-            fps={fps}
+      {data.pages.map((page, index) => {
+        // Calculate the start frame for this page
+        const startFrame = cumulativeFrames;
+        cumulativeFrames += pageDurations[index];
+        
+        // Process elements to ensure they all have IDs
+        const elementsWithIds = page.elements.map(element => {
+          if (element.id) return element;
+          return { ...element, id: generateUniqueId() };
+        });
+        
+        return (
+          <Sequence
+            key={`page-${index}`}
+            from={startFrame}
+            durationInFrames={pageDurations[index]}
           >
-            <ElementRenderer
-              element={element}
-              frame={frameOffset}
-              fps={fps}
-            />
-          </Layer>
-        ))}
-      </AbsoluteFill>
+            <AbsoluteFill style={{ backgroundColor: page.backgroundColor || '#ffffff' }}>
+              {elementsWithIds.map((element) => (
+                <Layer
+                  key={`element-${element.id}`}
+                  element={element}
+                  frame={frame - startFrame}
+                  fps={fps}
+                >
+                  <ElementRenderer
+                    element={element}
+                    frame={frame - startFrame}
+                    fps={fps}
+                  />
+                </Layer>
+              ))}
+            </AbsoluteFill>
+          </Sequence>
+        );
+      })}
       
-      {/* Selection outlines and interactive controls overlay */}
-      {setSelectedItem && changeItem && (
+      {/* Selection outlines overlay only shown for the active page when in edit mode */}
+      {/* This shouldn't execute in full video mode, but included for completeness */}
+      {currentPageIndex !== undefined && setSelectedItem && changeItem && data.pages[currentPageIndex] && (
         <SortedOutlines
           selectedItem={selectedItem}
-          items={elementsWithIds}
+          items={data.pages[currentPageIndex].elements.map(el => el.id ? el : {...el, id: generateUniqueId()})}
           setSelectedItem={setSelectedItem}
           changeItem={changeItem}
         />
