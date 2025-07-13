@@ -13,7 +13,10 @@ import { Link } from 'react-router-dom';
 import { CompositionElement } from './types';
 import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject } from '../atoms';
 import FilePreview from './FilePreview';
+import FileUploadComponent from '../../file-upload/FileUploadComponent';
 import ElementPreview from './ElementPreview';
+import { useQuery, getAllFilesByUser, getDownloadFileSignedURL } from 'wasp/client/operations';
+import type { File as DbFile } from 'wasp/entities';
 
 interface LeftPanelProps {
   onElementUpdate?: (elementId: string, updatedData: Partial<CompositionElement> | any) => void;
@@ -30,18 +33,28 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
   // Always enabled
   const propertiesEnabled = true;
   const [activeTab, setActiveTab] = useState<'explorer' | 'elements'>('explorer');
-  const [isDragOver, setIsDragOver] = useState(false);
   const [recentlyUpdated, setRecentlyUpdated] = useState<{[key: string]: boolean}>({});
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const [assets, setAssets] = useState<Array<{
-    id: number;
-    name: string;
-    type: string;
-    size: string;
-    file: File | null;
-  }>>([]);
   const { data: user } = useAuth();
+  
+  const { 
+    data: filesData, 
+    isLoading: filesLoading, 
+    refetch: refetchFiles 
+  } = useQuery(getAllFilesByUser, { page: 1, limit: 100 }, { enabled: !!user });
+
+  const uploadedFiles = filesData?.files || [];
+
+  const handleUploadComplete = (uploadedFile: any) => {
+    console.log('File uploaded successfully:', uploadedFile);
+    // Refresh the uploaded files list
+    refetchFiles();
+  };
+
+  const handleUploadError = (error: any) => {
+    console.error('Upload error:', error);
+  };
   
   // Function to reset the project to its default state
   const handleResetProject = () => {
@@ -64,9 +77,6 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
       
       // Clear selected element
       setSelectedElement(null);
-      
-      // Clear assets
-      setAssets([]);
       
       // Close menu after reset
       setShowMenu(false);
@@ -115,73 +125,73 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
     return 'U';
   };
 
-  const getFileType = (fileName: string): string => {
-    const extension = fileName.split('.').pop()?.toLowerCase();
-    switch (extension) {
-      case 'mp4':
-      case 'mov':
-      case 'avi':
-      case 'webm':
-        return 'video';
-      case 'mp3':
-      case 'wav':
-      case 'ogg':
-      case 'aac':
-        return 'audio';
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
-      case 'webp':
-        return 'image';
-      default:
-        return 'document';
+  // Component to render file preview
+  const FilePreviewItem = ({ file }: { file: DbFile }) => {
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [hasError, setHasError] = useState(false);
+
+    useEffect(() => {
+      const loadPreviewUrl = async () => {
+        if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+          return;
+        }
+        
+        setIsLoading(true);
+        setHasError(false);
+        
+        try {
+          const url = await getDownloadFileSignedURL({ key: file.key });
+          setPreviewUrl(url);
+        } catch (error) {
+          console.error('Failed to load preview URL:', error);
+          setHasError(true);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      loadPreviewUrl();
+    }, [file.key, file.type]);
+
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
+
+    if (isLoading) {
+      return <div className="w-8 h-8 bg-gray-200 animate-pulse rounded flex-shrink-0" />;
     }
-  };
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    // Only set isDragOver to false if we're leaving the entire drop zone
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX;
-    const y = e.clientY;
-    
-    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-      setIsDragOver(false);
+    if (hasError || (!isImage && !isVideo)) {
+      return <DocumentIcon className="w-8 h-8 text-gray-400 flex-shrink-0" />;
     }
-  };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) {
-      const newAssets = files.map((file, index) => ({
-        id: Date.now() * 1000 + Math.random() * 1000 + index, // More unique ID generation
-        name: file.name,
-        type: getFileType(file.name),
-        size: formatFileSize(file.size),
-        file: file // Store the actual File object for later use
-      }));
-
-      setAssets(prevAssets => [...prevAssets, ...newAssets]);
-      console.log('Files dropped and added:', newAssets);
+    if (isImage && previewUrl) {
+      return (
+        <img 
+          src={previewUrl} 
+          alt={file.name}
+          className="w-8 h-8 object-cover rounded flex-shrink-0 border border-gray-200"
+          onError={() => setHasError(true)}
+        />
+      );
     }
+
+    if (isVideo && previewUrl) {
+      return (
+        <video 
+          src={previewUrl}
+          className="w-8 h-8 object-cover rounded flex-shrink-0 border border-gray-200"
+          muted
+          preload="metadata"
+          onError={() => setHasError(true)}
+        />
+      );
+    }
+
+    // Fallback to document icon
+    return <DocumentIcon className="w-8 h-8 text-gray-400 flex-shrink-0" />;
   };
+
 
   return (
     <div className="h-full flex flex-col">
@@ -279,54 +289,51 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-900">Project Assets</h3>
             </div>
-            <div 
-              className={`min-h-[200px] transition-all duration-200 ${
-                isDragOver 
-                  ? 'border-2 border-dashed border-blue-400 bg-blue-50' 
-                  : 'border-2 border-transparent'
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
+            
+            {/* File Upload Section */}
+            <div className="mb-6">
+              <h4 className="text-xs font-medium text-gray-700 mb-2">Upload Files</h4>
+              <FileUploadComponent
+                onUploadComplete={handleUploadComplete}
+                onUploadError={handleUploadError}
+                buttonText="Upload to Project"
+                className="mb-4"
+              />
+            </div>
+            {/* Uploaded Files Section */}
+            <div>
+              <h4 className="text-xs font-medium text-gray-700 mb-2">Your Uploaded Files</h4>
               <div className="space-y-2">
-                {assets.length > 0 ? (
-                  assets.map((asset) => (
+                {filesLoading ? (
+                  <div className="text-xs text-gray-500 py-2">Loading files...</div>
+                ) : uploadedFiles.length > 0 ? (
+                  uploadedFiles.map((file: DbFile) => (
                     <div
-                      key={asset.id}
-                      className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer"
+                      key={file.id}
+                      className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer border border-gray-200"
                       onClick={() => {
-                        // Can't directly select assets as they're not CompositionElements
-                        // We should handle this differently or convert assets to elements
-                        console.log('Asset selected:', asset);
+                        console.log('Uploaded file selected:', file);
                       }}
                     >
-                      <FilePreview file={asset.file} type={asset.type} name={asset.name} className="w-12 h-12" />
-                      <div className="ml-3 flex-1">
-                        <div className="text-sm font-medium text-gray-900">{asset.name}</div>
-                        <div className="text-xs text-gray-500">{asset.size}</div>
+                      <div className="mr-3">
+                        <FilePreviewItem file={file} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900 truncate" title={file.name}>
+                          {file.name}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate">
+                          {file.type}
+                        </div>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="flex items-center justify-center py-8 text-gray-500">
-                    <div className="text-center">
-                      <DocumentIcon className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm font-medium">No assets yet</p>
-                      <p className="text-xs mt-1">Drag and drop files here to add assets</p>
-                    </div>
-                  </div>
-                )}
-                {isDragOver && (
-                  <div className="flex items-center justify-center py-8 text-blue-600">
-                    <div className="text-center">
-                      <DocumentIcon className="h-8 w-8 mx-auto mb-2 text-blue-400" />
-                      <p className="text-sm font-medium">Drop files here to add to project</p>
-                    </div>
-                  </div>
+                  <div className="text-xs text-gray-500 py-2">No files uploaded yet</div>
                 )}
               </div>
             </div>
+
           </div>
         )}
 

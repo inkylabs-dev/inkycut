@@ -27,6 +27,7 @@ export default function FileUploadComponent({
 }: FileUploadComponentProps) {
   const [uploadProgressPercent, setUploadProgressPercent] = useState<number>(0);
   const [uploadError, setUploadError] = useState<FileUploadError | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleUpload = async (e: FormEvent<HTMLFormElement>) => {
     try {
@@ -64,6 +65,7 @@ export default function FileUploadComponent({
       });
       
       formElement.reset();
+      setSelectedFile(null);
       
       if (onUploadComplete) {
         onUploadComplete(result);
@@ -82,6 +84,12 @@ export default function FileUploadComponent({
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
+    setUploadError(null);
+  };
+
   return (
     <form onSubmit={handleUpload} className={cn('flex flex-col gap-2', className)}>
       <input
@@ -89,14 +97,25 @@ export default function FileUploadComponent({
         id='file-upload'
         name='file-upload'
         accept={acceptedFileTypes.join(',')}
-        className='text-gray-600 dark:text-gray-400'
-        onChange={() => setUploadError(null)}
+        className='text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'
+        onChange={handleFileChange}
         disabled={disabled || uploadProgressPercent > 0}
       />
+      {selectedFile && (
+        <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded border">
+          Selected: {selectedFile.name}
+        </div>
+      )}
       <button
         type='submit'
-        disabled={disabled || uploadProgressPercent > 0}
-        className='min-w-[7rem] relative font-medium text-gray-800/90 bg-yellow-50 shadow-md ring-1 ring-inset ring-slate-200 py-2 px-4 rounded-md hover:bg-yellow-100 duration-200 ease-in-out focus:outline-none focus:shadow-none hover:shadow-none disabled:cursor-progress disabled:opacity-50'
+        disabled={disabled || uploadProgressPercent > 0 || !selectedFile}
+        className={cn(
+          'min-w-[7rem] relative font-medium py-2 px-4 rounded-md duration-200 ease-in-out focus:outline-none',
+          selectedFile && uploadProgressPercent === 0
+            ? 'text-white bg-blue-600 hover:bg-blue-700 shadow-md'
+            : 'text-gray-500 bg-gray-100 cursor-not-allowed',
+          uploadProgressPercent > 0 && 'cursor-progress opacity-75'
+        )}
       >
         {uploadProgressPercent > 0 ? (
           <>
@@ -106,12 +125,14 @@ export default function FileUploadComponent({
               aria-valuenow={uploadProgressPercent}
               aria-valuemin={0}
               aria-valuemax={100}
-              className='absolute bottom-0 left-0 h-1 bg-yellow-500 transition-all duration-300 ease-in-out rounded-b-md'
+              className='absolute bottom-0 left-0 h-1 bg-blue-300 transition-all duration-300 ease-in-out rounded-b-md'
               style={{ width: `${uploadProgressPercent}%` }}
             ></div>
           </>
-        ) : (
+        ) : selectedFile ? (
           buttonText
+        ) : (
+          'Select a file first'
         )}
       </button>
       {uploadError && <div className='text-red-500 text-sm'>{uploadError.message}</div>}
