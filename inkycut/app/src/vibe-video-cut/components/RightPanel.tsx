@@ -6,6 +6,7 @@
  */
 import React, { useState, useRef, useEffect } from 'react';
 import Markdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import { useAtom } from 'jotai';
 import { 
   PaperAirplaneIcon,
@@ -194,7 +195,7 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
                 }`}>
                   {message.role === 'assistant' ? (
                     <div className="text-sm whitespace-pre-wrap">
-                      <Markdown>{message.content}</Markdown>
+                      <Markdown rehypePlugins={[rehypeRaw]}>{message.content}</Markdown>
                     </div>
                   ) : (
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>

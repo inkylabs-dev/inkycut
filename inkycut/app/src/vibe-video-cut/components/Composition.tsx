@@ -275,6 +275,24 @@ export const MainComposition: React.FC<{
   
   // When rendering the full video, wrap each page in a Sequence
   // Calculate the frame durations for each page
+  // Handle missing or invalid data
+  if (!data || !data.pages || !Array.isArray(data.pages) || data.pages.length === 0) {
+    return (
+      <AbsoluteFill style={{ backgroundColor: '#ff0000' }}>
+        <div style={{ 
+          color: 'white', 
+          fontSize: 24, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          height: '100%' 
+        }}>
+          Error: No pages data available. Data: {JSON.stringify(data)}
+        </div>
+      </AbsoluteFill>
+    );
+  }
+
   const pageDurations = data.pages.map(page => page.duration || 0);
   let cumulativeFrames = 0;
   

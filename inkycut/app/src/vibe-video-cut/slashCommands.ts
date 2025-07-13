@@ -68,11 +68,16 @@ export async function processSlashCommand(command: string, project: any, user: U
       const type = argsObj.type || 'mp4';
       const quality = argsObj.quality || '1080p';
       
+      // Extract composition data from the project structure
+      const compositionData = project.composition || project;
+      
       // Start rendering process
-      const result = await renderProject(project, type, quality, user, context);
+      const result = await renderProject(compositionData, type, quality, user, context);
       
       return {
-        message: `Well done! Click to download the video: [link](${result.videoUrl})`,
+        message: `Well done! Click to download the video:
+<a href="${result.videoUrl}" target="_blank">link</a>
+<video src="${result.videoUrl}" controls></video>`,
         status: 'download_complete',
         type,
         quality
