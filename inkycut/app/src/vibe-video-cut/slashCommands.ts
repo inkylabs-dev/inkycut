@@ -5,7 +5,6 @@ import fs from 'fs';
 import os from 'os';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
-import { renderTasks } from './operations';
 import { getUploadFileSignedURLFromS3, getDownloadFileSignedURLFromS3 } from '../file-upload/s3Utils';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -23,6 +22,7 @@ async function getRemotionBundle() {
   if (!remotionBundlePath) {
     console.log('Getting Remotion bundle path...');
     // Use the pre-built bundle from public/remotion-bundle
+    // Hack: wasp compiles the web app under .wasp/out/web-app, while this file is in .wasp/out/server
     remotionBundlePath = path.resolve(__dirname, '../../web-app/public/remotion-bundle');
     
     // Check if the bundle exists
@@ -116,20 +116,20 @@ async function startRendering(project: any, type: string, quality: string, user:
   };
   
   // Store the task
-  renderTasks.set(taskId, renderTask);
+  // renderTasks.set(taskId, renderTask);
   
   // Start rendering in the background
   setTimeout(() => {
     renderProject(taskId, project, type, quality, user, context)
       .catch((error: Error) => {
         console.error(`Error rendering project ${project.id}:`, error);
-        const task = renderTasks.get(taskId);
-        if (task) {
-          task.status = 'failed';
-          task.error = error.message;
-          task.updatedAt = new Date().toISOString();
-          renderTasks.set(taskId, task);
-        }
+        // const task = renderTasks.get(taskId);
+        // if (task) {
+        //   task.status = 'failed';
+        //   task.error = error.message;
+        //   task.updatedAt = new Date().toISOString();
+        //   renderTasks.set(taskId, task);
+        // }
       });
   }, 0);
   
@@ -148,22 +148,22 @@ async function renderProject(taskId: string, project: any, type: string, quality
   let downloadUrl: string | undefined;
   
   // Update task status
-  const updateTaskStatus = (status: string, progress: number, url?: string) => {
-    const task = renderTasks.get(taskId);
-    if (task) {
-      task.status = status;
-      task.progress = progress;
-      if (url) {
-        task.videoUrl = url;
-        downloadUrl = url;
-      }
-      task.updatedAt = new Date().toISOString();
-      renderTasks.set(taskId, task);
-    }
-  };
+//   const updateTaskStatus = (status: string, progress: number, url?: string) => {
+//     const task = renderTasks.get(taskId);
+//     if (task) {
+//       task.status = status;
+//       task.progress = progress;
+//       if (url) {
+//         task.videoUrl = url;
+//         downloadUrl = url;
+//       }
+//       task.updatedAt = new Date().toISOString();
+//       renderTasks.set(taskId, task);
+//     }
+//   };
   
   try {
-    updateTaskStatus('bundling', 10);
+    // updateTaskStatus('bundling', 10);
     
     // Determine rendering settings based on quality
     let width: number, height: number, fps: number;
@@ -219,7 +219,7 @@ async function renderProject(taskId: string, project: any, type: string, quality
     // Get the path to the pre-built Remotion bundle
     let renderingSuccessful = false;
     try {
-      updateTaskStatus('bundling', 15);
+    //   updateTaskStatus('bundling', 15);
       const bundlePath = await getRemotionBundle();
       
       // Set up the composition with the project data
@@ -227,7 +227,7 @@ async function renderProject(taskId: string, project: any, type: string, quality
         projectData: project
       };
       
-      updateTaskStatus('preparing_composition', 25);
+    //   updateTaskStatus('preparing_composition', 25);
       const composition = await selectComposition({
         serveUrl: bundlePath,
         id: 'VideoComposition', // Match the ID defined in the Composition component
@@ -235,7 +235,7 @@ async function renderProject(taskId: string, project: any, type: string, quality
       });
       
       // Perform real rendering with Remotion
-      updateTaskStatus('rendering', 30);
+    //   updateTaskStatus('rendering', 30);
       
       console.log(`Starting real rendering: ${width}x${height} at ${fps}fps, codec: ${type === 'mp4' ? 'h264' : 'vp9'}`);
       console.log(`Output path: ${outputPath}`);
@@ -259,7 +259,7 @@ async function renderProject(taskId: string, project: any, type: string, quality
               const percentage = Math.round(progress * 100);
               if (percentage % 5 === 0) { // Update every 5%
                 console.log(`Rendering progress: ${percentage}%`);
-                updateTaskStatus('rendering', 30 + Math.floor(percentage / 2)); // Scale to 30-80% range
+                // updateTaskStatus('rendering', 30 + Math.floor(percentage / 2)); // Removed, no longer needed
               }
             } 
             // Disabled object progress logging to avoid excessive console output
@@ -270,15 +270,15 @@ async function renderProject(taskId: string, project: any, type: string, quality
         });
         
         console.log(`Rendering completed: ${outputPath}`);
-        updateTaskStatus('rendered', 80);
+        // updateTaskStatus('rendered', 80);
         renderingSuccessful = true;
       } catch (renderError) {
         console.error('Error during Remotion rendering:', renderError);
-        updateTaskStatus('rendering_failed', 30);
+        // updateTaskStatus('rendering_failed', 30);
       }
     } catch (setupError) {
       console.error('Error in Remotion setup:', setupError);
-      updateTaskStatus('setup_failed', 10);
+    //   updateTaskStatus('setup_failed', 10);
       // Continue with simulation
     }
     
@@ -287,7 +287,7 @@ async function renderProject(taskId: string, project: any, type: string, quality
     
     if (renderingSuccessful && fs.existsSync(outputPath)) {
       // If the file exists and rendering was marked successful
-      updateTaskStatus('finalizing', 70);
+    //   updateTaskStatus('finalizing', 70);
     } else {
       throw new Error(`Rendering failed or output file does not exist: ${outputPath}`);
     }
@@ -372,7 +372,7 @@ async function renderProject(taskId: string, project: any, type: string, quality
       }
       
       // Update task with completed status
-      updateTaskStatus('completed', 100, s3DownloadUrl);
+    //   updateTaskStatus('completed', 100, s3DownloadUrl);
       
       return {
         taskId,
@@ -383,7 +383,7 @@ async function renderProject(taskId: string, project: any, type: string, quality
       console.error('Error uploading to S3:', error);
       // Use a fallback URL
       const fallbackUrl = `/api/renders/${outputFilename}`;
-      updateTaskStatus('completed', 100, fallbackUrl);
+    //   updateTaskStatus('completed', 100, fallbackUrl);
       return {
         taskId,
         status: 'completed',
@@ -392,7 +392,7 @@ async function renderProject(taskId: string, project: any, type: string, quality
     }
   } catch (error) {
     console.error(`Error in renderProject for task ${taskId}:`, error);
-    updateTaskStatus('failed', 0);
+    // updateTaskStatus('failed', 0);
     throw error;
   }
 }

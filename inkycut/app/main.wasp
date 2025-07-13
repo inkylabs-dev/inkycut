@@ -343,46 +343,18 @@ page VibeVideoCutPage {
   component: import VibeVideoCutPage from "@src/vibe-video-cut/VibeVideoCutPage"
 }
 
-action createVibeProject {
-  fn: import { createVibeProject } from "@src/vibe-video-cut/operations",
-  entities: [User]
-}
 
-action updateVibeProject {
-  fn: import { updateVibeProject } from "@src/vibe-video-cut/operations",
-  entities: [User]
-}
 
 action processVideoAIPrompt {
   fn: import { processVideoAIPrompt } from "@src/vibe-video-cut/operations",
   entities: [User]
 }
 
-query getVibeProject {
-  fn: import { getVibeProject } from "@src/vibe-video-cut/operations",
-  entities: [User]
-}
 
-query getUserVibeProjects {
-  fn: import { getUserVibeProjects } from "@src/vibe-video-cut/operations",
-  entities: [User]
-}
 
-action renderVibeProject {
-  fn: import { renderVibeProject } from "@src/vibe-video-cut/operations",
-  entities: [User]
-}
 
-query getTaskProgress {
-  fn: import { getTaskProgress } from "@src/vibe-video-cut/operations",
-  entities: [User]
-}
 
-api taskProgressStream {
-  fn: import { renderProgressSSE } from "@src/vibe-video-cut/sse",
-  entities: [User],
-  httpRoute: (GET, "/task/:taskId/progress-stream")
-}
+
 
 
 //#endregion
