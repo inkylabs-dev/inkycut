@@ -10,6 +10,11 @@ import * as z from 'zod';
 import OpenAI from 'openai';
 import { SubscriptionStatus } from '../payment/plans';
 import { ensureArgsSchemaOrThrowHttpError } from '../server/validation';
+import path from 'path';
+import fs from 'fs';
+import { bundle } from '@remotion/bundler';
+import { renderMedia, selectComposition } from '@remotion/renderer';
+import { processSlashCommand } from './slashCommands';
 
 // OpenAI client setup
 const openAi = setUpOpenAi();
@@ -62,11 +67,11 @@ function isEligibleForAIFeatures(user: User): boolean {
 }
 
 /**
- * Process video editing AI prompt and return suggested edits
+ * Process video editing AI prompt or slash command and return suggested edits or command results
  *
  * @param args The input data including projectId, prompt, and current project data
  * @param context The operation context containing user authentication data
- * @returns Updated project data with AI-suggested changes
+ * @returns Updated project data with AI-suggested changes or command results
  * @throws HttpError if user is not authenticated or not eligible for AI features
  */
 export const processVideoAIPrompt = async (
@@ -96,7 +101,25 @@ export const processVideoAIPrompt = async (
       throw new HttpError(404, 'Project not found');
     }
 
-    // Call OpenAI with the prompt and project context
+    // Check if this is a slash command
+    if (prompt.trim().startsWith('/')) {
+      // Extract the command without the leading slash
+      const command = prompt.trim().substring(1);
+      
+      // Process the slash command
+      try {
+        const commandResponse = await processSlashCommand(command, project, context.user, context);
+        return {
+          message: commandResponse.message,
+          commandResult: commandResponse,
+          isCommandResult: true
+        };
+      } catch (commandError: any) {
+        throw new HttpError(400, `Command error: ${commandError.message}`);
+      }
+    }
+    
+    // If not a slash command, proceed with normal AI processing
     const aiResponse = await generateVideoEditSuggestions(prompt, project);
 
     if (!aiResponse) {
@@ -535,3 +558,6 @@ function simulateRendering(taskId: string, projectData: any) {
   // Start the simulation
   setTimeout(updateProgress, 1000);
 }
+
+//#region Slash Commands
+// Slash command functionality moved to slashCommands.ts
