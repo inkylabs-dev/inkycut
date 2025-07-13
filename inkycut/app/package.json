@@ -33,6 +33,7 @@
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
     "react-icons": "4.11.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^6.26.2",
     "remotion": "4.0.322",
     "stripe": "11.15.0",

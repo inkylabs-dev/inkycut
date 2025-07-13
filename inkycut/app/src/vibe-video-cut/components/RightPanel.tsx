@@ -5,6 +5,7 @@
  * It uses the OpenSaaS pattern to communicate with the server-side AI operation.
  */
 import React, { useState, useRef, useEffect } from 'react';
+import Markdown from 'react-markdown';
 import { useAtom } from 'jotai';
 import { 
   PaperAirplaneIcon,
@@ -191,7 +192,13 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-900'
                 }`}>
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  {message.role === 'assistant' ? (
+                    <div className="text-sm whitespace-pre-wrap">
+                      <Markdown>{message.content}</Markdown>
+                    </div>
+                  ) : (
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  )}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
                   {formatTime(message.timestamp)}

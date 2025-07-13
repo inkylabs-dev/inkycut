@@ -72,7 +72,7 @@ export async function processSlashCommand(command: string, project: any, user: U
       const result = await renderProject(project, type, quality, user, context);
       
       return {
-        message: `Well done! Click to download the video: <${result.videoUrl}>`,
+        message: `Well done! Click to download the video: [link](${result.videoUrl})`,
         status: 'download_complete',
         type,
         quality
