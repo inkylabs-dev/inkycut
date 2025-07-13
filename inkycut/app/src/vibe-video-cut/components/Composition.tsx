@@ -151,7 +151,7 @@ export const VideoComposition: React.FC<{
   changeItem?: (elementId: string, updater: (element: CompositionElement) => CompositionElement) => void;
 }> = ({ 
   data,
-  currentPageIndex = 0,
+  currentPageIndex,
   selectedItem = null,
   setSelectedItem,
   changeItem,
@@ -180,7 +180,7 @@ export const MainComposition: React.FC<{
   changeItem?: (elementId: string, updater: (element: CompositionElement) => CompositionElement) => void;
 }> = ({ 
   data, 
-  currentPageIndex = 0,
+  currentPageIndex,
   selectedItem = null,
   setSelectedItem = () => {},
   changeItem = () => {},
@@ -277,6 +277,7 @@ export const MainComposition: React.FC<{
   // Calculate the frame durations for each page
   const pageDurations = data.pages.map(page => page.duration || 0);
   let cumulativeFrames = 0;
+  
   
   return (
     <AbsoluteFill style={outer} onPointerDown={onPointerDown}>
