@@ -171,7 +171,7 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       const newAssets = files.map((file, index) => ({
-        id: Date.now() + index, // Simple ID generation
+        id: Date.now() * 1000 + Math.random() * 1000 + index, // More unique ID generation
         name: file.name,
         type: getFileType(file.name),
         size: formatFileSize(file.size),
