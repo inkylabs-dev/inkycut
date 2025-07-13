@@ -5,10 +5,6 @@ import * as z from 'zod';
 import OpenAI from 'openai';
 import { SubscriptionStatus } from '../payment/plans';
 import { ensureArgsSchemaOrThrowHttpError } from '../server/validation';
-import path from 'path';
-import fs from 'fs';
-import { bundle } from '@remotion/bundler';
-import { renderMedia, selectComposition } from '@remotion/renderer';
 import { processSlashCommand } from './slashCommands';
 
 // OpenAI client setup

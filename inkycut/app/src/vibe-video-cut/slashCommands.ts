@@ -3,7 +3,6 @@ import { HttpError } from 'wasp/server';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
 import { getUploadFileSignedURLFromS3, getDownloadFileSignedURLFromS3 } from '../file-upload/s3Utils';
 import { dirname } from 'path';
@@ -20,7 +19,6 @@ let remotionBundlePath: string | null = null;
 // Function to get the path to the Remotion bundle
 async function getRemotionBundle() {
   if (!remotionBundlePath) {
-    console.log('Getting Remotion bundle path...');
     // Use the pre-built bundle from public/remotion-bundle
     // Hack: wasp compiles the web app under .wasp/out/web-app, while this file is in .wasp/out/server
     remotionBundlePath = path.resolve(__dirname, '../../web-app/public/remotion-bundle');
@@ -71,12 +69,11 @@ export async function processSlashCommand(command: string, project: any, user: U
       const quality = argsObj.quality || '1080p';
       
       // Start rendering process
-      const taskId = await startRendering(project, type, quality, user, context);
+      const result = await renderProject(project, type, quality, user, context);
       
       return {
-        message: `Started rendering your project as ${type} with ${quality} quality. TaskId: ${taskId}`,
-        taskId,
-        status: 'rendering_started',
+        message: `Well done! Click to download the video: <${result.videoUrl}>`,
+        status: 'download_complete',
         type,
         quality
       };
@@ -88,55 +85,6 @@ export async function processSlashCommand(command: string, project: any, user: U
 }
 
 /**
- * Start the rendering process for a project
- * 
- * @param project The project data to render
- * @param type The output file type (mp4, webm, etc.)
- * @param quality The quality setting (1080p, 720p, etc.)
- * @param user The user who initiated the render
- * @returns Task ID for tracking render progress
- */
-async function startRendering(project: any, type: string, quality: string, user: User, context?: any): Promise<string> {
-  // Generate a unique task ID
-  const taskId = `render_${Math.random().toString(36).substring(2, 15)}`;
-  
-  // Create a task to track rendering progress
-  const renderTask = {
-    id: taskId,
-    projectId: project.id,
-    userId: user.id,
-    status: 'preparing',
-    progress: 0,
-    type,
-    quality,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    videoUrl: null,
-    error: null,
-  };
-  
-  // Store the task
-  // renderTasks.set(taskId, renderTask);
-  
-  // Start rendering in the background
-  setTimeout(() => {
-    renderProject(taskId, project, type, quality, user, context)
-      .catch((error: Error) => {
-        console.error(`Error rendering project ${project.id}:`, error);
-        // const task = renderTasks.get(taskId);
-        // if (task) {
-        //   task.status = 'failed';
-        //   task.error = error.message;
-        //   task.updatedAt = new Date().toISOString();
-        //   renderTasks.set(taskId, task);
-        // }
-      });
-  }, 0);
-  
-  return taskId;
-}
-
-/**
  * Render a project using Remotion
  * 
  * @param taskId The task ID to update progress
@@ -144,27 +92,10 @@ async function startRendering(project: any, type: string, quality: string, user:
  * @param type The output file type
  * @param quality The quality setting
  */
-async function renderProject(taskId: string, project: any, type: string, quality: string, user?: User, context?: any): Promise<any> {
+async function renderProject(project: any, type: string, quality: string, user?: User, context?: any): Promise<any> {
   let downloadUrl: string | undefined;
   
-  // Update task status
-//   const updateTaskStatus = (status: string, progress: number, url?: string) => {
-//     const task = renderTasks.get(taskId);
-//     if (task) {
-//       task.status = status;
-//       task.progress = progress;
-//       if (url) {
-//         task.videoUrl = url;
-//         downloadUrl = url;
-//       }
-//       task.updatedAt = new Date().toISOString();
-//       renderTasks.set(taskId, task);
-//     }
-//   };
-  
   try {
-    // updateTaskStatus('bundling', 10);
-    
     // Determine rendering settings based on quality
     let width: number, height: number, fps: number;
     switch (quality) {
@@ -224,7 +155,7 @@ async function renderProject(taskId: string, project: any, type: string, quality
       
       // Set up the composition with the project data
       const inputProps = {
-        projectData: project
+        data: project
       };
       
     //   updateTaskStatus('preparing_composition', 25);
@@ -261,11 +192,7 @@ async function renderProject(taskId: string, project: any, type: string, quality
                 console.log(`Rendering progress: ${percentage}%`);
                 // updateTaskStatus('rendering', 30 + Math.floor(percentage / 2)); // Removed, no longer needed
               }
-            } 
-            // Disabled object progress logging to avoid excessive console output
-            // else {
-            //   console.log(`Rendering in progress (raw value: ${progress})`);
-            // }
+            }
           }
         });
         
@@ -375,7 +302,6 @@ async function renderProject(taskId: string, project: any, type: string, quality
     //   updateTaskStatus('completed', 100, s3DownloadUrl);
       
       return {
-        taskId,
         status: 'completed',
         videoUrl: downloadUrl || s3DownloadUrl,
       };
@@ -385,13 +311,12 @@ async function renderProject(taskId: string, project: any, type: string, quality
       const fallbackUrl = `/api/renders/${outputFilename}`;
     //   updateTaskStatus('completed', 100, fallbackUrl);
       return {
-        taskId,
         status: 'completed',
         videoUrl: downloadUrl || fallbackUrl,
       };
     }
   } catch (error) {
-    console.error(`Error in renderProject for task ${taskId}:`, error);
+    console.error(`Error in renderProject for task:`, error);
     // updateTaskStatus('failed', 0);
     throw error;
   }
