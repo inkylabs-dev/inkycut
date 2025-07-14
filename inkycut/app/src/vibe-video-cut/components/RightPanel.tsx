@@ -12,7 +12,8 @@ import {
   PaperAirplaneIcon,
   UserIcon,
   CpuChipIcon,
-  EllipsisHorizontalIcon
+  EllipsisHorizontalIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { ChatMessage } from './types';
 import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom } from '../atoms';
@@ -126,6 +127,14 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
               ? error.message 
               : 'Failed to process your request. Please try again later.'
           );
+          
+          // Add ASSISTANT message with error info and retry suggestion
+          setAddChatMessage({
+            id: Date.now(),
+            role: 'assistant',
+            content: `❌ **Request Failed**\n\nI encountered an error while processing your request: ${error instanceof Error ? error.message : 'Unknown error'}\n\n**Please try again** or check your internet connection.`,
+            timestamp: new Date().toISOString()
+          });
         } finally {
           setIsProcessing(false);
         }
@@ -274,6 +283,42 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
           <span>More actions</span>
         </button>
       </div>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="p-4 bg-red-50 border-t border-red-200">
+          <div className="flex items-center space-x-2">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-red-800">Request Failed</h3>
+              <p className="text-sm text-red-700 mt-1">{error}</p>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              className="flex-shrink-0 text-red-400 hover:text-red-600"
+            >
+              <XMarkIcon className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="mt-3">
+            <button
+              onClick={() => {
+                setError(null);
+                if (inputMessage.trim()) {
+                  handleSendMessage();
+                }
+              }}
+              className="text-sm bg-red-100 text-red-800 px-3 py-1 rounded-md hover:bg-red-200 transition-colors"
+            >
+              Retry Request
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Input */}
       <div className="p-4 border-t border-gray-200 flex-shrink-0">
