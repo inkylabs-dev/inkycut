@@ -11,7 +11,6 @@
 import React from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, Img, Video, Sequence } from 'remotion';
 import { CompositionData, CompositionElement, CompositionPage, ElementRendererProps, defaultCompositionData } from './types'; // Adjust the import path as needed
-import { SortedOutlines } from './SortedOutline';
 import { Layer } from './Layer';
 
 interface CompositionProps {
@@ -152,17 +151,11 @@ export const VideoComposition: React.FC<{
 }> = ({ 
   data,
   currentPageIndex,
-  selectedItem = null,
-  setSelectedItem,
-  changeItem,
 }) => {
   return (
     <MainComposition 
       data={data}
       currentPageIndex={currentPageIndex}
-      selectedItem={selectedItem}
-      setSelectedItem={setSelectedItem}
-      changeItem={changeItem}
     />
   );
 };
@@ -175,35 +168,13 @@ export const VideoComposition: React.FC<{
 export const MainComposition: React.FC<{
   data: CompositionData;
   currentPageIndex?: number;
-  selectedItem?: string | null;
-  setSelectedItem?: (elementId: string | null) => void;
-  changeItem?: (elementId: string, updater: (element: CompositionElement) => CompositionElement) => void;
 }> = ({ 
   data, 
   currentPageIndex,
-  selectedItem = null,
-  setSelectedItem = () => {},
-  changeItem = () => {},
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
-  // Handle pointer down event to clear selection
-  const onPointerDown = React.useCallback(
-    (e: React.PointerEvent) => {
-      // Only handle left mouse button clicks
-      if (e.button !== 0 || !setSelectedItem) {
-        return;
-      }
-      
-      // Make sure the click was directly on the background
-      if (e.currentTarget === e.target) {
-        setSelectedItem(null);
-      }
-    },
-    [setSelectedItem],
-  );
-
   // Outer container style
   const outer: React.CSSProperties = {};
   
@@ -240,7 +211,7 @@ export const MainComposition: React.FC<{
     });
 
     return (
-      <AbsoluteFill style={outer} onPointerDown={onPointerDown}>
+      <AbsoluteFill style={outer}>
         {/* Base layer with content */}
         <AbsoluteFill style={layerContainer}>
           {/* Wrap ElementRenderer with Layer for proper time-based sequencing */}
@@ -259,16 +230,6 @@ export const MainComposition: React.FC<{
             </Layer>
           ))}
         </AbsoluteFill>
-        
-        {/* Selection outlines and interactive controls overlay */}
-        {setSelectedItem && changeItem && (
-          <SortedOutlines
-            selectedItem={selectedItem}
-            items={elementsWithIds}
-            setSelectedItem={setSelectedItem}
-            changeItem={changeItem}
-          />
-        )}
       </AbsoluteFill>
     );
   }
@@ -298,7 +259,7 @@ export const MainComposition: React.FC<{
   
   
   return (
-    <AbsoluteFill style={outer} onPointerDown={onPointerDown}>
+    <AbsoluteFill style={outer}>
       {data.pages.map((page, index) => {
         // Calculate the start frame for this page
         const startFrame = cumulativeFrames;
@@ -335,17 +296,6 @@ export const MainComposition: React.FC<{
           </Sequence>
         );
       })}
-      
-      {/* Selection outlines overlay only shown for the active page when in edit mode */}
-      {/* This shouldn't execute in full video mode, but included for completeness */}
-      {currentPageIndex !== undefined && setSelectedItem && changeItem && data.pages[currentPageIndex] && (
-        <SortedOutlines
-          selectedItem={selectedItem}
-          items={data.pages[currentPageIndex].elements.map(el => el.id ? el : {...el, id: generateUniqueId()})}
-          setSelectedItem={setSelectedItem}
-          changeItem={changeItem}
-        />
-      )}
     </AbsoluteFill>
   );
 };

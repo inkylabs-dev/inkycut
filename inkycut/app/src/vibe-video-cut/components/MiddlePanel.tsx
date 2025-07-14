@@ -10,10 +10,10 @@ import {
   CodeBracketIcon,
   VideoCameraIcon
 } from '@heroicons/react/24/outline';
-import { CompositionElement, CompositionData, defaultCompositionData } from './types';
+import { CompositionData, defaultCompositionData } from './types';
 import { VideoComposition } from './Composition';
 import { fromTheme } from 'tailwind-merge';
-import { projectAtom, selectedElementAtom, selectedPageAtom } from '../atoms';
+import { projectAtom, selectedPageAtom } from '../atoms';
 
 interface MiddlePanelProps {
   onTimelineUpdate: (timeline: any[]) => void;
@@ -24,7 +24,6 @@ interface MiddlePanelProps {
 export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onPageSelect }: MiddlePanelProps) {
   // Use Jotai atoms instead of props
   const [project] = useAtom(projectAtom);
-  const [selectedElement] = useAtom(selectedElementAtom);
   
   // Always enabled
   const propertiesEnabled = true;
@@ -38,7 +37,6 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [playerReady, setPlayerReady] = useState(false);
   const [userEditedJson, setUserEditedJson] = useState(false);
-  const [currentEditingElement, setCurrentEditingElement] = useState<string | null>(null);
   
   const playerRef = useRef<PlayerRef>(null);
   const frameUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -46,20 +44,6 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
   // Store last edited composition to preserve changes when toggling views
   const lastEditedComposition = useRef<CompositionData | null>(null);
 
-  // Sync selectedElement from props with local state
-//   useEffect(() => {
-//     console.log('Selected element from props:', selectedElement);
-//     console.log('Current editing element:', currentEditingElement);
-    
-//     if (selectedElement?.id && selectedElement.id !== currentEditingElement) {
-//       console.log('Updating currentEditingElement to:', selectedElement.id);
-//       setCurrentEditingElement(selectedElement.id);
-//     } else if (!selectedElement && currentEditingElement) {
-//       // If parent component clears selection, we should clear too
-//       console.log('Clearing currentEditingElement');
-//       setCurrentEditingElement(null);
-//     }
-//   }, [selectedElement, currentEditingElement]);
   
   // Refs to track previous project state for comparison
   const prevProjectIdRef = useRef<string>('');
@@ -225,9 +209,6 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
         setIsPlaying(false);
         stopFrameTracking();
       } else {
-        // Clear any current editing selection when starting playback
-        setCurrentEditingElement(null);
-        
         // If at the end, restart from beginning
         if (currentFrame >= totalFrames - 1) {
           console.log('Restarting from beginning');
@@ -256,8 +237,6 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
       setCurrentFrame(0);
       setIsPlaying(false);
       stopFrameTracking();
-      // Clear any current editing selection
-      setCurrentEditingElement(null);
     } catch (error) {
       console.error('Error stopping:', error);
     }
@@ -358,57 +337,6 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleElementSelect = useCallback((elementId: string | null) => {
-    setCurrentEditingElement(elementId);
-    
-    // Optionally propagate selection to parent component if needed
-    if (onPageSelect && elementId) {
-      // Find the element to provide to parent
-      const element = compositionData.pages
-        .flatMap(page => page.elements)
-        .find(el => el.id === elementId);
-      
-      if (element) {
-        onPageSelect(element);
-      }
-    }
-  }, [compositionData.pages, onPageSelect]);
-
-  const handleElementChange = useCallback((elementId: string, updater: (element: CompositionElement) => CompositionElement) => {
-    // Create a deep copy of compositionData to avoid direct state mutation
-    const updatedComposition = JSON.parse(JSON.stringify(compositionData)) as CompositionData;
-    
-    // Find and update the element
-    updatedComposition.pages = updatedComposition.pages.map(page => ({
-      ...page,
-      elements: page.elements.map(element => {
-        if (element.id === elementId) {
-          return updater(element);
-        }
-        return element;
-      }),
-    }));
-    
-    // Update local state
-    setCompositionData(updatedComposition);
-    setJsonString(JSON.stringify(updatedComposition, null, 2));
-    handleJsonChange(JSON.stringify(updatedComposition, null, 2));
-    setUserEditedJson(true);
-    // console.log('Element changed:', elementId, updatedComposition.pages[0].elements[0].left);
-    
-    // Store the latest valid edit in our ref for persistence across view switches
-    lastEditedComposition.current = { ...updatedComposition };
-    
-    // Notify parent component of the update
-    if (onCompositionUpdate) {
-      onCompositionUpdate(updatedComposition);
-    }
-    
-    // Save to localStorage if project has an id
-    if (project?.id) {
-      localStorage.setItem(`vibe-project-composition-${project.id}`, JSON.stringify(updatedComposition));
-    }
-  }, [compositionData, onCompositionUpdate, project?.id]);
 
   return (
     <div className="h-full flex flex-col bg-gray-900">
@@ -462,10 +390,7 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
                 component={VideoComposition}
                 inputProps={{ 
                   data: compositionData,
-                  currentPageIndex: getCurrentPage().pageIndex,
-                  setSelectedItem: handleElementSelect,
-                  changeItem: handleElementChange,
-                  selectedItem: currentEditingElement
+                  currentPageIndex: getCurrentPage().pageIndex
                 }}
                 durationInFrames={totalFrames}
                 compositionWidth={compositionData.width}
@@ -514,8 +439,6 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
                 </div>
               </div>
             </div>
-            
-            {/* Interactive editing functionality implemented in the InteractiveComposition component */}
           </div>
 
           {/* Control Bar */}
