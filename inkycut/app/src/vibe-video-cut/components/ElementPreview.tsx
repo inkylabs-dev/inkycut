@@ -6,52 +6,86 @@ import {
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { CompositionElement } from './types';
+import { FileResolver } from '../utils/fileResolver';
 
 /**
  * Component to preview a composition element with appropriate rendering based on element type
+ * Now supports file resolution for local file references
  */
 interface ElementPreviewProps { 
   element: CompositionElement; 
   className?: string;
+  fileResolver?: FileResolver;
 }
 
-const ElementPreview: React.FC<ElementPreviewProps> = ({ element, className = "w-10 h-10" }) => {
+const ElementPreview: React.FC<ElementPreviewProps> = ({ element, className = "w-10 h-10", fileResolver }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [hasError, setHasError] = useState(false);
+  const [isResolved, setIsResolved] = useState(false);
 
   useEffect(() => {
     if (element.src && (element.type === 'image' || element.type === 'video')) {
-      setPreviewUrl(element.src);
+      // Check if we're resolving a local file reference
+      const needsResolution = fileResolver && 
+                             !element.src.startsWith('data:') && 
+                             !element.src.startsWith('http://') && 
+                             !element.src.startsWith('https://');
+      
+      // Resolve file reference using FileResolver if available
+      const resolvedSrc = fileResolver ? fileResolver.resolve(element.src) : element.src;
+      setPreviewUrl(resolvedSrc);
+      setHasError(false);
+      setIsResolved(Boolean(needsResolution && resolvedSrc !== element.src));
+    } else {
+      setPreviewUrl(null);
+      setHasError(false);
+      setIsResolved(false);
     }
-  }, [element]);
+  }, [element, fileResolver]);
 
-  if (element.type === 'image' && previewUrl) {
+  if (element.type === 'image' && previewUrl && !hasError) {
     return (
-      <img 
-        src={previewUrl} 
-        alt={element.text || 'Image'}
-        className={`${className} object-cover rounded border border-gray-200`}
-      />
+      <div className="relative">
+        <img 
+          src={previewUrl} 
+          alt={element.text || 'Image'}
+          className={`${className} object-cover rounded border border-gray-200`}
+          onError={() => setHasError(true)}
+        />
+        {isResolved && (
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white" 
+               title="Using local file" />
+        )}
+      </div>
     );
   }
 
-  if (element.type === 'video' && previewUrl) {
+  if (element.type === 'video' && previewUrl && !hasError) {
     return (
-      <video 
-        src={previewUrl} 
-        className={`${className} object-cover rounded border border-gray-200`}
-        muted
-        onMouseEnter={(e) => {
-          const video = e.target as HTMLVideoElement;
-          video.play().catch(() => {
-            // Handle play error silently
-          });
-        }}
-        onMouseLeave={(e) => {
-          const video = e.target as HTMLVideoElement;
-          video.pause();
-          video.currentTime = 0;
-        }}
-      />
+      <div className="relative">
+        <video 
+          src={previewUrl} 
+          className={`${className} object-cover rounded border border-gray-200`}
+          muted
+          preload="metadata"
+          onError={() => setHasError(true)}
+          onMouseEnter={(e) => {
+            const video = e.target as HTMLVideoElement;
+            video.play().catch(() => {
+              // Handle play error silently
+            });
+          }}
+          onMouseLeave={(e) => {
+            const video = e.target as HTMLVideoElement;
+            video.pause();
+            video.currentTime = 0;
+          }}
+        />
+        {isResolved && (
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white" 
+               title="Using local file" />
+        )}
+      </div>
     );
   }
 

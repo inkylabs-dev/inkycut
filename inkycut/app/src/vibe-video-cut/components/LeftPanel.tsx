@@ -16,6 +16,7 @@ import LocalFileUpload from './LocalFileUpload';
 import ElementPreview from './ElementPreview';
 import FileListItem from './FileListItem';
 import { LocalFile } from './types';
+import { createFileResolver } from '../utils/fileResolver';
 
 interface LeftPanelProps {
   onElementUpdate?: (elementId: string, updatedData: Partial<CompositionElement> | any) => void;
@@ -37,6 +38,11 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const { data: user } = useAuth();
   const [localFiles] = useAtom(filesAtom);
+
+  // Create file resolver from local files
+  const fileResolver = React.useMemo(() => {
+    return createFileResolver(localFiles);
+  }, [localFiles]);
 
   const handleUploadComplete = (uploadedFile: LocalFile) => {
     console.log('File added successfully:', uploadedFile);
@@ -266,7 +272,7 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
                     onClick={() => setSelectedElement(element)}
                   >
                     <div className="flex items-center">
-                      <ElementPreview element={element} className="w-12 h-12 mr-3" />
+                      <ElementPreview element={element} className="w-12 h-12 mr-3" fileResolver={fileResolver} />
                       <div className="flex-1">
                         <div className="text-sm font-medium text-gray-900">
                           {element.type === 'text' ? 
