@@ -13,7 +13,7 @@ import {
 import { CompositionData, defaultCompositionData } from './types';
 import { VideoComposition } from './Composition';
 import { fromTheme } from 'tailwind-merge';
-import { projectAtom, selectedPageAtom } from '../atoms';
+import { projectAtom, selectedPageAtom, ensureCompositionIDs } from '../atoms';
 
 interface MiddlePanelProps {
   onTimelineUpdate: (timeline: any[]) => void;
@@ -274,22 +274,26 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
     setJsonString(newJson);
     try {
       const parsed = JSON.parse(newJson);
+      
+      // Ensure all pages and elements have IDs before proceeding
+      const compositionWithIDs = ensureCompositionIDs(parsed);
+      
       // Update local state first for immediate UI update
-      setCompositionData(parsed);
+      setCompositionData(compositionWithIDs);
       setJsonError(null);
       setUserEditedJson(true);
       
       // Store the latest valid edit in our ref for persistence across view switches
-      lastEditedComposition.current = { ...parsed };
+      lastEditedComposition.current = { ...compositionWithIDs };
       
       // In offline mode, we automatically save to localStorage
       if (project?.id) {
-        localStorage.setItem(`vibe-project-composition-${project.id}`, JSON.stringify(parsed));
+        localStorage.setItem(`vibe-project-composition-${project.id}`, JSON.stringify(compositionWithIDs));
       }
       
       // Then notify parent component to update the project state
       if (onCompositionUpdate) {
-        onCompositionUpdate(parsed);
+        onCompositionUpdate(compositionWithIDs);
       }
     } catch (error) {
       setJsonError(error instanceof Error ? error.message : 'Invalid JSON');
@@ -301,18 +305,21 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
     
     // When switching to player view from code view with valid edits
     if (newMode === 'player' && viewMode === 'code' && userEditedJson && !jsonError) {
+      // Ensure all pages and elements have IDs before saving
+      const compositionWithIDs = ensureCompositionIDs(compositionData);
+      
       // Ensure parent component has the latest data
       if (onCompositionUpdate) {
-        onCompositionUpdate(compositionData);
+        onCompositionUpdate(compositionWithIDs);
       }
       
       // Store the edited composition data in the ref
-      lastEditedComposition.current = { ...compositionData };
+      lastEditedComposition.current = { ...compositionWithIDs };
       
       // In offline mode, we always save changes immediately
       // This allows the player to immediately reflect JSON edits
       if (project?.id) {
-        localStorage.setItem(`vibe-project-composition-${project.id}`, JSON.stringify(compositionData));
+        localStorage.setItem(`vibe-project-composition-${project.id}`, JSON.stringify(compositionWithIDs));
       }
     }
     

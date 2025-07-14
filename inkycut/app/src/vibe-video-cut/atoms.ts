@@ -285,7 +285,7 @@ export const updateElementAtom = atom(
     if (!project || !project.composition) return;
 
     // Create a deep copy of the composition data
-    const updatedComposition = JSON.parse(JSON.stringify(project.composition)) as CompositionData;
+    const updatedComposition = ensureCompositionIDs(JSON.parse(JSON.stringify(project.composition)) as CompositionData);
     
     // Find and update the element
     let elementUpdated = false;
@@ -326,13 +326,16 @@ export const updateCompositionAtom = atom(
     const project = get(projectAtom);
     if (!project) return;
     
+    // Ensure all pages and elements have IDs before updating
+    const compositionWithIDs = ensureCompositionIDs(composition);
+    
     // Preserve the current selectedElementId if the element still exists
     const currentSelectedElementId = project.appState?.selectedElementId;
     let elementStillExists = false;
     
     if (currentSelectedElementId) {
       // Check if the element still exists in the new composition
-      elementStillExists = composition.pages.some(page => 
+      elementStillExists = compositionWithIDs.pages.some(page => 
         page.elements.some(el => el.id === currentSelectedElementId)
       );
     }
@@ -340,7 +343,7 @@ export const updateCompositionAtom = atom(
     // Update project with new composition
     const updatedProject = {
       ...project,
-      composition,
+      composition: compositionWithIDs,
       appState: {
         ...project.appState || {},
         // Clear selectedElementId if element no longer exists
@@ -352,6 +355,36 @@ export const updateCompositionAtom = atom(
     set(updateProjectAtom, updatedProject);
   }
 );
+
+/**
+ * Utility function to ensure all pages and elements have valid IDs
+ * This prevents JSON parsing errors when saving projects
+ * @param {CompositionData} composition - The composition data to validate
+ * @returns {CompositionData} - The composition with ensured IDs
+ */
+export const ensureCompositionIDs = (composition: CompositionData): CompositionData => {
+  return {
+    ...composition,
+    pages: composition.pages.map((page, pageIndex) => {
+      // Ensure page has an ID
+      const pageId = page.id || `page-${Date.now()}-${pageIndex}`;
+      
+      return {
+        ...page,
+        id: pageId,
+        elements: page.elements.map((element, elementIndex) => {
+          // Ensure element has an ID
+          const elementId = element.id || `element-${Date.now()}-${pageIndex}-${elementIndex}`;
+          
+          return {
+            ...element,
+            id: elementId
+          };
+        })
+      };
+    })
+  };
+};
 
 /**
  * Write-only atom for adding a new chat message

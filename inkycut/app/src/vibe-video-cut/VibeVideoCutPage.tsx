@@ -20,7 +20,8 @@ import {
   setSelectedElementAtom,
   setSelectedPageAtom,
   createDefaultProject,
-  createDefaultPage
+  createDefaultPage,
+  ensureCompositionIDs
 } from './atoms';
 
 export default function VibeVideoCutPage() {
@@ -55,11 +56,16 @@ export default function VibeVideoCutPage() {
       try {
         // Check localStorage directly first to see if we have data
         const storedProjectString = localStorage.getItem('vibe-project');
-        let storedProject = null;
+        let storedProject: any = null;
         
         if (storedProjectString && storedProjectString !== 'null') {
           try {
             storedProject = JSON.parse(storedProjectString);
+            
+            // Ensure all pages and elements have IDs when loading from localStorage
+            if (storedProject && storedProject.composition) {
+              storedProject.composition = ensureCompositionIDs(storedProject.composition);
+            }
           } catch (parseErr) {
             console.error('Error parsing stored project data:', parseErr);
           }

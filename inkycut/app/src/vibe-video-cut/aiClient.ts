@@ -4,6 +4,7 @@
  */
 
 import { Project } from './components/types';
+import { ensureCompositionIDs } from './atoms';
 
 // Type definitions
 interface VideoAIPromptInput {
@@ -70,6 +71,12 @@ export async function processVideoAIPrompt(
 function simulateAI(prompt: string, projectData: Project): Partial<Project> {
   // Deep clone the project to avoid modifying the original
   const project = JSON.parse(JSON.stringify(projectData)) as Project;
+  
+  // Ensure all pages and elements have IDs after cloning
+  if (project.composition) {
+    project.composition = ensureCompositionIDs(project.composition);
+  }
+  
   const lowerPrompt = prompt.toLowerCase();
   
   // Look for specific keywords and make simple changes
