@@ -19,47 +19,47 @@ interface FilePreviewProps {
 const FilePreview: React.FC<FilePreviewProps> = ({ file, type, name, className = "w-10 h-10" }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (file && (type === 'image' || type === 'video')) {
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
+  // useEffect(() => {
+  //   if (file && (type === 'image' || type === 'video')) {
+  //     const url = URL.createObjectURL(file);
+  //     setPreviewUrl(url);
       
-      return () => {
-        URL.revokeObjectURL(url);
-      };
-    }
-  }, [file, type]);
+  //     return () => {
+  //       URL.revokeObjectURL(url);
+  //     };
+  //   }
+  // }, [file, type]);
 
-  if (type === 'image' && previewUrl) {
-    return (
-      <img 
-        src={previewUrl} 
-        alt={name}
-        className={`${className} object-cover rounded border border-gray-200`}
-      />
-    );
-  }
+  // if (type === 'image' && previewUrl) {
+  //   return (
+  //     <img 
+  //       src={previewUrl} 
+  //       alt={name}
+  //       className={`${className} object-cover rounded border border-gray-200`}
+  //     />
+  //   );
+  // }
 
-  if (type === 'video' && previewUrl) {
-    return (
-      <video 
-        src={previewUrl} 
-        className={`${className} object-cover rounded border border-gray-200`}
-        muted
-        onMouseEnter={(e) => {
-          const video = e.target as HTMLVideoElement;
-          video.play().catch(() => {
-            // Handle play error silently
-          });
-        }}
-        onMouseLeave={(e) => {
-          const video = e.target as HTMLVideoElement;
-          video.pause();
-          video.currentTime = 0;
-        }}
-      />
-    );
-  }
+  // if (type === 'video' && previewUrl) {
+  //   return (
+  //     <video 
+  //       src={previewUrl} 
+  //       className={`${className} object-cover rounded border border-gray-200`}
+  //       muted
+  //       onMouseEnter={(e) => {
+  //         const video = e.target as HTMLVideoElement;
+  //         video.play().catch(() => {
+  //           // Handle play error silently
+  //         });
+  //       }}
+  //       onMouseLeave={(e) => {
+  //         const video = e.target as HTMLVideoElement;
+  //         video.pause();
+  //         video.currentTime = 0;
+  //       }}
+  //     />
+  //   );
+  // }
 
   // Fallback to icon for non-previewable files or files without File object
   const getFileIcon = (type: string) => {

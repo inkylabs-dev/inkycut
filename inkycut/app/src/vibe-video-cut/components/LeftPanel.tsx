@@ -131,28 +131,28 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
 
-    useEffect(() => {
-      const loadPreviewUrl = async () => {
-        if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
-          return;
-        }
+    // useEffect(() => {
+    //   const loadPreviewUrl = async () => {
+    //     if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+    //       return;
+    //     }
         
-        setIsLoading(true);
-        setHasError(false);
+    //     setIsLoading(true);
+    //     setHasError(false);
         
-        try {
-          const url = await getDownloadFileSignedURL({ key: file.key });
-          setPreviewUrl(url);
-        } catch (error) {
-          console.error('Failed to load preview URL:', error);
-          setHasError(true);
-        } finally {
-          setIsLoading(false);
-        }
-      };
+    //     try {
+    //       const url = await getDownloadFileSignedURL({ key: file.key });
+    //       setPreviewUrl(url);
+    //     } catch (error) {
+    //       console.error('Failed to load preview URL:', error);
+    //       setHasError(true);
+    //     } finally {
+    //       setIsLoading(false);
+    //     }
+    //   };
       
-      loadPreviewUrl();
-    }, [file.key, file.type]);
+    //   loadPreviewUrl();
+    // }, [file.key, file.type]);
 
     const isImage = file.type.startsWith('image/');
     const isVideo = file.type.startsWith('video/');
