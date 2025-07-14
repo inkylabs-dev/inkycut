@@ -79,8 +79,10 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
           setIsProcessing(true);
           setError(null);
           
-          // Call the AI processing operation with server-safe project data (excludes files)
-          const serverSafeProject = createServerSafeProject(project);
+          // Determine whether to send raw project or server-safe project
+          // If message starts with /, send the raw project with files
+          const isRawProjectRequest = userMessage.startsWith('/');
+          const projectToSend = isRawProjectRequest ? project : createServerSafeProject(project);
           
           // Get user's API key from localStorage
           const userApiKey = localStorage.getItem('openai-api-key') || undefined;
@@ -92,13 +94,14 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
             files: `${(sizeInfo.files / 1024).toFixed(1)}KB`,
             other: `${(sizeInfo.other / 1024).toFixed(1)}KB`,
             filesCount: project.files?.length || 0,
-            usingUserApiKey: !!userApiKey
+            usingUserApiKey: !!userApiKey,
+            sendingRawProject: isRawProjectRequest
           });
           
           const result = await processVideoAIPrompt({
             projectId: project.id,
             prompt: userMessage,
-            projectData: serverSafeProject,
+            projectData: projectToSend,
             apiKey: userApiKey
           });
           console.log('AI response:', result);

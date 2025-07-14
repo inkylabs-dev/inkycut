@@ -16,10 +16,10 @@ export default function Hero() {
         <div className='mx-auto max-w-8xl px-6 lg:px-8'>
           <div className='lg:mb-18 mx-auto max-w-3xl text-center'>
             <h1 className='text-4xl font-bold text-gray-900 sm:text-6xl dark:text-white'>
-              Remix stunning visuals with your <span className='italic'>brilliant</span> stories
+              Make stunning videos with <span className='italic'>Vibe Filming</span>.
             </h1>
             <p className='mt-6 mx-auto max-w-2xl text-lg leading-8 text-gray-600 dark:text-white'>
-              Create, tweak, and bring AI-generated tales to life.
+              Free your creativity and free forever. No video editing skills required.
             </p>
             <div className='mt-10 flex items-center justify-center gap-x-6'>
               <Link

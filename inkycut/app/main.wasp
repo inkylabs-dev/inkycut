@@ -94,6 +94,10 @@ app OpenSaaS {
       email: "me@example.com"
     },
   },
+
+  server: {
+    middlewareConfigFn: import { serverMiddlewareFn } from "@src/serverSetup"
+  },
 }
 
 route LandingPageRoute { path: "/", to: LandingPage }
