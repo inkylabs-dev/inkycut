@@ -5,12 +5,13 @@
 
 import { Project } from './components/types';
 import { ensureCompositionIDs } from './atoms';
+import { createServerSafeProject } from './utils/projectUtils';
 
 // Type definitions
 interface VideoAIPromptInput {
   projectId: string;
   prompt: string;
-  projectData: Project;
+  projectData: Omit<Project, 'files' | 'appState'>;
 }
 
 interface VideoAIResponse {
@@ -65,12 +66,13 @@ export async function processVideoAIPrompt(
 /**
  * Extremely simple AI simulation that modifies the project based on keywords in the prompt
  * @param prompt The user's prompt text
- * @param projectData The current project data
+ * @param projectData The current project data (without files/appState)
  * @returns Modified project data
  */
-function simulateAI(prompt: string, projectData: Project): Partial<Project> {
+function simulateAI(prompt: string, projectData: Omit<Project, 'files' | 'appState'>): Partial<Project> {
   // Deep clone the project to avoid modifying the original
-  const project = JSON.parse(JSON.stringify(projectData)) as Project;
+  // Note: this project doesn't have files or appState as they're excluded from server communication
+  const project = JSON.parse(JSON.stringify(projectData)) as Omit<Project, 'files' | 'appState'>;
   
   // Ensure all pages and elements have IDs after cloning
   if (project.composition) {

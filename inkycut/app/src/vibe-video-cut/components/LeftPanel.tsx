@@ -11,9 +11,10 @@ import { useAuth } from 'wasp/client/auth';
 import { routes } from 'wasp/client/router';
 import { Link } from 'react-router-dom';
 import { CompositionElement } from './types';
-import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject, filesAtom, removeFileAtom } from '../atoms';
-import LocalFileUpload, { getFileIcon } from './LocalFileUpload';
+import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject, filesAtom } from '../atoms';
+import LocalFileUpload from './LocalFileUpload';
 import ElementPreview from './ElementPreview';
+import FileListItem from './FileListItem';
 import { LocalFile } from './types';
 
 interface LeftPanelProps {
@@ -36,7 +37,6 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const { data: user } = useAuth();
   const [localFiles] = useAtom(filesAtom);
-  const removeFile = useSetAtom(removeFileAtom);
 
   const handleUploadComplete = (uploadedFile: LocalFile) => {
     console.log('File added successfully:', uploadedFile);
@@ -115,43 +115,6 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
     return 'U';
   };
 
-  // Component to render local file preview
-  const LocalFilePreviewItem = ({ file }: { file: LocalFile }) => {
-    const [hasError, setHasError] = useState(false);
-
-    const isImage = file.type.startsWith('image/');
-    const isVideo = file.type.startsWith('video/');
-
-    if (hasError || (!isImage && !isVideo)) {
-      return getFileIcon(file.type, 'w-8 h-8 text-gray-400 flex-shrink-0');
-    }
-
-    if (isImage) {
-      return (
-        <img 
-          src={file.dataUrl} 
-          alt={file.name}
-          className="w-8 h-8 object-cover rounded flex-shrink-0 border border-gray-200"
-          onError={() => setHasError(true)}
-        />
-      );
-    }
-
-    if (isVideo) {
-      return (
-        <video 
-          src={file.dataUrl}
-          className="w-8 h-8 object-cover rounded flex-shrink-0 border border-gray-200"
-          muted
-          preload="metadata"
-          onError={() => setHasError(true)}
-        />
-      );
-    }
-
-    // Fallback to document icon
-    return getFileIcon(file.type, 'w-8 h-8 text-gray-400 flex-shrink-0');
-  };
 
 
   return (
@@ -267,35 +230,11 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
               <div className="space-y-2">
                 {localFiles.length > 0 ? (
                   localFiles.map((file: LocalFile) => (
-                    <div
+                    <FileListItem
                       key={file.id}
-                      className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer border border-gray-200 group"
-                      onClick={() => {
-                        console.log('Local file selected:', file);
-                      }}
-                    >
-                      <div className="mr-3">
-                        <LocalFilePreviewItem file={file} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-gray-900 truncate" title={file.name}>
-                          {file.name}
-                        </div>
-                        <div className="text-xs text-gray-500 truncate">
-                          {file.type} • {(file.size / 1024 / 1024).toFixed(1)}MB
-                        </div>
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeFile(file.id);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 p-1 transition-opacity"
-                        title="Remove file"
-                      >
-                        ×
-                      </button>
-                    </div>
+                      file={file}
+                      onElementUpdate={onElementUpdate}
+                    />
                   ))
                 ) : (
                   <div className="text-xs text-gray-500 py-2">No files added yet</div>

@@ -18,6 +18,7 @@ import { ChatMessage } from './types';
 import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom } from '../atoms';
 import { Project } from './types';
 import { processVideoAIPrompt } from 'wasp/client/operations';
+import { createServerSafeProject, estimateProjectSize } from '../utils/projectUtils';
 
 // Define types for AI operations following OpenSaaS pattern
 interface ProcessVideoAIPromptInput {
@@ -77,11 +78,22 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
           setIsProcessing(true);
           setError(null);
           
-          // Call the AI processing operation
+          // Call the AI processing operation with server-safe project data (excludes files)
+          const serverSafeProject = createServerSafeProject(project);
+          
+          // Log project size for debugging
+          const sizeInfo = estimateProjectSize(project);
+          console.log('Project size info:', {
+            total: `${(sizeInfo.total / 1024).toFixed(1)}KB`,
+            files: `${(sizeInfo.files / 1024).toFixed(1)}KB`,
+            other: `${(sizeInfo.other / 1024).toFixed(1)}KB`,
+            filesCount: project.files?.length || 0
+          });
+          
           const result = await processVideoAIPrompt({
             projectId: project.id,
             prompt: userMessage,
-            projectData: project
+            projectData: serverSafeProject
           });
           console.log('AI response:', result);
           

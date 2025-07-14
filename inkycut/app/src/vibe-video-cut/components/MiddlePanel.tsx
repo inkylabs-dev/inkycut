@@ -13,7 +13,7 @@ import {
 import { CompositionData, defaultCompositionData } from './types';
 import { VideoComposition } from './Composition';
 import { fromTheme } from 'tailwind-merge';
-import { projectAtom, selectedPageAtom, ensureCompositionIDs } from '../atoms';
+import { projectAtom, selectedPageAtom, ensureCompositionIDs, filesAtom } from '../atoms';
 
 interface MiddlePanelProps {
   onTimelineUpdate: (timeline: any[]) => void;
@@ -24,6 +24,7 @@ interface MiddlePanelProps {
 export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onPageSelect }: MiddlePanelProps) {
   // Use Jotai atoms instead of props
   const [project] = useAtom(projectAtom);
+  const [files] = useAtom(filesAtom);
   
   // Always enabled
   const propertiesEnabled = true;
@@ -397,7 +398,8 @@ export default function MiddlePanel({ onTimelineUpdate, onCompositionUpdate, onP
                 component={VideoComposition}
                 inputProps={{ 
                   data: compositionData,
-                  currentPageIndex: getCurrentPage().pageIndex
+                  currentPageIndex: getCurrentPage().pageIndex,
+                  files: files
                 }}
                 durationInFrames={totalFrames}
                 compositionWidth={compositionData.width}

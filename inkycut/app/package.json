@@ -3,6 +3,7 @@
   "type": "module",
   "scripts": {
     "start": "wasp start",
+    "build": "wasp build",
     "dev": "wasp start"
   },
   "dependencies": {

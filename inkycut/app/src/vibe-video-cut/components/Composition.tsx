@@ -10,12 +10,14 @@
 // Basic composition component
 import React from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, Img, Video, Sequence } from 'remotion';
-import { CompositionData, CompositionElement, CompositionPage, ElementRendererProps, defaultCompositionData } from './types'; // Adjust the import path as needed
+import { CompositionData, CompositionElement, CompositionPage, ElementRendererProps, defaultCompositionData, LocalFile } from './types'; // Adjust the import path as needed
 import { Layer } from './Layer';
+import { FileResolver, createFileResolver } from '../utils/fileResolver';
 
 interface CompositionProps {
   data: CompositionData;
   currentPageIndex?: number;
+  files?: LocalFile[];
 }
 
 // Utility function to generate unique IDs
@@ -24,7 +26,7 @@ const generateUniqueId = (): string => {
 };
 
 // Individual element renderer
-const ElementRenderer: React.FC<ElementRendererProps> = ({ element, frame, fps }) => {
+const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileResolver }> = ({ element, frame, fps, fileResolver }) => {
   // Ensure element has an ID
   const elementWithId = React.useMemo(() => {
     if (element.id) return element;
@@ -57,19 +59,22 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({ element, frame, fps }
     zIndex: elementWithId.zIndex || 0,
   };
 
+  // Resolve file sources using the file resolver
+  const resolvedSrc = elementWithId.src && fileResolver ? fileResolver.resolve(elementWithId.src) : elementWithId.src;
+
   switch (elementWithId.type) {
     case 'image':
-      return elementWithId.src ? (
+      return resolvedSrc ? (
         <Img
-          src={elementWithId.src}
+          src={resolvedSrc}
           style={style}
         />
       ) : null;
 
     case 'video':
-      return elementWithId.src ? (
+      return resolvedSrc ? (
         <Video
-          src={elementWithId.src}
+          src={resolvedSrc}
           style={style}
           startFrom={Math.floor((currentTimeInSeconds - startTime) * fps)}
         />
@@ -108,7 +113,8 @@ const PageRenderer: React.FC<{
   page: CompositionPage; 
   frame: number; 
   fps: number;
-}> = ({ page, frame, fps }) => {
+  fileResolver?: FileResolver;
+}> = ({ page, frame, fps, fileResolver }) => {
   // Ensure all elements on this page have IDs
   const elementsWithIds = React.useMemo(() => {
     return page.elements.map((element, index) => {
@@ -134,6 +140,7 @@ const PageRenderer: React.FC<{
             element={element}
             frame={frame}
             fps={fps}
+            fileResolver={fileResolver}
           />
         </Layer>
       ))}
@@ -148,14 +155,17 @@ export const VideoComposition: React.FC<{
   selectedItem?: string | null;
   setSelectedItem?: (elementId: string | null) => void;
   changeItem?: (elementId: string, updater: (element: CompositionElement) => CompositionElement) => void;
+  files?: LocalFile[];
 }> = ({ 
   data,
   currentPageIndex,
+  files,
 }) => {
   return (
     <MainComposition 
       data={data}
       currentPageIndex={currentPageIndex}
+      files={files}
     />
   );
 };
@@ -168,12 +178,19 @@ export const VideoComposition: React.FC<{
 export const MainComposition: React.FC<{
   data: CompositionData;
   currentPageIndex?: number;
+  files?: LocalFile[];
 }> = ({ 
   data, 
   currentPageIndex,
+  files,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  
+  // Create file resolver from local files
+  const fileResolver = React.useMemo(() => {
+    return files ? createFileResolver(files) : undefined;
+  }, [files]);
   
   // Outer container style
   const outer: React.CSSProperties = {};
@@ -226,6 +243,7 @@ export const MainComposition: React.FC<{
                 element={element}
                 frame={frame}
                 fps={fps}
+                fileResolver={fileResolver}
               />
             </Layer>
           ))}
@@ -289,6 +307,7 @@ export const MainComposition: React.FC<{
                     element={element}
                     frame={frame - startFrame}
                     fps={fps}
+                    fileResolver={fileResolver}
                   />
                 </Layer>
               ))}

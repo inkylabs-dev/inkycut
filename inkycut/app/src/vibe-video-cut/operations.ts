@@ -154,8 +154,8 @@ export const processVideoAIPrompt = async (
  */
 async function generateVideoEditSuggestions(prompt: string, project: any) {
   try {
-    // Use full original project data except for appState
-    const { appState, ...simplifiedProject } = project;
+    // Use full original project data except for appState and files (to avoid sending large base64 data)
+    const { appState, files, ...simplifiedProject } = project;
 
     const functionDef = {
       name: "edit_json",
