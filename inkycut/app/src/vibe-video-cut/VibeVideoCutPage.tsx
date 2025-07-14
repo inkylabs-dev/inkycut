@@ -255,7 +255,7 @@ export default function VibeVideoCutPage() {
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-gray-100">
       {/* Main content area without top banner */}
       <div className="flex w-full h-full overflow-hidden">
-        {/* Left Panel - File Explorer / Elements */}
+        {/* Left Panel - Files / Elements */}
         <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0 overflow-hidden">
           <LeftPanel 
             onElementUpdate={handleElementUpdate}

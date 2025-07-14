@@ -11,12 +11,10 @@ import { useAuth } from 'wasp/client/auth';
 import { routes } from 'wasp/client/router';
 import { Link } from 'react-router-dom';
 import { CompositionElement } from './types';
-import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject } from '../atoms';
-import FilePreview from './FilePreview';
-import FileUploadComponent from '../../file-upload/FileUploadComponent';
+import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject, filesAtom, removeFileAtom } from '../atoms';
+import LocalFileUpload, { getFileIcon } from './LocalFileUpload';
 import ElementPreview from './ElementPreview';
-import { useQuery, getAllFilesByUser, getDownloadFileSignedURL } from 'wasp/client/operations';
-import type { File as DbFile } from 'wasp/entities';
+import { LocalFile } from './types';
 
 interface LeftPanelProps {
   onElementUpdate?: (elementId: string, updatedData: Partial<CompositionElement> | any) => void;
@@ -32,24 +30,16 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
   
   // Always enabled
   const propertiesEnabled = true;
-  const [activeTab, setActiveTab] = useState<'explorer' | 'elements'>('explorer');
+  const [activeTab, setActiveTab] = useState<'files' | 'elements'>('files');
   const [recentlyUpdated, setRecentlyUpdated] = useState<{[key: string]: boolean}>({});
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { data: user } = useAuth();
-  
-  const { 
-    data: filesData, 
-    isLoading: filesLoading, 
-    refetch: refetchFiles 
-  } = useQuery(getAllFilesByUser, { page: 1, limit: 100 }, { enabled: !!user });
+  const [localFiles] = useAtom(filesAtom);
+  const removeFile = useSetAtom(removeFileAtom);
 
-  const uploadedFiles = filesData?.files || [];
-
-  const handleUploadComplete = (uploadedFile: any) => {
-    console.log('File uploaded successfully:', uploadedFile);
-    // Refresh the uploaded files list
-    refetchFiles();
+  const handleUploadComplete = (uploadedFile: LocalFile) => {
+    console.log('File added successfully:', uploadedFile);
   };
 
   const handleUploadError = (error: any) => {
@@ -125,50 +115,21 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
     return 'U';
   };
 
-  // Component to render file preview
-  const FilePreviewItem = ({ file }: { file: DbFile }) => {
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+  // Component to render local file preview
+  const LocalFilePreviewItem = ({ file }: { file: LocalFile }) => {
     const [hasError, setHasError] = useState(false);
-
-    // useEffect(() => {
-    //   const loadPreviewUrl = async () => {
-    //     if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
-    //       return;
-    //     }
-        
-    //     setIsLoading(true);
-    //     setHasError(false);
-        
-    //     try {
-    //       const url = await getDownloadFileSignedURL({ key: file.key });
-    //       setPreviewUrl(url);
-    //     } catch (error) {
-    //       console.error('Failed to load preview URL:', error);
-    //       setHasError(true);
-    //     } finally {
-    //       setIsLoading(false);
-    //     }
-    //   };
-      
-    //   loadPreviewUrl();
-    // }, [file.key, file.type]);
 
     const isImage = file.type.startsWith('image/');
     const isVideo = file.type.startsWith('video/');
 
-    if (isLoading) {
-      return <div className="w-8 h-8 bg-gray-200 animate-pulse rounded flex-shrink-0" />;
-    }
-
     if (hasError || (!isImage && !isVideo)) {
-      return <DocumentIcon className="w-8 h-8 text-gray-400 flex-shrink-0" />;
+      return getFileIcon(file.type, 'w-8 h-8 text-gray-400 flex-shrink-0');
     }
 
-    if (isImage && previewUrl) {
+    if (isImage) {
       return (
         <img 
-          src={previewUrl} 
+          src={file.dataUrl} 
           alt={file.name}
           className="w-8 h-8 object-cover rounded flex-shrink-0 border border-gray-200"
           onError={() => setHasError(true)}
@@ -176,10 +137,10 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
       );
     }
 
-    if (isVideo && previewUrl) {
+    if (isVideo) {
       return (
         <video 
-          src={previewUrl}
+          src={file.dataUrl}
           className="w-8 h-8 object-cover rounded flex-shrink-0 border border-gray-200"
           muted
           preload="metadata"
@@ -189,7 +150,7 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
     }
 
     // Fallback to document icon
-    return <DocumentIcon className="w-8 h-8 text-gray-400 flex-shrink-0" />;
+    return getFileIcon(file.type, 'w-8 h-8 text-gray-400 flex-shrink-0');
   };
 
 
@@ -261,14 +222,14 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
       {/* Tab Navigation */}
       <div className="flex border-b border-gray-200">
         <button
-          onClick={() => setActiveTab('explorer')}
+          onClick={() => setActiveTab('files')}
           className={`flex-1 px-4 py-2 text-sm font-medium ${
-            activeTab === 'explorer'
+            activeTab === 'files'
               ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-500'
               : 'text-gray-500 hover:text-gray-700'
           }`}
         >
-          Explorer
+          Files
         </button>
         <button
           onClick={() => setActiveTab('elements')}
@@ -284,7 +245,7 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
 
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto p-4">
-        {activeTab === 'explorer' && (
+        {activeTab === 'files' && (
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-900">Project Assets</h3>
@@ -292,44 +253,52 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
             
             {/* File Upload Section */}
             <div className="mb-6">
-              <h4 className="text-xs font-medium text-gray-700 mb-2">Upload Files</h4>
-              <FileUploadComponent
+              <h4 className="text-xs font-medium text-gray-700 mb-2">Add Local Files</h4>
+              <LocalFileUpload
                 onUploadComplete={handleUploadComplete}
                 onUploadError={handleUploadError}
-                buttonText="Upload to Project"
+                buttonText="Add to Project"
                 className="mb-4"
               />
             </div>
-            {/* Uploaded Files Section */}
+            {/* Local Files Section */}
             <div>
-              <h4 className="text-xs font-medium text-gray-700 mb-2">Your Uploaded Files</h4>
+              <h4 className="text-xs font-medium text-gray-700 mb-2">Project Files</h4>
               <div className="space-y-2">
-                {filesLoading ? (
-                  <div className="text-xs text-gray-500 py-2">Loading files...</div>
-                ) : uploadedFiles.length > 0 ? (
-                  uploadedFiles.map((file: DbFile) => (
+                {localFiles.length > 0 ? (
+                  localFiles.map((file: LocalFile) => (
                     <div
                       key={file.id}
-                      className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer border border-gray-200"
+                      className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer border border-gray-200 group"
                       onClick={() => {
-                        console.log('Uploaded file selected:', file);
+                        console.log('Local file selected:', file);
                       }}
                     >
                       <div className="mr-3">
-                        <FilePreviewItem file={file} />
+                        <LocalFilePreviewItem file={file} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-gray-900 truncate" title={file.name}>
                           {file.name}
                         </div>
                         <div className="text-xs text-gray-500 truncate">
-                          {file.type}
+                          {file.type} • {(file.size / 1024 / 1024).toFixed(1)}MB
                         </div>
                       </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeFile(file.id);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 p-1 transition-opacity"
+                        title="Remove file"
+                      >
+                        ×
+                      </button>
                     </div>
                   ))
                 ) : (
-                  <div className="text-xs text-gray-500 py-2">No files uploaded yet</div>
+                  <div className="text-xs text-gray-500 py-2">No files added yet</div>
                 )}
               </div>
             </div>

@@ -126,6 +126,25 @@ export interface AppState {
 }
 
 /**
+ * LocalFile represents a file stored locally in the project
+ * Files are stored as data URLs (base64 encoded)
+ */
+export interface LocalFile {
+  /** Unique identifier for the file */
+  id: string;
+  /** Original filename */
+  name: string;
+  /** MIME type of the file */
+  type: string;
+  /** File size in bytes */
+  size: number;
+  /** Data URL containing the file content (data:mime/type;base64,data) */
+  dataUrl: string;
+  /** Timestamp when file was added */
+  createdAt: string;
+}
+
+/**
  * Project represents a complete video editing project
  * Combines composition data with application state and metadata
  */
@@ -144,6 +163,8 @@ export interface Project {
   composition: CompositionData;
   /** Current application state for this project */
   appState: AppState;
+  /** Local files stored in the project (no server uploads) */
+  files: LocalFile[];
   /** Optional additional metadata for the project */
   metadata?: {
     /** Timeline-specific data for rendering */

@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage, AppState } from './components/types';
+import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage, AppState, LocalFile } from './components/types';
 
 /**
  * Primary atom to store the project data with persistence
@@ -259,7 +259,8 @@ export const createDefaultProject = (name: string = 'My Project'): Project => {
       width: 1920,
       height: 1080
     },
-    appState: createDefaultAppState()
+    appState: createDefaultAppState(),
+    files: []
   };
 };
 
@@ -417,5 +418,76 @@ export const addChatMessageAtom = atom(
     
     // Add only the single message to the chat history
     set(chatMessagesAtom, [...chatMessages, newMessage]);
+  }
+);
+
+/**
+ * Derived atom providing the files array from the current project
+ * @type {LocalFile[]} - Array of local files or empty array if no project
+ */
+export const filesAtom = atom(
+  (get) => get(projectAtom)?.files || []
+);
+
+/**
+ * Write-only atom for adding a new local file to the project
+ * Converts File object to LocalFile with data URL and stores it
+ * @param {File} file - The File object to add to the project
+ */
+export const addFileAtom = atom(
+  null,
+  async (get, set, file: File) => {
+    const project = get(projectAtom);
+    if (!project) return;
+
+    // Convert file to data URL
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    // Create LocalFile object
+    const localFile: LocalFile = {
+      id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      dataUrl,
+      createdAt: new Date().toISOString()
+    };
+
+    // Add file to project
+    const updatedProject = {
+      ...project,
+      files: [...project.files, localFile]
+    };
+
+    // Use updateProjectAtom to update the project in storage
+    set(updateProjectAtom, updatedProject);
+    
+    return localFile;
+  }
+);
+
+/**
+ * Write-only atom for removing a file from the project
+ * @param {string} fileId - The ID of the file to remove
+ */
+export const removeFileAtom = atom(
+  null,
+  (get, set, fileId: string) => {
+    const project = get(projectAtom);
+    if (!project) return;
+
+    // Remove file from project
+    const updatedProject = {
+      ...project,
+      files: project.files.filter(file => file.id !== fileId)
+    };
+
+    // Use updateProjectAtom to update the project in storage
+    set(updateProjectAtom, updatedProject);
   }
 );
