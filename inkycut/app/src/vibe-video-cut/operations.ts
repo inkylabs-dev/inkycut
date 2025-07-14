@@ -35,8 +35,13 @@ const processVideoAIPromptSchema = z.object({
 
 type ProcessVideoAIPromptInput = z.infer<typeof processVideoAIPromptSchema>;
 
-// Check if user is eligible for AI features (has credits or active subscription)
-function isEligibleForAIFeatures(user: User): boolean {
+// Check if user is eligible for AI features (has credits, active subscription, or BYO API key)
+function isEligibleForAIFeatures(user: User, apiKey?: string): boolean {
+  // If user brings their own OpenAI API key, skip credit check
+  if (apiKey && apiKey.trim() !== '') {
+    return true;
+  }
+  
   const isUserSubscribed =
     user.subscriptionStatus === SubscriptionStatus.Active ||
     user.subscriptionStatus === SubscriptionStatus.CancelAtPeriodEnd;
@@ -60,14 +65,14 @@ export const processVideoAIPrompt = async (
     throw new HttpError(401, 'Only authenticated users can access AI features');
   }
 
-  if (!isEligibleForAIFeatures(context.user)) {
-    throw new HttpError(402, 'User has not paid or is out of credits');
-  }
-
   const { projectId, prompt, projectData, apiKey } = ensureArgsSchemaOrThrowHttpError(
     processVideoAIPromptSchema,
     rawArgs
   );
+
+  if (!isEligibleForAIFeatures(context.user, apiKey)) {
+    throw new HttpError(402, 'User has not paid or is out of credits');
+  }
 
   try {
     console.log('Processing video AI prompt:', prompt);
@@ -107,15 +112,17 @@ export const processVideoAIPrompt = async (
     // Since we need to ensure both operations are Prisma Client promises,
     // we'll handle them separately instead of using a transaction
     try {
-      // Decrement the user's credits
-      await context.entities.User.update({
-        where: { id: context.user.id },
-        data: {
-          credits: {
-            decrement: 1,
+      // Only decrement credits if user is not using their own API key
+      if (!apiKey || apiKey.trim() === '') {
+        await context.entities.User.update({
+          where: { id: context.user.id },
+          data: {
+            credits: {
+              decrement: 1,
+            },
           },
-        },
-      });
+        });
+      }
       
       // Create a record of this AI interaction if the entity exists
       if (context.entities.AiInteraction) {
@@ -195,7 +202,17 @@ async function generateVideoEditSuggestions(prompt: string, project: any, userAp
             'You are an expert video editor AI assistant. Your job is to help users edit their video projects by suggesting changes and improvements. ' +
             'You will be given the current state of a video project and a request from the user. ' +
             'Provide clear, specific advice and modifications to the project based on the user\'s request. ' +
-            'Your suggestions should be actionable and technically feasible within the constraints of the project.' +
+            'Your suggestions should be actionable and technically feasible within the constraints of the project.\n\n' +
+            'COMPOSITION SCHEMA:\n' +
+            'A video project consists of:\n' +
+            '- composition: { pages: CompositionPage[], fps: number, width: number, height: number }\n' +
+            '- CompositionPage: { id: string, name: string, duration: number, backgroundColor?: string, elements: CompositionElement[] }\n' +
+            '- CompositionElement: {\n' +
+            '  id: string, type: "video"|"image"|"text", left: number, top: number, width: number, height: number,\n' +
+            '  rotation?: number, opacity?: number, zIndex?: number, startTime?: number, endTime?: number,\n' +
+            '  src?: string (for video/image), text?: string, fontSize?: number, fontFamily?: string, color?: string,\n' +
+            '  fontWeight?: string, textAlign?: "left"|"center"|"right", isDragging?: boolean\n' +
+            '}\n\n' +
             'You should call changeVideoSchema tool to apply changes.',
         },
         {
