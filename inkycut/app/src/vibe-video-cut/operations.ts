@@ -30,6 +30,7 @@ const processVideoAIPromptSchema = z.object({
   projectId: z.string().nonempty(),
   prompt: z.string().nonempty(),
   projectData: z.any(),
+  apiKey: z.string().optional(), // Optional user-provided API key
 });
 
 type ProcessVideoAIPromptInput = z.infer<typeof processVideoAIPromptSchema>;
@@ -63,7 +64,7 @@ export const processVideoAIPrompt = async (
     throw new HttpError(402, 'User has not paid or is out of credits');
   }
 
-  const { projectId, prompt, projectData } = ensureArgsSchemaOrThrowHttpError(
+  const { projectId, prompt, projectData, apiKey } = ensureArgsSchemaOrThrowHttpError(
     processVideoAIPromptSchema,
     rawArgs
   );
@@ -97,7 +98,7 @@ export const processVideoAIPrompt = async (
     }
     
     // If not a slash command, proceed with normal AI processing
-    const aiResponse = await generateVideoEditSuggestions(prompt, project);
+    const aiResponse = await generateVideoEditSuggestions(prompt, project, apiKey);
 
     if (!aiResponse) {
       throw new HttpError(500, 'Failed to generate AI response');
@@ -150,10 +151,24 @@ export const processVideoAIPrompt = async (
  *
  * @param prompt User's prompt about video editing
  * @param project Current project data
+ * @param userApiKey Optional user-provided API key
  * @returns AI response with message and suggested project updates
  */
-async function generateVideoEditSuggestions(prompt: string, project: any) {
+async function generateVideoEditSuggestions(prompt: string, project: any, userApiKey?: string) {
   try {
+    // Use user's API key if provided, otherwise fall back to server's API key
+    const apiKeyToUse = userApiKey || process.env.OPENAI_API_KEY;
+    
+    if (!apiKeyToUse) {
+      throw new Error('No OpenAI API key available. Please provide your API key in Settings.');
+    }
+
+    // Create OpenAI client with the appropriate API key
+    const openAiClient = new OpenAI({
+      apiKey: apiKeyToUse,
+      baseURL: process.env.OPENAI_BASE_URL || undefined
+    });
+
     // Use full original project data except for appState and files (to avoid sending large base64 data)
     const { appState, files, ...simplifiedProject } = project;
 
@@ -171,7 +186,7 @@ async function generateVideoEditSuggestions(prompt: string, project: any) {
         required: ["edited_json"]
       }
     };
-    const completion = await openAi.chat.completions.create({
+    const completion = await openAiClient.chat.completions.create({
       model: 'gpt-4-0613', // Use a more capable model for creative tasks
       messages: [
         {

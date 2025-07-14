@@ -81,19 +81,24 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
           // Call the AI processing operation with server-safe project data (excludes files)
           const serverSafeProject = createServerSafeProject(project);
           
+          // Get user's API key from localStorage
+          const userApiKey = localStorage.getItem('openai-api-key') || undefined;
+          
           // Log project size for debugging
           const sizeInfo = estimateProjectSize(project);
           console.log('Project size info:', {
             total: `${(sizeInfo.total / 1024).toFixed(1)}KB`,
             files: `${(sizeInfo.files / 1024).toFixed(1)}KB`,
             other: `${(sizeInfo.other / 1024).toFixed(1)}KB`,
-            filesCount: project.files?.length || 0
+            filesCount: project.files?.length || 0,
+            usingUserApiKey: !!userApiKey
           });
           
           const result = await processVideoAIPrompt({
             projectId: project.id,
             prompt: userMessage,
-            projectData: serverSafeProject
+            projectData: serverSafeProject,
+            apiKey: userApiKey
           });
           console.log('AI response:', result);
           
@@ -170,12 +175,20 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
     <div className="h-full flex flex-col bg-white overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b border-gray-200 flex-shrink-0">
-        <div className="flex items-center space-x-2">
-          <CpuChipIcon className="h-6 w-6 text-blue-500" />
-          <div>
-            <h3 className="font-semibold text-gray-900">AI Assistant</h3>
-            <p className="text-xs text-gray-500">Online • Ready to help</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <CpuChipIcon className="h-6 w-6 text-blue-500" />
+            <div>
+              <h3 className="font-semibold text-gray-900">AI Assistant</h3>
+              <p className="text-xs text-gray-500">Online • Ready to help</p>
+            </div>
           </div>
+          {localStorage.getItem('openai-api-key') && (
+            <div className="flex items-center space-x-1 text-xs text-green-600">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>Using your API key</span>
+            </div>
+          )}
         </div>
       </div>
 

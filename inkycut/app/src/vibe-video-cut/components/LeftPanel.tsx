@@ -5,7 +5,8 @@ import {
   HomeIcon,
   Bars3Icon,
   HeartIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  CogIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from 'wasp/client/auth';
 import { routes } from 'wasp/client/router';
@@ -15,6 +16,7 @@ import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementA
 import LocalFileUpload from './LocalFileUpload';
 import ElementPreview from './ElementPreview';
 import FileListItem from './FileListItem';
+import SettingsDialog from './SettingsDialog';
 import { LocalFile } from './types';
 import { createFileResolver } from '../utils/fileResolver';
 
@@ -35,6 +37,7 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
   const [activeTab, setActiveTab] = useState<'files' | 'elements'>('files');
   const [recentlyUpdated, setRecentlyUpdated] = useState<{[key: string]: boolean}>({});
   const [showMenu, setShowMenu] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { data: user } = useAuth();
   const [localFiles] = useAtom(filesAtom);
@@ -147,6 +150,17 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
                   >
                     <ArrowPathIcon className="mr-2 h-5 w-5 text-gray-500" />
                     Reset Project
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setShowSettings(true);
+                      setShowMenu(false);
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                  >
+                    <CogIcon className="mr-2 h-5 w-5 text-gray-500" />
+                    Settings...
                   </button>
                   
                   <Link 
@@ -311,6 +325,12 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
           </div>
         )}
       </div>
+
+      {/* Settings Dialog */}
+      <SettingsDialog
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
     </div>
   );
 }
