@@ -2,9 +2,11 @@
 
 > Create videos with just a chat. No timeline, no tools. Just vibe..
 
-> ✨ Try our AI Video Editor Prototype: Just type what you want, and we’ll build a short video.
-> 🚧 Still early — your feedback shapes the next version. 
-> You don't need to pay to use the [Vibe Filming](https://inkycut.com/vibe) currently, but an OpenAI API key is required before first use.
+✨ Try our AI Video Editor Prototype: Just type what you want, and we’ll build a short video.
+
+🚧 Still early — your feedback shapes the next version. 
+
+You don't need to pay to use the [Vibe Filming](https://inkycut.com/vibe) currently, but an OpenAI API key is required before first use.
 
 **Want more features? Starting using it and submit an issue on GitHub!**
 
