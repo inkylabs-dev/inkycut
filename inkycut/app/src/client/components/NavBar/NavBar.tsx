@@ -140,7 +140,7 @@ function renderNavigationItems(
   });
 }
 
-const ContestURL = 'https://github.com/inkycut/inkycut';
+const ContestURL = 'https://github.com/inkylabs-dev/inkycut';
 
 function Announcement() {
   return (

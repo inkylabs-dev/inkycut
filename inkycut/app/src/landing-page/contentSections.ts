@@ -7,7 +7,7 @@ import avatarPlaceholder from '../client/static/avatar-placeholder.webp';
 export const landingPageNavigationItems: NavigationItem[] = [
   { name: 'Vibe Filming', to: '/vibe' },
   { name: 'Features', to: '#features' },
-  { name: 'Pricing', to: routes.PricingPageRoute.to },
+  // { name: 'Pricing', to: routes.PricingPageRoute.to },
   { name: 'Documentation', to: DocsUrl },
   { name: 'Blog', to: BlogUrl },
 ];
