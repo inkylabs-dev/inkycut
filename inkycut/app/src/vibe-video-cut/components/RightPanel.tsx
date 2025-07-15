@@ -89,22 +89,12 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
           
           // Log project size for debugging
           const sizeInfo = estimateProjectSize(project);
-          console.log('Project size info:', {
-            total: `${(sizeInfo.total / 1024).toFixed(1)}KB`,
-            files: `${(sizeInfo.files / 1024).toFixed(1)}KB`,
-            other: `${(sizeInfo.other / 1024).toFixed(1)}KB`,
-            filesCount: project.files?.length || 0,
-            usingUserApiKey: !!userApiKey,
-            sendingRawProject: isRawProjectRequest
-          });
-          
           const result = await processVideoAIPrompt({
             projectId: project.id,
             prompt: userMessage,
             projectData: projectToSend,
             apiKey: userApiKey
           });
-          console.log('AI response:', result);
           
           // Update the project with AI changes if we got an updated project back
           if (result.updatedProject) {
