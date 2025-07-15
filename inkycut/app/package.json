@@ -37,6 +37,7 @@
     "react-icons": "4.11.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^6.26.2",
+    "react-type-animation": "^3.2.0",
     "rehype-raw": "^7.0.0",
     "remotion": "4.0.322",
     "stripe": "11.15.0",

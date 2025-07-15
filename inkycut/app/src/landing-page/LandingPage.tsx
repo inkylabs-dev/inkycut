@@ -7,11 +7,13 @@ import FAQ from './components/FAQ';
 import Footer from './components/Footer';
 
 export default function LandingPage() {
+  const hasClients = false;
+  
   return (
     <div className='bg-white dark:text-white dark:bg-boxdark-2'>
       <main className='isolate dark:bg-boxdark-2'>
         <Hero />
-        <Clients />
+        { hasClients && <Clients /> }
         <Features features={features} />
         <Testimonials testimonials={testimonials} />
         <FAQ faqs={faqs} />

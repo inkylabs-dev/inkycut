@@ -1,5 +1,6 @@
 import React from 'react';
 import { Player } from '@remotion/player';
+import { TypeAnimation } from 'react-type-animation';
 import { VideoComposition } from '../../vibe-video-cut/components/Composition';
 import { CompositionData } from '../../vibe-video-cut/components/types';
 import { DocsUrl } from '../../shared/common';
@@ -7,61 +8,7 @@ import { DocsUrl } from '../../shared/common';
 import { useAuth } from 'wasp/client/auth';
 // @ts-ignore - TypeScript doesn't recognize the wasp modules
 import { Link } from 'wasp/client/router';
-
-const demoCompositionData: CompositionData = {
-  fps: 30,
-  width: 1920,
-  height: 1080,
-  pages: [
-    {
-      id: 'demo-page-1',
-      name: 'Welcome',
-      duration: 90, // 3 seconds at 30fps
-      backgroundColor: '#ffffff',
-      elements: [
-        {
-          id: 'demo-title',
-          type: 'text',
-          left: 160,
-          top: 300,
-          width: 1600,
-          height: 300,
-          text: 'Describe what your want. Let AI do the rest.',
-          fontSize: 96,
-          color: '#000000',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          startTime: 0,
-          endTime: 3,
-          animation: {
-            props: {
-              scale: [1, 1.05, 1],
-              opacity: [0.85, 1, 0.85]
-            },
-            duration: 3000,
-            ease: 'easeInOutQuad',
-            loop: true,
-            autoplay: true
-          }
-        },
-        {
-          id: 'demo-subtitle',
-          type: 'text',
-          left: 160,
-          top: 650,
-          width: 1600,
-          height: 100,
-          text: 'Images, videos, audio - all supported.',
-          fontSize: 48,
-          color: '#000000',
-          textAlign: 'center',
-          startTime: 0.5,
-          endTime: 3,
-        }
-      ]
-    }
-  ]
-};
+import { landingCompositionData } from '../contentSections';
 
 export default function Hero() {
   const { data: user } = useAuth();
@@ -74,7 +21,21 @@ export default function Hero() {
         <div className='mx-auto max-w-8xl px-6 lg:px-8'>
           <div className='lg:mb-18 mx-auto max-w-3xl text-center'>
             <h1 className='text-4xl font-bold text-gray-900 sm:text-6xl dark:text-white'>
-              Create videos with <span className='italic'>just a chat</span>.
+              Create stunning videos<br></br>
+              <TypeAnimation
+                sequence={[
+                  'with just a chat',
+                  2000,
+                  'with vibe filming.',
+                  2000,
+                  'using InkyCut.',
+                  2000,
+                ]}
+                wrapper="span"
+                speed={50}
+                style={{ fontStyle: 'italic' }}
+                repeat={Infinity}
+              />
             </h1>
             <p className='mt-6 mx-auto max-w-2xl text-lg leading-8 text-gray-600 dark:text-white'>
               Free your creativity and free forever. No video editing skills required.
@@ -94,7 +55,7 @@ export default function Hero() {
                 <Player
                   component={VideoComposition}
                   inputProps={{ 
-                    data: demoCompositionData,
+                    data: landingCompositionData,
                     files: []
                   }}
                   durationInFrames={90}

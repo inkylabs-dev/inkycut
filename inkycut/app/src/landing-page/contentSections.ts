@@ -3,6 +3,63 @@ import { routes } from 'wasp/client/router';
 import { DocsUrl, BlogUrl } from '../shared/common';
 import daBoiAvatar from '../client/static/da-boi.webp';
 import avatarPlaceholder from '../client/static/avatar-placeholder.webp';
+import { CompositionData } from "../../vibe-video-cut/components/types"
+
+export const landingCompositionData: CompositionData = {
+  "pages": [
+    {
+      "id": "page-1752612414825",
+      "name": "Page 1",
+      "duration": 150,
+      "backgroundColor": "white",
+      "elements": [
+        {
+          "id": "element-1752613970969",
+          "type": "image",
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080,
+          "src": "/editor-screenshot.png",
+          "opacity": 1,
+          "zIndex": 1,
+          "rotation": 0,
+          "startTime": 0,
+          "endTime": 5
+        },
+        {
+          "id": "element-1752613971289",
+          "type": "text",
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080,
+          "fontSize": 60,
+          "color": "red",
+          "textAlign": "center",
+          "text": "Vibe Filming",
+          "zIndex": 2,
+          "animation": {
+            "props": {
+              "scale": [
+                1,
+                1.2
+              ]
+            },
+            "duration": 1000,
+            "ease": "easeInOut",
+            "alternate": true,
+            "loop": true,
+            "autoplay": true
+          }
+        }
+      ]
+    }
+  ],
+  "fps": 30,
+  "width": 1920,
+  "height": 1080
+}
 
 export const landingPageNavigationItems: NavigationItem[] = [
   { name: 'Vibe Filming', to: '/vibe' },
@@ -13,27 +70,27 @@ export const landingPageNavigationItems: NavigationItem[] = [
 ];
 export const features = [
   {
-    name: 'Prompt-to-Video with Prebuilt Libraries',
-    description: 'Instantly generate full videos using one prompt. Our curated libraries include scenes, characters, audio, and animations—ready to remix with your story.',
+    name: 'Vibe Filming',
+    description: 'Like vibe coding, you describe what you want and let AI do the rest. No video editing skills required, just chat with our AI assistant.',
     icon: '🎬',
     href: DocsUrl,
   },
   {
-    name: 'Viral Video Templates',
-    description: 'Use proven video formats (reaction, parody, explainers, challenges) designed to hook viewers on TikTok, YouTube Shorts, and Instagram Reels.',
-    icon: '🔥',
+    name: 'Multiple-Media Support',
+    description: 'Create videos with any combination of images, videos, text, and audio. Import your media assets and let the AI help arrange them perfectly.',
+    icon: '�️',
     href: DocsUrl,
   },
   {
-    name: 'Custom Libraries for Your Brand or Style',
-    description: 'Upload your own assets to build personal or team libraries. Reuse consistent characters, settings, and animations across videos with ease.',
-    icon: '🎨',
+    name: 'Real-time Preview',
+    description: 'Instantly see your changes as you make them. Preview your video at any stage of the creation process to ensure it matches your vision.',
+    icon: '👁️',
     href: DocsUrl,
   },
   {
-    name: 'Smart Script-to-Scene Mapping',
-    description: 'Each script line intelligently maps to dynamic visuals, transitions, and sound effects—no editing skills required.',
-    icon: '🧠',
+    name: 'Open Source',
+    description: 'The editor, the JSON schema, and the video renderer are all open source. Contribute to the project or build your own applications on top of our technology.',
+    icon: '🌟',
     href: DocsUrl,
   },
 ];
@@ -65,25 +122,25 @@ export const faqs = [
   {
     id: 1,
     question: 'What is InkyCut?',
-    answer: 'InkyCut is an AI-powered video creation platform where you can remix iconic scenes and visuals with your own story prompts. It lets creators generate full videos—scripts, voices, scenes, and all—using smart libraries and remix tools.',
+    answer: 'InkyCut is an Open-Source video editor allowing users to edit videos with just a chat.',
     href: '',
   },
   {
     id: 2,
     question: 'Do I need to know video editing?',
-    answer: 'Nope! InkyCut is designed for storytellers, not editors. With just a prompt, you can generate an entire video using our curated libraries and remix tools—no timeline or software skills required.',
+    answer: 'Nope! Just describe what you want, AI does the video editing for you.',
     href: '',
   },
   {
     id: 3,
-    question: 'Can I create my own video library?',
-    answer: 'Yes! You can upload your own characters, backgrounds, sound effects, or animations to build a custom video library—great for brands, educators, or creators with a signature style.',
+    question: 'Do I need to pay?',
+    answer: 'No, InkyCut Vibe Filming editor is free forever. We believe in free and open-source software. Premium features will be available in the future but the core functionality will always be free.',
     href: '',
   },
   {
-    id: 4,
-    question: 'Are the videos copyright-safe?',
-    answer: 'Yes, videos made with InkyCut are AI-generated and transformative. You\'re not copying original assets but remixing styles and concepts. However, it\'s still your responsibility to follow platform policies (like TikTok or YouTube) when publishing content.',
+    id: 3,
+    question: 'Why do I need an OpenAI API Key?',
+    answer: 'We are in an early stage of development and using OpenAI to power the AI features. Your API key is used only for your account and is only stored on our local browser. We will not ask for user to provide an OpenAI key for premium users.',
     href: '',
   },
 ];

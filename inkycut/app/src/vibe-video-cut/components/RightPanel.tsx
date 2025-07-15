@@ -54,6 +54,7 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isQuickActionsEnabled = false; // Toggle for quick actions visibility
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
@@ -258,7 +259,7 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
       </div>
 
       {/* Quick Actions */}
-      <div className="p-4 border-t border-gray-100 flex-shrink-0">
+      { isQuickActionsEnabled && <div className="p-4 border-t border-gray-100 flex-shrink-0">
         <h4 className="text-xs font-semibold text-gray-700 mb-2">Quick Actions</h4>
         <div className="grid grid-cols-1 gap-1">
           {quickActions.slice(0, 3).map((action, index) => (
@@ -275,7 +276,7 @@ export default function RightPanel({ onSendMessage }: RightPanelProps) {
           <EllipsisHorizontalIcon className="h-3 w-3" />
           <span>More actions</span>
         </button>
-      </div>
+      </div> }
 
       {/* Error Banner */}
       {error && (
