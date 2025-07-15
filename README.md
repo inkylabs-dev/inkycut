@@ -42,18 +42,18 @@ The AI understands your creative intent and automatically applies the appropriat
 
 ### 🚀 Core Features
 
-- **🎬 Vibe Filming**: Revolutionary conversational video editing - talk to AI, get professional edits
-- **🤖 AI-Powered Story Generation**: Create compelling narratives with advanced AI assistance
-- **📱 Visual Storyboarding**: Transform stories into visual sequences with timeline-based editing
-- **🎥 Multi-Media Support**: Work with images, videos, and audio files seamlessly
-- **⚡ Real-time Preview**: See your changes instantly with live preview functionality
-- **📚 Library Management**: Organize and manage your creative assets efficiently
-- **💾 Export Options**: Render your projects in various formats for different platforms
+- [x] **🎬 Vibe Filming**: Revolutionary conversational video editing - talk to AI, get professional edits
+- [x] **🎥 Multi-Media Support**: Work with images, videos, and audio files seamlessly
+- [x] **⚡ Real-time Preview**: See your changes instantly with live preview functionality
+- [ ] **🤖 AI-Powered Story Generation**: Create compelling narratives with advanced AI assistance
+- [ ] **📱 Visual Storyboarding**: Transform stories into visual sequences with timeline-based editing
+- [ ] **📚 Library Management**: Organize and manage your creative assets efficiently
+- [ ] **💾 Export Options**: Render your projects in various formats for different platforms
 
 ### 🛠️ Technical Features
 
 - **🔐 User Authentication**: Secure Google OAuth integration for user accounts
-- **💳 Payment Integration**: Flexible pricing with Stripe and LemonSqueezy support
+- **💳 Payment Integration**: Flexible pricing with Stripe support
 - **🎞️ Professional Rendering**: High-quality video output with Remotion
 - **☁️ Cloud Storage**: Secure file management and sharing
 - **📊 Analytics Dashboard**: Track usage and performance metrics
