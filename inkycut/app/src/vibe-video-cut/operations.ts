@@ -211,8 +211,18 @@ async function generateVideoEditSuggestions(prompt: string, project: any, userAp
             '  id: string, type: "video"|"image"|"text", left: number, top: number, width: number, height: number,\n' +
             '  rotation?: number, opacity?: number, zIndex?: number, startTime?: number, endTime?: number,\n' +
             '  src?: string (for video/image), text?: string, fontSize?: number, fontFamily?: string, color?: string,\n' +
-            '  fontWeight?: string, textAlign?: "left"|"center"|"right", isDragging?: boolean\n' +
+            '  fontWeight?: string, textAlign?: "left"|"center"|"right", isDragging?: boolean,\n' +
+            '  animation?: {\n' +
+            '    props?: Record<string, any>, duration?: number, ease?: string,\n' +
+            '    delay?: number, alternate?: boolean, loop?: boolean|number, autoplay?: boolean\n' +
+            '  }\n' +
             '}\n\n' +
+            'ANIMATION EXAMPLES:\n' +
+            '- Fade in: { duration: 1000, props: { opacity: [0, 1] } }\n' +
+            '- Slide from left: { duration: 1000, props: { translateX: [-100, 0] } }\n' +
+            '- Scale up: { duration: 1000, props: { scale: [0.5, 1] } }\n' +
+            '- Rotate: { duration: 2000, props: { rotate: "1turn" } }\n' +
+            '- Bounce: { duration: 1000, ease: "easeOutBounce", props: { translateY: [-50, 0] } }\n\n' +
             'You should call changeVideoSchema tool to apply changes.',
         },
         {

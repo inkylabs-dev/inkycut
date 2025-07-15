@@ -8,11 +8,13 @@
  */
 
 // Basic composition component
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, Img, Video, Sequence } from 'remotion';
 import { CompositionData, CompositionElement, CompositionPage, ElementRendererProps, defaultCompositionData, LocalFile } from './types'; // Adjust the import path as needed
 import { Layer } from './Layer';
 import { FileResolver, createFileResolver } from '../utils/fileResolver';
+import { useAnimeTimeline } from './useAnimeTimeline';
+import { createTimeline } from "animejs";
 
 interface CompositionProps {
   data: CompositionData;
@@ -36,12 +38,92 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
     };
   }, [element]);
   
+  // Create ref for DOM element to use with anime.js
+  const elementRef = useRef<HTMLDivElement>(null);
+  
   const currentTimeInSeconds = frame / fps;
   
   // Check if element should be visible at current time
   const startTime = elementWithId.startTime || 0;
   const endTime = elementWithId.endTime || Infinity;
   const isVisible = currentTimeInSeconds >= startTime && currentTimeInSeconds <= endTime;
+  
+  // Handle animation execution
+  const scopeRef = useAnimeTimeline(() => {
+    const tl = createTimeline({
+      defaults: {
+        loop: false,
+      },
+    });
+    
+    // Create animationConfig inside the factory to avoid stale closures
+    const { animation } = elementWithId;
+    if (animation && animation.props && Object.keys(animation.props).length > 0) {
+      const animationConfig = {
+        duration: animation.duration || 1000,
+        ease: animation.ease || 'linear',
+        delay: animation.delay || 0,
+        alternate: animation.alternate || false,
+        loop: animation.loop || false,
+        autoplay: animation.autoplay !== false,
+        // Add animation properties directly
+        ...animation.props
+      };
+      
+      // Check if DOM element exists before adding animation
+      const domElement = document.getElementById(elementWithId.id);
+      if (domElement) {
+        tl.add(`#${elementWithId.id}`, animationConfig);
+        console.log('Created anime timeline for element :', elementWithId.id, animationConfig);
+      } else {
+        console.warn('DOM element not found for animation:', elementWithId.id);
+      }
+    }
+    
+    return tl;
+  }, [elementWithId.id, JSON.stringify(elementWithId.animation)])
+  // useEffect(() => {
+  //   // Only proceed if element has animation config with valid parameters
+  //   if (elementRef.current && 
+  //       elementWithId.animation && 
+  //       elementWithId.animation.parameters && 
+  //       Object.keys(elementWithId.animation.parameters).length > 0 && 
+  //       isVisible) {
+      
+  //     const { animation } = elementWithId;
+      
+  //     // Create animation configuration with proper anime.js structure
+  //     const animationConfig = {
+  //       targets: elementRef.current,
+  //       duration: animation.duration || 1000,
+  //       easing: animation.easing || 'easeInOutQuad',
+  //       delay: animation.delay || 0,
+  //       direction: animation.direction || 'normal',
+  //       loop: animation.loop || false,
+  //       autoplay: animation.autoplay !== false,
+  //       // Add animation properties directly
+  //       ...animation.parameters
+  //     };
+
+      
+      
+  //     try {
+  //       console.log('Animation config for element:', elementWithId.id, animationConfig);
+  //       console.log('Anime function:', animate);
+  //       const animationInstance = animate(`#${elementWithId.id}`, animationConfig);
+        
+  //       // Cleanup function
+  //       return () => {
+  //         if (animationInstance && typeof animationInstance.pause === 'function') {
+  //           animationInstance.pause();
+  //         }
+  //       };
+  //     } catch (error) {
+  //       console.warn('Animation error for element:', elementWithId.id, error);
+  //       console.warn('Animation config that failed:', animationConfig);
+  //     }
+  //   }
+  // }, [elementWithId.animation, isVisible, currentTimeInSeconds]);
   
   if (!isVisible) return null;
 
@@ -65,24 +147,32 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
   switch (elementWithId.type) {
     case 'image':
       return resolvedSrc ? (
-        <Img
-          src={resolvedSrc}
-          style={style}
-        />
+        <div ref={elementRef} style={style} id={scopeRef}>
+          <Img
+            id={elementWithId.id}
+            src={resolvedSrc}
+            style={{ width: '100%', height: '100%' }}
+          />
+        </div>
       ) : null;
 
     case 'video':
       return resolvedSrc ? (
-        <Video
-          src={resolvedSrc}
-          style={style}
-          startFrom={Math.floor((currentTimeInSeconds - startTime) * fps)}
-        />
+        <div ref={elementRef} style={style} id={scopeRef}>
+          <Video
+            id={elementWithId.id}
+            src={resolvedSrc}
+            style={{ width: '100%', height: '100%' }}
+            startFrom={Math.floor((currentTimeInSeconds - startTime) * fps)}
+          />
+        </div>
       ) : null;
 
     case 'text':
       return (
         <div
+          ref={elementRef}
+          id={scopeRef}
           style={{
             ...style,
             fontSize: elementWithId.fontSize || 24,
@@ -99,7 +189,9 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
             overflow: 'hidden',
           }}
         >
-          {elementWithId.text || 'Sample Text'}
+          <div id={elementWithId.id}>
+            {elementWithId.text || 'Sample Text'}
+          </div>
         </div>
       );
 

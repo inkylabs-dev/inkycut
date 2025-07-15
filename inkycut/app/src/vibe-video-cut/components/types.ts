@@ -48,6 +48,27 @@ export interface CompositionElement {
   // Interactive state (for editing)
   /** Whether element is currently being dragged by user */
   isDragging?: boolean;
+  
+  // Animation properties
+  /** Animation configuration compatible with anime.js */
+  animation?: {
+    /** Animation parameters compatible with anime.js. It
+     * can be css properties, css transforms, css variables, 
+     */
+    props?: Record<string, any>;
+    /** Animation duration in milliseconds */
+    duration?: number;
+    /** Animation easing function */
+    ease?: string;
+    /** Animation delay in milliseconds */
+    delay?: number;
+    /** Animation direction */
+    alternate?: boolean;
+    /** Animation loop settings */
+    loop?: boolean | number;
+    /** Auto-play animation */
+    autoplay?: boolean;
+  };
 }
 
 /**
