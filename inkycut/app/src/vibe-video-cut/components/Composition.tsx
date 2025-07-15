@@ -74,7 +74,6 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
       const domElement = document.getElementById(elementWithId.id);
       if (domElement) {
         tl.add(`#${elementWithId.id}`, animationConfig);
-        console.log('Created anime timeline for element :', elementWithId.id, animationConfig);
       } else {
         console.warn('DOM element not found for animation:', elementWithId.id);
       }
@@ -82,48 +81,6 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
     
     return tl;
   }, [elementWithId.id, JSON.stringify(elementWithId.animation)])
-  // useEffect(() => {
-  //   // Only proceed if element has animation config with valid parameters
-  //   if (elementRef.current && 
-  //       elementWithId.animation && 
-  //       elementWithId.animation.parameters && 
-  //       Object.keys(elementWithId.animation.parameters).length > 0 && 
-  //       isVisible) {
-      
-  //     const { animation } = elementWithId;
-      
-  //     // Create animation configuration with proper anime.js structure
-  //     const animationConfig = {
-  //       targets: elementRef.current,
-  //       duration: animation.duration || 1000,
-  //       easing: animation.easing || 'easeInOutQuad',
-  //       delay: animation.delay || 0,
-  //       direction: animation.direction || 'normal',
-  //       loop: animation.loop || false,
-  //       autoplay: animation.autoplay !== false,
-  //       // Add animation properties directly
-  //       ...animation.parameters
-  //     };
-
-      
-      
-  //     try {
-  //       console.log('Animation config for element:', elementWithId.id, animationConfig);
-  //       console.log('Anime function:', animate);
-  //       const animationInstance = animate(`#${elementWithId.id}`, animationConfig);
-        
-  //       // Cleanup function
-  //       return () => {
-  //         if (animationInstance && typeof animationInstance.pause === 'function') {
-  //           animationInstance.pause();
-  //         }
-  //       };
-  //     } catch (error) {
-  //       console.warn('Animation error for element:', elementWithId.id, error);
-  //       console.warn('Animation config that failed:', animationConfig);
-  //     }
-  //   }
-  // }, [elementWithId.animation, isVisible, currentTimeInSeconds]);
   
   if (!isVisible) return null;
 

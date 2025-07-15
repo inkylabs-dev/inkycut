@@ -311,7 +311,6 @@ async function replaceMediaSourcesWithDataURIs(project: any): Promise<any> {
       // Process all clips in this track
       if (track.elements) {
         await Promise.all(track.elements.map(async (clip: any) => {
-          console.log(`Processing clip: ${clip.id} of type ${clip.src}`);
           try {
             // Process image elements
             if (clip.type === 'image' && clip.src) {
@@ -323,10 +322,8 @@ async function replaceMediaSourcesWithDataURIs(project: any): Promise<any> {
               // Check if we have this file in our file map first
               if (clip.src && fileMap.has(clip.src)) {
                 clip.src = fileMap.get(clip.src);
-                console.log(`Replaced image URL with data URI from file map: ${clip.src}`);
               } else {
                 // Fall back to external conversion
-                console.log(`Converting external image URL to data URI: ${clip.src}`);
                 clip.src = await convertUrlToDataURI(clip.src);
               }
             }
@@ -341,10 +338,8 @@ async function replaceMediaSourcesWithDataURIs(project: any): Promise<any> {
               // Check if we have this file in our file map first
               if (clip.src && fileMap.has(clip.src)) {
                 clip.src = fileMap.get(clip.src);
-                console.log(`Replaced video URL with data URI from file map: ${clip.src}`);
               } else {
                 // Fall back to external conversion
-                console.log(`Converting external video URL to data URI: ${clip.src}`);
                 clip.src = await convertUrlToDataURI(clip.src);
               }
             }
