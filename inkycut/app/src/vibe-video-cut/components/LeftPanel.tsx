@@ -12,7 +12,7 @@ import { useAuth } from 'wasp/client/auth';
 import { routes } from 'wasp/client/router';
 import { Link } from 'react-router-dom';
 import { CompositionElement } from './types';
-import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject, filesAtom } from '../atoms';
+import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject, filesAtom, chatMessagesAtom } from '../atoms';
 import LocalFileUpload from './LocalFileUpload';
 import ElementPreview from './ElementPreview';
 import FileListItem from './FileListItem';
@@ -41,6 +41,7 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const { data: user } = useAuth();
   const [localFiles] = useAtom(filesAtom);
+  const [, setChatMessages] = useAtom(chatMessagesAtom);
 
   // Create file resolver from local files
   const fileResolver = React.useMemo(() => {
@@ -76,6 +77,16 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
       
       // Clear selected element
       setSelectedElement(null);
+      
+      // Clear chat history and reset to welcome message
+      setChatMessages([
+        {
+          id: 1,
+          role: 'assistant',
+          content: 'Welcome to Vibe Video Cut! I\'m your AI assistant. How can I help you create amazing videos today?',
+          timestamp: new Date().toISOString()
+        }
+      ]);
       
       // Close menu after reset
       setShowMenu(false);
@@ -182,7 +193,7 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
                   </a>
                   
                   <a 
-                    href="https://github.com/inkylabsio/inkycut" 
+                    href="https://github.com/inkylabs-dev/inkycut" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
