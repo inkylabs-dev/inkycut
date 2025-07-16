@@ -1,4 +1,5 @@
 remotion-bundle:
+	rm -rf /tmp/remotion-bundle
 	node src/vibe-video-cut/scripts/bundle.mjs
 
 render-local: remotion-bundle
