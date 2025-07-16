@@ -17169,7 +17169,6 @@ const ElementRenderer = ({ element, frame, fps, fileResolver }) => {
       const domElement = document.getElementById(elementWithId.id);
       if (domElement) {
         tl.add(`#${elementWithId.id}`, animationConfig);
-        console.log("Created anime timeline for element :", elementWithId.id, animationConfig);
       } else {
         console.warn("DOM element not found for animation:", elementWithId.id);
       }

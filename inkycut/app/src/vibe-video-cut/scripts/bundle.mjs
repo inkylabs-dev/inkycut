@@ -1,5 +1,4 @@
 import {bundle} from '@remotion/bundler';
-import {renderMedia, selectComposition} from '@remotion/renderer';
 import path from 'path';
 import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
@@ -19,7 +18,7 @@ const onProgress = (progress) => {
 const bundleLocation = await bundle({
   entryPoint: path.resolve(__dirname, '../components/remotionEntrypoint.tsx'),
   onProgress: onProgress,
-  publicPath: '/',
+  publicPath: '/remotion-bundle/',
   publicDir: '',
   outDir: '/tmp/remotion-bundle/',
   // If you have a webpack override in remotion.config.ts, pass it here as well.

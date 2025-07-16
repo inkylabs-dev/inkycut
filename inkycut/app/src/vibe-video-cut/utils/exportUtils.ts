@@ -3,40 +3,16 @@ import { HttpError } from 'wasp/server';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import { renderMedia, selectComposition } from '@remotion/renderer';
 import { getUploadFileSignedURLFromS3, getDownloadFileSignedURLFromS3 } from '../../file-upload/s3Utils';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Create a global path variable to the remotion bundle
-let remotionBundlePath: string | null = null;
-
-// Function to get the path to the Remotion bundle
-async function getRemotionBundle() {
-  if (!remotionBundlePath) {
-    // Use the pre-built bundle from public/remotion-bundle
-    // Hack: wasp compiles the web app under .wasp/out/web-app, while this file is in .wasp/out/server
-    remotionBundlePath = path.resolve(__dirname, '../../web-app/public/remotion-bundle');
-    
-    // Check if the bundle exists
-    try {
-      const stat = await fs.promises.stat(remotionBundlePath);
-      if (!stat.isDirectory()) {
-        throw new Error(`Remotion bundle path exists but is not a directory: ${remotionBundlePath}`);
-      }
-      console.log(`Remotion bundle found at: ${remotionBundlePath}`);
-    } catch (error) {
-      console.error(`Remotion bundle not found at ${remotionBundlePath}. Error:`, error);
-      throw new Error(`Remotion bundle not found. Please ensure the bundle is generated at ${remotionBundlePath}`);
-    }
-  }
-  return remotionBundlePath;
-}
+import {
+  getRemotionBundle,
+  createTempDirectory,
+  generateOutputFilename,
+  renderVideoComposition,
+  cleanupTempFiles
+} from './renderUtils.js';
 
 /**
  * Render a project using Remotion
@@ -53,55 +29,11 @@ export async function renderProject(project: any, type: string, quality: string,
     // Process the project to replace image/video src URLs with data URIs
     project = await replaceMediaSourcesWithDataURIs(project);
     
-    // Determine rendering settings based on quality
-    let width: number, height: number, fps: number;
-    switch (quality) {
-      case '4k':
-        width = 3840;
-        height = 2160;
-        fps = 30;
-        break;
-      case '2k':
-        width = 2560;
-        height = 1440;
-        fps = 30;
-        break;
-      case '1080p':
-        width = 1920;
-        height = 1080;
-        fps = 30;
-        break;
-      case '720p':
-        width = 1280;
-        height = 720;
-        fps = 30;
-        break;
-      case '480p':
-        width = 854;
-        height = 480;
-        fps = 30;
-        break;
-      case '360p':
-        width = 640;
-        height = 360;
-        fps = 30;
-        break;
-      default:
-        width = 1280;
-        height = 720;
-        fps = 30;
-    }
-    
-    // Create a proper temporary directory for the output
-    const tempBaseDir = os.tmpdir();
-    const tempDirPrefix = path.join(tempBaseDir, 'inkycut-render-');
-    
-    // Create a unique temporary directory
-    const outputDir = await fs.promises.mkdtemp(tempDirPrefix);
-    console.log(`Created temporary directory for rendering: ${outputDir}`);
+    // Create a temporary directory for the output
+    const outputDir = await createTempDirectory();
     
     // Set up the output filename
-    const outputFilename = `video_${project.id}_${Date.now()}.${type}`;
+    const outputFilename = generateOutputFilename(project, type);
     const outputPath = path.join(outputDir, outputFilename);
     
     // Get the path to the pre-built Remotion bundle
@@ -110,50 +42,15 @@ export async function renderProject(project: any, type: string, quality: string,
     //   updateTaskStatus('bundling', 15);
       const bundlePath = await getRemotionBundle();
       
-      // Set up the composition with the project data
-      const inputProps = {
-        data: project
-      };
-      
-    //   updateTaskStatus('preparing_composition', 25);
-      const composition = await selectComposition({
-        serveUrl: bundlePath,
-        id: 'VideoComposition', // Match the ID defined in the Composition component
-        inputProps,
-      });
-      
       // Perform real rendering with Remotion
     //   updateTaskStatus('rendering', 30);
       
-      console.log(`Starting real rendering: ${width}x${height} at ${fps}fps, codec: ${type === 'mp4' ? 'h264' : 'vp9'}`);
-      console.log(`Output path: ${outputPath}`);
-      
       try {
-        // Render the media with the selected configuration and report progress
-        await renderMedia({
-          composition,
-          serveUrl: bundlePath,
-          codec: type === 'mp4' ? 'h264' : 'vp9',
-          outputLocation: outputPath,
-          inputProps,
-          imageFormat: 'jpeg',
-          pixelFormat: 'yuv420p',
-          overwrite: true,
-          timeoutInMilliseconds: 300000, // 5 minutes timeout
-          onProgress: (progress) => {
-            // progress might not be a number in some cases
-            if (typeof progress === 'number') {
-              // progress is a value between 0 and 1
-              const percentage = Math.round(progress * 100);
-              if (percentage % 5 === 0) { // Update every 5%
-                console.log(`Rendering progress: ${percentage}%`);
-                // updateTaskStatus('rendering', 30 + Math.floor(percentage / 2)); // Removed, no longer needed
-              }
-            }
-          }
+        // Render the video composition using shared utility
+        await renderVideoComposition(project, type, quality, bundlePath, outputPath, (percentage) => {
+          // updateTaskStatus('rendering', 30 + Math.floor(percentage / 2)); // Removed, no longer needed
         });
         
-        console.log(`Rendering completed: ${outputPath}`);
         // updateTaskStatus('rendered', 80);
         renderingSuccessful = true;
       } catch (renderError) {
@@ -239,21 +136,7 @@ export async function renderProject(project: any, type: string, quality: string,
       const s3DownloadUrl = await getDownloadFileSignedURLFromS3({ key });
       
       // Clean up the temporary directory and rendered file
-      try {
-        // First ensure the rendered file is removed
-        if (fs.existsSync(outputPath)) {
-          fs.unlinkSync(outputPath);
-          console.log(`Deleted local rendered file: ${outputPath}`);
-        }
-        
-        // Then remove the entire temporary directory
-        if (fs.existsSync(outputDir)) {
-          await fs.promises.rm(outputDir, { recursive: true, force: true });
-          console.log(`Deleted temporary directory: ${outputDir}`);
-        }
-      } catch (cleanupError) {
-        console.warn('Failed to clean up temporary directory or files:', cleanupError);
-      }
+      await cleanupTempFiles(outputPath, outputDir);
       
       // Update task with completed status
     //   updateTaskStatus('completed', 100, s3DownloadUrl);
