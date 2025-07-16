@@ -4,12 +4,13 @@ import path from 'path';
 import fs from 'fs/promises';
 import os from 'os';
 import chalk from 'chalk';
-import { renderMedia } from '@remotion/renderer';
+import { renderMedia, selectComposition } from '@remotion/renderer';
 
 export interface RenderOptions {
   output: string;
   quality: string;
   format: string;
+  bundle?: string;
   verbose?: boolean;
 }
 
@@ -32,6 +33,49 @@ export async function renderFromUrl(shareUrl: string, options: RenderOptions): P
 
   // Render the video
   await renderVideo(processedProject, options);
+}
+
+export async function renderFromFile(filePath: string, options: RenderOptions): Promise<void> {
+  if (options.verbose) {
+    console.log(chalk.gray(`Reading project file: ${filePath}`));
+  }
+
+  // Read and parse the JSON file
+  const projectData = await readProjectFile(filePath, options.verbose);
+
+  // Process the project data for rendering
+  const processedProject = await processProjectData(projectData, options.verbose);
+
+  // Render the video
+  await renderVideo(processedProject, options);
+}
+
+async function readProjectFile(filePath: string, verbose?: boolean): Promise<any> {
+  try {
+    // Check if file exists and is accessible
+    await fs.access(filePath);
+    
+    if (verbose) {
+      console.log(chalk.gray('Reading project file...'));
+    }
+
+    const fileContent = await fs.readFile(filePath, 'utf-8');
+    const projectData = JSON.parse(fileContent);
+    
+    if (verbose) {
+      console.log(chalk.gray('Project file read successfully'));
+    }
+    
+    return projectData;
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+      throw new Error(`Project file not found: ${filePath}`);
+    }
+    if (error instanceof SyntaxError) {
+      throw new Error(`Invalid JSON in project file: ${filePath}`);
+    }
+    throw new Error(`Failed to read project file: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 function extractShareId(shareUrl: string): string | null {
@@ -91,7 +135,7 @@ async function replaceMediaSourcesWithDataURIs(project: any, verbose?: boolean):
   
   if (!processedProject.files || processedProject.files.length === 0) {
     if (verbose) {
-      console.log(chalk.yellow('No files found in project for data URI conversion'));
+      console.log(chalk.gray('No files found in project for data URI conversion'));
     }
     return processedProject;
   }
@@ -169,53 +213,53 @@ async function renderVideo(projectData: any, options: RenderOptions): Promise<vo
     console.log(chalk.gray('Starting video rendering...'));
   }
 
-  // Create a temporary directory for the output
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'inkycut-render-'));
-  const tempDataPath = path.join(tempDir, 'project.json');
+  const bundleUrl = options.bundle || 'https://inkycut.com/remotion-bundle/';
   
-  try {
-    // Write project data to temporary file
-    await fs.writeFile(tempDataPath, JSON.stringify(projectData, null, 2));
-    
-    // Create bundled script that can be used with Remotion
-    const bundlePath = await createRemotionBundle(tempDir, projectData, options.verbose);
-    
-    if (options.verbose) {
-      console.log(chalk.gray('Rendering with Remotion...'));
-    }
-    
-    // Render using Remotion
-    await renderMedia({
-      composition: {
-        id: 'Main',
-        fps: 30,
-        durationInFrames: calculateDurationInFrames(projectData),
-        width: 1920,
-        height: 1080,
-        defaultProps: {},
-        props: {},
-        defaultCodec: 'h264' as const,
-        defaultOutName: 'out.mp4',
-        defaultVideoImageFormat: 'jpeg' as const,
-        defaultPixelFormat: 'yuv420p' as const,
-      },
-      serveUrl: bundlePath,
-      codec: options.format === 'webm' ? 'vp8' : 'h264',
-      outputLocation: options.output,
-      onProgress: ({ progress }) => {
-        if (options.verbose) {
-          console.log(chalk.blue(`Rendering progress: ${Math.round(progress * 100)}%`));
-        }
-      },
-    });
-    
-    if (options.verbose) {
-      console.log(chalk.gray('Video rendered successfully'));
-    }
-    
-  } finally {
-    // Clean up temporary files
-    await fs.rm(tempDir, { recursive: true, force: true });
+  if (options.verbose) {
+    console.log(chalk.gray(`Using bundle: ${bundleUrl}`));
+  }
+  
+  // Set up the input props to match renderUtils structure
+  const inputProps = {
+    data: projectData
+  };
+  
+  if (options.verbose) {
+    console.log(chalk.gray('Selecting composition...'));
+  }
+  
+  // Select the composition using the correct ID
+  const composition = await selectComposition({
+    serveUrl: bundleUrl,
+    id: 'VideoComposition', // Match the ID from renderUtils
+    inputProps,
+  });
+  
+  if (options.verbose) {
+    console.log(chalk.gray('Rendering...'));
+  }
+  
+  // Render using Remotion with the selected composition
+  await renderMedia({
+    composition,
+    serveUrl: bundleUrl,
+    codec: options.format === 'webm' ? 'vp9' : 'h264',
+    outputLocation: options.output,
+    inputProps,
+    imageFormat: 'jpeg',
+    pixelFormat: 'yuv420p',
+    overwrite: true,
+    timeoutInMilliseconds: 300000, // 5 minutes timeout
+    onProgress: (progress) => {
+      if (options.verbose && typeof progress === 'number') {
+        const percentage = Math.round(progress * 100);
+        console.log(chalk.blue(`Rendering progress: ${percentage}%`));
+      }
+    },
+  });
+  
+  if (options.verbose) {
+    console.log(chalk.gray('Video rendered successfully'));
   }
 }
 
@@ -232,60 +276,19 @@ function calculateDurationInFrames(projectData: any): number {
   projectData.pages.forEach((page: any) => {
     if (page.elements) {
       page.elements.forEach((element: any) => {
-        const endTime = (element.startTime || 0) + (element.duration || 5);
+        // Convert duration from frames to seconds if it's a large number (likely frames)
+        let durationInSeconds = element.duration || 5;
+        if (durationInSeconds > 100) {
+          durationInSeconds = durationInSeconds / 30; // Convert frames to seconds
+        }
+        const endTime = (element.startTime || 0) + durationInSeconds;
         maxEndTime = Math.max(maxEndTime, endTime);
       });
     }
   });
   
-  return maxEndTime > 0 ? Math.ceil(maxEndTime * 30) : defaultDuration;
+  const result = maxEndTime > 0 ? Math.ceil(maxEndTime * 30) : defaultDuration;
+  console.log(`Calculated duration: ${result} frames (${result/30} seconds)`);
+  return result;
 }
 
-async function createRemotionBundle(tempDir: string, projectData: any, verbose?: boolean): Promise<string> {
-  if (verbose) {
-    console.log(chalk.gray('Creating Remotion bundle...'));
-  }
-  
-  // Create a simple Remotion composition
-  const compositionCode = `
-import { registerRoot } from 'remotion';
-import { Composition } from 'remotion';
-
-const projectData = ${JSON.stringify(projectData, null, 2)};
-
-const MainComposition = () => {
-  return (
-    <div style={{
-      width: '100%',
-      height: '100%',
-      backgroundColor: '#000',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: 'white',
-      fontSize: 48,
-    }}>
-      InkyCut Video
-    </div>
-  );
-};
-
-registerRoot(() => {
-  return (
-    <Composition
-      id="Main"
-      component={MainComposition}
-      durationInFrames={${calculateDurationInFrames(projectData)}}
-      fps={30}
-      width={1920}
-      height={1080}
-    />
-  );
-});
-`;
-  
-  const bundlePath = path.join(tempDir, 'index.tsx');
-  await fs.writeFile(bundlePath, compositionCode);
-  
-  return bundlePath;
-}
