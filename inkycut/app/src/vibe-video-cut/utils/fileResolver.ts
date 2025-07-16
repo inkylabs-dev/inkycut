@@ -58,11 +58,6 @@ export class FileResolver {
       }
     }
     
-    // Log unresolved references only when they're not standard fallbacks
-    if (!src.includes('placeholder') && !src.includes('default')) {
-      console.warn(`File reference not resolved: "${src}". Available:`, Array.from(this.fileMap.keys()));
-    }
-    
     // Return original src as fallback (might be a placeholder or external URL)
     return src;
   }
