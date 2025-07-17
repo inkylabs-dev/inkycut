@@ -5,7 +5,7 @@ import {
   VideoCameraIcon,
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
-import { CompositionElement } from './types';
+import { CompositionElement } from '@inkycut/editor';
 import { FileResolver } from '../utils/fileResolver';
 
 /**

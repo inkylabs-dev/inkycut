@@ -15,9 +15,9 @@ import {
   EllipsisHorizontalIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
-import { ChatMessage } from './types';
+import { ChatMessage } from '@inkycut/editor';
 import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom } from '../atoms';
-import { Project } from './types';
+import { Project } from '@inkycut/editor';
 import { processVideoAIPrompt } from 'wasp/client/operations';
 import { createServerSafeProject, estimateProjectSize } from '../utils/projectUtils';
 

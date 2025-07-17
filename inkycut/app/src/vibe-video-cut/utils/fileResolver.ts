@@ -1,4 +1,4 @@
-import { LocalFile } from '../components/types';
+import { LocalFile } from '@inkycut/editor';
 
 /**
  * Resolves file references in element sources to actual data URLs

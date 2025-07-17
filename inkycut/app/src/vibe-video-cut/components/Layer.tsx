@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sequence } from 'remotion';
-import type { ElementRendererProps } from './types';
+import type { ElementRendererProps } from '@inkycut/editor';
  
 interface LayerProps extends ElementRendererProps {
   children: React.ReactNode;

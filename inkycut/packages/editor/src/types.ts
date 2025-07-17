@@ -316,3 +316,4 @@ export const defaultCompositionData: CompositionData = {
     }
   ]
 };
+

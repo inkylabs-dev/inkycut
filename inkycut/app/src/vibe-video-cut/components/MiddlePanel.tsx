@@ -10,7 +10,7 @@ import {
   CodeBracketIcon,
   VideoCameraIcon
 } from '@heroicons/react/24/outline';
-import { CompositionData, defaultCompositionData } from './types';
+import { CompositionData, defaultCompositionData } from '@inkycut/editor';
 import { VideoComposition } from './Composition';
 import { fromTheme } from 'tailwind-merge';
 import { projectAtom, selectedPageAtom, ensureCompositionIDs, filesAtom } from '../atoms';

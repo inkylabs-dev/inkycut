@@ -1,6 +1,6 @@
 import { registerRoot, Composition } from 'remotion';
 import { VideoComposition } from './Composition';
-import { defaultCompositionData } from './types';
+import { defaultCompositionData } from '@inkycut/editor';
 import React from 'react';
 
 // Create a Root component that sets up compositions

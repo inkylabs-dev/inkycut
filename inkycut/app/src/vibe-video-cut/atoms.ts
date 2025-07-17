@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage, AppState, LocalFile } from './components/types';
+import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage, AppState, LocalFile } from '@inkycut/editor';
 
 /**
  * Primary atom to store the project data with persistence
