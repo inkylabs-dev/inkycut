@@ -19,7 +19,7 @@ import { ChatMessage } from '@inkycut/editor';
 import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom } from '@inkycut/editor';
 import { Project } from '@inkycut/editor';
 import { processVideoAIPrompt } from 'wasp/client/operations';
-import { createServerSafeProject, estimateProjectSize } from '../utils/projectUtils';
+import { createServerSafeProject, estimateProjectSize } from '@inkycut/editor';
 
 // Define types for AI operations following OpenSaaS pattern
 interface ProcessVideoAIPromptInput {

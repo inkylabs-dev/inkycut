@@ -1,4 +1,4 @@
-import { Project } from '@inkycut/editor';
+import { Project } from '../types';
 
 /**
  * Creates a copy of the project data excluding fields that shouldn't be sent to the server

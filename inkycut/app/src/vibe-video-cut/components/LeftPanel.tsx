@@ -18,7 +18,7 @@ import ElementPreview from './ElementPreview';
 import FileListItem from './FileListItem';
 import SettingsDialog from './SettingsDialog';
 import { LocalFile } from '@inkycut/editor';
-import { createFileResolver } from '../utils/fileResolver';
+import { createFileResolver } from '@inkycut/editor';
 
 interface LeftPanelProps {
   onElementUpdate?: (elementId: string, updatedData: Partial<CompositionElement> | any) => void;

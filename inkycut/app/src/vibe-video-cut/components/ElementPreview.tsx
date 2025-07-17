@@ -6,7 +6,7 @@ import {
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { CompositionElement } from '@inkycut/editor';
-import { FileResolver } from '../utils/fileResolver';
+import { FileResolver } from '@inkycut/editor';
 
 /**
  * Component to preview a composition element with appropriate rendering based on element type

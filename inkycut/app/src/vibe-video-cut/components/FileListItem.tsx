@@ -3,7 +3,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import { LocalFile, CompositionElement } from '@inkycut/editor';
 import { projectAtom, selectedPageAtom, removeFileAtom } from '@inkycut/editor';
 import { getFileIcon } from './LocalFileUpload';
-import { getMediaDimensions, calculateElementDimensions, DEFAULT_DIMENSIONS, MediaDimensions } from '../utils/mediaUtils';
+import { getMediaDimensions, calculateElementDimensions, DEFAULT_DIMENSIONS, MediaDimensions } from '@inkycut/editor';
 
 interface FileListItemProps {
   file: LocalFile;

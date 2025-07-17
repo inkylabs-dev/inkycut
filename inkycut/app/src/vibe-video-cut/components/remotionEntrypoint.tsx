@@ -1,7 +1,21 @@
 import { registerRoot, Composition } from 'remotion';
 import { VideoComposition } from './Composition';
-import { defaultCompositionData } from '@inkycut/editor';
 import React from 'react';
+
+const defaultCompositionData = {
+  "pages": [
+    {
+      "id": "page-1752794556111",
+      "name": "Page 1",
+      "duration": 150,
+      "backgroundColor": "white",
+      "elements": []
+    }
+  ],
+  "fps": 30,
+  "width": 1920,
+  "height": 1080
+};
 
 // Create a Root component that sets up compositions
 const Root = () => {

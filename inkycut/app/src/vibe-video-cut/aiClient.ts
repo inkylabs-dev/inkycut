@@ -5,7 +5,7 @@
 
 import { Project } from '@inkycut/editor';
 import { ensureCompositionIDs } from '@inkycut/editor';
-import { createServerSafeProject } from './utils/projectUtils';
+import { createServerSafeProject } from '@inkycut/editor';
 
 // Type definitions
 interface VideoAIPromptInput {
