@@ -208,7 +208,7 @@ async function convertUrlToDataURI(url: string, verbose?: boolean): Promise<stri
   }
 }
 
-async function renderVideo(projectData: any, options: RenderOptions): Promise<void> {
+export async function renderVideo(projectData: any, options: RenderOptions): Promise<void> {
   if (options.verbose) {
     console.log(chalk.gray('Starting video rendering...'));
   }
