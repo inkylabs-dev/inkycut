@@ -16,7 +16,7 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import { ChatMessage } from '@inkycut/editor';
-import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom } from '../atoms';
+import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom } from '@inkycut/editor';
 import { Project } from '@inkycut/editor';
 import { processVideoAIPrompt } from 'wasp/client/operations';
 import { createServerSafeProject, estimateProjectSize } from '../utils/projectUtils';

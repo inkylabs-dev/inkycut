@@ -12,7 +12,7 @@ import { useAuth } from 'wasp/client/auth';
 import { routes } from 'wasp/client/router';
 import { Link } from 'react-router-dom';
 import { CompositionElement } from '@inkycut/editor';
-import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject, filesAtom, chatMessagesAtom } from '../atoms';
+import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject, filesAtom, chatMessagesAtom } from '@inkycut/editor';
 import LocalFileUpload from './LocalFileUpload';
 import ElementPreview from './ElementPreview';
 import FileListItem from './FileListItem';

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useSetAtom } from 'jotai';
 import { DocumentIcon, PhotoIcon, VideoCameraIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
-import { addFileAtom } from '../atoms';
+import { addFileAtom } from '@inkycut/editor';
 import { LocalFile } from '@inkycut/editor';
 
 interface LocalFileUploadProps {

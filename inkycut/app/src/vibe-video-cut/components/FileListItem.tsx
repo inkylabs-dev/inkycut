@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { LocalFile, CompositionElement } from '@inkycut/editor';
-import { projectAtom, selectedPageAtom, removeFileAtom } from '../atoms';
+import { projectAtom, selectedPageAtom, removeFileAtom } from '@inkycut/editor';
 import { getFileIcon } from './LocalFileUpload';
 import { getMediaDimensions, calculateElementDimensions, DEFAULT_DIMENSIONS, MediaDimensions } from '../utils/mediaUtils';
 

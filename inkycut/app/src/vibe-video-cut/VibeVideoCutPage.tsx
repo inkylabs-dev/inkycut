@@ -22,7 +22,7 @@ import {
   createDefaultProject,
   createDefaultPage,
   ensureCompositionIDs
-} from './atoms';
+} from '@inkycut/editor';
 
 export default function VibeVideoCutPage() {
   const navigate = useNavigate();

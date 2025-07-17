@@ -4,7 +4,7 @@
  */
 
 import { Project } from '@inkycut/editor';
-import { ensureCompositionIDs } from './atoms';
+import { ensureCompositionIDs } from '@inkycut/editor';
 import { createServerSafeProject } from './utils/projectUtils';
 
 // Type definitions

@@ -13,7 +13,7 @@ import {
 import { CompositionData, defaultCompositionData } from '@inkycut/editor';
 import { VideoComposition } from './Composition';
 import { fromTheme } from 'tailwind-merge';
-import { projectAtom, selectedPageAtom, ensureCompositionIDs, filesAtom } from '../atoms';
+import { projectAtom, selectedPageAtom, ensureCompositionIDs, filesAtom } from '@inkycut/editor';
 
 interface MiddlePanelProps {
   onTimelineUpdate: (timeline: any[]) => void;

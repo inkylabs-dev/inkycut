@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage, AppState, LocalFile } from '@inkycut/editor';
+import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage, AppState, LocalFile } from './types';
 
 /**
  * Primary atom to store the project data with persistence
@@ -16,7 +16,7 @@ export const projectAtom = atomWithStorage<Project | null>('vibe-project', null)
  */
 export const updateProjectAtom = atom(
   null,
-  (get, set, updatedProject: Project | null) => {
+  (_, set, updatedProject: Project | null) => {
     if (!updatedProject) {
       // If clearing the project, just set null
       set(projectAtom, null);
@@ -177,7 +177,7 @@ export const loadingAtom = atom<boolean>(false);
  */
 export const setLoadingAtom = atom(
   null,
-  (get, set, isLoading: boolean) => {
+  (_, set, isLoading: boolean) => {
     set(loadingAtom, isLoading);
   }
 );
@@ -195,7 +195,7 @@ export const errorAtom = atom<Error | null>(null);
  */
 export const setErrorAtom = atom(
   null,
-  (get, set, error: Error | null) => {
+  (_, set, error: Error | null) => {
     set(errorAtom, error);
   }
 );
