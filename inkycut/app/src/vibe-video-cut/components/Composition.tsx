@@ -13,7 +13,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, Img, Video, Sequence } f
 import { CompositionData, CompositionElement, CompositionPage, ElementRendererProps, defaultCompositionData, LocalFile } from '@inkycut/editor';
 import { Layer } from './Layer';
 import { FileResolver, createFileResolver } from '../utils/fileResolver';
-import { useAnimeTimeline } from './useAnimeTimeline';
+import { useAnimeTimeline } from '@inkycut/editor';
 import { createTimeline } from "animejs";
 
 interface CompositionProps {

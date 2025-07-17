@@ -3,11 +3,11 @@ import { useEffect, useId, useRef } from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { Timeline } from "animejs";
 
-export const useAnimeTimeline = <T extends HTMLElement>(
+export const useAnimeTimeline = (
   animeTimelineFactory: () => Timeline,
   deps?: React.DependencyList,
 ) => {
-  // const animationScopeRef = useRef<T>(null);
+  // const animationScopeRef = useRef<HTMLElement>(null);
   const timelineRef = useRef<Timeline | null>(null);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
