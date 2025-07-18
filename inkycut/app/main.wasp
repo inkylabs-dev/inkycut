@@ -222,94 +222,12 @@ job dailyStatsJob {
 }
 //#endregion
 
-//#region Library
-route LibraryRoute { path: "/library", to: LibraryPage }
-page LibraryPage {
-  authRequired: true,
-  component: import LibraryPage from "@src/library-app/LibraryPage"
-}
-
-route AddLibraryRoute { path: "/library/add", to: AddLibraryPage }
-page AddLibraryPage {
-  authRequired: true,
-  component: import AddLibraryPage from "@src/library-app/AddLibraryPage"
-}
-
-route EditLibraryRoute { path: "/library/edit/:id", to: EditLibraryPage }
-page EditLibraryPage {
-  authRequired: true,
-  component: import EditLibraryPage from "@src/library-app/EditLibraryPage"
-}
-
-query getPaginatedLibraries {
-  fn: import { getPaginatedLibraries } from "@src/library-app/operations",
-  entities: [User, Library, File, Page]
-}
-
-query getLibraryById {
-  fn: import { getLibraryById } from "@src/library-app/operations",
-  entities: [User, Library, File, Page]
-}
-
-action createLibrary {
-  fn: import { createLibrary } from "@src/library-app/operations",
-  entities: [User, Library, File, Page]
-}
-
-action updateLibrary {
-  fn: import { updateLibrary } from "@src/library-app/operations",
-  entities: [User, Library, File, Page]
-}
-
-action deleteLibrary {
-  fn: import { deleteLibrary } from "@src/library-app/operations",
-  entities: [User, Library, File, Page]
-}
-
-action createPage {
-  fn: import { createPage } from "@src/library-app/operations",
-  entities: [User, Library, File, Page]
-}
-
-action updatePage {
-  fn: import { updatePage } from "@src/library-app/operations",
-  entities: [User, Library, File, Page]
-}
-
-action deletePage {
-  fn: import { deletePage } from "@src/library-app/operations",
-  entities: [User, Library, File, Page]
-}
-
-action reorderPages {
-  fn: import { reorderPages } from "@src/library-app/operations",
-  entities: [User, Library, File, Page]
-}
-
-action uploadPageVideo {
-  fn: import { uploadPageVideo } from "@src/library-app/operations",
-  entities: [User, Library, File, Page]
-}
-
-action generateManifest {
-  fn: import { generateManifest } from "@src/library-app/operations",
-  entities: [User, Library, File, Page]
-}
-
-query getLibraryFileDownloadURL {
-  fn: import { getLibraryFileDownloadURL } from "@src/library-app/operations",
-  entities: [User, Library, File, Page]
-}
-//#endregion
-
 //#region Vibe Video Cut
 route VibeVideoCutRoute { path: "/vibe", to: VibeVideoCutPage }
 page VibeVideoCutPage {
   authRequired: false,
   component: import VibeVideoCutPage from "@src/vibe-video-cut/VibeVideoCutPage"
 }
-
-
 
 action processVideoAIPrompt {
   fn: import { processVideoAIPrompt } from "@src/vibe-video-cut/operations",
