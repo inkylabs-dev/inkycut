@@ -6,7 +6,7 @@ export * from './utils/projectUtils';
 export * from './utils/mediaUtils';
 
 // Component exports
-export { VideoComposition, MainComposition } from './Composition';
+export { MainComposition } from './Composition';
 export { Layer } from './Layer';
 export { default as ElementPreview } from './ElementPreview';
 export { default as FileListItem } from './FileListItem';

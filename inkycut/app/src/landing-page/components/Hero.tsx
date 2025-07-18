@@ -1,7 +1,7 @@
 import React from 'react';
 import { Player } from '@remotion/player';
 import { TypeAnimation } from 'react-type-animation';
-import { VideoComposition } from '@inkycut/editor';
+import { MainComposition } from '@inkycut/editor';
 import { CompositionData } from '@inkycut/editor';
 import { DocsUrl } from '../../shared/common';
 // @ts-ignore - TypeScript doesn't recognize the wasp modules
@@ -53,7 +53,7 @@ export default function Hero() {
             <div className='-m-2 flex justify-center rounded-xl lg:-m-4 lg:rounded-2xl lg:p-4'>
               <div className='w-full max-w-4xl aspect-video'>
                 <Player
-                  component={VideoComposition}
+                  component={MainComposition}
                   inputProps={{ 
                     data: landingCompositionData,
                     files: []

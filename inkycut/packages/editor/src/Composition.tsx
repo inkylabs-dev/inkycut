@@ -9,8 +9,8 @@
 
 // Basic composition component
 import React, { useRef } from 'react';
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, Img, Video, Sequence } from 'remotion';
-import { CompositionData, CompositionElement, ElementRendererProps, LocalFile } from './types';
+import { AbsoluteFill, useCurrentFrame, Img, Video, Sequence } from 'remotion';
+import { CompositionData, ElementRendererProps, LocalFile } from './types';
 import { Layer } from './Layer';
 import { FileResolver, createFileResolver } from './utils/fileResolver';
 import { useAnimeTimeline } from './useAnimeTimeline';
@@ -151,32 +151,6 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
   }
 };
 
-// Enhanced wrapper component with selection and editing capabilities
-export const VideoComposition: React.FC<{ 
-  data: CompositionData;
-  currentPageIndex?: number;
-  selectedItem?: string | null;
-  setSelectedItem?: (elementId: string | null) => void;
-  changeItem?: (elementId: string, updater: (element: CompositionElement) => CompositionElement) => void;
-  files?: LocalFile[];
-}> = ({ 
-  data,
-  currentPageIndex,
-  files,
-}) => {
-  return (
-    <MainComposition 
-      data={data}
-      currentPageIndex={currentPageIndex}
-      files={files}
-    />
-  );
-};
-
-
-
-// Main composition component with outlines and pointer event support
-
 // Main composition component with outlines and pointer event support
 export const MainComposition: React.FC<{
   data: CompositionData;
@@ -188,9 +162,17 @@ export const MainComposition: React.FC<{
   files,
 }) => {
   // Only use Remotion hooks when in Player context (no currentPageIndex)
-  const isPlayerContext = currentPageIndex === undefined;
-  const frame = isPlayerContext ? useCurrentFrame() : 0;
-  const { fps } = isPlayerContext ? useVideoConfig() : { fps: data.fps };
+  let frame = 0;
+  let isPlayerContext = false;
+
+  try {
+    frame = useCurrentFrame();
+    isPlayerContext = true; // If useCurrentFrame works, we are in Player context
+  } catch (error) {
+    console.warn('useCurrentFrame is only available in Player context');
+  }
+  
+  const { fps } = data;
   
   // Create file resolver from local files
   const fileResolver = React.useMemo(() => {
