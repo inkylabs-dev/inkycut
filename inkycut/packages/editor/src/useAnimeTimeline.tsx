@@ -39,5 +39,5 @@ export const useAnimeTimeline = (
     }
   }, [frame, fps]);
 
-  return id.replaceAll(":", "_");
+  return id.replace(/:/g, "_");
 };

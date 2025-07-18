@@ -22,7 +22,7 @@ const generateUniqueId = (): string => {
 };
 
 // Individual element renderer
-const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileResolver }> = ({ element, frame, fps, fileResolver }) => {
+const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileResolver; isPlayerContext?: boolean }> = ({ element, frame, fps, fileResolver, isPlayerContext = false }) => {
   // Ensure element has an ID
   const elementWithId = React.useMemo(() => {
     if (element.id) return element;
@@ -42,8 +42,8 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
   const endTime = elementWithId.endTime || Infinity;
   const isVisible = currentTimeInSeconds >= startTime && currentTimeInSeconds <= endTime;
   
-  // Handle animation execution
-  const scopeRef = useAnimeTimeline(() => {
+  // Handle animation execution - only in Player context
+  const scopeRef = isPlayerContext ? useAnimeTimeline(() => {
     const tl = createTimeline({
       defaults: {
         loop: false,
@@ -74,7 +74,7 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
     }
     
     return tl;
-  }, [elementWithId.id, JSON.stringify(elementWithId.animation)])
+  }, [elementWithId.id, JSON.stringify(elementWithId.animation)]) : elementWithId.id;
   
   if (!isVisible) return null;
 
@@ -187,8 +187,10 @@ export const MainComposition: React.FC<{
   currentPageIndex,
   files,
 }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  // Only use Remotion hooks when in Player context (no currentPageIndex)
+  const isPlayerContext = currentPageIndex === undefined;
+  const frame = isPlayerContext ? useCurrentFrame() : 0;
+  const { fps } = isPlayerContext ? useVideoConfig() : { fps: data.fps };
   
   // Create file resolver from local files
   const fileResolver = React.useMemo(() => {
@@ -241,12 +243,14 @@ export const MainComposition: React.FC<{
               element={element}
               frame={frame}
               fps={fps}
+              isPlayerContext={isPlayerContext}
             >
               <ElementRenderer
                 element={element}
                 frame={frame}
                 fps={fps}
                 fileResolver={fileResolver}
+                isPlayerContext={isPlayerContext}
               />
             </Layer>
           ))}
@@ -305,12 +309,14 @@ export const MainComposition: React.FC<{
                   element={element}
                   frame={frame - startFrame}
                   fps={fps}
+                  isPlayerContext={isPlayerContext}
                 >
                   <ElementRenderer
                     element={element}
                     frame={frame - startFrame}
                     fps={fps}
                     fileResolver={fileResolver}
+                    isPlayerContext={isPlayerContext}
                   />
                 </Layer>
               ))}

@@ -4,10 +4,17 @@ import type { ElementRendererProps } from './types';
  
 interface LayerProps extends ElementRendererProps {
   children: React.ReactNode;
+  isPlayerContext?: boolean;
 }
 
 export const Layer: React.FC<LayerProps> = (props) => {
-  const { element, fps, children } = props;
+  const { element, fps, children, isPlayerContext = false } = props;
+  
+  // If not in Player context, just return the children directly
+  if (!isPlayerContext) {
+    return <>{children}</>;
+  }
+  
   // Calculate from and durationInFrames based on startTime and endTime (which are in seconds)
   const startTime = element.startTime || 0;
   const endTime = element.endTime || Infinity;
