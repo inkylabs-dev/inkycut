@@ -20,7 +20,13 @@
   "dependencies": {
     "animejs": "^4.0.2",
     "remotion": "4.0.324",
-    "jotai": "^2.12.5"
+    "@remotion/player": "^4.0.324",
+    "jotai": "^2.12.5",
+    "@heroicons/react": "^2.2.0",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^6.26.2",
+    "rehype-raw": "^7.0.0",
+    "tailwind-merge": "^2.2.1"
   },
   "husky": {
     "hooks": {
