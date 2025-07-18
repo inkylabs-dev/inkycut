@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom, useSetAtom } from 'jotai';
-import LeftPanel from './components/LeftPanel';
-import MiddlePanel from './components/MiddlePanel';
-import RightPanel from './components/RightPanel';
+import { LeftPanel, MiddlePanel, RightPanel } from '@inkycut/editor';
 import { 
   projectAtom,
   updateProjectAtom,
@@ -21,8 +19,10 @@ import {
   setSelectedPageAtom,
   createDefaultProject,
   createDefaultPage,
-  ensureCompositionIDs
+  ensureCompositionIDs,
+  createServerSafeProject
 } from '@inkycut/editor';
+import { processVideoAIPrompt } from 'wasp/client/operations';
 
 export default function VibeVideoCutPage() {
   const navigate = useNavigate();
@@ -191,16 +191,12 @@ export default function VibeVideoCutPage() {
 
   const handleChatMessage = (message: string) => {
     // Add the user message to chat using the atom
-    // The message should be of type user
     setAddChatMessage({
       id: Date.now(),
       role: 'user',
       content: message,
       timestamp: new Date().toISOString()
     });
-    
-    // RightPanel will handle the AI processing and response
-    // This separation keeps this component focused on message display, not processing
   };
 
   const handleCompositionUpdate = async (composition: any) => {
@@ -275,6 +271,41 @@ export default function VibeVideoCutPage() {
         <div className="w-80 bg-white border-l border-gray-200 flex-shrink-0 overflow-hidden">
           <RightPanel
             onSendMessage={handleChatMessage}
+            onHandleMessage={async (message: string) => {
+              // Process the AI prompt using the wasp operation
+              if (project) {
+                // Create a server-safe version of the project (without files and appState)
+                const serverSafeProject = createServerSafeProject(project);
+                
+                const response = await processVideoAIPrompt({
+                  projectId: project.id || 'default',
+                  prompt: message,
+                  projectData: serverSafeProject,
+                  apiKey: localStorage.getItem('openai-api-key') || '',
+                });
+                
+                // Update the project with AI changes if provided
+                if (response.updatedProject) {
+                  // Merge the updated project with the current project (preserving files and appState)
+                  const updatedProject = {
+                    ...project,
+                    ...response.updatedProject,
+                    // Preserve client-side state
+                    files: project.files,
+                    appState: project.appState,
+                  };
+                  
+                  setUpdateProject(updatedProject);
+                }
+                
+                return response;
+              }
+              
+              return {
+                message: "No project loaded. Please create or load a project first.",
+                updatedProject: null
+              };
+            }}
           />
         </div>
       </div>

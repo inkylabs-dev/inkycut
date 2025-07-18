@@ -416,30 +416,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect }: Middl
               />
             </div>
             
-            {/* Play progress overlay */}
-            <div className="absolute bottom-4 left-4 right-4">
-              <div className="bg-black bg-opacity-50 rounded-lg p-3">
-                <div className="flex items-center justify-between text-white text-sm mb-2">
-                  <span>{formatTime(currentTime)}</span>
-                  <span>{formatTime(totalDuration)}</span>
-                </div>
-                <div 
-                  className="w-full bg-gray-600 rounded-full h-2 cursor-pointer hover:h-3 transition-all"
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const percentage = x / rect.width;
-                    const targetFrame = Math.floor(percentage * totalFrames);
-                    handleSeek(targetFrame);
-                  }}
-                >
-                  <div 
-                    className="bg-blue-500 h-full rounded-full transition-all duration-100"
-                    style={{ width: `${totalFrames > 0 ? (currentFrame / totalFrames) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-            </div>
+            
           </div>
 
           {/* Control Bar */}

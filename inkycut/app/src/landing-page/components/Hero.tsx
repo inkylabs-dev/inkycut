@@ -1,7 +1,7 @@
 import React from 'react';
 import { Player } from '@remotion/player';
 import { TypeAnimation } from 'react-type-animation';
-import { VideoComposition } from '../../vibe-video-cut/components/Composition';
+import { VideoComposition } from '@inkycut/editor';
 import { CompositionData } from '@inkycut/editor';
 import { DocsUrl } from '../../shared/common';
 // @ts-ignore - TypeScript doesn't recognize the wasp modules
