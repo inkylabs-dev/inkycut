@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useAtom } from 'jotai';
 import { Player, PlayerRef } from '@remotion/player';
 import { 
@@ -334,6 +334,12 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect }: Middl
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const inputProps = useMemo(() => ({
+    data: compositionData,
+    currentPageIndex: getCurrentPage().pageIndex,
+    files: files
+  }), [compositionData, currentFrame, files]);
+
 
   return (
     <div className="h-full flex flex-col bg-white">
@@ -384,12 +390,9 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect }: Middl
           <div className="flex-1 bg-gray-100 flex items-center justify-center relative">
             <div className="w-full max-w-4xl aspect-video">
               <Player
+                ref={playerRef}
                 component={MainComposition}
-                inputProps={{ 
-                  data: compositionData,
-                  currentPageIndex: getCurrentPage().pageIndex,
-                  files: files
-                }}
+                inputProps={inputProps}
                 durationInFrames={totalFrames}
                 compositionWidth={compositionData.width}
                 compositionHeight={compositionData.height}
