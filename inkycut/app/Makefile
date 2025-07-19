@@ -8,7 +8,7 @@ render-local: remotion-bundle
 render:
 	REMOTION_BUNDLE_URI=https://inkycut.com/remotion-bundle/ npx tsx src/vibe-video-cut/scripts/render.ts --data $(file)
 
-deploy: remotion-bundle
+deploy:
 	REACT_APP_API_URL=https://api.inkycut.com \
 	WASP_SERVER_URL=https://api.inkycut.com \
 	WASP_WEB_CLIENT_URL=https://inkycut.com \
