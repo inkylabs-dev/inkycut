@@ -17,10 +17,10 @@
     // We're bundling all code in the end so this is the most appropriate option,
     // it's also important for autocomplete to work properly.
     "moduleResolution": "bundler",
-    // Added it since wasp 0.17.0
-    "moduleDetection": "force",
-    // Added it since wasp 0.17.0
-    "isolatedModules": true,
+    // Added it since wasp 0.17.0 but it may cause Remotion context issue.
+    // "moduleDetection": "force",
+    // Added it since wasp 0.17.0 but it may cause issues with some libraries.
+    // "isolatedModules": true,
     // JSX support
     "jsx": "preserve",
     "strict": true,
