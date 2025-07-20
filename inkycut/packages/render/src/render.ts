@@ -221,7 +221,14 @@ export async function renderVideo(projectData: any, options: RenderOptions): Pro
   
   // Set up the input props to match renderUtils structure
   const inputProps = {
-    data: projectData
+    data: {
+      pages: projectData.composition?.pages || [],
+      fps: projectData.composition?.fps || 30,
+      width: projectData.composition?.width || 1920,
+      height: projectData.composition?.height || 1080,
+      files: projectData.files || [],
+      
+    }
   };
   
   if (options.verbose) {

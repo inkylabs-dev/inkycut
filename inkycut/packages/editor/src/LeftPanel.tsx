@@ -6,7 +6,8 @@ import {
   Bars3Icon,
   HeartIcon,
   ArrowPathIcon,
-  CogIcon
+  CogIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 // import { useAuth } from 'wasp/client/auth';
 // import { routes } from 'wasp/client/router';
@@ -17,6 +18,7 @@ import LocalFileUpload from './LocalFileUpload';
 import ElementPreview from './ElementPreview';
 import FileListItem from './FileListItem';
 import SettingsDialog from './SettingsDialog';
+import ImportDialog from './ImportDialog';
 import { createFileResolver } from './utils/fileResolver';
 
 interface LeftPanelProps {
@@ -34,6 +36,7 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
   const [activeTab, setActiveTab] = useState<'files' | 'elements'>('files');
   const [showMenu, setShowMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   // const { data: user } = useAuth();
   const [localFiles] = useAtom(filesAtom);
@@ -126,6 +129,17 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
                 className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
               >
                 <div className="py-1">
+                  <button
+                    onClick={() => {
+                      setShowImportDialog(true);
+                      setShowMenu(false);
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                  >
+                    <ArrowDownTrayIcon className="mr-2 h-5 w-5 text-gray-500" />
+                    Import Project
+                  </button>
+                  
                   <button
                     onClick={handleResetProject}
                     className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
@@ -312,6 +326,12 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
       <SettingsDialog
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
+      />
+
+      {/* Import Dialog */}
+      <ImportDialog
+        isOpen={showImportDialog}
+        onClose={() => setShowImportDialog(false)}
       />
     </div>
   );

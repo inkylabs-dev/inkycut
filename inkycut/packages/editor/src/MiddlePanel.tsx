@@ -340,7 +340,6 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect }: Middl
     files: files
   }), [compositionData, currentFrame, files]);
 
-
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Top Toggle Bar */}
