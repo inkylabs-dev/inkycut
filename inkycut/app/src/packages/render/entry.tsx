@@ -1,5 +1,5 @@
 import { registerRoot, Composition } from 'remotion';
-import { MainComposition } from '@inkycut/editor';
+import { MainComposition } from '../../packages/editor';
 import React from 'react';
 
 const defaultCompositionData = {
@@ -29,9 +29,7 @@ const Root = () => {
         width={1920}
         height={1080}
         defaultProps={{
-          data: {
-            "composition": defaultCompositionData,
-          }
+          data: defaultCompositionData,
           // Remove currentPageIndex to enable multi-page rendering
         }}
         calculateMetadata={({ props }) => {

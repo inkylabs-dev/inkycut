@@ -3,7 +3,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { renderFromUrl, renderFromFile } from './render';
-import { version } from '../package.json';
 import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
@@ -19,28 +18,27 @@ const program = new Command();
 program
   .name('inkycut-render')
   .description('CLI for rendering InkyCut video projects')
-  .version(version);
-
-program
-  .argument('<input>', 'InkyCut share URL (e.g., https://inkycut.com/vibe#share=xxxxxxxx) or local JSON file path')
+  .version('0.1.0')
+  //.argument('<input>', 'InkyCut share URL (e.g., https://inkycut.com/vibe#share=xxxxxxxx) or local JSON file path')
+  .option('-i, --input <path>', 'Input file path (if not using URL)', './input.json')
   .option('-o, --output <path>', 'Output file path', './output.mp4')
   .option('-q, --quality <quality>', 'Video quality (1080p, 720p, 480p)', '1080p')
   .option('-f, --format <format>', 'Output format (mp4, webm)', 'mp4')
   .option('-b, --bundle <url>', 'Remotion bundle URL', defaultBundlePath)
   .option('--verbose', 'Enable verbose logging')
-  .action(async (input, options) => {
+  .action(async (options) => {
     try {
       console.log(chalk.blue('🎬 InkyCut Render CLI'));
       
       // Determine if input is a URL or file path
-      const isUrl = input.startsWith('http://') || input.startsWith('https://');
-      const isFile = !isUrl && existsSync(input);
-      
+      const isUrl = options.input.startsWith('http://') || options.input.startsWith('https://');
+      const isFile = !isUrl && existsSync(options.input);
+
       if (!isUrl && !isFile) {
-        throw new Error(`Input must be either a valid URL or an existing file path. Got: ${input}`);
+        throw new Error(`Input must be either a valid URL or an existing file path. Got: ${options.input}`);
       }
       
-      console.log(chalk.gray(`Input: ${input} ${isUrl ? '(URL)' : '(file)'}`));
+      console.log(chalk.gray(`Input: ${options.input} ${isUrl ? '(URL)' : '(file)'}`));
       console.log(chalk.gray(`Output: ${options.output}`));
       console.log(chalk.gray(`Quality: ${options.quality}`));
       console.log(chalk.gray(`Format: ${options.format}`));
@@ -59,9 +57,9 @@ program
       };
       
       if (isUrl) {
-        await renderFromUrl(input, renderOptions);
+        await renderFromUrl(options.input, renderOptions);
       } else {
-        await renderFromFile(input, renderOptions);
+        await renderFromFile(options.input, renderOptions);
       }
       
       console.log(chalk.green('✅ Rendering completed successfully!'));
@@ -70,5 +68,4 @@ program
       process.exit(1);
     }
   });
-
-program.parse();
+program.parse(process.argv);

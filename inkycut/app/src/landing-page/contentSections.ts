@@ -1,9 +1,8 @@
 import type { NavigationItem } from '../client/components/NavBar/NavBar';
-import { routes } from 'wasp/client/router';
 import { DocsUrl, BlogUrl } from '../shared/common';
 import daBoiAvatar from '../client/static/da-boi.webp';
 import avatarPlaceholder from '../client/static/avatar-placeholder.webp';
-import { CompositionData } from '@inkycut/editor';
+import { CompositionData } from '../packages/editor';
 
 export const landingCompositionData: CompositionData = {
   "pages": [

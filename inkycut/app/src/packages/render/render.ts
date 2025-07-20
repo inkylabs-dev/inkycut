@@ -230,7 +230,7 @@ export async function renderVideo(projectData: any, options: RenderOptions): Pro
   //   files: projectData.files || [],
   // };
   const inputProps = {
-    data: projectData,
+    data: projectData.composition,
   };
 
   if (options.verbose) {

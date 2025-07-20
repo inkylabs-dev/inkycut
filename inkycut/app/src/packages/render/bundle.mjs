@@ -17,7 +17,7 @@ const bundleLocation = await bundle({
     onProgress: onProgress,
     publicPath: '/',
     publicDir: '',
-    outDir: path.resolve(__dirname, '../dist/bundle'),
+    outDir: path.resolve(__dirname, './bundle'),
     // If you have a webpack override in remotion.config.ts, pass it here as well.
     webpackOverride: (config) => config,
 });

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom, useSetAtom } from 'jotai';
-import { LeftPanel, MiddlePanel, RightPanel } from '@inkycut/editor';
+import { LeftPanel, MiddlePanel, RightPanel } from '../packages/editor';
 import { 
   projectAtom,
   updateProjectAtom,
@@ -21,7 +21,7 @@ import {
   createDefaultPage,
   ensureCompositionIDs,
   createServerSafeProject
-} from '@inkycut/editor';
+} from '../packages/editor';
 import { processVideoAIPrompt } from 'wasp/client/operations';
 
 export default function VibeVideoCutPage() {

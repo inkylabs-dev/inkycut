@@ -1,8 +1,7 @@
 import React from 'react';
 import { Player } from '@remotion/player';
 import { TypeAnimation } from 'react-type-animation';
-import { MainComposition } from '@inkycut/editor';
-import { CompositionData } from '@inkycut/editor';
+import { MainComposition } from '../../packages/editor';
 import { DocsUrl } from '../../shared/common';
 // @ts-ignore - TypeScript doesn't recognize the wasp modules
 import { useAuth } from 'wasp/client/auth';

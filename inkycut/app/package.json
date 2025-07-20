@@ -4,7 +4,8 @@
   "scripts": {
     "start": "wasp start",
     "build": "wasp build",
-    "dev": "wasp start"
+    "dev": "wasp start",
+    "build-packages": "node scripts/buildPackages.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.523.0",
@@ -13,8 +14,6 @@
     "@google-analytics/data": "4.1.0",
     "@headlessui/react": "1.7.13",
     "@heroicons/react": "^2.2.0",
-    "@inkycut/editor": "file:../packages/editor",
-    "@inkycut/render": "file:../packages/render",
     "@lemonsqueezy/lemonsqueezy.js": "^3.2.0",
     "@prisma/engines": "^6.12.0",
     "@remotion/cli": "4.0.324",
