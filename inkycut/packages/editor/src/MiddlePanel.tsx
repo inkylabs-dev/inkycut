@@ -357,7 +357,6 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect }: Middl
               <VideoCameraIcon className="h-4 w-4" />
               <span>Player</span>
             </button>
-            {getCurrentPage().pageIndex}
             <button
               onClick={toggleViewMode}
               className={`flex items-center space-x-2 px-3 py-1 rounded text-sm font-medium transition-colors ${

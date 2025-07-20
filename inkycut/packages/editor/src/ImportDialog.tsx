@@ -103,7 +103,12 @@ export default function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
     setIsDragOver(false);
   };
 
-  const handleClick = () => {
+  const handleChooseFile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    fileInputRef.current?.click();
+  };
+
+  const handleDropAreaClick = () => {
     fileInputRef.current?.click();
   };
 
@@ -132,7 +137,7 @@ export default function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
-            onClick={handleClick}
+            onClick={handleDropAreaClick}
           >
             <DocumentArrowUpIcon className="h-12 w-12 mx-auto text-gray-400 mb-4" />
             <p className="text-lg font-medium text-gray-900 mb-2">
@@ -152,7 +157,7 @@ export default function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
             />
             
             <button
-              onClick={handleClick}
+              onClick={handleChooseFile}
               disabled={isImporting}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >

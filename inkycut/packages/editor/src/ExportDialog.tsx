@@ -33,15 +33,53 @@ export default function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
     setIsExporting(true);
 
     try {
+      // Ensure the project has all required fields before export
+      const completeProject = {
+        ...project,
+        // Ensure required fields are present
+        id: project.id || `project-${Date.now()}`,
+        name: project.name || 'Untitled Project',
+        createdAt: project.createdAt || new Date().toISOString(),
+        updatedAt: project.updatedAt || new Date().toISOString(),
+        propertiesEnabled: project.propertiesEnabled ?? true,
+        // Ensure composition has all required fields
+        composition: project.composition ? {
+          pages: project.composition.pages || [],
+          fps: project.composition.fps || 30,
+          width: project.composition.width || 1920,
+          height: project.composition.height || 1080
+        } : {
+          pages: [],
+          fps: 30,
+          width: 1920,
+          height: 1080
+        },
+        // Ensure appState exists
+        appState: project.appState || {
+          selectedElementId: null,
+          selectedPageId: null,
+          viewMode: 'edit' as const,
+          zoomLevel: 1,
+          showGrid: false,
+          isLoading: false,
+          error: null,
+          history: { past: [], future: [] }
+        },
+        // Ensure files array exists
+        files: project.files || [],
+        // Preserve metadata
+        metadata: project.metadata || {}
+      };
+
       // Create JSON blob
-      const jsonData = JSON.stringify(project, null, 2);
+      const jsonData = JSON.stringify(completeProject, null, 2);
       const blob = new Blob([jsonData], { type: 'application/json' });
       
       // Create download link
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${project.name || 'project'}.json`;
+      link.download = `${completeProject.name}.json`;
       
       // Trigger download
       document.body.appendChild(link);

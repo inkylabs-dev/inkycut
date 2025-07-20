@@ -1,18 +1,5 @@
 import type { User } from 'wasp/entities';
 import { HttpError } from 'wasp/server';
-import path from 'path';
-import fs from 'fs';
-import os from 'os';
-import { renderMedia, selectComposition } from '@remotion/renderer';
-import { getUploadFileSignedURLFromS3, getDownloadFileSignedURLFromS3 } from '../file-upload/s3Utils';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import fetch from 'node-fetch';
-import FormData from 'form-data';
-import { renderProject } from './utils/exportUtils';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 /**
  * Process slash commands for special functionality
@@ -22,7 +9,7 @@ const __dirname = dirname(__filename);
  * @param user The user who initiated the command
  * @returns Response object with message and any additional data
  */
-export async function processSlashCommand(command: string, project: any, user: User, context?: any) {
+export async function processSlashCommand(command: string, project: any) {
   // Parse the command and args
   const [mainCommand, ...args] = command.trim().split(/\s+/);
   
@@ -39,27 +26,10 @@ export async function processSlashCommand(command: string, project: any, user: U
   
   // Handle different commands
   switch (mainCommand.toLowerCase()) {
-    case 'download': {
-      // Validate required parameters
-      const type = argsObj.type || 'mp4';
-      const quality = argsObj.quality || '1080p';
-      
-      // Extract composition data and merge files if present
-      let compositionData = project.composition || project;
-      if (project.files) {
-        compositionData.files = project.files;
-      }
-      
-      // Start rendering process
-      const result = await renderProject(compositionData, type, quality, user, context);
-      
+    case 'help': {
       return {
-        message: `Well done! Click to this
-<a href="${result.videoUrl}" target="_blank" class="text-blue-600">temporary link</a> to download the video:
-<video src="${result.videoUrl}" controls></video>`,
-        status: 'download_complete',
-        type,
-        quality
+        message: `/help - Show this help message`,
+        status: 'complete',
       };
     }
     

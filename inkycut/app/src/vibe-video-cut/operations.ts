@@ -91,7 +91,7 @@ export const processVideoAIPrompt = async (
       
       // Process the slash command
       try {
-        const commandResponse = await processSlashCommand(command, project, context.user, context);
+        const commandResponse = await processSlashCommand(command, project);
         return {
           message: commandResponse.message,
           commandResult: commandResponse,
