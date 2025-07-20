@@ -16,7 +16,7 @@ function getAllTsFiles(dir: string): Record<string, string> {
       
       if (stat.isDirectory()) {
         scanDir(fullPath);
-      } else if (item.endsWith('.ts')) {
+      } else if (item.endsWith('.ts') && !item.includes('entry.tsx') && !item.includes('bundle.mjs')) {
         const relativePath = fullPath.replace(dir + '/', '');
         const name = relativePath.replace(/\.ts$/, '');
         entries[name] = fullPath;

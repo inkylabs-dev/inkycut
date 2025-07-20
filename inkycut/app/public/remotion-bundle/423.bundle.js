@@ -1,4 +1,4 @@
-(self["webpackChunkopensaas"] = self["webpackChunkopensaas"] || []).push([[569],{
+(self["webpackChunkopensaas"] = self["webpackChunkopensaas"] || []).push([[423],{
 
 /***/ 3638:
 /***/ ((__unused_webpack_module, exports) => {
@@ -2426,7 +2426,7 @@ exports.stringifyDefaultProps = stringifyDefaultProps;
 
 /***/ }),
 
-/***/ 569:
+/***/ 9423:
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2720,13 +2720,22 @@ var calculateOuterStyle = ({
 };
 var calculateContainerStyle = ({
   config,
-  canvasSize,
   layout,
   scale,
   overflowVisible
 }) => {
-  if (!config || !canvasSize || !layout) {
+  if (!config) {
     return {};
+  }
+  if (!layout) {
+    return {
+      position: "absolute",
+      width: config.width,
+      height: config.height,
+      display: "flex",
+      transform: `scale(${scale})`,
+      overflow: overflowVisible ? "visible" : "hidden"
+    };
   }
   return {
     position: "absolute",
@@ -2745,8 +2754,18 @@ var calculateOuter = ({
   config,
   overflowVisible
 }) => {
-  if (!layout || !config) {
+  if (!config) {
     return {};
+  }
+  if (!layout) {
+    return {
+      width: config.width * scale,
+      height: config.height * scale,
+      display: "flex",
+      flexDirection: "column",
+      position: "absolute",
+      overflow: overflowVisible ? "visible" : "hidden"
+    };
   }
   const { centerX, centerY } = layout;
   return {
@@ -3497,8 +3516,8 @@ var useElementSize = (ref, options) => {
         setSize(null);
         return;
       }
-      const probableCssParentScale = contentRect.width === 0 || contentRect.width === 0 ? 1 : newSize[0].width / contentRect.width;
-      const width = options.shouldApplyCssTransforms ? newSize[0].width : newSize[0].width * (1 / probableCssParentScale);
+      const probableCssParentScale = contentRect.width === 0 ? 1 : newSize[0].width / contentRect.width;
+      const width = options.shouldApplyCssTransforms && probableCssParentScale > 0 ? newSize[0].width : newSize[0].width * (1 / probableCssParentScale);
       const height = options.shouldApplyCssTransforms ? newSize[0].height : newSize[0].height * (1 / probableCssParentScale);
       setSize((prevState) => {
         const isSame = prevState && prevState.width === width && prevState.height === height && prevState.left === newSize[0].x && prevState.top === newSize[0].y && prevState.windowSize.height === window.innerHeight && prevState.windowSize.width === window.innerWidth;
@@ -5076,13 +5095,12 @@ var PlayerUI = ({
   }, [config, layout, overflowVisible, scale]);
   const containerStyle3 = (0,react.useMemo)(() => {
     return calculateContainerStyle({
-      canvasSize,
       config,
       layout,
       scale,
       overflowVisible
     });
-  }, [canvasSize, config, layout, overflowVisible, scale]);
+  }, [config, layout, overflowVisible, scale]);
   const playerPause = player.pause;
   const playerDispatchError = player.emitter.dispatchError;
   const onError = (0,react.useCallback)((error) => {
@@ -5813,13 +5831,12 @@ var ThumbnailUI = ({
   }, [config, layout, overflowVisible, scale]);
   const containerStyle3 = (0,react.useMemo)(() => {
     return calculateContainerStyle({
-      canvasSize,
       config,
       layout,
       scale,
       overflowVisible
     });
-  }, [canvasSize, config, layout, overflowVisible, scale]);
+  }, [config, layout, overflowVisible, scale]);
   const onError = (0,react.useCallback)((error) => {
     thumbnail.emitter.dispatchError(error);
   }, [thumbnail.emitter]);
@@ -5983,8 +6000,8 @@ var PlayerInternals = {
 var dist = __webpack_require__(6996);
 // EXTERNAL MODULE: ./node_modules/@remotion/studio-shared/dist/index.js
 var studio_shared_dist = __webpack_require__(6588);
-// EXTERNAL MODULE: ./node_modules/@remotion/studio/node_modules/source-map/source-map.js
-var source_map = __webpack_require__(4531);
+// EXTERNAL MODULE: ./node_modules/source-map/source-map.js
+var source_map = __webpack_require__(9665);
 ;// ./node_modules/@remotion/media-parser/dist/esm/index.mjs
 // src/aac-codecprivate.ts
 var getSampleRateFromSampleFrequencyIndex = (samplingFrequencyIndex) => {
@@ -24093,7 +24110,7 @@ var downloadAndParseMedia = async (options) => {
   return returnValue;
 };
 // src/version.ts
-var VERSION = "4.0.322";
+var VERSION = "4.0.324";
 
 // src/index.ts
 var MediaParserInternals = {
@@ -30297,6 +30314,7 @@ var internalExtractFrames = ({
       return async (sample) => {
         const nextTimestampWeWant = timestampTargets[0];
         if (sample.type === "key") {
+          await decoder.flush();
           queued.length = 0;
         }
         queued.push(sample);
@@ -34100,7 +34118,7 @@ var NoReactAPIs = {
 };
 
 
-;// ./node_modules/@remotion/studio/dist/esm/chunk-n77gaszd.js
+;// ./node_modules/@remotion/studio/dist/esm/chunk-gqesq3a3.js
 
 
 // src/Studio.tsx
@@ -34359,7 +34377,7 @@ var calculateFrameWhileScrollingRight = ({
   width,
   scrollLeft
 }) => {
-  return chunk_n77gaszd_getFrameFromX({
+  return chunk_gqesq3a3_getFrameFromX({
     clientX: scrollLeft,
     durationInFrames,
     width,
@@ -34370,13 +34388,13 @@ var getFrameWhileScrollingLeft = ({
   durationInFrames,
   width
 }) => {
-  const nextFrame = chunk_n77gaszd_getFrameFromX({
+  const nextFrame = chunk_gqesq3a3_getFrameFromX({
     clientX: scrollableRef.current?.scrollLeft - SCROLL_INCREMENT,
     durationInFrames,
     width,
     extrapolate: "clamp"
   });
-  const currentFrame2 = chunk_n77gaszd_getFrameFromX({
+  const currentFrame2 = chunk_gqesq3a3_getFrameFromX({
     clientX: scrollableRef.current?.scrollLeft,
     durationInFrames,
     width,
@@ -34417,7 +34435,7 @@ var ensureFrameIsInViewport = ({
   const width = scrollableRef.current?.scrollWidth ?? 0;
   const scrollLeft = scrollableRef.current?.scrollLeft ?? 0;
   if (direction === "fit-left") {
-    const currentFrameLeft = chunk_n77gaszd_getFrameFromX({
+    const currentFrameLeft = chunk_gqesq3a3_getFrameFromX({
       clientX: scrollLeft,
       durationInFrames,
       width,
@@ -34522,7 +34540,7 @@ var getFrameWhileScrollingRight = ({
   });
   return Math.min(durationInFrames - 1, Math.max(nextFrame, currentFrame2 + 1));
 };
-var chunk_n77gaszd_getFrameFromX = ({
+var chunk_gqesq3a3_getFrameFromX = ({
   clientX,
   durationInFrames,
   width,
@@ -37835,7 +37853,7 @@ var emptyState = {
   textAlign: "center",
   padding: "0 12px"
 };
-var chunk_n77gaszd_label = {
+var chunk_gqesq3a3_label = {
   color: LIGHT_TEXT,
   lineHeight: 1.5,
   fontSize: 14
@@ -37927,7 +37945,7 @@ var AssetSelector = ({ readOnlyStudio }) => {
     children: staticFiles.length === 0 ? publicFolderExists ? /* @__PURE__ */ (0,jsx_runtime.jsx)("div", {
       style: emptyState,
       children: /* @__PURE__ */ (0,jsx_runtime.jsxs)("div", {
-        style: chunk_n77gaszd_label,
+        style: chunk_gqesq3a3_label,
         children: [
           "To add assets, place a file in the",
           " ",
@@ -37941,7 +37959,7 @@ var AssetSelector = ({ readOnlyStudio }) => {
     }) : /* @__PURE__ */ (0,jsx_runtime.jsx)("div", {
       style: emptyState,
       children: /* @__PURE__ */ (0,jsx_runtime.jsxs)("div", {
-        style: chunk_n77gaszd_label,
+        style: chunk_gqesq3a3_label,
         children: [
           "To add assets, create a folder called",
           " ",
@@ -38380,7 +38398,7 @@ var ModalContainer = ({ children, onEscape, onOutsideClick, noZIndex }) => {
 
 // src/components/NewComposition/CancelButton.tsx
 
-var chunk_n77gaszd_style = {
+var chunk_gqesq3a3_style = {
   appearance: "none",
   border: "none",
   backgroundColor: "transparent",
@@ -38394,7 +38412,7 @@ var CancelButton = ({ onPress, ...props }) => {
   const { tabIndex } = useZIndex();
   return /* @__PURE__ */ (0,jsx_runtime.jsx)("button", {
     tabIndex,
-    style: chunk_n77gaszd_style,
+    style: chunk_gqesq3a3_style,
     type: "button",
     onClick: onPress,
     children: /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", {
@@ -38534,7 +38552,7 @@ var style2 = {
   width: 14,
   height: 14
 };
-var chunk_n77gaszd_Checkmark = () => /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", {
+var chunk_gqesq3a3_Checkmark = () => /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", {
   focusable: "false",
   role: "img",
   viewBox: "0 0 512 512",
@@ -39198,7 +39216,7 @@ var RenderPreview = ({ path, assetMetadata }) => {
 
 var viewBox = 100;
 var lines = 8;
-var chunk_n77gaszd_className = "__remotion_spinner_line";
+var chunk_gqesq3a3_className = "__remotion_spinner_line";
 var remotionSpinnerAnimation = "__remotion_spinner_animation";
 var translated = "M 44 0 L 50 0 a 6 6 0 0 1 6 6 L 56 26 a 6 6 0 0 1 -6 6 L 50 32 a 6 6 0 0 1 -6 -6 L 44 6 a 6 6 0 0 1 6 -6 Z";
 var Spinner = ({ size, duration }) => {
@@ -39222,7 +39240,7 @@ var Spinner = ({ size, duration }) => {
           }
         }
         
-        .${chunk_n77gaszd_className} {
+        .${chunk_gqesq3a3_className} {
             animation: ${remotionSpinnerAnimation} ${duration}s linear infinite;
         }        
 			`
@@ -39232,7 +39250,7 @@ var Spinner = ({ size, duration }) => {
         viewBox: `0 0 ${viewBox} ${viewBox}`,
         children: new Array(lines).fill(true).map((_, index) => {
           return /* @__PURE__ */ (0,jsx_runtime.jsx)("path", {
-            className: chunk_n77gaszd_className,
+            className: chunk_gqesq3a3_className,
             style: {
               rotate: `${index * Math.PI * 2 / lines}rad`,
               transformOrigin: "center center",
@@ -39336,7 +39354,7 @@ var getPreviewFileType = (fileName) => {
   return "other";
 };
 var checkerboardSize = 49;
-var chunk_n77gaszd_containerStyle = (options) => {
+var chunk_gqesq3a3_containerStyle = (options) => {
   return {
     transform: `scale(${options.scale})`,
     marginLeft: options.xCorrection,
@@ -39437,7 +39455,7 @@ var CompWhenItHasDimensions = ({ contentDimensions, canvasSize, canvasContent, a
 var PortalContainer = ({ scale, xCorrection, yCorrection, contentDimensions }) => {
   const { checkerboard } = (0,react.useContext)(CheckerboardContext);
   const style3 = (0,react.useMemo)(() => {
-    return chunk_n77gaszd_containerStyle({
+    return chunk_gqesq3a3_containerStyle({
       checkerboard,
       scale,
       xCorrection,
@@ -39562,7 +39580,7 @@ var SizeSelector = () => {
         type: "item",
         value: newSize.size,
         keyHint: newSize.size === "auto" ? "0" : null,
-        leftItem: String(size.size) === String(newSize.size) ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+        leftItem: String(size.size) === String(newSize.size) ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
         subMenu: null,
         quickSwitcherLabel: null
       };
@@ -40159,7 +40177,7 @@ var openExternal = (link) => {
 var rotate = {
   transform: `rotate(90deg)`
 };
-var chunk_n77gaszd_ICON_SIZE = 16;
+var chunk_gqesq3a3_ICON_SIZE = 16;
 var getFileMenu = ({
   readOnlyStudio,
   closeMenu,
@@ -40254,8 +40272,8 @@ var useMenuStructure = (closeMenu, readOnlyStudio) => {
           align: "center",
           justify: "center",
           children: /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", {
-            width: chunk_n77gaszd_ICON_SIZE,
-            height: chunk_n77gaszd_ICON_SIZE,
+            width: chunk_gqesq3a3_ICON_SIZE,
+            height: chunk_gqesq3a3_ICON_SIZE,
             viewBox: "-100 -100 400 400",
             style: rotate,
             children: /* @__PURE__ */ (0,jsx_runtime.jsx)("path", {
@@ -40373,7 +40391,7 @@ var useMenuStructure = (closeMenu, readOnlyStudio) => {
                 id: String(newSize.size),
                 keyHint: newSize.size === 1 ? "0" : null,
                 label: getPreviewSizeLabel(newSize),
-                leftItem: String(newSize.size) === String(size.size) ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+                leftItem: String(newSize.size) === String(size.size) ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
                 onClick: () => {
                   closeMenu();
                   setSize(() => newSize);
@@ -40397,7 +40415,7 @@ var useMenuStructure = (closeMenu, readOnlyStudio) => {
             },
             type: "item",
             value: "editor-zoom-gestures",
-            leftItem: editorZoomGestures ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+            leftItem: editorZoomGestures ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
             subMenu: null,
             quickSwitcherLabel: editorZoomGestures ? "Disable Zoom and Pan Gestures" : "Enable Zoom and Pan Gestures"
           },
@@ -40411,7 +40429,7 @@ var useMenuStructure = (closeMenu, readOnlyStudio) => {
             },
             type: "item",
             value: "show-ruler",
-            leftItem: editorShowRulers ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+            leftItem: editorShowRulers ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
             subMenu: null,
             quickSwitcherLabel: editorShowRulers ? "Hide Rulers" : "Show Rulers"
           },
@@ -40425,7 +40443,7 @@ var useMenuStructure = (closeMenu, readOnlyStudio) => {
             },
             type: "item",
             value: "show-guides",
-            leftItem: editorShowGuides ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+            leftItem: editorShowGuides ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
             subMenu: null,
             quickSwitcherLabel: editorShowGuides ? "Hide Guides" : "Show Guides"
           },
@@ -40449,7 +40467,7 @@ var useMenuStructure = (closeMenu, readOnlyStudio) => {
                   id: "left-sidebar-responsive",
                   keyHint: null,
                   label: "Responsive",
-                  leftItem: sidebarCollapsedStateLeft === "responsive" ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+                  leftItem: sidebarCollapsedStateLeft === "responsive" ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
                   onClick: () => {
                     closeMenu();
                     setSidebarCollapsedState({
@@ -40466,7 +40484,7 @@ var useMenuStructure = (closeMenu, readOnlyStudio) => {
                   id: "left-sidebar-expanded",
                   keyHint: null,
                   label: "Expanded",
-                  leftItem: sidebarCollapsedStateLeft === "expanded" ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+                  leftItem: sidebarCollapsedStateLeft === "expanded" ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
                   onClick: () => {
                     closeMenu();
                     setSidebarCollapsedState({ left: "expanded", right: null });
@@ -40480,7 +40498,7 @@ var useMenuStructure = (closeMenu, readOnlyStudio) => {
                   id: "left-sidebar-collapsed",
                   keyHint: null,
                   label: "Collapsed",
-                  leftItem: sidebarCollapsedStateLeft === "collapsed" ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+                  leftItem: sidebarCollapsedStateLeft === "collapsed" ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
                   onClick: () => {
                     closeMenu();
                     setSidebarCollapsedState({
@@ -40515,7 +40533,7 @@ var useMenuStructure = (closeMenu, readOnlyStudio) => {
                   id: "sidebar-expanded",
                   keyHint: null,
                   label: "Expanded",
-                  leftItem: sidebarCollapsedStateRight === "expanded" ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+                  leftItem: sidebarCollapsedStateRight === "expanded" ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
                   onClick: () => {
                     closeMenu();
                     setSidebarCollapsedState({ left: null, right: "expanded" });
@@ -40529,7 +40547,7 @@ var useMenuStructure = (closeMenu, readOnlyStudio) => {
                   id: "right-sidebar-collapsed",
                   keyHint: null,
                   label: "Collapsed",
-                  leftItem: sidebarCollapsedStateRight === "collapsed" ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+                  leftItem: sidebarCollapsedStateRight === "collapsed" ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
                   onClick: () => {
                     closeMenu();
                     setSidebarCollapsedState({
@@ -40562,7 +40580,7 @@ var useMenuStructure = (closeMenu, readOnlyStudio) => {
             },
             type: "item",
             value: "checkerboard",
-            leftItem: checkerboard ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+            leftItem: checkerboard ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
             subMenu: null,
             quickSwitcherLabel: checkerboard ? "Disable Checkerboard Transparency" : "Enable Checkerboard Transparency"
           },
@@ -41574,7 +41592,7 @@ var getErrorRecord = async (error) => {
 // src/components/Button.tsx
 
 
-var chunk_n77gaszd_button = {
+var chunk_gqesq3a3_button = {
   border: `1px solid ${INPUT_BORDER_COLOR_UNHOVERED}`,
   borderRadius: 4,
   backgroundColor: INPUT_BACKGROUND,
@@ -41596,7 +41614,7 @@ var ButtonRefForwardFunction = ({
 }, ref) => {
   const combined = (0,react.useMemo)(() => {
     return {
-      ...chunk_n77gaszd_button,
+      ...chunk_gqesq3a3_button,
       ...style4 ?? {}
     };
   }, [style4]);
@@ -42243,7 +42261,7 @@ var container17 = {
   flexDirection: "row",
   width: "100%"
 };
-var chunk_n77gaszd_frame = {
+var chunk_gqesq3a3_frame = {
   backgroundColor: "#070707",
   marginBottom: 20,
   overflowY: "auto"
@@ -42263,7 +42281,7 @@ var lineNumber = {
 };
 var CodeFrame = ({ source, lineNumberWidth }) => {
   return /* @__PURE__ */ (0,jsx_runtime.jsx)("div", {
-    style: chunk_n77gaszd_frame,
+    style: chunk_gqesq3a3_frame,
     className: HORIZONTAL_SCROLLBAR_CLASSNAME,
     children: source.map((s, j) => {
       return /* @__PURE__ */ (0,jsx_runtime.jsxs)("div", {
@@ -42306,7 +42324,7 @@ var formatLocation = (location) => {
 
 // src/error-overlay/remotion-overlay/StackFrame.tsx
 
-var chunk_n77gaszd_location = {
+var chunk_gqesq3a3_location = {
   color: "rgba(255, 255, 255, 0.6)",
   fontFamily: "monospace",
   fontSize: 14
@@ -42350,7 +42368,7 @@ var StackElement = ({ s, lineNumberWidth, isFirst, defaultFunctionName }) => {
                 children: s.originalFunctionName ?? defaultFunctionName
               }),
               s.originalFileName ? /* @__PURE__ */ (0,jsx_runtime.jsxs)("div", {
-                style: chunk_n77gaszd_location,
+                style: chunk_gqesq3a3_location,
                 children: [
                   formatLocation(s.originalFileName),
                   ":",
@@ -45354,7 +45372,7 @@ var rightRow = {
   alignSelf: "center",
   flex: 1
 };
-var chunk_n77gaszd_input = {
+var chunk_gqesq3a3_input = {
   minWidth: 250
 };
 var fieldSetText = {
@@ -46462,7 +46480,7 @@ var Checkbox = ({ checked, onChange, disabled, name }) => {
       }),
       /* @__PURE__ */ (0,jsx_runtime.jsx)("div", {
         style: box,
-        children: checked ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null
+        children: checked ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null
       })
     ]
   });
@@ -47058,7 +47076,7 @@ var ZodDiscriminatedUnionEditor = ({
         label: option,
         id: option,
         keyHint: null,
-        leftItem: option === value[typedSchema.discriminator] ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+        leftItem: option === value[typedSchema.discriminator] ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
         onClick: () => {
           const val = createZodValues(typedSchema.optionsMap.get(option), z, zodTypes);
           setLocalValue(() => val, false, false);
@@ -47244,7 +47262,7 @@ var ZodEnumEditor = ({
         label: option,
         id: option,
         keyHint: null,
-        leftItem: option === value ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+        leftItem: option === value ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
         onClick: (id) => {
           setLocalValue(() => id, false, false);
         },
@@ -47794,7 +47812,7 @@ var ZodStaticFileEditor = ({
         label: option.name,
         id: option.src,
         keyHint: null,
-        leftItem: option.src === value ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+        leftItem: option.src === value ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
         onClick: (id) => {
           setLocalValue(() => id, false, false);
         },
@@ -50834,7 +50852,7 @@ var LoopToggle = ({ loop, setLoop }) => {
 // src/icons/media-volume.tsx
 
 var size3 = 22;
-var chunk_n77gaszd_VolumeOffIcon = () => {
+var chunk_gqesq3a3_VolumeOffIcon = () => {
   return /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", {
     width: size3,
     height: size3,
@@ -50845,7 +50863,7 @@ var chunk_n77gaszd_VolumeOffIcon = () => {
     })
   });
 };
-var chunk_n77gaszd_VolumeOnIcon = () => {
+var chunk_gqesq3a3_VolumeOnIcon = () => {
   return /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", {
     width: size3,
     height: size3,
@@ -50881,7 +50899,7 @@ var MuteToggle = ({ muted, setMuted }) => {
     title: accessibilityLabel5,
     "aria-label": accessibilityLabel5,
     onClick,
-    children: muted ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_VolumeOffIcon, {}) : /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_VolumeOnIcon, {})
+    children: muted ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_VolumeOffIcon, {}) : /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_VolumeOnIcon, {})
   });
 };
 
@@ -51401,7 +51419,7 @@ var PlaybackRateSelector = ({ playbackRate, setPlaybackRate }) => {
         type: "item",
         value: newPlaybackRate,
         keyHint: null,
-        leftItem: String(playbackRate) === String(newPlaybackRate) ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+        leftItem: String(playbackRate) === String(newPlaybackRate) ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
         subMenu: null,
         quickSwitcherLabel: null
       };
@@ -53034,7 +53052,7 @@ var Inner2 = () => {
     if (e.button !== 0) {
       return;
     }
-    const frame2 = chunk_n77gaszd_getFrameFromX({
+    const frame2 = chunk_gqesq3a3_getFrameFromX({
       clientX: getClientXWithScroll(e.clientX) - left3,
       durationInFrames: videoConfig.durationInFrames,
       width,
@@ -53067,7 +53085,7 @@ var Inner2 = () => {
     }
     const isRightOfArea = e.clientX >= scrollableRef.current?.clientWidth + left3 - TIMELINE_PADDING;
     const isLeftOfArea = e.clientX <= left3;
-    const frame2 = chunk_n77gaszd_getFrameFromX({
+    const frame2 = chunk_gqesq3a3_getFrameFromX({
       clientX: getClientXWithScroll(e.clientX) - left3,
       durationInFrames: videoConfig.durationInFrames,
       width,
@@ -53175,7 +53193,7 @@ var Inner2 = () => {
     setDragging({
       dragging: false
     });
-    const frame2 = chunk_n77gaszd_getFrameFromX({
+    const frame2 = chunk_gqesq3a3_getFrameFromX({
       clientX: getClientXWithScroll(e.clientX) - left3,
       durationInFrames: videoConfig.durationInFrames,
       width,
@@ -53200,7 +53218,7 @@ var Inner2 = () => {
     setInOutDragging({
       dragging: false
     });
-    const frame2 = chunk_n77gaszd_getFrameFromX({
+    const frame2 = chunk_gqesq3a3_getFrameFromX({
       clientX: getClientXWithScroll(e.clientX) - left3,
       durationInFrames: videoConfig.durationInFrames,
       width,
@@ -53439,8 +53457,10 @@ var TimelineLayerEye = ({ onInvoked, hidden, type }) => {
 
 
 
+var publicPath = window.remotion_publicPath === "/" ? "" : window.remotion_publicPath;
+var withoutSlashInTheEnd = publicPath.endsWith("/") ? publicPath.slice(0, -1) : publicPath;
 source_map.SourceMapConsumer.initialize({
-  "lib/mappings.wasm": (window.remotion_publicPath === "/" ? "" : window.remotion_publicPath) + studio_shared_dist/* SOURCE_MAP_ENDPOINT */.fC
+  "lib/mappings.wasm": withoutSlashInTheEnd + studio_shared_dist/* SOURCE_MAP_ENDPOINT */.fC
 });
 var TimelineStack = ({ isCompact, sequence }) => {
   const [originalLocation, setOriginalLocation] = (0,react.useState)(null);
@@ -53676,7 +53696,7 @@ var TimelineListItem = ({ nestedDepth, sequence, isCompact }) => {
 
 
 
-var chunk_n77gaszd_text = {
+var chunk_gqesq3a3_text = {
   color: "white",
   display: "flex",
   flexDirection: "row",
@@ -53746,7 +53766,7 @@ var TimeValue = () => {
     return null;
   }
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)("div", {
-    style: chunk_n77gaszd_text,
+    style: chunk_gqesq3a3_text,
     children: [
       /* @__PURE__ */ (0,jsx_runtime.jsx)("div", {
         style: time,
@@ -54101,7 +54121,7 @@ var getTimelineSequenceLayout = ({
 };
 
 // ../media-parser/dist/esm/index.mjs
-var chunk_n77gaszd_getSampleRateFromSampleFrequencyIndex = (samplingFrequencyIndex) => {
+var chunk_gqesq3a3_getSampleRateFromSampleFrequencyIndex = (samplingFrequencyIndex) => {
   switch (samplingFrequencyIndex) {
     case 0:
       return 96000;
@@ -54133,7 +54153,7 @@ var chunk_n77gaszd_getSampleRateFromSampleFrequencyIndex = (samplingFrequencyInd
       throw new Error(`Unexpected sampling frequency index ${samplingFrequencyIndex}`);
   }
 };
-var chunk_n77gaszd_getConfigForSampleRate = (sampleRate) => {
+var chunk_gqesq3a3_getConfigForSampleRate = (sampleRate) => {
   if (sampleRate === 96000) {
     return 0;
   }
@@ -54175,7 +54195,7 @@ var chunk_n77gaszd_getConfigForSampleRate = (sampleRate) => {
   }
   throw new Error(`Unexpected sample rate ${sampleRate}`);
 };
-var chunk_n77gaszd_createAacCodecPrivate = ({
+var chunk_gqesq3a3_createAacCodecPrivate = ({
   audioObjectType,
   sampleRate,
   channelConfiguration,
@@ -54184,7 +54204,7 @@ var chunk_n77gaszd_createAacCodecPrivate = ({
   if (codecPrivate !== null && codecPrivate.length > 2) {
     return codecPrivate;
   }
-  const bits = `${audioObjectType.toString(2).padStart(5, "0")}${chunk_n77gaszd_getConfigForSampleRate(sampleRate).toString(2).padStart(4, "0")}${channelConfiguration.toString(2).padStart(4, "0")}000`;
+  const bits = `${audioObjectType.toString(2).padStart(5, "0")}${chunk_gqesq3a3_getConfigForSampleRate(sampleRate).toString(2).padStart(4, "0")}${channelConfiguration.toString(2).padStart(4, "0")}000`;
   if (bits.length !== 16) {
     throw new Error("Invalid AAC codec private " + bits.length);
   }
@@ -54195,7 +54215,7 @@ var chunk_n77gaszd_createAacCodecPrivate = ({
   const secondByte = parseInt(bits.slice(8, 16), 2);
   return new Uint8Array([firstByte, secondByte]);
 };
-var chunk_n77gaszd_parseAacCodecPrivate = (bytes) => {
+var chunk_gqesq3a3_parseAacCodecPrivate = (bytes) => {
   if (bytes.length < 2) {
     throw new Error("Invalid AAC codec private length");
   }
@@ -54217,18 +54237,18 @@ var chunk_n77gaszd_parseAacCodecPrivate = (bytes) => {
     offset += 5;
     return {
       audioObjectType: newAudioObjectType,
-      sampleRate: chunk_n77gaszd_getSampleRateFromSampleFrequencyIndex(extensionSamplingFrequencyIndex),
+      sampleRate: chunk_gqesq3a3_getSampleRateFromSampleFrequencyIndex(extensionSamplingFrequencyIndex),
       channelConfiguration
     };
   }
-  const sampleRate = chunk_n77gaszd_getSampleRateFromSampleFrequencyIndex(samplingFrequencyIndex);
+  const sampleRate = chunk_gqesq3a3_getSampleRateFromSampleFrequencyIndex(samplingFrequencyIndex);
   return {
     audioObjectType,
     sampleRate,
     channelConfiguration
   };
 };
-var chunk_n77gaszd_mapAudioObjectTypeToCodecString = (audioObjectType) => {
+var chunk_gqesq3a3_mapAudioObjectTypeToCodecString = (audioObjectType) => {
   switch (audioObjectType) {
     case 1:
       return "mp4a.40.2";
@@ -54250,7 +54270,7 @@ var chunk_n77gaszd_mapAudioObjectTypeToCodecString = (audioObjectType) => {
       throw new Error(`Unexpected audio object type ${audioObjectType}`);
   }
 };
-var chunk_n77gaszd_parseFtyp = ({
+var chunk_gqesq3a3_parseFtyp = ({
   iterator,
   size: size4,
   offset
@@ -54272,7 +54292,7 @@ var chunk_n77gaszd_parseFtyp = ({
     boxSize: offsetAtEnd - offset
   };
 };
-var chunk_n77gaszd_matroskaElements = {
+var chunk_gqesq3a3_matroskaElements = {
   Header: "0x1a45dfa3",
   EBMLMaxIDLength: "0x42f2",
   EBMLVersion: "0x4286",
@@ -54543,485 +54563,485 @@ var chunk_n77gaszd_matroskaElements = {
   Void: "0xec",
   Crc32: "0xbf"
 };
-var chunk_n77gaszd_matroskaIds = Object.values(chunk_n77gaszd_matroskaElements);
-var chunk_n77gaszd_knownIdsWithOneLength = chunk_n77gaszd_matroskaIds.filter((id) => id.length === 4);
-var chunk_n77gaszd_knownIdsWithTwoLength = chunk_n77gaszd_matroskaIds.filter((id) => id.length === 6);
-var chunk_n77gaszd_knownIdsWithThreeLength = chunk_n77gaszd_matroskaIds.filter((id) => id.length === 8);
-var chunk_n77gaszd_ebmlVersion = {
+var chunk_gqesq3a3_matroskaIds = Object.values(chunk_gqesq3a3_matroskaElements);
+var chunk_gqesq3a3_knownIdsWithOneLength = chunk_gqesq3a3_matroskaIds.filter((id) => id.length === 4);
+var chunk_gqesq3a3_knownIdsWithTwoLength = chunk_gqesq3a3_matroskaIds.filter((id) => id.length === 6);
+var chunk_gqesq3a3_knownIdsWithThreeLength = chunk_gqesq3a3_matroskaIds.filter((id) => id.length === 8);
+var chunk_gqesq3a3_ebmlVersion = {
   name: "EBMLVersion",
   type: "uint"
 };
-var chunk_n77gaszd_ebmlReadVersion = {
+var chunk_gqesq3a3_ebmlReadVersion = {
   name: "EBMLReadVersion",
   type: "uint"
 };
-var chunk_n77gaszd_ebmlMaxIdLength = {
+var chunk_gqesq3a3_ebmlMaxIdLength = {
   name: "EBMLMaxIDLength",
   type: "uint"
 };
-var chunk_n77gaszd_ebmlMaxSizeLength = {
+var chunk_gqesq3a3_ebmlMaxSizeLength = {
   name: "EBMLMaxSizeLength",
   type: "uint"
 };
-var chunk_n77gaszd_docType = {
+var chunk_gqesq3a3_docType = {
   name: "DocType",
   type: "string"
 };
-var chunk_n77gaszd_docTypeVersion = {
+var chunk_gqesq3a3_docTypeVersion = {
   name: "DocTypeVersion",
   type: "uint"
 };
-var chunk_n77gaszd_docTypeReadVersion = {
+var chunk_gqesq3a3_docTypeReadVersion = {
   name: "DocTypeReadVersion",
   type: "uint"
 };
-var chunk_n77gaszd_voidEbml = {
+var chunk_gqesq3a3_voidEbml = {
   name: "Void",
   type: "uint8array"
 };
-var chunk_n77gaszd_matroskaHeader = {
+var chunk_gqesq3a3_matroskaHeader = {
   name: "Header",
   type: "children"
 };
-var chunk_n77gaszd_seekId = {
+var chunk_gqesq3a3_seekId = {
   name: "SeekID",
   type: "hex-string"
 };
-var chunk_n77gaszd_name = {
+var chunk_gqesq3a3_name = {
   name: "Name",
   type: "string"
 };
-var chunk_n77gaszd_minCache = {
+var chunk_gqesq3a3_minCache = {
   name: "MinCache",
   type: "uint"
 };
-var chunk_n77gaszd_maxCache = {
+var chunk_gqesq3a3_maxCache = {
   name: "MaxCache",
   type: "uint"
 };
-var chunk_n77gaszd_seekPosition = {
+var chunk_gqesq3a3_seekPosition = {
   name: "SeekPosition",
   type: "uint"
 };
-var chunk_n77gaszd_seek = {
+var chunk_gqesq3a3_seek = {
   name: "Seek",
   type: "children"
 };
-var chunk_n77gaszd_seekHead = {
+var chunk_gqesq3a3_seekHead = {
   name: "SeekHead",
   type: "children"
 };
-var chunk_n77gaszd_trackType = {
+var chunk_gqesq3a3_trackType = {
   name: "TrackType",
   type: "uint"
 };
-var chunk_n77gaszd_widthType = {
+var chunk_gqesq3a3_widthType = {
   name: "PixelWidth",
   type: "uint"
 };
-var chunk_n77gaszd_heightType = {
+var chunk_gqesq3a3_heightType = {
   name: "PixelHeight",
   type: "uint"
 };
-var chunk_n77gaszd_muxingApp = {
+var chunk_gqesq3a3_muxingApp = {
   name: "MuxingApp",
   type: "string"
 };
-var chunk_n77gaszd_duration = {
+var chunk_gqesq3a3_duration = {
   name: "Duration",
   type: "float"
 };
-var chunk_n77gaszd_timestampScale = {
+var chunk_gqesq3a3_timestampScale = {
   name: "TimestampScale",
   type: "uint"
 };
-var chunk_n77gaszd_infoType = {
+var chunk_gqesq3a3_infoType = {
   name: "Info",
   type: "children"
 };
-var chunk_n77gaszd_titleType = {
+var chunk_gqesq3a3_titleType = {
   name: "Title",
   type: "string"
 };
-var chunk_n77gaszd_tagTrackUidType = {
+var chunk_gqesq3a3_tagTrackUidType = {
   name: "TagTrackUID",
   type: "hex-string"
 };
-var chunk_n77gaszd_samplingFrequency = {
+var chunk_gqesq3a3_samplingFrequency = {
   name: "SamplingFrequency",
   type: "float"
 };
-var chunk_n77gaszd_channels = {
+var chunk_gqesq3a3_channels = {
   name: "Channels",
   type: "uint"
 };
-var chunk_n77gaszd_alphaMode = {
+var chunk_gqesq3a3_alphaMode = {
   name: "AlphaMode",
   type: "uint"
 };
-var chunk_n77gaszd_interlaced = {
+var chunk_gqesq3a3_interlaced = {
   name: "FlagInterlaced",
   type: "uint"
 };
-var chunk_n77gaszd_bitDepth = {
+var chunk_gqesq3a3_bitDepth = {
   name: "BitDepth",
   type: "uint"
 };
-var chunk_n77gaszd_displayWidth = {
+var chunk_gqesq3a3_displayWidth = {
   name: "DisplayWidth",
   type: "uint"
 };
-var chunk_n77gaszd_displayHeight = {
+var chunk_gqesq3a3_displayHeight = {
   name: "DisplayHeight",
   type: "uint"
 };
-var chunk_n77gaszd_displayUnit = {
+var chunk_gqesq3a3_displayUnit = {
   name: "DisplayUnit",
   type: "uint"
 };
-var chunk_n77gaszd_flagLacing = {
+var chunk_gqesq3a3_flagLacing = {
   name: "FlagLacing",
   type: "uint"
 };
-var chunk_n77gaszd_tagSegment = {
+var chunk_gqesq3a3_tagSegment = {
   name: "Tag",
   type: "children"
 };
-var chunk_n77gaszd_tags = {
+var chunk_gqesq3a3_tags = {
   name: "Tags",
   type: "children"
 };
-var chunk_n77gaszd_trackNumber = {
+var chunk_gqesq3a3_trackNumber = {
   name: "TrackNumber",
   type: "uint"
 };
-var chunk_n77gaszd_trackUID = {
+var chunk_gqesq3a3_trackUID = {
   name: "TrackUID",
   type: "hex-string"
 };
-var chunk_n77gaszd_color = {
+var chunk_gqesq3a3_color = {
   name: "Colour",
   type: "children"
 };
-var chunk_n77gaszd_transferCharacteristics = {
+var chunk_gqesq3a3_transferCharacteristics = {
   name: "TransferCharacteristics",
   type: "uint"
 };
-var chunk_n77gaszd_matrixCoefficients = {
+var chunk_gqesq3a3_matrixCoefficients = {
   name: "MatrixCoefficients",
   type: "uint"
 };
-var chunk_n77gaszd_primaries = {
+var chunk_gqesq3a3_primaries = {
   name: "Primaries",
   type: "uint"
 };
-var chunk_n77gaszd_range = {
+var chunk_gqesq3a3_range = {
   name: "Range",
   type: "uint"
 };
-var chunk_n77gaszd_ChromaSitingHorz = {
+var chunk_gqesq3a3_ChromaSitingHorz = {
   name: "ChromaSitingHorz",
   type: "uint"
 };
-var chunk_n77gaszd_ChromaSitingVert = {
+var chunk_gqesq3a3_ChromaSitingVert = {
   name: "ChromaSitingVert",
   type: "uint"
 };
-var chunk_n77gaszd_language = {
+var chunk_gqesq3a3_language = {
   name: "Language",
   type: "string"
 };
-var chunk_n77gaszd_defaultDuration = {
+var chunk_gqesq3a3_defaultDuration = {
   name: "DefaultDuration",
   type: "uint"
 };
-var chunk_n77gaszd_codecPrivate = {
+var chunk_gqesq3a3_codecPrivate = {
   name: "CodecPrivate",
   type: "uint8array"
 };
-var chunk_n77gaszd_blockAdditionsSegment = {
+var chunk_gqesq3a3_blockAdditionsSegment = {
   name: "BlockAdditions",
   type: "uint8array"
 };
-var chunk_n77gaszd_maxBlockAdditionIdSegment = {
+var chunk_gqesq3a3_maxBlockAdditionIdSegment = {
   name: "MaxBlockAdditionID",
   type: "uint"
 };
-var chunk_n77gaszd_audioSegment = {
+var chunk_gqesq3a3_audioSegment = {
   name: "Audio",
   type: "children"
 };
-var chunk_n77gaszd_videoSegment = {
+var chunk_gqesq3a3_videoSegment = {
   name: "Video",
   type: "children"
 };
-var chunk_n77gaszd_flagDefault = {
+var chunk_gqesq3a3_flagDefault = {
   name: "FlagDefault",
   type: "uint"
 };
-var chunk_n77gaszd_referenceBlock = {
+var chunk_gqesq3a3_referenceBlock = {
   name: "ReferenceBlock",
   type: "uint"
 };
-var chunk_n77gaszd_blockDurationSegment = {
+var chunk_gqesq3a3_blockDurationSegment = {
   name: "BlockDuration",
   type: "uint"
 };
-var chunk_n77gaszd_codecName = {
+var chunk_gqesq3a3_codecName = {
   name: "CodecName",
   type: "string"
 };
-var chunk_n77gaszd_trackTimestampScale = {
+var chunk_gqesq3a3_trackTimestampScale = {
   name: "TrackTimestampScale",
   type: "float"
 };
-var chunk_n77gaszd_trackEntry = {
+var chunk_gqesq3a3_trackEntry = {
   name: "TrackEntry",
   type: "children"
 };
-var chunk_n77gaszd_tracks = {
+var chunk_gqesq3a3_tracks = {
   name: "Tracks",
   type: "children"
 };
-var chunk_n77gaszd_block = {
+var chunk_gqesq3a3_block = {
   name: "Block",
   type: "uint8array"
 };
-var chunk_n77gaszd_simpleBlock = {
+var chunk_gqesq3a3_simpleBlock = {
   name: "SimpleBlock",
   type: "uint8array"
 };
-var chunk_n77gaszd_blockGroup = {
+var chunk_gqesq3a3_blockGroup = {
   name: "BlockGroup",
   type: "children"
 };
-var chunk_n77gaszd_targetsType = {
+var chunk_gqesq3a3_targetsType = {
   name: "Targets",
   type: "children"
 };
-var chunk_n77gaszd_simpleTagType = {
+var chunk_gqesq3a3_simpleTagType = {
   name: "SimpleTag",
   type: "children"
 };
-var chunk_n77gaszd_tagNameType = {
+var chunk_gqesq3a3_tagNameType = {
   name: "TagName",
   type: "string"
 };
-var chunk_n77gaszd_tagStringType = {
+var chunk_gqesq3a3_tagStringType = {
   name: "TagString",
   type: "string"
 };
-var chunk_n77gaszd_ebmlMap = {
-  [chunk_n77gaszd_matroskaElements.Header]: chunk_n77gaszd_matroskaHeader,
-  [chunk_n77gaszd_matroskaElements.DocType]: chunk_n77gaszd_docType,
-  [chunk_n77gaszd_matroskaElements.Targets]: chunk_n77gaszd_targetsType,
-  [chunk_n77gaszd_matroskaElements.SimpleTag]: chunk_n77gaszd_simpleTagType,
-  [chunk_n77gaszd_matroskaElements.TagName]: chunk_n77gaszd_tagNameType,
-  [chunk_n77gaszd_matroskaElements.TagString]: chunk_n77gaszd_tagStringType,
-  [chunk_n77gaszd_matroskaElements.DocTypeVersion]: chunk_n77gaszd_docTypeVersion,
-  [chunk_n77gaszd_matroskaElements.DocTypeReadVersion]: chunk_n77gaszd_docTypeReadVersion,
-  [chunk_n77gaszd_matroskaElements.EBMLVersion]: chunk_n77gaszd_ebmlVersion,
-  [chunk_n77gaszd_matroskaElements.EBMLReadVersion]: chunk_n77gaszd_ebmlReadVersion,
-  [chunk_n77gaszd_matroskaElements.EBMLMaxIDLength]: chunk_n77gaszd_ebmlMaxIdLength,
-  [chunk_n77gaszd_matroskaElements.EBMLMaxSizeLength]: chunk_n77gaszd_ebmlMaxSizeLength,
-  [chunk_n77gaszd_matroskaElements.Void]: chunk_n77gaszd_voidEbml,
-  [chunk_n77gaszd_matroskaElements.Cues]: {
+var chunk_gqesq3a3_ebmlMap = {
+  [chunk_gqesq3a3_matroskaElements.Header]: chunk_gqesq3a3_matroskaHeader,
+  [chunk_gqesq3a3_matroskaElements.DocType]: chunk_gqesq3a3_docType,
+  [chunk_gqesq3a3_matroskaElements.Targets]: chunk_gqesq3a3_targetsType,
+  [chunk_gqesq3a3_matroskaElements.SimpleTag]: chunk_gqesq3a3_simpleTagType,
+  [chunk_gqesq3a3_matroskaElements.TagName]: chunk_gqesq3a3_tagNameType,
+  [chunk_gqesq3a3_matroskaElements.TagString]: chunk_gqesq3a3_tagStringType,
+  [chunk_gqesq3a3_matroskaElements.DocTypeVersion]: chunk_gqesq3a3_docTypeVersion,
+  [chunk_gqesq3a3_matroskaElements.DocTypeReadVersion]: chunk_gqesq3a3_docTypeReadVersion,
+  [chunk_gqesq3a3_matroskaElements.EBMLVersion]: chunk_gqesq3a3_ebmlVersion,
+  [chunk_gqesq3a3_matroskaElements.EBMLReadVersion]: chunk_gqesq3a3_ebmlReadVersion,
+  [chunk_gqesq3a3_matroskaElements.EBMLMaxIDLength]: chunk_gqesq3a3_ebmlMaxIdLength,
+  [chunk_gqesq3a3_matroskaElements.EBMLMaxSizeLength]: chunk_gqesq3a3_ebmlMaxSizeLength,
+  [chunk_gqesq3a3_matroskaElements.Void]: chunk_gqesq3a3_voidEbml,
+  [chunk_gqesq3a3_matroskaElements.Cues]: {
     name: "Cues",
     type: "children"
   },
-  [chunk_n77gaszd_matroskaElements.CuePoint]: {
+  [chunk_gqesq3a3_matroskaElements.CuePoint]: {
     name: "CuePoint",
     type: "children"
   },
-  [chunk_n77gaszd_matroskaElements.CueTime]: {
+  [chunk_gqesq3a3_matroskaElements.CueTime]: {
     name: "CueTime",
     type: "uint"
   },
-  [chunk_n77gaszd_matroskaElements.CueTrackPositions]: {
+  [chunk_gqesq3a3_matroskaElements.CueTrackPositions]: {
     name: "CueTrackPositions",
     type: "children"
   },
-  [chunk_n77gaszd_matroskaElements.CueClusterPosition]: {
+  [chunk_gqesq3a3_matroskaElements.CueClusterPosition]: {
     name: "CueClusterPosition",
     type: "uint"
   },
-  [chunk_n77gaszd_matroskaElements.CueRelativePosition]: {
+  [chunk_gqesq3a3_matroskaElements.CueRelativePosition]: {
     name: "CueRelativePosition",
     type: "uint"
   },
-  [chunk_n77gaszd_matroskaElements.CueBlockNumber]: {
+  [chunk_gqesq3a3_matroskaElements.CueBlockNumber]: {
     name: "CueBlockNumber",
     type: "uint"
   },
-  [chunk_n77gaszd_matroskaElements.CueTrack]: {
+  [chunk_gqesq3a3_matroskaElements.CueTrack]: {
     name: "CueTrack",
     type: "uint"
   },
-  [chunk_n77gaszd_matroskaElements.DateUTC]: {
+  [chunk_gqesq3a3_matroskaElements.DateUTC]: {
     name: "DateUTC",
     type: "uint8array"
   },
-  [chunk_n77gaszd_matroskaElements.TrackTimestampScale]: chunk_n77gaszd_trackTimestampScale,
-  [chunk_n77gaszd_matroskaElements.CodecDelay]: {
+  [chunk_gqesq3a3_matroskaElements.TrackTimestampScale]: chunk_gqesq3a3_trackTimestampScale,
+  [chunk_gqesq3a3_matroskaElements.CodecDelay]: {
     name: "CodecDelay",
     type: "uint8array"
   },
-  [chunk_n77gaszd_matroskaElements.SeekPreRoll]: {
+  [chunk_gqesq3a3_matroskaElements.SeekPreRoll]: {
     name: "SeekPreRoll",
     type: "uint8array"
   },
-  [chunk_n77gaszd_matroskaElements.DiscardPadding]: {
+  [chunk_gqesq3a3_matroskaElements.DiscardPadding]: {
     name: "DiscardPadding",
     type: "uint8array"
   },
-  [chunk_n77gaszd_matroskaElements.OutputSamplingFrequency]: {
+  [chunk_gqesq3a3_matroskaElements.OutputSamplingFrequency]: {
     name: "OutputSamplingFrequency",
     type: "uint8array"
   },
-  [chunk_n77gaszd_matroskaElements.CodecName]: chunk_n77gaszd_codecName,
-  [chunk_n77gaszd_matroskaElements.Position]: {
+  [chunk_gqesq3a3_matroskaElements.CodecName]: chunk_gqesq3a3_codecName,
+  [chunk_gqesq3a3_matroskaElements.Position]: {
     name: "Position",
     type: "uint8array"
   },
-  [chunk_n77gaszd_matroskaElements.SliceDuration]: {
+  [chunk_gqesq3a3_matroskaElements.SliceDuration]: {
     name: "SliceDuration",
     type: "uint8array"
   },
-  [chunk_n77gaszd_matroskaElements.TagTrackUID]: chunk_n77gaszd_tagTrackUidType,
-  [chunk_n77gaszd_matroskaElements.SeekHead]: chunk_n77gaszd_seekHead,
-  [chunk_n77gaszd_matroskaElements.Seek]: chunk_n77gaszd_seek,
-  [chunk_n77gaszd_matroskaElements.SeekID]: chunk_n77gaszd_seekId,
-  [chunk_n77gaszd_matroskaElements.Name]: chunk_n77gaszd_name,
-  [chunk_n77gaszd_matroskaElements.MinCache]: chunk_n77gaszd_minCache,
-  [chunk_n77gaszd_matroskaElements.MaxCache]: chunk_n77gaszd_maxCache,
-  [chunk_n77gaszd_matroskaElements.SeekPosition]: chunk_n77gaszd_seekPosition,
-  [chunk_n77gaszd_matroskaElements.Crc32]: {
+  [chunk_gqesq3a3_matroskaElements.TagTrackUID]: chunk_gqesq3a3_tagTrackUidType,
+  [chunk_gqesq3a3_matroskaElements.SeekHead]: chunk_gqesq3a3_seekHead,
+  [chunk_gqesq3a3_matroskaElements.Seek]: chunk_gqesq3a3_seek,
+  [chunk_gqesq3a3_matroskaElements.SeekID]: chunk_gqesq3a3_seekId,
+  [chunk_gqesq3a3_matroskaElements.Name]: chunk_gqesq3a3_name,
+  [chunk_gqesq3a3_matroskaElements.MinCache]: chunk_gqesq3a3_minCache,
+  [chunk_gqesq3a3_matroskaElements.MaxCache]: chunk_gqesq3a3_maxCache,
+  [chunk_gqesq3a3_matroskaElements.SeekPosition]: chunk_gqesq3a3_seekPosition,
+  [chunk_gqesq3a3_matroskaElements.Crc32]: {
     name: "Crc32",
     type: "uint8array"
   },
-  [chunk_n77gaszd_matroskaElements.MuxingApp]: chunk_n77gaszd_muxingApp,
-  [chunk_n77gaszd_matroskaElements.WritingApp]: {
+  [chunk_gqesq3a3_matroskaElements.MuxingApp]: chunk_gqesq3a3_muxingApp,
+  [chunk_gqesq3a3_matroskaElements.WritingApp]: {
     name: "WritingApp",
     type: "string"
   },
-  [chunk_n77gaszd_matroskaElements.SegmentUUID]: {
+  [chunk_gqesq3a3_matroskaElements.SegmentUUID]: {
     name: "SegmentUUID",
     type: "string"
   },
-  [chunk_n77gaszd_matroskaElements.Duration]: chunk_n77gaszd_duration,
-  [chunk_n77gaszd_matroskaElements.CodecID]: {
+  [chunk_gqesq3a3_matroskaElements.Duration]: chunk_gqesq3a3_duration,
+  [chunk_gqesq3a3_matroskaElements.CodecID]: {
     name: "CodecID",
     type: "string"
   },
-  [chunk_n77gaszd_matroskaElements.TrackType]: chunk_n77gaszd_trackType,
-  [chunk_n77gaszd_matroskaElements.PixelWidth]: chunk_n77gaszd_widthType,
-  [chunk_n77gaszd_matroskaElements.PixelHeight]: chunk_n77gaszd_heightType,
-  [chunk_n77gaszd_matroskaElements.TimestampScale]: chunk_n77gaszd_timestampScale,
-  [chunk_n77gaszd_matroskaElements.Info]: chunk_n77gaszd_infoType,
-  [chunk_n77gaszd_matroskaElements.Title]: chunk_n77gaszd_titleType,
-  [chunk_n77gaszd_matroskaElements.SamplingFrequency]: chunk_n77gaszd_samplingFrequency,
-  [chunk_n77gaszd_matroskaElements.Channels]: chunk_n77gaszd_channels,
-  [chunk_n77gaszd_matroskaElements.AlphaMode]: chunk_n77gaszd_alphaMode,
-  [chunk_n77gaszd_matroskaElements.FlagInterlaced]: chunk_n77gaszd_interlaced,
-  [chunk_n77gaszd_matroskaElements.BitDepth]: chunk_n77gaszd_bitDepth,
-  [chunk_n77gaszd_matroskaElements.DisplayHeight]: chunk_n77gaszd_displayHeight,
-  [chunk_n77gaszd_matroskaElements.DisplayWidth]: chunk_n77gaszd_displayWidth,
-  [chunk_n77gaszd_matroskaElements.DisplayUnit]: chunk_n77gaszd_displayUnit,
-  [chunk_n77gaszd_matroskaElements.FlagLacing]: chunk_n77gaszd_flagLacing,
-  [chunk_n77gaszd_matroskaElements.Tags]: chunk_n77gaszd_tags,
-  [chunk_n77gaszd_matroskaElements.Tag]: chunk_n77gaszd_tagSegment,
-  [chunk_n77gaszd_matroskaElements.TrackNumber]: chunk_n77gaszd_trackNumber,
-  [chunk_n77gaszd_matroskaElements.TrackUID]: chunk_n77gaszd_trackUID,
-  [chunk_n77gaszd_matroskaElements.Colour]: chunk_n77gaszd_color,
-  [chunk_n77gaszd_matroskaElements.Language]: chunk_n77gaszd_language,
-  [chunk_n77gaszd_matroskaElements.DefaultDuration]: chunk_n77gaszd_defaultDuration,
-  [chunk_n77gaszd_matroskaElements.CodecPrivate]: chunk_n77gaszd_codecPrivate,
-  [chunk_n77gaszd_matroskaElements.BlockDuration]: chunk_n77gaszd_blockDurationSegment,
-  [chunk_n77gaszd_matroskaElements.BlockAdditions]: chunk_n77gaszd_blockAdditionsSegment,
-  [chunk_n77gaszd_matroskaElements.MaxBlockAdditionID]: chunk_n77gaszd_maxBlockAdditionIdSegment,
-  [chunk_n77gaszd_matroskaElements.Audio]: chunk_n77gaszd_audioSegment,
-  [chunk_n77gaszd_matroskaElements.Video]: chunk_n77gaszd_videoSegment,
-  [chunk_n77gaszd_matroskaElements.FlagDefault]: chunk_n77gaszd_flagDefault,
-  [chunk_n77gaszd_matroskaElements.ReferenceBlock]: chunk_n77gaszd_referenceBlock,
-  [chunk_n77gaszd_matroskaElements.TrackEntry]: chunk_n77gaszd_trackEntry,
-  [chunk_n77gaszd_matroskaElements.Timestamp]: {
+  [chunk_gqesq3a3_matroskaElements.TrackType]: chunk_gqesq3a3_trackType,
+  [chunk_gqesq3a3_matroskaElements.PixelWidth]: chunk_gqesq3a3_widthType,
+  [chunk_gqesq3a3_matroskaElements.PixelHeight]: chunk_gqesq3a3_heightType,
+  [chunk_gqesq3a3_matroskaElements.TimestampScale]: chunk_gqesq3a3_timestampScale,
+  [chunk_gqesq3a3_matroskaElements.Info]: chunk_gqesq3a3_infoType,
+  [chunk_gqesq3a3_matroskaElements.Title]: chunk_gqesq3a3_titleType,
+  [chunk_gqesq3a3_matroskaElements.SamplingFrequency]: chunk_gqesq3a3_samplingFrequency,
+  [chunk_gqesq3a3_matroskaElements.Channels]: chunk_gqesq3a3_channels,
+  [chunk_gqesq3a3_matroskaElements.AlphaMode]: chunk_gqesq3a3_alphaMode,
+  [chunk_gqesq3a3_matroskaElements.FlagInterlaced]: chunk_gqesq3a3_interlaced,
+  [chunk_gqesq3a3_matroskaElements.BitDepth]: chunk_gqesq3a3_bitDepth,
+  [chunk_gqesq3a3_matroskaElements.DisplayHeight]: chunk_gqesq3a3_displayHeight,
+  [chunk_gqesq3a3_matroskaElements.DisplayWidth]: chunk_gqesq3a3_displayWidth,
+  [chunk_gqesq3a3_matroskaElements.DisplayUnit]: chunk_gqesq3a3_displayUnit,
+  [chunk_gqesq3a3_matroskaElements.FlagLacing]: chunk_gqesq3a3_flagLacing,
+  [chunk_gqesq3a3_matroskaElements.Tags]: chunk_gqesq3a3_tags,
+  [chunk_gqesq3a3_matroskaElements.Tag]: chunk_gqesq3a3_tagSegment,
+  [chunk_gqesq3a3_matroskaElements.TrackNumber]: chunk_gqesq3a3_trackNumber,
+  [chunk_gqesq3a3_matroskaElements.TrackUID]: chunk_gqesq3a3_trackUID,
+  [chunk_gqesq3a3_matroskaElements.Colour]: chunk_gqesq3a3_color,
+  [chunk_gqesq3a3_matroskaElements.Language]: chunk_gqesq3a3_language,
+  [chunk_gqesq3a3_matroskaElements.DefaultDuration]: chunk_gqesq3a3_defaultDuration,
+  [chunk_gqesq3a3_matroskaElements.CodecPrivate]: chunk_gqesq3a3_codecPrivate,
+  [chunk_gqesq3a3_matroskaElements.BlockDuration]: chunk_gqesq3a3_blockDurationSegment,
+  [chunk_gqesq3a3_matroskaElements.BlockAdditions]: chunk_gqesq3a3_blockAdditionsSegment,
+  [chunk_gqesq3a3_matroskaElements.MaxBlockAdditionID]: chunk_gqesq3a3_maxBlockAdditionIdSegment,
+  [chunk_gqesq3a3_matroskaElements.Audio]: chunk_gqesq3a3_audioSegment,
+  [chunk_gqesq3a3_matroskaElements.Video]: chunk_gqesq3a3_videoSegment,
+  [chunk_gqesq3a3_matroskaElements.FlagDefault]: chunk_gqesq3a3_flagDefault,
+  [chunk_gqesq3a3_matroskaElements.ReferenceBlock]: chunk_gqesq3a3_referenceBlock,
+  [chunk_gqesq3a3_matroskaElements.TrackEntry]: chunk_gqesq3a3_trackEntry,
+  [chunk_gqesq3a3_matroskaElements.Timestamp]: {
     name: "Timestamp",
     type: "uint"
   },
-  [chunk_n77gaszd_matroskaElements.Tracks]: chunk_n77gaszd_tracks,
-  [chunk_n77gaszd_matroskaElements.Block]: chunk_n77gaszd_block,
-  [chunk_n77gaszd_matroskaElements.SimpleBlock]: chunk_n77gaszd_simpleBlock,
-  [chunk_n77gaszd_matroskaElements.BlockGroup]: chunk_n77gaszd_blockGroup,
-  [chunk_n77gaszd_matroskaElements.Segment]: {
+  [chunk_gqesq3a3_matroskaElements.Tracks]: chunk_gqesq3a3_tracks,
+  [chunk_gqesq3a3_matroskaElements.Block]: chunk_gqesq3a3_block,
+  [chunk_gqesq3a3_matroskaElements.SimpleBlock]: chunk_gqesq3a3_simpleBlock,
+  [chunk_gqesq3a3_matroskaElements.BlockGroup]: chunk_gqesq3a3_blockGroup,
+  [chunk_gqesq3a3_matroskaElements.Segment]: {
     name: "Segment",
     type: "children"
   },
-  [chunk_n77gaszd_matroskaElements.Cluster]: {
+  [chunk_gqesq3a3_matroskaElements.Cluster]: {
     name: "Cluster",
     type: "children"
   },
-  [chunk_n77gaszd_matroskaElements.TransferCharacteristics]: chunk_n77gaszd_transferCharacteristics,
-  [chunk_n77gaszd_matroskaElements.MatrixCoefficients]: chunk_n77gaszd_matrixCoefficients,
-  [chunk_n77gaszd_matroskaElements.Primaries]: chunk_n77gaszd_primaries,
-  [chunk_n77gaszd_matroskaElements.Range]: chunk_n77gaszd_range,
-  [chunk_n77gaszd_matroskaElements.ChromaSitingHorz]: chunk_n77gaszd_ChromaSitingHorz,
-  [chunk_n77gaszd_matroskaElements.ChromaSitingVert]: chunk_n77gaszd_ChromaSitingVert
+  [chunk_gqesq3a3_matroskaElements.TransferCharacteristics]: chunk_gqesq3a3_transferCharacteristics,
+  [chunk_gqesq3a3_matroskaElements.MatrixCoefficients]: chunk_gqesq3a3_matrixCoefficients,
+  [chunk_gqesq3a3_matroskaElements.Primaries]: chunk_gqesq3a3_primaries,
+  [chunk_gqesq3a3_matroskaElements.Range]: chunk_gqesq3a3_range,
+  [chunk_gqesq3a3_matroskaElements.ChromaSitingHorz]: chunk_gqesq3a3_ChromaSitingHorz,
+  [chunk_gqesq3a3_matroskaElements.ChromaSitingVert]: chunk_gqesq3a3_ChromaSitingVert
 };
-var chunk_n77gaszd_webmPattern = new Uint8Array([26, 69, 223, 163]);
-var chunk_n77gaszd_matchesPattern = (pattern) => {
+var chunk_gqesq3a3_webmPattern = new Uint8Array([26, 69, 223, 163]);
+var chunk_gqesq3a3_matchesPattern = (pattern) => {
   return (data) => {
     return pattern.every((value, index) => data[index] === value);
   };
 };
-var chunk_n77gaszd_isRiffAvi = (data) => {
+var chunk_gqesq3a3_isRiffAvi = (data) => {
   const riffPattern = new Uint8Array([82, 73, 70, 70]);
-  if (!chunk_n77gaszd_matchesPattern(riffPattern)(data.subarray(0, 4))) {
+  if (!chunk_gqesq3a3_matchesPattern(riffPattern)(data.subarray(0, 4))) {
     return false;
   }
   const fileType = data.subarray(8, 12);
   const aviPattern = new Uint8Array([65, 86, 73, 32]);
-  return chunk_n77gaszd_matchesPattern(aviPattern)(fileType);
+  return chunk_gqesq3a3_matchesPattern(aviPattern)(fileType);
 };
-var chunk_n77gaszd_isRiffWave = (data) => {
+var chunk_gqesq3a3_isRiffWave = (data) => {
   const riffPattern = new Uint8Array([82, 73, 70, 70]);
-  if (!chunk_n77gaszd_matchesPattern(riffPattern)(data.subarray(0, 4))) {
+  if (!chunk_gqesq3a3_matchesPattern(riffPattern)(data.subarray(0, 4))) {
     return false;
   }
   const fileType = data.subarray(8, 12);
   const wavePattern = new Uint8Array([87, 65, 86, 69]);
-  return chunk_n77gaszd_matchesPattern(wavePattern)(fileType);
+  return chunk_gqesq3a3_matchesPattern(wavePattern)(fileType);
 };
-var chunk_n77gaszd_isWebm = (data) => {
-  return chunk_n77gaszd_matchesPattern(chunk_n77gaszd_webmPattern)(data.subarray(0, 4));
+var chunk_gqesq3a3_isWebm = (data) => {
+  return chunk_gqesq3a3_matchesPattern(chunk_gqesq3a3_webmPattern)(data.subarray(0, 4));
 };
-var chunk_n77gaszd_isIsoBaseMedia = (data) => {
+var chunk_gqesq3a3_isIsoBaseMedia = (data) => {
   const isoBaseMediaMp4Pattern = new TextEncoder().encode("ftyp");
-  return chunk_n77gaszd_matchesPattern(isoBaseMediaMp4Pattern)(data.subarray(4, 8));
+  return chunk_gqesq3a3_matchesPattern(isoBaseMediaMp4Pattern)(data.subarray(4, 8));
 };
-var chunk_n77gaszd_isTransportStream = (data) => {
+var chunk_gqesq3a3_isTransportStream = (data) => {
   return data[0] === 71 && data[188] === 71;
 };
-var chunk_n77gaszd_isMp3 = (data) => {
+var chunk_gqesq3a3_isMp3 = (data) => {
   const mpegPattern = new Uint8Array([255, 243]);
   const mpegPattern2 = new Uint8Array([255, 251]);
   const id3v4Pattern = new Uint8Array([73, 68, 51, 4]);
   const id3v3Pattern = new Uint8Array([73, 68, 51, 3]);
   const id3v2Pattern = new Uint8Array([73, 68, 51, 2]);
   const subarray = data.subarray(0, 4);
-  return chunk_n77gaszd_matchesPattern(mpegPattern)(subarray) || chunk_n77gaszd_matchesPattern(mpegPattern2)(subarray) || chunk_n77gaszd_matchesPattern(id3v4Pattern)(subarray) || chunk_n77gaszd_matchesPattern(id3v3Pattern)(subarray) || chunk_n77gaszd_matchesPattern(id3v2Pattern)(subarray);
+  return chunk_gqesq3a3_matchesPattern(mpegPattern)(subarray) || chunk_gqesq3a3_matchesPattern(mpegPattern2)(subarray) || chunk_gqesq3a3_matchesPattern(id3v4Pattern)(subarray) || chunk_gqesq3a3_matchesPattern(id3v3Pattern)(subarray) || chunk_gqesq3a3_matchesPattern(id3v2Pattern)(subarray);
 };
-var chunk_n77gaszd_isAac = (data) => {
+var chunk_gqesq3a3_isAac = (data) => {
   const aacPattern = new Uint8Array([255, 241]);
-  return chunk_n77gaszd_matchesPattern(aacPattern)(data.subarray(0, 2));
+  return chunk_gqesq3a3_matchesPattern(aacPattern)(data.subarray(0, 2));
 };
-var chunk_n77gaszd_isFlac = (data) => {
+var chunk_gqesq3a3_isFlac = (data) => {
   const flacPattern = new Uint8Array([102, 76, 97, 67]);
-  return chunk_n77gaszd_matchesPattern(flacPattern)(data.subarray(0, 4));
+  return chunk_gqesq3a3_matchesPattern(flacPattern)(data.subarray(0, 4));
 };
-var chunk_n77gaszd_isM3u = (data) => {
+var chunk_gqesq3a3_isM3u = (data) => {
   return new TextDecoder("utf-8").decode(data.slice(0, 7)) === "#EXTM3U";
 };
-function chunk_n77gaszd_getBmpDimensions(bmpData) {
+function chunk_gqesq3a3_getBmpDimensions(bmpData) {
   if (bmpData.length < 26) {
     return null;
   }
@@ -55031,28 +55051,28 @@ function chunk_n77gaszd_getBmpDimensions(bmpData) {
     height: Math.abs(view.getInt32(22, true))
   };
 }
-var chunk_n77gaszd_isBmp = (data) => {
+var chunk_gqesq3a3_isBmp = (data) => {
   const bmpPattern = new Uint8Array([66, 77]);
-  if (chunk_n77gaszd_matchesPattern(bmpPattern)(data.subarray(0, 2))) {
-    const bmp = chunk_n77gaszd_getBmpDimensions(data);
+  if (chunk_gqesq3a3_matchesPattern(bmpPattern)(data.subarray(0, 2))) {
+    const bmp = chunk_gqesq3a3_getBmpDimensions(data);
     return { dimensions: bmp, type: "bmp" };
   }
   return null;
 };
-var chunk_n77gaszd_getGifDimensions = (data) => {
+var chunk_gqesq3a3_getGifDimensions = (data) => {
   const view = new DataView(data.buffer, data.byteOffset);
   const width = view.getUint16(6, true);
   const height = view.getUint16(8, true);
   return { width, height };
 };
-var chunk_n77gaszd_isGif = (data) => {
+var chunk_gqesq3a3_isGif = (data) => {
   const gifPattern = new Uint8Array([71, 73, 70, 56]);
-  if (chunk_n77gaszd_matchesPattern(gifPattern)(data.subarray(0, 4))) {
-    return { type: "gif", dimensions: chunk_n77gaszd_getGifDimensions(data) };
+  if (chunk_gqesq3a3_matchesPattern(gifPattern)(data.subarray(0, 4))) {
+    return { type: "gif", dimensions: chunk_gqesq3a3_getGifDimensions(data) };
   }
   return null;
 };
-function chunk_n77gaszd_getJpegDimensions(data) {
+function chunk_gqesq3a3_getJpegDimensions(data) {
   let offset = 0;
   function readUint16BE(o) {
     return data[o] << 8 | data[o + 1];
@@ -55077,23 +55097,23 @@ function chunk_n77gaszd_getJpegDimensions(data) {
   }
   return null;
 }
-var chunk_n77gaszd_isJpeg = (data) => {
+var chunk_gqesq3a3_isJpeg = (data) => {
   const jpegPattern = new Uint8Array([255, 216]);
-  const jpeg = chunk_n77gaszd_matchesPattern(jpegPattern)(data.subarray(0, 2));
+  const jpeg = chunk_gqesq3a3_matchesPattern(jpegPattern)(data.subarray(0, 2));
   if (!jpeg) {
     return null;
   }
-  const dim = chunk_n77gaszd_getJpegDimensions(data);
+  const dim = chunk_gqesq3a3_getJpegDimensions(data);
   return { dimensions: dim, type: "jpeg" };
 };
-var chunk_n77gaszd_isPdf = (data) => {
+var chunk_gqesq3a3_isPdf = (data) => {
   if (data.length < 4) {
     return null;
   }
   const pdfPattern = new Uint8Array([37, 80, 68, 70]);
-  return chunk_n77gaszd_matchesPattern(pdfPattern)(data.subarray(0, 4)) ? { type: "pdf" } : null;
+  return chunk_gqesq3a3_matchesPattern(pdfPattern)(data.subarray(0, 4)) ? { type: "pdf" } : null;
 };
-function chunk_n77gaszd_getPngDimensions(pngData) {
+function chunk_gqesq3a3_getPngDimensions(pngData) {
   if (pngData.length < 24) {
     return null;
   }
@@ -55109,15 +55129,15 @@ function chunk_n77gaszd_getPngDimensions(pngData) {
     height: view.getUint32(20, false)
   };
 }
-var chunk_n77gaszd_isPng = (data) => {
+var chunk_gqesq3a3_isPng = (data) => {
   const pngPattern = new Uint8Array([137, 80, 78, 71]);
-  if (chunk_n77gaszd_matchesPattern(pngPattern)(data.subarray(0, 4))) {
-    const png = chunk_n77gaszd_getPngDimensions(data);
+  if (chunk_gqesq3a3_matchesPattern(pngPattern)(data.subarray(0, 4))) {
+    const png = chunk_gqesq3a3_getPngDimensions(data);
     return { dimensions: png, type: "png" };
   }
   return null;
 };
-function chunk_n77gaszd_getWebPDimensions(bytes) {
+function chunk_gqesq3a3_getWebPDimensions(bytes) {
   if (bytes.length < 30) {
     return null;
   }
@@ -55146,95 +55166,95 @@ function chunk_n77gaszd_getWebPDimensions(bytes) {
   }
   return null;
 }
-var chunk_n77gaszd_isWebp = (data) => {
+var chunk_gqesq3a3_isWebp = (data) => {
   const webpPattern = new Uint8Array([82, 73, 70, 70]);
-  if (chunk_n77gaszd_matchesPattern(webpPattern)(data.subarray(0, 4))) {
+  if (chunk_gqesq3a3_matchesPattern(webpPattern)(data.subarray(0, 4))) {
     return {
       type: "webp",
-      dimensions: chunk_n77gaszd_getWebPDimensions(data)
+      dimensions: chunk_gqesq3a3_getWebPDimensions(data)
     };
   }
   return null;
 };
-var chunk_n77gaszd_detectFileType = (data) => {
-  if (chunk_n77gaszd_isRiffWave(data)) {
+var chunk_gqesq3a3_detectFileType = (data) => {
+  if (chunk_gqesq3a3_isRiffWave(data)) {
     return { type: "wav" };
   }
-  if (chunk_n77gaszd_isRiffAvi(data)) {
+  if (chunk_gqesq3a3_isRiffAvi(data)) {
     return { type: "riff" };
   }
-  if (chunk_n77gaszd_isAac(data)) {
+  if (chunk_gqesq3a3_isAac(data)) {
     return { type: "aac" };
   }
-  if (chunk_n77gaszd_isFlac(data)) {
+  if (chunk_gqesq3a3_isFlac(data)) {
     return { type: "flac" };
   }
-  if (chunk_n77gaszd_isM3u(data)) {
+  if (chunk_gqesq3a3_isM3u(data)) {
     return { type: "m3u" };
   }
-  const webp = chunk_n77gaszd_isWebp(data);
+  const webp = chunk_gqesq3a3_isWebp(data);
   if (webp) {
     return webp;
   }
-  if (chunk_n77gaszd_isWebm(data)) {
+  if (chunk_gqesq3a3_isWebm(data)) {
     return { type: "webm" };
   }
-  if (chunk_n77gaszd_isIsoBaseMedia(data)) {
+  if (chunk_gqesq3a3_isIsoBaseMedia(data)) {
     return { type: "iso-base-media" };
   }
-  if (chunk_n77gaszd_isTransportStream(data)) {
+  if (chunk_gqesq3a3_isTransportStream(data)) {
     return { type: "transport-stream" };
   }
-  if (chunk_n77gaszd_isMp3(data)) {
+  if (chunk_gqesq3a3_isMp3(data)) {
     return { type: "mp3" };
   }
-  const gif = chunk_n77gaszd_isGif(data);
+  const gif = chunk_gqesq3a3_isGif(data);
   if (gif) {
     return gif;
   }
-  const png = chunk_n77gaszd_isPng(data);
+  const png = chunk_gqesq3a3_isPng(data);
   if (png) {
     return png;
   }
-  const pdf = chunk_n77gaszd_isPdf(data);
+  const pdf = chunk_gqesq3a3_isPdf(data);
   if (pdf) {
     return pdf;
   }
-  const bmp = chunk_n77gaszd_isBmp(data);
+  const bmp = chunk_gqesq3a3_isBmp(data);
   if (bmp) {
     return bmp;
   }
-  const jpeg = chunk_n77gaszd_isJpeg(data);
+  const jpeg = chunk_gqesq3a3_isJpeg(data);
   if (jpeg) {
     return jpeg;
   }
   return { type: "unknown" };
 };
-var chunk_n77gaszd_logLevels = ["trace", "verbose", "info", "warn", "error"];
-var chunk_n77gaszd_getNumberForLogLevel = (level) => {
-  return chunk_n77gaszd_logLevels.indexOf(level);
+var chunk_gqesq3a3_logLevels = ["trace", "verbose", "info", "warn", "error"];
+var chunk_gqesq3a3_getNumberForLogLevel = (level) => {
+  return chunk_gqesq3a3_logLevels.indexOf(level);
 };
-var chunk_n77gaszd_isEqualOrBelowLogLevel = (currentLevel, level) => {
-  return chunk_n77gaszd_getNumberForLogLevel(currentLevel) <= chunk_n77gaszd_getNumberForLogLevel(level);
+var chunk_gqesq3a3_isEqualOrBelowLogLevel = (currentLevel, level) => {
+  return chunk_gqesq3a3_getNumberForLogLevel(currentLevel) <= chunk_gqesq3a3_getNumberForLogLevel(level);
 };
-var chunk_n77gaszd_Log = {
+var chunk_gqesq3a3_Log = {
   trace: (logLevel, ...args) => {
-    if (chunk_n77gaszd_isEqualOrBelowLogLevel(logLevel, "trace")) {
+    if (chunk_gqesq3a3_isEqualOrBelowLogLevel(logLevel, "trace")) {
       return console.log(...args);
     }
   },
   verbose: (logLevel, ...args) => {
-    if (chunk_n77gaszd_isEqualOrBelowLogLevel(logLevel, "verbose")) {
+    if (chunk_gqesq3a3_isEqualOrBelowLogLevel(logLevel, "verbose")) {
       return console.log(...args);
     }
   },
   info: (logLevel, ...args) => {
-    if (chunk_n77gaszd_isEqualOrBelowLogLevel(logLevel, "info")) {
+    if (chunk_gqesq3a3_isEqualOrBelowLogLevel(logLevel, "info")) {
       return console.log(...args);
     }
   },
   warn: (logLevel, ...args) => {
-    if (chunk_n77gaszd_isEqualOrBelowLogLevel(logLevel, "warn")) {
+    if (chunk_gqesq3a3_isEqualOrBelowLogLevel(logLevel, "warn")) {
       return console.warn(...args);
     }
   },
@@ -55243,7 +55263,7 @@ var chunk_n77gaszd_Log = {
   }
 };
 
-class chunk_n77gaszd_ResizableBuffer {
+class chunk_gqesq3a3_ResizableBuffer {
   buffer;
   uintarray;
   constructor(buffer) {
@@ -55261,31 +55281,31 @@ class chunk_n77gaszd_ResizableBuffer {
     }
   }
 }
-var chunk_n77gaszd_makeBufferWithMaxBytes = (initialData, maxBytes) => {
+var chunk_gqesq3a3_makeBufferWithMaxBytes = (initialData, maxBytes) => {
   const maxByteLength = Math.min(maxBytes, 2 ** 31);
   try {
     const buf = new ArrayBuffer(initialData.byteLength, {
       maxByteLength
     });
-    return new chunk_n77gaszd_ResizableBuffer(buf);
+    return new chunk_gqesq3a3_ResizableBuffer(buf);
   } catch (e) {
     if (e instanceof RangeError && maxBytes > 2 ** 27) {
-      return new chunk_n77gaszd_ResizableBuffer(new ArrayBuffer(initialData.byteLength, {
+      return new chunk_gqesq3a3_ResizableBuffer(new ArrayBuffer(initialData.byteLength, {
         maxByteLength: 2 ** 27
       }));
     }
     throw e;
   }
 };
-var chunk_n77gaszd_bufferManager = ({
+var chunk_gqesq3a3_bufferManager = ({
   initialData,
   maxBytes,
   counter,
   logLevel
 }) => {
-  const buf = chunk_n77gaszd_makeBufferWithMaxBytes(initialData, maxBytes);
+  const buf = chunk_gqesq3a3_makeBufferWithMaxBytes(initialData, maxBytes);
   if (!buf.buffer.resize) {
-    chunk_n77gaszd_Log.warn(logLevel, "`ArrayBuffer.resize` is not supported in this Runtime. Using slow polyfill.");
+    chunk_gqesq3a3_Log.warn(logLevel, "`ArrayBuffer.resize` is not supported in this Runtime. Using slow polyfill.");
   }
   buf.uintarray.set(initialData);
   let view = new DataView(buf.uintarray.buffer);
@@ -55354,7 +55374,7 @@ var chunk_n77gaszd_bufferManager = ({
     replaceData
   };
 };
-var chunk_n77gaszd_makeOffsetCounter = (initial) => {
+var chunk_gqesq3a3_makeOffsetCounter = (initial) => {
   let offset = initial;
   let discardedBytes = 0;
   return {
@@ -55381,12 +55401,12 @@ var chunk_n77gaszd_makeOffsetCounter = (initial) => {
     }
   };
 };
-var chunk_n77gaszd_getArrayBufferIterator = ({
+var chunk_gqesq3a3_getArrayBufferIterator = ({
   initialData,
   maxBytes,
   logLevel
 }) => {
-  const counter = chunk_n77gaszd_makeOffsetCounter(0);
+  const counter = chunk_gqesq3a3_makeOffsetCounter(0);
   const {
     getUint8Array,
     getView,
@@ -55395,7 +55415,7 @@ var chunk_n77gaszd_getArrayBufferIterator = ({
     removeBytesRead,
     skipTo,
     replaceData
-  } = chunk_n77gaszd_bufferManager({ initialData, maxBytes, counter, logLevel });
+  } = chunk_gqesq3a3_bufferManager({ initialData, maxBytes, counter, logLevel });
   const startCheckpoint = () => {
     const checkpoint = counter.getOffset();
     return {
@@ -55546,11 +55566,11 @@ var chunk_n77gaszd_getArrayBufferIterator = ({
     return (1 << zerosCount) - 1 + suffix2;
   };
   const peekB = (length) => {
-    chunk_n77gaszd_Log.info("info", [...getSlice(length)].map((b) => b.toString(16).padStart(2, "0")));
+    chunk_gqesq3a3_Log.info("info", [...getSlice(length)].map((b) => b.toString(16).padStart(2, "0")));
     counter.decrement(length);
   };
   const peekD = (length) => {
-    chunk_n77gaszd_Log.info("info", [...getSlice(length)].map((b) => b.toString(16).padStart(2, "0")));
+    chunk_gqesq3a3_Log.info("info", [...getSlice(length)].map((b) => b.toString(16).padStart(2, "0")));
     counter.decrement(length);
   };
   const leb128 = () => {
@@ -55644,7 +55664,7 @@ var chunk_n77gaszd_getArrayBufferIterator = ({
       return new TextDecoder().decode(atom);
     },
     detectFileType: () => {
-      return chunk_n77gaszd_detectFileType(getUint8Array());
+      return chunk_gqesq3a3_detectFileType(getUint8Array());
     },
     getPaddedFourByteNumber,
     getMatroskaSegmentId: () => {
@@ -55655,7 +55675,7 @@ var chunk_n77gaszd_getArrayBufferIterator = ({
       const firstOneString = `0x${Array.from(new Uint8Array(first)).map((b) => {
         return b.toString(16).padStart(2, "0");
       }).join("")}`;
-      if (chunk_n77gaszd_knownIdsWithOneLength.includes(firstOneString)) {
+      if (chunk_gqesq3a3_knownIdsWithOneLength.includes(firstOneString)) {
         return firstOneString;
       }
       if (bytesRemaining() === 0) {
@@ -55665,7 +55685,7 @@ var chunk_n77gaszd_getArrayBufferIterator = ({
       const firstTwoString = `${firstOneString}${Array.from(new Uint8Array(firstTwo)).map((b) => {
         return b.toString(16).padStart(2, "0");
       }).join("")}`;
-      if (chunk_n77gaszd_knownIdsWithTwoLength.includes(firstTwoString)) {
+      if (chunk_gqesq3a3_knownIdsWithTwoLength.includes(firstTwoString)) {
         return firstTwoString;
       }
       if (bytesRemaining() === 0) {
@@ -55675,7 +55695,7 @@ var chunk_n77gaszd_getArrayBufferIterator = ({
       const firstThreeString = `${firstTwoString}${Array.from(new Uint8Array(firstThree)).map((b) => {
         return b.toString(16).padStart(2, "0");
       }).join("")}`;
-      if (chunk_n77gaszd_knownIdsWithThreeLength.includes(firstThreeString)) {
+      if (chunk_gqesq3a3_knownIdsWithThreeLength.includes(firstThreeString)) {
         return firstThreeString;
       }
       if (bytesRemaining() === 0) {
@@ -55822,14 +55842,14 @@ var chunk_n77gaszd_getArrayBufferIterator = ({
     replaceData
   };
 };
-var chunk_n77gaszd_toUnixTimestamp = (value) => {
+var chunk_gqesq3a3_toUnixTimestamp = (value) => {
   if (value === 0) {
     return null;
   }
   const baseDate = new Date("1904-01-01T00:00:00Z");
   return Math.floor(value + baseDate.getTime() / 1000) * 1000;
 };
-var chunk_n77gaszd_parseMvhd = ({
+var chunk_gqesq3a3_parseMvhd = ({
   iterator,
   offset,
   size: size4
@@ -55842,14 +55862,14 @@ var chunk_n77gaszd_parseMvhd = ({
   const durationInUnits = version === 1 ? iterator.getUint64() : iterator.getUint32();
   const durationInSeconds = Number(durationInUnits) / timeScale;
   const rateArray = iterator.getSlice(4);
-  const rateView = chunk_n77gaszd_getArrayBufferIterator({
+  const rateView = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: rateArray,
     maxBytes: rateArray.length,
     logLevel: "error"
   });
   const rate = rateView.getInt8() * 10 + rateView.getInt8() + rateView.getInt8() * 0.1 + rateView.getInt8() * 0.01;
   const volumeArray = iterator.getSlice(2);
-  const volumeView = chunk_n77gaszd_getArrayBufferIterator({
+  const volumeView = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: volumeArray,
     maxBytes: volumeArray.length,
     logLevel: "error"
@@ -55877,8 +55897,8 @@ var chunk_n77gaszd_parseMvhd = ({
     throw new Error("expected 0 bytes " + bytesRemaining);
   }
   return {
-    creationTime: chunk_n77gaszd_toUnixTimestamp(Number(creationTime)),
-    modificationTime: chunk_n77gaszd_toUnixTimestamp(Number(modificationTime)),
+    creationTime: chunk_gqesq3a3_toUnixTimestamp(Number(creationTime)),
+    modificationTime: chunk_gqesq3a3_toUnixTimestamp(Number(modificationTime)),
     timeScale,
     durationInUnits: Number(durationInUnits),
     durationInSeconds,
@@ -55891,10 +55911,10 @@ var chunk_n77gaszd_parseMvhd = ({
     offset
   };
 };
-var chunk_n77gaszd_getCodecStringFromSpsAndPps = (sps) => {
+var chunk_gqesq3a3_getCodecStringFromSpsAndPps = (sps) => {
   return `avc1.${sps.spsData.profile.toString(16).padStart(2, "0")}${sps.spsData.compatibility.toString(16).padStart(2, "0")}${sps.spsData.level.toString(16).padStart(2, "0")}`;
 };
-var chunk_n77gaszd_combineUint8Arrays = (arrays) => {
+var chunk_gqesq3a3_combineUint8Arrays = (arrays) => {
   if (arrays.length === 0) {
     return new Uint8Array([]);
   }
@@ -55913,17 +55933,17 @@ var chunk_n77gaszd_combineUint8Arrays = (arrays) => {
   }
   return result;
 };
-function chunk_n77gaszd_truthy(value) {
+function chunk_gqesq3a3_truthy(value) {
   return Boolean(value);
 }
-function chunk_n77gaszd_serializeUint16(value) {
+function chunk_gqesq3a3_serializeUint16(value) {
   const buffer = new ArrayBuffer(2);
   const view = new DataView(buffer);
   view.setUint16(0, value);
   return new Uint8Array(buffer);
 }
-var chunk_n77gaszd_createSpsPpsData = (avc1Profile) => {
-  return chunk_n77gaszd_combineUint8Arrays([
+var chunk_gqesq3a3_createSpsPpsData = (avc1Profile) => {
+  return chunk_gqesq3a3_combineUint8Arrays([
     new Uint8Array([
       1,
       avc1Profile.sps.spsData.profile,
@@ -55932,26 +55952,26 @@ var chunk_n77gaszd_createSpsPpsData = (avc1Profile) => {
       255,
       225
     ]),
-    chunk_n77gaszd_serializeUint16(avc1Profile.sps.sps.length),
+    chunk_gqesq3a3_serializeUint16(avc1Profile.sps.sps.length),
     avc1Profile.sps.sps,
     new Uint8Array([1]),
-    chunk_n77gaszd_serializeUint16(avc1Profile.pps.pps.length),
+    chunk_gqesq3a3_serializeUint16(avc1Profile.pps.pps.length),
     avc1Profile.pps.pps,
     [66, 77, 88].some((b) => avc1Profile.sps.spsData.profile === b) ? null : new Uint8Array([253, 248, 248, 0])
-  ].filter(chunk_n77gaszd_truthy));
+  ].filter(chunk_gqesq3a3_truthy));
 };
-var chunk_n77gaszd_addAvcProfileToTrack = (track, avc1Profile) => {
+var chunk_gqesq3a3_addAvcProfileToTrack = (track, avc1Profile) => {
   if (avc1Profile === null) {
     return track;
   }
   return {
     ...track,
-    codec: chunk_n77gaszd_getCodecStringFromSpsAndPps(avc1Profile.sps),
-    codecData: { type: "avc-sps-pps", data: chunk_n77gaszd_createSpsPpsData(avc1Profile) },
+    codec: chunk_gqesq3a3_getCodecStringFromSpsAndPps(avc1Profile.sps),
+    codecData: { type: "avc-sps-pps", data: chunk_gqesq3a3_createSpsPpsData(avc1Profile) },
     description: undefined
   };
 };
-var chunk_n77gaszd_registerVideoTrack = async ({
+var chunk_gqesq3a3_registerVideoTrack = async ({
   track,
   container: container42,
   logLevel,
@@ -55960,7 +55980,7 @@ var chunk_n77gaszd_registerVideoTrack = async ({
   tracks: tracks2
 }) => {
   if (tracks2.getTracks().find((t) => t.trackId === track.trackId)) {
-    chunk_n77gaszd_Log.trace(logLevel, `Track ${track.trackId} already registered, skipping`);
+    chunk_gqesq3a3_Log.trace(logLevel, `Track ${track.trackId} already registered, skipping`);
     return null;
   }
   if (track.type !== "video") {
@@ -55977,7 +55997,7 @@ var chunk_n77gaszd_registerVideoTrack = async ({
   await registerVideoSampleCallback(track.trackId, callback ?? null);
   return callback;
 };
-var chunk_n77gaszd_registerAudioTrack = async ({
+var chunk_gqesq3a3_registerAudioTrack = async ({
   track,
   container: container42,
   tracks: tracks2,
@@ -55986,7 +56006,7 @@ var chunk_n77gaszd_registerAudioTrack = async ({
   registerAudioSampleCallback
 }) => {
   if (tracks2.getTracks().find((t) => t.trackId === track.trackId)) {
-    chunk_n77gaszd_Log.trace(logLevel, `Track ${track.trackId} already registered, skipping`);
+    chunk_gqesq3a3_Log.trace(logLevel, `Track ${track.trackId} already registered, skipping`);
     return null;
   }
   if (track.type !== "audio") {
@@ -56003,14 +56023,14 @@ var chunk_n77gaszd_registerAudioTrack = async ({
   await registerAudioSampleCallback(track.trackId, callback ?? null);
   return callback;
 };
-var chunk_n77gaszd_registerVideoTrackWhenProfileIsAvailable = ({
+var chunk_gqesq3a3_registerVideoTrackWhenProfileIsAvailable = ({
   state,
   track,
   container: container42
 }) => {
   state.riff.registerOnAvcProfileCallback(async (profile) => {
-    await chunk_n77gaszd_registerVideoTrack({
-      track: chunk_n77gaszd_addAvcProfileToTrack(track, profile),
+    await chunk_gqesq3a3_registerVideoTrack({
+      track: chunk_gqesq3a3_addAvcProfileToTrack(track, profile),
       container: container42,
       logLevel: state.logLevel,
       onVideoTrack: state.onVideoTrack,
@@ -56019,15 +56039,15 @@ var chunk_n77gaszd_registerVideoTrackWhenProfileIsAvailable = ({
     });
   });
 };
-var chunk_n77gaszd_makeSkip = (skipTo) => ({
+var chunk_gqesq3a3_makeSkip = (skipTo) => ({
   action: "skip",
   skipTo
 });
-var chunk_n77gaszd_makeFetchMoreData = (bytesNeeded) => ({
+var chunk_gqesq3a3_makeFetchMoreData = (bytesNeeded) => ({
   action: "fetch-more-data",
   bytesNeeded
 });
-var chunk_n77gaszd_parseElst = ({
+var chunk_gqesq3a3_parseElst = ({
   iterator,
   size: size4,
   offset
@@ -56060,7 +56080,7 @@ var chunk_n77gaszd_parseElst = ({
   };
   return result;
 };
-var chunk_n77gaszd_parseDecoderSpecificConfig = (iterator) => {
+var chunk_gqesq3a3_parseDecoderSpecificConfig = (iterator) => {
   const layerTag = iterator.getUint8();
   const layerSize = iterator.getPaddedFourByteNumber();
   const start = iterator.counter.getOffset();
@@ -56092,7 +56112,7 @@ var chunk_n77gaszd_parseDecoderSpecificConfig = (iterator) => {
     asBytes: bytes
   };
 };
-var chunk_n77gaszd_mapToObjectAudioIndicator = (num) => {
+var chunk_gqesq3a3_mapToObjectAudioIndicator = (num) => {
   if (num === 64) {
     return "aac";
   }
@@ -56101,7 +56121,7 @@ var chunk_n77gaszd_mapToObjectAudioIndicator = (num) => {
   }
   return "unknown";
 };
-var chunk_n77gaszd_processDescriptor = ({
+var chunk_gqesq3a3_processDescriptor = ({
   iterator
 }) => {
   const tag = iterator.getUint8();
@@ -56119,13 +56139,13 @@ var chunk_n77gaszd_processDescriptor = ({
     const avgBitrate = iterator.getUint32();
     const decoderSpecificConfigs = [];
     while (size4 - (iterator.counter.getOffset() - initialOffset) > 0) {
-      const decoderSpecificConfig = chunk_n77gaszd_parseDecoderSpecificConfig(iterator);
+      const decoderSpecificConfig = chunk_gqesq3a3_parseDecoderSpecificConfig(iterator);
       decoderSpecificConfigs.push(decoderSpecificConfig);
     }
     return {
       descriptor: {
         type: "decoder-config-descriptor",
-        objectTypeIndication: chunk_n77gaszd_mapToObjectAudioIndicator(objectTypeIndication),
+        objectTypeIndication: chunk_gqesq3a3_mapToObjectAudioIndicator(objectTypeIndication),
         asNumber: objectTypeIndication,
         bufferSizeDB,
         streamType,
@@ -56149,11 +56169,11 @@ var chunk_n77gaszd_processDescriptor = ({
     descriptor: null
   };
 };
-var chunk_n77gaszd_parseDescriptors = (iterator, maxBytes) => {
+var chunk_gqesq3a3_parseDescriptors = (iterator, maxBytes) => {
   const descriptors = [];
   const initialOffset = iterator.counter.getOffset();
   while (iterator.bytesRemaining() > 0 && iterator.counter.getOffset() - initialOffset < maxBytes) {
-    const { descriptor } = chunk_n77gaszd_processDescriptor({
+    const { descriptor } = chunk_gqesq3a3_processDescriptor({
       iterator
     });
     if (descriptor) {
@@ -56164,7 +56184,7 @@ var chunk_n77gaszd_parseDescriptors = (iterator, maxBytes) => {
   }
   return descriptors;
 };
-var chunk_n77gaszd_parseEsds = ({
+var chunk_gqesq3a3_parseEsds = ({
   data,
   size: size4,
   fileOffset
@@ -56176,7 +56196,7 @@ var chunk_n77gaszd_parseEsds = ({
   const esId = data.getUint16();
   data.discard(1);
   const remaining = size4 - (data.counter.getOffset() - fileOffset);
-  const descriptors = chunk_n77gaszd_parseDescriptors(data, remaining);
+  const descriptors = chunk_gqesq3a3_parseDescriptors(data, remaining);
   const remainingNow = size4 - (data.counter.getOffset() - fileOffset);
   data.discard(remainingNow);
   return {
@@ -56188,7 +56208,7 @@ var chunk_n77gaszd_parseEsds = ({
     descriptors
   };
 };
-var chunk_n77gaszd_precomputedMoofState = () => {
+var chunk_gqesq3a3_precomputedMoofState = () => {
   let moofBoxes = [];
   return {
     getMoofBoxes: () => moofBoxes,
@@ -56197,7 +56217,7 @@ var chunk_n77gaszd_precomputedMoofState = () => {
     }
   };
 };
-var chunk_n77gaszd_toMoofBox = (box2) => {
+var chunk_gqesq3a3_toMoofBox = (box2) => {
   if (box2.type !== "regular-box") {
     throw new Error("expected regular bpx");
   }
@@ -56207,17 +56227,17 @@ var chunk_n77gaszd_toMoofBox = (box2) => {
     size: box2.boxSize
   };
 };
-var chunk_n77gaszd_deduplicateMoofBoxesByOffset = (moofBoxes) => {
+var chunk_gqesq3a3_deduplicateMoofBoxesByOffset = (moofBoxes) => {
   return moofBoxes.filter((m, i, arr) => i === arr.findIndex((t) => t.offset === m.offset));
 };
-var chunk_n77gaszd_getMoovFromFromIsoStructure = (structure) => {
+var chunk_gqesq3a3_getMoovFromFromIsoStructure = (structure) => {
   const moovBox = structure.boxes.find((s) => s.type === "moov-box");
   if (!moovBox || moovBox.type !== "moov-box") {
     return null;
   }
   return moovBox;
 };
-var chunk_n77gaszd_getMoovBoxFromState = ({
+var chunk_gqesq3a3_getMoovBoxFromState = ({
   structureState,
   isoState,
   mp4HeaderSegment,
@@ -56228,46 +56248,46 @@ var chunk_n77gaszd_getMoovBoxFromState = ({
     return got.moovBox;
   }
   if (mp4HeaderSegment) {
-    return chunk_n77gaszd_getMoovFromFromIsoStructure(mp4HeaderSegment);
+    return chunk_gqesq3a3_getMoovFromFromIsoStructure(mp4HeaderSegment);
   }
   const structure = structureState.getIsoStructure();
-  return chunk_n77gaszd_getMoovFromFromIsoStructure(structure);
+  return chunk_gqesq3a3_getMoovFromFromIsoStructure(structure);
 };
-var chunk_n77gaszd_getMoofBoxes = (main) => {
+var chunk_gqesq3a3_getMoofBoxes = (main) => {
   const moofBoxes = main.filter((s) => s.type === "regular-box" && s.boxType === "moof");
-  return moofBoxes.map((m) => chunk_n77gaszd_toMoofBox(m));
+  return moofBoxes.map((m) => chunk_gqesq3a3_toMoofBox(m));
 };
-var chunk_n77gaszd_getMvhdBox = (moovBox) => {
+var chunk_gqesq3a3_getMvhdBox = (moovBox) => {
   const mvHdBox = moovBox.children.find((s) => s.type === "mvhd-box");
   if (!mvHdBox || mvHdBox.type !== "mvhd-box") {
     return null;
   }
   return mvHdBox;
 };
-var chunk_n77gaszd_getTraks = (moovBox) => {
+var chunk_gqesq3a3_getTraks = (moovBox) => {
   return moovBox.children.filter((s) => s.type === "trak-box");
 };
-var chunk_n77gaszd_getTkhdBox = (trakBox) => {
+var chunk_gqesq3a3_getTkhdBox = (trakBox) => {
   const tkhdBox = trakBox.children.find((s) => s.type === "tkhd-box");
   return tkhdBox;
 };
-var chunk_n77gaszd_getMdiaBox = (trakBox) => {
+var chunk_gqesq3a3_getMdiaBox = (trakBox) => {
   const mdiaBox = trakBox.children.find((s) => s.type === "regular-box" && s.boxType === "mdia");
   if (!mdiaBox || mdiaBox.type !== "regular-box") {
     return null;
   }
   return mdiaBox;
 };
-var chunk_n77gaszd_getMdhdBox = (trakBox) => {
-  const mdiaBox = chunk_n77gaszd_getMdiaBox(trakBox);
+var chunk_gqesq3a3_getMdhdBox = (trakBox) => {
+  const mdiaBox = chunk_gqesq3a3_getMdiaBox(trakBox);
   if (!mdiaBox) {
     return null;
   }
   const mdhdBox = mdiaBox.children.find((c) => c.type === "mdhd-box");
   return mdhdBox;
 };
-var chunk_n77gaszd_getStblBox = (trakBox) => {
-  const mdiaBox = chunk_n77gaszd_getMdiaBox(trakBox);
+var chunk_gqesq3a3_getStblBox = (trakBox) => {
+  const mdiaBox = chunk_gqesq3a3_getMdiaBox(trakBox);
   if (!mdiaBox) {
     return null;
   }
@@ -56281,16 +56301,16 @@ var chunk_n77gaszd_getStblBox = (trakBox) => {
   }
   return stblBox;
 };
-var chunk_n77gaszd_getStsdBox = (trakBox) => {
-  const stblBox = chunk_n77gaszd_getStblBox(trakBox);
+var chunk_gqesq3a3_getStsdBox = (trakBox) => {
+  const stblBox = chunk_gqesq3a3_getStblBox(trakBox);
   if (!stblBox || stblBox.type !== "regular-box") {
     return null;
   }
   const stsdBox = stblBox.children.find((s) => s.type === "stsd-box");
   return stsdBox;
 };
-var chunk_n77gaszd_getVideoDescriptors = (trakBox) => {
-  const stsdBox = chunk_n77gaszd_getStsdBox(trakBox);
+var chunk_gqesq3a3_getVideoDescriptors = (trakBox) => {
+  const stsdBox = chunk_gqesq3a3_getStsdBox(trakBox);
   if (!stsdBox) {
     return null;
   }
@@ -56301,55 +56321,55 @@ var chunk_n77gaszd_getVideoDescriptors = (trakBox) => {
   });
   return descriptors.flat(1).filter(Boolean)[0] ?? null;
 };
-var chunk_n77gaszd_getStcoBox = (trakBox) => {
-  const stblBox = chunk_n77gaszd_getStblBox(trakBox);
+var chunk_gqesq3a3_getStcoBox = (trakBox) => {
+  const stblBox = chunk_gqesq3a3_getStblBox(trakBox);
   if (!stblBox || stblBox.type !== "regular-box") {
     return null;
   }
   const stcoBox = stblBox.children.find((s) => s.type === "stco-box");
   return stcoBox;
 };
-var chunk_n77gaszd_getSttsBox = (trakBox) => {
-  const stblBox = chunk_n77gaszd_getStblBox(trakBox);
+var chunk_gqesq3a3_getSttsBox = (trakBox) => {
+  const stblBox = chunk_gqesq3a3_getStblBox(trakBox);
   if (!stblBox || stblBox.type !== "regular-box") {
     return null;
   }
   const sttsBox = stblBox.children.find((s) => s.type === "stts-box");
   return sttsBox;
 };
-var chunk_n77gaszd_getCttsBox = (trakBox) => {
-  const stblBox = chunk_n77gaszd_getStblBox(trakBox);
+var chunk_gqesq3a3_getCttsBox = (trakBox) => {
+  const stblBox = chunk_gqesq3a3_getStblBox(trakBox);
   if (!stblBox || stblBox.type !== "regular-box") {
     return null;
   }
   const cttsBox = stblBox.children.find((s) => s.type === "ctts-box");
   return cttsBox;
 };
-var chunk_n77gaszd_getStszBox = (trakBox) => {
-  const stblBox = chunk_n77gaszd_getStblBox(trakBox);
+var chunk_gqesq3a3_getStszBox = (trakBox) => {
+  const stblBox = chunk_gqesq3a3_getStblBox(trakBox);
   if (!stblBox || stblBox.type !== "regular-box") {
     return null;
   }
   const stszBox = stblBox.children.find((s) => s.type === "stsz-box");
   return stszBox;
 };
-var chunk_n77gaszd_getStscBox = (trakBox) => {
-  const stblBox = chunk_n77gaszd_getStblBox(trakBox);
+var chunk_gqesq3a3_getStscBox = (trakBox) => {
+  const stblBox = chunk_gqesq3a3_getStblBox(trakBox);
   if (!stblBox || stblBox.type !== "regular-box") {
     return null;
   }
   const stcoBox = stblBox.children.find((b) => b.type === "stsc-box");
   return stcoBox;
 };
-var chunk_n77gaszd_getStssBox = (trakBox) => {
-  const stblBox = chunk_n77gaszd_getStblBox(trakBox);
+var chunk_gqesq3a3_getStssBox = (trakBox) => {
+  const stblBox = chunk_gqesq3a3_getStblBox(trakBox);
   if (!stblBox || stblBox.type !== "regular-box") {
     return null;
   }
   const stssBox = stblBox.children.find((b) => b.type === "stss-box");
   return stssBox;
 };
-var chunk_n77gaszd_getTfdtBox = (segment) => {
+var chunk_gqesq3a3_getTfdtBox = (segment) => {
   if (segment.type !== "regular-box" || segment.boxType !== "traf") {
     throw new Error("Expected traf-box");
   }
@@ -56359,7 +56379,7 @@ var chunk_n77gaszd_getTfdtBox = (segment) => {
   }
   return tfhdBox;
 };
-var chunk_n77gaszd_getTfhdBox = (segment) => {
+var chunk_gqesq3a3_getTfhdBox = (segment) => {
   if (segment.type !== "regular-box" || segment.boxType !== "traf") {
     throw new Error("Expected traf-box");
   }
@@ -56369,50 +56389,50 @@ var chunk_n77gaszd_getTfhdBox = (segment) => {
   }
   return tfhdBox;
 };
-var chunk_n77gaszd_getTrunBoxes = (segment) => {
+var chunk_gqesq3a3_getTrunBoxes = (segment) => {
   if (segment.type !== "regular-box" || segment.boxType !== "traf") {
     throw new Error("Expected traf-box");
   }
   const trunBoxes = segment.children.filter((c) => c.type === "trun-box");
   return trunBoxes;
 };
-var chunk_n77gaszd_getMvexBox = (moovAtom) => {
+var chunk_gqesq3a3_getMvexBox = (moovAtom) => {
   const mvexBox = moovAtom.children.find((s) => s.type === "regular-box" && s.boxType === "mvex");
   if (!mvexBox || mvexBox.type !== "regular-box") {
     return null;
   }
   return mvexBox;
 };
-var chunk_n77gaszd_getTrexBoxes = (moovAtom) => {
-  const mvexBox = chunk_n77gaszd_getMvexBox(moovAtom);
+var chunk_gqesq3a3_getTrexBoxes = (moovAtom) => {
+  const mvexBox = chunk_gqesq3a3_getMvexBox(moovAtom);
   if (!mvexBox) {
     return [];
   }
   const trexBoxes = mvexBox.children.filter((c) => c.type === "trex-box");
   return trexBoxes;
 };
-var chunk_n77gaszd_getTfraBoxesFromMfraBoxChildren = (mfraBoxChildren) => {
+var chunk_gqesq3a3_getTfraBoxesFromMfraBoxChildren = (mfraBoxChildren) => {
   const tfraBoxes = mfraBoxChildren.filter((b) => b.type === "tfra-box");
   return tfraBoxes;
 };
-var chunk_n77gaszd_getTfraBoxes = (structure) => {
+var chunk_gqesq3a3_getTfraBoxes = (structure) => {
   const mfraBox = structure.find((b) => b.type === "regular-box" && b.boxType === "mfra");
   if (!mfraBox) {
     return [];
   }
-  return chunk_n77gaszd_getTfraBoxesFromMfraBoxChildren(mfraBox.children);
+  return chunk_gqesq3a3_getTfraBoxesFromMfraBoxChildren(mfraBox.children);
 };
-var chunk_n77gaszd_getTrakBoxByTrackId = (moovBox, trackId) => {
-  const trakBoxes = chunk_n77gaszd_getTraks(moovBox);
+var chunk_gqesq3a3_getTrakBoxByTrackId = (moovBox, trackId) => {
+  const trakBoxes = chunk_gqesq3a3_getTraks(moovBox);
   return trakBoxes.find((t) => {
-    const tkhd = chunk_n77gaszd_getTkhdBox(t);
+    const tkhd = chunk_gqesq3a3_getTkhdBox(t);
     if (!tkhd) {
       return false;
     }
     return tkhd.trackId === trackId;
   }) ?? null;
 };
-var chunk_n77gaszd_getElstBox = (trakBox) => {
+var chunk_gqesq3a3_getElstBox = (trakBox) => {
   const edtsBox = trakBox.children.find((s) => s.type === "regular-box" && s.boxType === "edts");
   if (!edtsBox || edtsBox.type !== "regular-box") {
     return null;
@@ -56420,11 +56440,11 @@ var chunk_n77gaszd_getElstBox = (trakBox) => {
   const elstBox = edtsBox.children.find((s) => s.type === "elst-box");
   return elstBox;
 };
-var chunk_n77gaszd_findTrackStartTimeInSeconds = ({
+var chunk_gqesq3a3_findTrackStartTimeInSeconds = ({
   movieTimeScale,
   trakBox
 }) => {
-  const elstBox = chunk_n77gaszd_getElstBox(trakBox);
+  const elstBox = chunk_gqesq3a3_getElstBox(trakBox);
   if (!elstBox) {
     return 0;
   }
@@ -56439,40 +56459,40 @@ var chunk_n77gaszd_findTrackStartTimeInSeconds = ({
   }
   return dwellTime / movieTimeScale;
 };
-var chunk_n77gaszd_WEBCODECS_TIMESCALE = 1e6;
-var chunk_n77gaszd_MEDIA_PARSER_RIFF_TIMESCALE = 1e6;
-var chunk_n77gaszd_isRiffAvi2 = (structure) => {
+var chunk_gqesq3a3_WEBCODECS_TIMESCALE = 1e6;
+var chunk_gqesq3a3_MEDIA_PARSER_RIFF_TIMESCALE = 1e6;
+var chunk_gqesq3a3_isRiffAvi2 = (structure) => {
   return structure.boxes.some((box2) => box2.type === "riff-header" && box2.fileType === "AVI");
 };
-var chunk_n77gaszd_getHdlrBox = (structure) => {
+var chunk_gqesq3a3_getHdlrBox = (structure) => {
   return structure.boxes.find((box2) => box2.type === "list-box" && box2.listType === "hdrl");
 };
-var chunk_n77gaszd_getAvihBox = (structure) => {
-  const hdlrBox = chunk_n77gaszd_getHdlrBox(structure);
+var chunk_gqesq3a3_getAvihBox = (structure) => {
+  const hdlrBox = chunk_gqesq3a3_getHdlrBox(structure);
   if (!hdlrBox) {
     return null;
   }
   return hdlrBox.children.find((box2) => box2.type === "avih-box");
 };
-var chunk_n77gaszd_getStrlBoxes = (structure) => {
-  const hdlrBox = chunk_n77gaszd_getHdlrBox(structure);
+var chunk_gqesq3a3_getStrlBoxes = (structure) => {
+  const hdlrBox = chunk_gqesq3a3_getHdlrBox(structure);
   if (!hdlrBox) {
     return [];
   }
   return hdlrBox.children.filter((box2) => box2.type === "list-box" && box2.listType === "strl");
 };
-var chunk_n77gaszd_getStrhBox = (strlBoxChildren) => {
+var chunk_gqesq3a3_getStrhBox = (strlBoxChildren) => {
   return strlBoxChildren.find((box2) => box2.type === "strh-box");
 };
-var chunk_n77gaszd_TO_BE_OVERRIDDEN_LATER = "to-be-overriden-later";
-var chunk_n77gaszd_getNumberOfTracks = (structure) => {
-  const avihBox = chunk_n77gaszd_getAvihBox(structure);
+var chunk_gqesq3a3_TO_BE_OVERRIDDEN_LATER = "to-be-overriden-later";
+var chunk_gqesq3a3_getNumberOfTracks = (structure) => {
+  const avihBox = chunk_gqesq3a3_getAvihBox(structure);
   if (avihBox) {
     return avihBox.streams;
   }
   throw new Error("No avih box found");
 };
-var chunk_n77gaszd_makeAviAudioTrack = ({
+var chunk_gqesq3a3_makeAviAudioTrack = ({
   strf,
   index
 }) => {
@@ -56487,13 +56507,13 @@ var chunk_n77gaszd_makeAviAudioTrack = ({
     description: new Uint8Array([18, 16]),
     numberOfChannels: strf.numberOfChannels,
     sampleRate: strf.sampleRate,
-    originalTimescale: chunk_n77gaszd_MEDIA_PARSER_RIFF_TIMESCALE,
+    originalTimescale: chunk_gqesq3a3_MEDIA_PARSER_RIFF_TIMESCALE,
     trackId: index,
     startInSeconds: 0,
-    timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+    timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
   };
 };
-var chunk_n77gaszd_makeAviVideoTrack = ({
+var chunk_gqesq3a3_makeAviVideoTrack = ({
   strh,
   strf,
   index
@@ -56503,7 +56523,7 @@ var chunk_n77gaszd_makeAviVideoTrack = ({
   }
   return {
     codecData: null,
-    codec: chunk_n77gaszd_TO_BE_OVERRIDDEN_LATER,
+    codec: chunk_gqesq3a3_TO_BE_OVERRIDDEN_LATER,
     codecEnum: "h264",
     codedHeight: strf.height,
     codedWidth: strf.width,
@@ -56511,7 +56531,7 @@ var chunk_n77gaszd_makeAviVideoTrack = ({
     height: strf.height,
     type: "video",
     displayAspectHeight: strf.height,
-    originalTimescale: chunk_n77gaszd_MEDIA_PARSER_RIFF_TIMESCALE,
+    originalTimescale: chunk_gqesq3a3_MEDIA_PARSER_RIFF_TIMESCALE,
     description: undefined,
     m3uStreamFormat: null,
     trackId: index,
@@ -56535,23 +56555,23 @@ var chunk_n77gaszd_makeAviVideoTrack = ({
     },
     fps: strh.rate / strh.scale,
     startInSeconds: 0,
-    timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+    timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
   };
 };
-var chunk_n77gaszd_getTracksFromAvi = (structure, state) => {
+var chunk_gqesq3a3_getTracksFromAvi = (structure, state) => {
   const tracks2 = [];
-  const boxes = chunk_n77gaszd_getStrlBoxes(structure);
+  const boxes = chunk_gqesq3a3_getStrlBoxes(structure);
   let i = 0;
   for (const box2 of boxes) {
-    const strh = chunk_n77gaszd_getStrhBox(box2.children);
+    const strh = chunk_gqesq3a3_getStrhBox(box2.children);
     if (!strh) {
       continue;
     }
     const { strf } = strh;
     if (strf.type === "strf-box-video") {
-      tracks2.push(chunk_n77gaszd_addAvcProfileToTrack(chunk_n77gaszd_makeAviVideoTrack({ strh, strf, index: i }), state.riff.getAvcProfile()));
+      tracks2.push(chunk_gqesq3a3_addAvcProfileToTrack(chunk_gqesq3a3_makeAviVideoTrack({ strh, strf, index: i }), state.riff.getAvcProfile()));
     } else if (strh.fccType === "auds") {
-      tracks2.push(chunk_n77gaszd_makeAviAudioTrack({ strf, index: i }));
+      tracks2.push(chunk_gqesq3a3_makeAviAudioTrack({ strf, index: i }));
     } else {
       throw new Error(`Unsupported track type ${strh.fccType}`);
     }
@@ -56559,71 +56579,71 @@ var chunk_n77gaszd_getTracksFromAvi = (structure, state) => {
   }
   return tracks2;
 };
-var chunk_n77gaszd_hasAllTracksFromAvi = (state) => {
+var chunk_gqesq3a3_hasAllTracksFromAvi = (state) => {
   try {
     const structure = state.structure.getRiffStructure();
-    const numberOfTracks = chunk_n77gaszd_getNumberOfTracks(structure);
-    const tracks2 = chunk_n77gaszd_getTracksFromAvi(structure, state);
-    return tracks2.length === numberOfTracks && !tracks2.find((t) => t.type === "video" && t.codec === chunk_n77gaszd_TO_BE_OVERRIDDEN_LATER);
+    const numberOfTracks = chunk_gqesq3a3_getNumberOfTracks(structure);
+    const tracks2 = chunk_gqesq3a3_getTracksFromAvi(structure, state);
+    return tracks2.length === numberOfTracks && !tracks2.find((t) => t.type === "video" && t.codec === chunk_gqesq3a3_TO_BE_OVERRIDDEN_LATER);
   } catch {
     return false;
   }
 };
-var chunk_n77gaszd_findProgramAssociationTableOrThrow = (structure) => {
+var chunk_gqesq3a3_findProgramAssociationTableOrThrow = (structure) => {
   const box2 = structure.boxes.find((b) => b.type === "transport-stream-pat-box");
   if (!box2) {
     throw new Error("No PAT box found");
   }
   return box2;
 };
-var chunk_n77gaszd_findProgramMapOrNull = (structure) => {
+var chunk_gqesq3a3_findProgramMapOrNull = (structure) => {
   const box2 = structure.boxes.find((b) => b.type === "transport-stream-pmt-box");
   if (!box2) {
     return null;
   }
   return box2;
 };
-var chunk_n77gaszd_findProgramMapTableOrThrow = (structure) => {
-  const box2 = chunk_n77gaszd_findProgramMapOrNull(structure);
+var chunk_gqesq3a3_findProgramMapTableOrThrow = (structure) => {
+  const box2 = chunk_gqesq3a3_findProgramMapOrNull(structure);
   if (!box2) {
     throw new Error("No PMT box found");
   }
   return box2;
 };
-var chunk_n77gaszd_getProgramForId = (structure, packetIdentifier) => {
-  const box2 = chunk_n77gaszd_findProgramAssociationTableOrThrow(structure);
+var chunk_gqesq3a3_getProgramForId = (structure, packetIdentifier) => {
+  const box2 = chunk_gqesq3a3_findProgramAssociationTableOrThrow(structure);
   const entry = box2.pat.find((e) => e.programMapIdentifier === packetIdentifier);
   return entry ?? null;
 };
-var chunk_n77gaszd_getStreamForId = (structure, packetIdentifier) => {
-  const box2 = chunk_n77gaszd_findProgramMapTableOrThrow(structure);
+var chunk_gqesq3a3_getStreamForId = (structure, packetIdentifier) => {
+  const box2 = chunk_gqesq3a3_findProgramMapTableOrThrow(structure);
   const entry = box2.streams.find((e) => e.pid === packetIdentifier);
   return entry ?? null;
 };
-var chunk_n77gaszd_filterStreamsBySupportedTypes = (streams) => {
+var chunk_gqesq3a3_filterStreamsBySupportedTypes = (streams) => {
   return streams.filter((stream) => stream.streamType === 27 || stream.streamType === 15);
 };
-var chunk_n77gaszd_getTracksFromTransportStream = (parserState) => {
+var chunk_gqesq3a3_getTracksFromTransportStream = (parserState) => {
   const structure = parserState.structure.getTsStructure();
-  const programMapTable = chunk_n77gaszd_findProgramMapTableOrThrow(structure);
+  const programMapTable = chunk_gqesq3a3_findProgramMapTableOrThrow(structure);
   const parserTracks = parserState.callbacks.tracks.getTracks();
-  const mapped = chunk_n77gaszd_filterStreamsBySupportedTypes(programMapTable.streams).map((stream) => {
+  const mapped = chunk_gqesq3a3_filterStreamsBySupportedTypes(programMapTable.streams).map((stream) => {
     return parserTracks.find((track) => track.trackId === stream.pid);
-  }).filter(chunk_n77gaszd_truthy);
-  if (mapped.length !== chunk_n77gaszd_filterStreamsBySupportedTypes(programMapTable.streams).length) {
+  }).filter(chunk_gqesq3a3_truthy);
+  if (mapped.length !== chunk_gqesq3a3_filterStreamsBySupportedTypes(programMapTable.streams).length) {
     throw new Error("Not all tracks found");
   }
   return mapped;
 };
-var chunk_n77gaszd_hasAllTracksFromTransportStream = (parserState) => {
+var chunk_gqesq3a3_hasAllTracksFromTransportStream = (parserState) => {
   try {
-    chunk_n77gaszd_getTracksFromTransportStream(parserState);
+    chunk_gqesq3a3_getTracksFromTransportStream(parserState);
     return true;
   } catch {
     return false;
   }
 };
-var chunk_n77gaszd_getHvc1CodecString = (data) => {
+var chunk_gqesq3a3_getHvc1CodecString = (data) => {
   const configurationVersion = data.getUint8();
   if (configurationVersion !== 1) {
     throw new Error(`Unsupported HVCC version ${configurationVersion}`);
@@ -56655,7 +56675,7 @@ var chunk_n77gaszd_getHvc1CodecString = (data) => {
   }
   return `${profileSpaceChar}${generalProfileIdc.toString(16)}.${profileId.toString(16)}.${generalTierChar}${generalLevelIdc}${generalConstraintString ? "." : ""}${generalConstraintString}`;
 };
-var chunk_n77gaszd_mediaParserAdvancedColorToWebCodecsColor = (color2) => {
+var chunk_gqesq3a3_mediaParserAdvancedColorToWebCodecsColor = (color2) => {
   return {
     transfer: color2.transfer,
     matrix: color2.matrix,
@@ -56663,8 +56683,8 @@ var chunk_n77gaszd_mediaParserAdvancedColorToWebCodecsColor = (color2) => {
     fullRange: color2.fullRange
   };
 };
-var chunk_n77gaszd_parseAv1PrivateData = (data, colrAtom) => {
-  const iterator = chunk_n77gaszd_getArrayBufferIterator({
+var chunk_gqesq3a3_parseAv1PrivateData = (data, colrAtom) => {
+  const iterator = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: data,
     maxBytes: data.byteLength,
     logLevel: "error"
@@ -56727,7 +56747,7 @@ var chunk_n77gaszd_parseAv1PrivateData = (data, colrAtom) => {
   iterator.destroy();
   return str;
 };
-var chunk_n77gaszd_getMatrixCoefficientsFromIndex = (index) => {
+var chunk_gqesq3a3_getMatrixCoefficientsFromIndex = (index) => {
   if (index === 0) {
     return "rgb";
   }
@@ -56745,7 +56765,7 @@ var chunk_n77gaszd_getMatrixCoefficientsFromIndex = (index) => {
   }
   return null;
 };
-var chunk_n77gaszd_getTransferCharacteristicsFromIndex = (index) => {
+var chunk_gqesq3a3_getTransferCharacteristicsFromIndex = (index) => {
   if (index === 1) {
     return "bt709";
   }
@@ -56766,7 +56786,7 @@ var chunk_n77gaszd_getTransferCharacteristicsFromIndex = (index) => {
   }
   return null;
 };
-var chunk_n77gaszd_getPrimariesFromIndex = (index) => {
+var chunk_gqesq3a3_getPrimariesFromIndex = (index) => {
   if (index === 1) {
     return "bt709";
   }
@@ -56784,14 +56804,14 @@ var chunk_n77gaszd_getPrimariesFromIndex = (index) => {
   }
   return null;
 };
-var chunk_n77gaszd_getMainSegment = (segments) => {
+var chunk_gqesq3a3_getMainSegment = (segments) => {
   return segments.find((s) => s.type === "Segment") ?? null;
 };
-var chunk_n77gaszd_getTrackCodec = (track) => {
+var chunk_gqesq3a3_getTrackCodec = (track) => {
   const child = track.value.find((b) => b.type === "CodecID");
   return child ?? null;
 };
-var chunk_n77gaszd_getTrackTimestampScale = (track) => {
+var chunk_gqesq3a3_getTrackTimestampScale = (track) => {
   const child = track.value.find((b) => b.type === "TrackTimestampScale");
   if (!child) {
     return null;
@@ -56801,22 +56821,22 @@ var chunk_n77gaszd_getTrackTimestampScale = (track) => {
   }
   return child.value;
 };
-var chunk_n77gaszd_getTrackId = (track) => {
+var chunk_gqesq3a3_getTrackId = (track) => {
   const trackId = track.value.find((b) => b.type === "TrackNumber");
   if (!trackId || trackId.type !== "TrackNumber") {
     throw new Error("Expected track number segment");
   }
   return trackId.value.value;
 };
-var chunk_n77gaszd_getCodecSegment = (track) => {
+var chunk_gqesq3a3_getCodecSegment = (track) => {
   const codec = track.value.find((b) => b.type === "CodecID");
   if (!codec || codec.type !== "CodecID") {
     return null;
   }
   return codec;
 };
-var chunk_n77gaszd_getColourSegment = (track) => {
-  const videoSegment2 = chunk_n77gaszd_getVideoSegment(track);
+var chunk_gqesq3a3_getColourSegment = (track) => {
+  const videoSegment2 = chunk_gqesq3a3_getVideoSegment(track);
   if (!videoSegment2) {
     return null;
   }
@@ -56826,7 +56846,7 @@ var chunk_n77gaszd_getColourSegment = (track) => {
   }
   return colour;
 };
-var chunk_n77gaszd_getTransferCharacteristicsSegment = (color2) => {
+var chunk_gqesq3a3_getTransferCharacteristicsSegment = (color2) => {
   if (!color2 || color2.type !== "Colour") {
     return null;
   }
@@ -56836,7 +56856,7 @@ var chunk_n77gaszd_getTransferCharacteristicsSegment = (color2) => {
   }
   return box2;
 };
-var chunk_n77gaszd_getMatrixCoefficientsSegment = (color2) => {
+var chunk_gqesq3a3_getMatrixCoefficientsSegment = (color2) => {
   if (!color2 || color2.type !== "Colour") {
     return null;
   }
@@ -56846,7 +56866,7 @@ var chunk_n77gaszd_getMatrixCoefficientsSegment = (color2) => {
   }
   return box2;
 };
-var chunk_n77gaszd_getPrimariesSegment = (color2) => {
+var chunk_gqesq3a3_getPrimariesSegment = (color2) => {
   if (!color2 || color2.type !== "Colour") {
     return null;
   }
@@ -56856,7 +56876,7 @@ var chunk_n77gaszd_getPrimariesSegment = (color2) => {
   }
   return box2;
 };
-var chunk_n77gaszd_getRangeSegment = (color2) => {
+var chunk_gqesq3a3_getRangeSegment = (color2) => {
   if (!color2 || color2.type !== "Colour") {
     return null;
   }
@@ -56866,8 +56886,8 @@ var chunk_n77gaszd_getRangeSegment = (color2) => {
   }
   return box2;
 };
-var chunk_n77gaszd_getDisplayHeightSegment = (track) => {
-  const videoSegment2 = chunk_n77gaszd_getVideoSegment(track);
+var chunk_gqesq3a3_getDisplayHeightSegment = (track) => {
+  const videoSegment2 = chunk_gqesq3a3_getVideoSegment(track);
   if (!videoSegment2) {
     return null;
   }
@@ -56877,15 +56897,15 @@ var chunk_n77gaszd_getDisplayHeightSegment = (track) => {
   }
   return displayHeight2;
 };
-var chunk_n77gaszd_getTrackTypeSegment = (track) => {
+var chunk_gqesq3a3_getTrackTypeSegment = (track) => {
   const trackType2 = track.value.find((b) => b.type === "TrackType");
   if (!trackType2 || trackType2.type !== "TrackType") {
     return null;
   }
   return trackType2;
 };
-var chunk_n77gaszd_getWidthSegment = (track) => {
-  const videoSegment2 = chunk_n77gaszd_getVideoSegment(track);
+var chunk_gqesq3a3_getWidthSegment = (track) => {
+  const videoSegment2 = chunk_gqesq3a3_getVideoSegment(track);
   if (!videoSegment2) {
     return null;
   }
@@ -56895,8 +56915,8 @@ var chunk_n77gaszd_getWidthSegment = (track) => {
   }
   return width;
 };
-var chunk_n77gaszd_getHeightSegment = (track) => {
-  const videoSegment2 = chunk_n77gaszd_getVideoSegment(track);
+var chunk_gqesq3a3_getHeightSegment = (track) => {
+  const videoSegment2 = chunk_gqesq3a3_getVideoSegment(track);
   if (!videoSegment2) {
     return null;
   }
@@ -56906,8 +56926,8 @@ var chunk_n77gaszd_getHeightSegment = (track) => {
   }
   return height;
 };
-var chunk_n77gaszd_getDisplayWidthSegment = (track) => {
-  const videoSegment2 = chunk_n77gaszd_getVideoSegment(track);
+var chunk_gqesq3a3_getDisplayWidthSegment = (track) => {
+  const videoSegment2 = chunk_gqesq3a3_getVideoSegment(track);
   if (!videoSegment2) {
     return null;
   }
@@ -56917,15 +56937,15 @@ var chunk_n77gaszd_getDisplayWidthSegment = (track) => {
   }
   return displayWidth2;
 };
-var chunk_n77gaszd_getTracksSegment = (segment) => {
+var chunk_gqesq3a3_getTracksSegment = (segment) => {
   const tracksSegment = segment.value.find((b) => b.type === "Tracks");
   if (!tracksSegment) {
     return null;
   }
   return tracksSegment;
 };
-var chunk_n77gaszd_getTrackWithUid = (segment, trackUid) => {
-  const tracksSegment = chunk_n77gaszd_getTracksSegment(segment);
+var chunk_gqesq3a3_getTrackWithUid = (segment, trackUid) => {
+  const tracksSegment = chunk_gqesq3a3_getTracksSegment(segment);
   if (!tracksSegment) {
     return null;
   }
@@ -56938,22 +56958,22 @@ var chunk_n77gaszd_getTrackWithUid = (segment, trackUid) => {
   }
   return trackEntry2.value.find((t) => t.type === "TrackNumber")?.value.value ?? null;
 };
-var chunk_n77gaszd_getVideoSegment = (track) => {
+var chunk_gqesq3a3_getVideoSegment = (track) => {
   const videoSegment2 = track.value.find((b) => b.type === "Video");
   if (!videoSegment2 || videoSegment2.type !== "Video") {
     return null;
   }
   return videoSegment2 ?? null;
 };
-var chunk_n77gaszd_getAudioSegment = (track) => {
+var chunk_gqesq3a3_getAudioSegment = (track) => {
   const audioSegment2 = track.value.find((b) => b.type === "Audio");
   if (!audioSegment2 || audioSegment2.type !== "Audio") {
     return null;
   }
   return audioSegment2 ?? null;
 };
-var chunk_n77gaszd_getSampleRate = (track) => {
-  const audioSegment2 = chunk_n77gaszd_getAudioSegment(track);
+var chunk_gqesq3a3_getSampleRate = (track) => {
+  const audioSegment2 = chunk_gqesq3a3_getAudioSegment(track);
   if (!audioSegment2) {
     return null;
   }
@@ -56963,8 +56983,8 @@ var chunk_n77gaszd_getSampleRate = (track) => {
   }
   return samplingFrequency2.value.value;
 };
-var chunk_n77gaszd_getNumberOfChannels = (track) => {
-  const audioSegment2 = chunk_n77gaszd_getAudioSegment(track);
+var chunk_gqesq3a3_getNumberOfChannels = (track) => {
+  const audioSegment2 = chunk_gqesq3a3_getAudioSegment(track);
   if (!audioSegment2) {
     throw new Error("Could not find audio segment");
   }
@@ -56974,8 +56994,8 @@ var chunk_n77gaszd_getNumberOfChannels = (track) => {
   }
   return channels2.value.value;
 };
-var chunk_n77gaszd_getBitDepth = (track) => {
-  const audioSegment2 = chunk_n77gaszd_getAudioSegment(track);
+var chunk_gqesq3a3_getBitDepth = (track) => {
+  const audioSegment2 = chunk_gqesq3a3_getAudioSegment(track);
   if (!audioSegment2) {
     return null;
   }
@@ -56985,31 +57005,31 @@ var chunk_n77gaszd_getBitDepth = (track) => {
   }
   return bitDepth2.value.value;
 };
-var chunk_n77gaszd_getPrivateData = (track) => {
+var chunk_gqesq3a3_getPrivateData = (track) => {
   const privateData = track.value.find((b) => b.type === "CodecPrivate");
   if (!privateData || privateData.type !== "CodecPrivate") {
     return null;
   }
   return privateData.value;
 };
-var chunk_n77gaszd_parseColorSegment = (colourSegment) => {
-  const transferCharacteristics2 = chunk_n77gaszd_getTransferCharacteristicsSegment(colourSegment);
-  const matrixCoefficients2 = chunk_n77gaszd_getMatrixCoefficientsSegment(colourSegment);
-  const primaries2 = chunk_n77gaszd_getPrimariesSegment(colourSegment);
-  const range2 = chunk_n77gaszd_getRangeSegment(colourSegment);
+var chunk_gqesq3a3_parseColorSegment = (colourSegment) => {
+  const transferCharacteristics2 = chunk_gqesq3a3_getTransferCharacteristicsSegment(colourSegment);
+  const matrixCoefficients2 = chunk_gqesq3a3_getMatrixCoefficientsSegment(colourSegment);
+  const primaries2 = chunk_gqesq3a3_getPrimariesSegment(colourSegment);
+  const range2 = chunk_gqesq3a3_getRangeSegment(colourSegment);
   return {
-    transfer: transferCharacteristics2 ? chunk_n77gaszd_getTransferCharacteristicsFromIndex(transferCharacteristics2.value.value) : null,
-    matrix: matrixCoefficients2 ? chunk_n77gaszd_getMatrixCoefficientsFromIndex(matrixCoefficients2.value.value) : null,
-    primaries: primaries2 ? chunk_n77gaszd_getPrimariesFromIndex(primaries2.value.value) : null,
+    transfer: transferCharacteristics2 ? chunk_gqesq3a3_getTransferCharacteristicsFromIndex(transferCharacteristics2.value.value) : null,
+    matrix: matrixCoefficients2 ? chunk_gqesq3a3_getMatrixCoefficientsFromIndex(matrixCoefficients2.value.value) : null,
+    primaries: primaries2 ? chunk_gqesq3a3_getPrimariesFromIndex(primaries2.value.value) : null,
     fullRange: transferCharacteristics2?.value.value && matrixCoefficients2?.value.value ? null : range2 ? Boolean(range2?.value.value) : null
   };
 };
-var chunk_n77gaszd_getAudioDescription = (track) => {
-  const codec = chunk_n77gaszd_getCodecSegment(track);
+var chunk_gqesq3a3_getAudioDescription = (track) => {
+  const codec = chunk_gqesq3a3_getCodecSegment(track);
   if (!codec || codec.value !== "A_VORBIS") {
     return;
   }
-  const privateData = chunk_n77gaszd_getPrivateData(track);
+  const privateData = chunk_gqesq3a3_getPrivateData(track);
   if (!privateData) {
     return;
   }
@@ -57043,7 +57063,7 @@ var chunk_n77gaszd_getAudioDescription = (track) => {
     throw new Error("Error parsing vorbis codec private");
   }
   const vorbisBooks = privateData.slice(offset);
-  const bufferIterator = chunk_n77gaszd_getArrayBufferIterator({
+  const bufferIterator = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: vorbisInfo.slice(0),
     maxBytes: vorbisInfo.length,
     logLevel: "error"
@@ -57067,7 +57087,7 @@ var chunk_n77gaszd_getAudioDescription = (track) => {
   ]);
   return vorbisDescription;
 };
-var chunk_n77gaszd_trackTypeToString = (trackType2) => {
+var chunk_gqesq3a3_trackTypeToString = (trackType2) => {
   switch (trackType2) {
     case 1:
       return "video";
@@ -57087,21 +57107,21 @@ var chunk_n77gaszd_trackTypeToString = (trackType2) => {
       throw new Error(`Unknown track type: ${trackType2}`);
   }
 };
-var chunk_n77gaszd_NO_CODEC_PRIVATE_SHOULD_BE_DERIVED_FROM_SPS = "no-codec-private-should-be-derived-from-sps";
-var chunk_n77gaszd_getDescription = (track) => {
-  const codec = chunk_n77gaszd_getCodecSegment(track);
+var chunk_gqesq3a3_NO_CODEC_PRIVATE_SHOULD_BE_DERIVED_FROM_SPS = "no-codec-private-should-be-derived-from-sps";
+var chunk_gqesq3a3_getDescription = (track) => {
+  const codec = chunk_gqesq3a3_getCodecSegment(track);
   if (!codec) {
     return;
   }
   if (codec.value === "V_MPEG4/ISO/AVC" || codec.value === "V_MPEGH/ISO/HEVC") {
-    const priv = chunk_n77gaszd_getPrivateData(track);
+    const priv = chunk_gqesq3a3_getPrivateData(track);
     if (priv) {
       return priv;
     }
   }
   return;
 };
-var chunk_n77gaszd_getMatroskaVideoCodecEnum = ({
+var chunk_gqesq3a3_getMatroskaVideoCodecEnum = ({
   codecSegment: codec
 }) => {
   if (codec.value === "V_VP8") {
@@ -57121,7 +57141,7 @@ var chunk_n77gaszd_getMatroskaVideoCodecEnum = ({
   }
   throw new Error(`Unknown codec: ${codec.value}`);
 };
-var chunk_n77gaszd_getMatroskaVideoCodecString = ({
+var chunk_gqesq3a3_getMatroskaVideoCodecString = ({
   track,
   codecSegment: codec
 }) => {
@@ -57129,41 +57149,41 @@ var chunk_n77gaszd_getMatroskaVideoCodecString = ({
     return "vp8";
   }
   if (codec.value === "V_VP9") {
-    const priv = chunk_n77gaszd_getPrivateData(track);
+    const priv = chunk_gqesq3a3_getPrivateData(track);
     if (priv) {
       throw new Error("@remotion/media-parser cannot handle the private data for VP9. Do you have an example file you could send so we can implement it? https://remotion.dev/report");
     }
     return "vp09.00.10.08";
   }
   if (codec.value === "V_MPEG4/ISO/AVC") {
-    const priv = chunk_n77gaszd_getPrivateData(track);
+    const priv = chunk_gqesq3a3_getPrivateData(track);
     if (priv) {
       return `avc1.${priv[1].toString(16).padStart(2, "0")}${priv[2].toString(16).padStart(2, "0")}${priv[3].toString(16).padStart(2, "0")}`;
     }
-    return chunk_n77gaszd_NO_CODEC_PRIVATE_SHOULD_BE_DERIVED_FROM_SPS;
+    return chunk_gqesq3a3_NO_CODEC_PRIVATE_SHOULD_BE_DERIVED_FROM_SPS;
   }
   if (codec.value === "V_MPEGH/ISO/HEVC") {
-    const priv = chunk_n77gaszd_getPrivateData(track);
-    const iterator = chunk_n77gaszd_getArrayBufferIterator({
+    const priv = chunk_gqesq3a3_getPrivateData(track);
+    const iterator = chunk_gqesq3a3_getArrayBufferIterator({
       initialData: priv,
       maxBytes: priv.length,
       logLevel: "error"
     });
-    return "hvc1." + chunk_n77gaszd_getHvc1CodecString(iterator);
+    return "hvc1." + chunk_gqesq3a3_getHvc1CodecString(iterator);
   }
   if (codec.value === "V_AV1") {
-    const priv = chunk_n77gaszd_getPrivateData(track);
+    const priv = chunk_gqesq3a3_getPrivateData(track);
     if (!priv) {
       throw new Error("Expected private data in AV1 track");
     }
-    return chunk_n77gaszd_parseAv1PrivateData(priv, null);
+    return chunk_gqesq3a3_parseAv1PrivateData(priv, null);
   }
   throw new Error(`Unknown codec: ${codec.value}`);
 };
-var chunk_n77gaszd_getMatroskaAudioCodecEnum = ({
+var chunk_gqesq3a3_getMatroskaAudioCodecEnum = ({
   track
 }) => {
-  const codec = chunk_n77gaszd_getCodecSegment(track);
+  const codec = chunk_gqesq3a3_getCodecSegment(track);
   if (!codec) {
     throw new Error("Expected codec segment");
   }
@@ -57174,7 +57194,7 @@ var chunk_n77gaszd_getMatroskaAudioCodecEnum = ({
     return "vorbis";
   }
   if (codec.value === "A_PCM/INT/LIT") {
-    const bitDepth2 = chunk_n77gaszd_getBitDepth(track);
+    const bitDepth2 = chunk_gqesq3a3_getBitDepth(track);
     if (bitDepth2 === null) {
       throw new Error("Expected bit depth");
     }
@@ -57197,8 +57217,8 @@ var chunk_n77gaszd_getMatroskaAudioCodecEnum = ({
   }
   throw new Error(`Unknown codec: ${codec.value}`);
 };
-var chunk_n77gaszd_getMatroskaAudioCodecString = (track) => {
-  const codec = chunk_n77gaszd_getCodecSegment(track);
+var chunk_gqesq3a3_getMatroskaAudioCodecString = (track) => {
+  const codec = chunk_gqesq3a3_getCodecSegment(track);
   if (!codec) {
     throw new Error("Expected codec segment");
   }
@@ -57209,7 +57229,7 @@ var chunk_n77gaszd_getMatroskaAudioCodecString = (track) => {
     return "vorbis";
   }
   if (codec.value === "A_PCM/INT/LIT") {
-    const bitDepth2 = chunk_n77gaszd_getBitDepth(track);
+    const bitDepth2 = chunk_gqesq3a3_getBitDepth(track);
     if (bitDepth2 === null) {
       throw new Error("Expected bit depth");
     }
@@ -57219,8 +57239,8 @@ var chunk_n77gaszd_getMatroskaAudioCodecString = (track) => {
     return "pcm-s" + bitDepth2;
   }
   if (codec.value === "A_AAC") {
-    const priv = chunk_n77gaszd_getPrivateData(track);
-    const iterator = chunk_n77gaszd_getArrayBufferIterator({
+    const priv = chunk_gqesq3a3_getPrivateData(track);
+    const iterator = chunk_gqesq3a3_getArrayBufferIterator({
       initialData: priv,
       maxBytes: priv.length,
       logLevel: "error"
@@ -57236,40 +57256,40 @@ var chunk_n77gaszd_getMatroskaAudioCodecString = (track) => {
   }
   throw new Error(`Unknown codec: ${codec.value}`);
 };
-var chunk_n77gaszd_getTrack = ({
+var chunk_gqesq3a3_getTrack = ({
   timescale,
   track
 }) => {
-  const trackType2 = chunk_n77gaszd_getTrackTypeSegment(track);
+  const trackType2 = chunk_gqesq3a3_getTrackTypeSegment(track);
   if (!trackType2) {
     throw new Error("Expected track type segment");
   }
-  const trackId = chunk_n77gaszd_getTrackId(track);
-  if (chunk_n77gaszd_trackTypeToString(trackType2.value.value) === "video") {
-    const width = chunk_n77gaszd_getWidthSegment(track);
+  const trackId = chunk_gqesq3a3_getTrackId(track);
+  if (chunk_gqesq3a3_trackTypeToString(trackType2.value.value) === "video") {
+    const width = chunk_gqesq3a3_getWidthSegment(track);
     if (width === null) {
       throw new Error("Expected width segment");
     }
-    const height = chunk_n77gaszd_getHeightSegment(track);
+    const height = chunk_gqesq3a3_getHeightSegment(track);
     if (height === null) {
       throw new Error("Expected height segment");
     }
-    const displayHeight2 = chunk_n77gaszd_getDisplayHeightSegment(track);
-    const displayWidth2 = chunk_n77gaszd_getDisplayWidthSegment(track);
-    const codec = chunk_n77gaszd_getCodecSegment(track);
+    const displayHeight2 = chunk_gqesq3a3_getDisplayHeightSegment(track);
+    const displayWidth2 = chunk_gqesq3a3_getDisplayWidthSegment(track);
+    const codec = chunk_gqesq3a3_getCodecSegment(track);
     if (!codec) {
       return null;
     }
-    const codecPrivate2 = chunk_n77gaszd_getPrivateData(track);
-    const codecString = chunk_n77gaszd_getMatroskaVideoCodecString({
+    const codecPrivate2 = chunk_gqesq3a3_getPrivateData(track);
+    const codecString = chunk_gqesq3a3_getMatroskaVideoCodecString({
       track,
       codecSegment: codec
     });
-    const colour = chunk_n77gaszd_getColourSegment(track);
+    const colour = chunk_gqesq3a3_getColourSegment(track);
     if (!codecString) {
       return null;
     }
-    const codecEnum = chunk_n77gaszd_getMatroskaVideoCodecEnum({
+    const codecEnum = chunk_gqesq3a3_getMatroskaVideoCodecEnum({
       codecSegment: codec
     });
     const codecData = codecPrivate2 === null ? null : codecEnum === "h264" ? { type: "avc-sps-pps", data: codecPrivate2 } : codecEnum === "av1" ? {
@@ -57285,7 +57305,7 @@ var chunk_n77gaszd_getTrack = ({
       type: "unknown-data",
       data: codecPrivate2
     } : null;
-    const advancedColor = colour ? chunk_n77gaszd_parseColorSegment(colour) : {
+    const advancedColor = colour ? chunk_gqesq3a3_parseColorSegment(colour) : {
       fullRange: null,
       matrix: null,
       primaries: null,
@@ -57296,7 +57316,7 @@ var chunk_n77gaszd_getTrack = ({
       type: "video",
       trackId,
       codec: codecString,
-      description: chunk_n77gaszd_getDescription(track),
+      description: chunk_gqesq3a3_getDescription(track),
       height: displayHeight2 ? displayHeight2.value.value : height.value.value,
       width: displayWidth2 ? displayWidth2.value.value : width.value.value,
       sampleAspectRatio: {
@@ -57310,22 +57330,22 @@ var chunk_n77gaszd_getTrack = ({
       displayAspectWidth: displayWidth2 ? displayWidth2.value.value : width.value.value,
       rotation: 0,
       codecData,
-      colorSpace: chunk_n77gaszd_mediaParserAdvancedColorToWebCodecsColor(advancedColor),
+      colorSpace: chunk_gqesq3a3_mediaParserAdvancedColorToWebCodecsColor(advancedColor),
       advancedColor,
       codecEnum,
       fps: null,
       startInSeconds: 0,
-      timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+      timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
     };
   }
-  if (chunk_n77gaszd_trackTypeToString(trackType2.value.value) === "audio") {
-    const sampleRate = chunk_n77gaszd_getSampleRate(track);
-    const numberOfChannels = chunk_n77gaszd_getNumberOfChannels(track);
-    const codecPrivate2 = chunk_n77gaszd_getPrivateData(track);
+  if (chunk_gqesq3a3_trackTypeToString(trackType2.value.value) === "audio") {
+    const sampleRate = chunk_gqesq3a3_getSampleRate(track);
+    const numberOfChannels = chunk_gqesq3a3_getNumberOfChannels(track);
+    const codecPrivate2 = chunk_gqesq3a3_getPrivateData(track);
     if (sampleRate === null) {
       throw new Error("Could not find sample rate or number of channels");
     }
-    const codecString = chunk_n77gaszd_getMatroskaAudioCodecString(track);
+    const codecString = chunk_gqesq3a3_getMatroskaAudioCodecString(track);
     return {
       type: "audio",
       trackId,
@@ -57333,27 +57353,27 @@ var chunk_n77gaszd_getTrack = ({
       originalTimescale: timescale,
       numberOfChannels,
       sampleRate,
-      description: chunk_n77gaszd_getAudioDescription(track),
+      description: chunk_gqesq3a3_getAudioDescription(track),
       codecData: codecPrivate2 ? codecString === "opus" ? { type: "ogg-identification", data: codecPrivate2 } : { type: "unknown-data", data: codecPrivate2 } : null,
-      codecEnum: chunk_n77gaszd_getMatroskaAudioCodecEnum({
+      codecEnum: chunk_gqesq3a3_getMatroskaAudioCodecEnum({
         track
       }),
       startInSeconds: 0,
-      timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+      timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
     };
   }
   return null;
 };
-var chunk_n77gaszd_getTracksFromMatroska = ({
+var chunk_gqesq3a3_getTracksFromMatroska = ({
   structureState,
   webmState
 }) => {
   const structure = structureState.getMatroskaStructure();
-  const mainSegment = chunk_n77gaszd_getMainSegment(structure.boxes);
+  const mainSegment = chunk_gqesq3a3_getMainSegment(structure.boxes);
   if (!mainSegment) {
     throw new Error("No main segment");
   }
-  const tracksSegment = chunk_n77gaszd_getTracksSegment(mainSegment);
+  const tracksSegment = chunk_gqesq3a3_getTracksSegment(mainSegment);
   if (!tracksSegment) {
     throw new Error("No tracks segment");
   }
@@ -57366,19 +57386,19 @@ var chunk_n77gaszd_getTracksFromMatroska = ({
     if (trackEntrySegment.type !== "TrackEntry") {
       throw new Error("Expected track entry segment");
     }
-    const track = chunk_n77gaszd_getTrack({
+    const track = chunk_gqesq3a3_getTrack({
       track: trackEntrySegment,
       timescale: webmState.getTimescale()
     });
     if (!track) {
       continue;
     }
-    if (track.codec === chunk_n77gaszd_NO_CODEC_PRIVATE_SHOULD_BE_DERIVED_FROM_SPS) {
+    if (track.codec === chunk_gqesq3a3_NO_CODEC_PRIVATE_SHOULD_BE_DERIVED_FROM_SPS) {
       const avc = webmState.getAvcProfileForTrackNumber(track.trackId);
       if (avc) {
         resolvedTracks.push({
           ...track,
-          codec: chunk_n77gaszd_getCodecStringFromSpsAndPps(avc)
+          codec: chunk_gqesq3a3_getCodecStringFromSpsAndPps(avc)
         });
       } else {
         missingInfo.push(track);
@@ -57389,44 +57409,44 @@ var chunk_n77gaszd_getTracksFromMatroska = ({
   }
   return { missingInfo, resolved: resolvedTracks };
 };
-var chunk_n77gaszd_matroskaHasTracks = ({
+var chunk_gqesq3a3_matroskaHasTracks = ({
   structureState,
   webmState
 }) => {
   const structure = structureState.getMatroskaStructure();
-  const mainSegment = chunk_n77gaszd_getMainSegment(structure.boxes);
+  const mainSegment = chunk_gqesq3a3_getMainSegment(structure.boxes);
   if (!mainSegment) {
     return false;
   }
-  return chunk_n77gaszd_getTracksSegment(mainSegment) !== null && chunk_n77gaszd_getTracksFromMatroska({
+  return chunk_gqesq3a3_getTracksSegment(mainSegment) !== null && chunk_gqesq3a3_getTracksFromMatroska({
     structureState,
     webmState
   }).missingInfo.length === 0;
 };
-var chunk_n77gaszd_isoBaseMediaHasTracks = (state, mayUsePrecomputed) => {
-  return Boolean(chunk_n77gaszd_getMoovBoxFromState({
+var chunk_gqesq3a3_isoBaseMediaHasTracks = (state, mayUsePrecomputed) => {
+  return Boolean(chunk_gqesq3a3_getMoovBoxFromState({
     structureState: state.structure,
     isoState: state.iso,
     mp4HeaderSegment: state.m3uPlaylistContext?.mp4HeaderSegment ?? null,
     mayUsePrecomputed
   }));
 };
-var chunk_n77gaszd_getHasTracks = (state, mayUsePrecomputed) => {
+var chunk_gqesq3a3_getHasTracks = (state, mayUsePrecomputed) => {
   const structure = state.structure.getStructure();
   if (structure.type === "matroska") {
-    return chunk_n77gaszd_matroskaHasTracks({
+    return chunk_gqesq3a3_matroskaHasTracks({
       structureState: state.structure,
       webmState: state.webm
     });
   }
   if (structure.type === "iso-base-media") {
-    return chunk_n77gaszd_isoBaseMediaHasTracks(state, mayUsePrecomputed);
+    return chunk_gqesq3a3_isoBaseMediaHasTracks(state, mayUsePrecomputed);
   }
   if (structure.type === "riff") {
-    return chunk_n77gaszd_hasAllTracksFromAvi(state);
+    return chunk_gqesq3a3_hasAllTracksFromAvi(state);
   }
   if (structure.type === "transport-stream") {
-    return chunk_n77gaszd_hasAllTracksFromTransportStream(state);
+    return chunk_gqesq3a3_hasAllTracksFromTransportStream(state);
   }
   if (structure.type === "mp3") {
     return state.callbacks.tracks.getTracks().length > 0;
@@ -57445,26 +57465,26 @@ var chunk_n77gaszd_getHasTracks = (state, mayUsePrecomputed) => {
   }
   throw new Error("Unknown container " + structure);
 };
-var chunk_n77gaszd_getCategorizedTracksFromMatroska = (state) => {
-  const { resolved } = chunk_n77gaszd_getTracksFromMatroska({
+var chunk_gqesq3a3_getCategorizedTracksFromMatroska = (state) => {
+  const { resolved } = chunk_gqesq3a3_getTracksFromMatroska({
     structureState: state.structure,
     webmState: state.webm
   });
   return resolved;
 };
-var chunk_n77gaszd_getTracksFromMoovBox = (moovBox) => {
+var chunk_gqesq3a3_getTracksFromMoovBox = (moovBox) => {
   const mediaParserTracks = [];
-  const tracks2 = chunk_n77gaszd_getTraks(moovBox);
+  const tracks2 = chunk_gqesq3a3_getTraks(moovBox);
   for (const trakBox of tracks2) {
-    const mvhdBox = chunk_n77gaszd_getMvhdBox(moovBox);
+    const mvhdBox = chunk_gqesq3a3_getMvhdBox(moovBox);
     if (!mvhdBox) {
       throw new Error("Mvhd box is not found");
     }
-    const startTime = chunk_n77gaszd_findTrackStartTimeInSeconds({
+    const startTime = chunk_gqesq3a3_findTrackStartTimeInSeconds({
       movieTimeScale: mvhdBox.timeScale,
       trakBox
     });
-    const track = chunk_n77gaszd_makeBaseMediaTrack(trakBox, startTime);
+    const track = chunk_gqesq3a3_makeBaseMediaTrack(trakBox, startTime);
     if (!track) {
       continue;
     }
@@ -57472,13 +57492,13 @@ var chunk_n77gaszd_getTracksFromMoovBox = (moovBox) => {
   }
   return mediaParserTracks;
 };
-var chunk_n77gaszd_getTracksFromIsoBaseMedia = ({
+var chunk_gqesq3a3_getTracksFromIsoBaseMedia = ({
   mayUsePrecomputed,
   structure,
   isoState,
   m3uPlaylistContext
 }) => {
-  const moovBox = chunk_n77gaszd_getMoovBoxFromState({
+  const moovBox = chunk_gqesq3a3_getMoovBoxFromState({
     structureState: structure,
     isoState,
     mp4HeaderSegment: m3uPlaylistContext?.mp4HeaderSegment ?? null,
@@ -57487,22 +57507,22 @@ var chunk_n77gaszd_getTracksFromIsoBaseMedia = ({
   if (!moovBox) {
     return [];
   }
-  return chunk_n77gaszd_getTracksFromMoovBox(moovBox);
+  return chunk_gqesq3a3_getTracksFromMoovBox(moovBox);
 };
-var chunk_n77gaszd_defaultGetTracks = (parserState) => {
+var chunk_gqesq3a3_defaultGetTracks = (parserState) => {
   const tracks2 = parserState.callbacks.tracks.getTracks();
   if (tracks2.length === 0) {
     throw new Error("No tracks found");
   }
   return tracks2;
 };
-var chunk_n77gaszd_getTracks = (state, mayUsePrecomputed) => {
+var chunk_gqesq3a3_getTracks = (state, mayUsePrecomputed) => {
   const structure = state.structure.getStructure();
   if (structure.type === "matroska") {
-    return chunk_n77gaszd_getCategorizedTracksFromMatroska(state);
+    return chunk_gqesq3a3_getCategorizedTracksFromMatroska(state);
   }
   if (structure.type === "iso-base-media") {
-    return chunk_n77gaszd_getTracksFromIsoBaseMedia({
+    return chunk_gqesq3a3_getTracksFromIsoBaseMedia({
       isoState: state.iso,
       m3uPlaylistContext: state.m3uPlaylistContext,
       structure: state.structure,
@@ -57510,18 +57530,18 @@ var chunk_n77gaszd_getTracks = (state, mayUsePrecomputed) => {
     });
   }
   if (structure.type === "riff") {
-    return chunk_n77gaszd_getTracksFromAvi(structure, state);
+    return chunk_gqesq3a3_getTracksFromAvi(structure, state);
   }
   if (structure.type === "transport-stream") {
-    return chunk_n77gaszd_getTracksFromTransportStream(state);
+    return chunk_gqesq3a3_getTracksFromTransportStream(state);
   }
   if (structure.type === "mp3" || structure.type === "wav" || structure.type === "flac" || structure.type === "aac" || structure.type === "m3u") {
-    return chunk_n77gaszd_defaultGetTracks(state);
+    return chunk_gqesq3a3_defaultGetTracks(state);
   }
   throw new Error(`Unknown container${structure}`);
 };
-var chunk_n77gaszd_getAudioCodec = (parserState) => {
-  const tracks2 = chunk_n77gaszd_getTracks(parserState, true);
+var chunk_gqesq3a3_getAudioCodec = (parserState) => {
+  const tracks2 = chunk_gqesq3a3_getTracks(parserState, true);
   if (tracks2.length === 0) {
     throw new Error("No tracks yet");
   }
@@ -57534,10 +57554,10 @@ var chunk_n77gaszd_getAudioCodec = (parserState) => {
   }
   return null;
 };
-var chunk_n77gaszd_hasAudioCodec = (state) => {
-  return chunk_n77gaszd_getHasTracks(state, true);
+var chunk_gqesq3a3_hasAudioCodec = (state) => {
+  return chunk_gqesq3a3_getHasTracks(state, true);
 };
-var chunk_n77gaszd_getCodecSpecificatorFromEsdsBox = ({
+var chunk_gqesq3a3_getCodecSpecificatorFromEsdsBox = ({
   child
 }) => {
   const descriptor = child.descriptors.find((d) => d.type === "decoder-config-descriptor");
@@ -57566,8 +57586,8 @@ var chunk_n77gaszd_getCodecSpecificatorFromEsdsBox = ({
     description: audioSpecificConfig.asBytes
   };
 };
-var chunk_n77gaszd_getCodecPrivateFromTrak = (trakBox) => {
-  const stsdBox = chunk_n77gaszd_getStsdBox(trakBox);
+var chunk_gqesq3a3_getCodecPrivateFromTrak = (trakBox) => {
+  const stsdBox = chunk_gqesq3a3_getStsdBox(trakBox);
   if (!stsdBox) {
     return null;
   }
@@ -57589,10 +57609,10 @@ var chunk_n77gaszd_getCodecPrivateFromTrak = (trakBox) => {
   }
   return { type: "aac-config", data: mp4a.asBytes };
 };
-var chunk_n77gaszd_onSample = (sample, children) => {
+var chunk_gqesq3a3_onSample = (sample, children) => {
   const child = children.find((c) => c.type === "esds-box");
   if (child && child.type === "esds-box") {
-    const ret = chunk_n77gaszd_getCodecSpecificatorFromEsdsBox({ child });
+    const ret = chunk_gqesq3a3_getCodecSpecificatorFromEsdsBox({ child });
     return {
       format: sample.format,
       primarySpecificator: ret.primary,
@@ -57607,8 +57627,8 @@ var chunk_n77gaszd_onSample = (sample, children) => {
     description: undefined
   };
 };
-var chunk_n77gaszd_getNumberOfChannelsFromTrak = (trak) => {
-  const stsdBox = chunk_n77gaszd_getStsdBox(trak);
+var chunk_gqesq3a3_getNumberOfChannelsFromTrak = (trak) => {
+  const stsdBox = chunk_gqesq3a3_getStsdBox(trak);
   if (!stsdBox) {
     return null;
   }
@@ -57618,8 +57638,8 @@ var chunk_n77gaszd_getNumberOfChannelsFromTrak = (trak) => {
   }
   return sample.numberOfChannels;
 };
-var chunk_n77gaszd_getSampleRate2 = (trak) => {
-  const stsdBox = chunk_n77gaszd_getStsdBox(trak);
+var chunk_gqesq3a3_getSampleRate2 = (trak) => {
+  const stsdBox = chunk_gqesq3a3_getStsdBox(trak);
   if (!stsdBox) {
     return null;
   }
@@ -57629,8 +57649,8 @@ var chunk_n77gaszd_getSampleRate2 = (trak) => {
   }
   return sample.sampleRate;
 };
-var chunk_n77gaszd_getAudioCodecFromTrak = (trak) => {
-  const stsdBox = chunk_n77gaszd_getStsdBox(trak);
+var chunk_gqesq3a3_getAudioCodecFromTrak = (trak) => {
+  const stsdBox = chunk_gqesq3a3_getStsdBox(trak);
   if (!stsdBox) {
     return null;
   }
@@ -57640,28 +57660,28 @@ var chunk_n77gaszd_getAudioCodecFromTrak = (trak) => {
   }
   const waveBox = sample.children.find((b) => b.type === "regular-box" && b.boxType === "wave");
   if (waveBox && waveBox.type === "regular-box" && waveBox.boxType === "wave") {
-    const esdsSample = chunk_n77gaszd_onSample(sample, waveBox.children);
+    const esdsSample = chunk_gqesq3a3_onSample(sample, waveBox.children);
     if (esdsSample) {
       return esdsSample;
     }
   }
-  const ret = chunk_n77gaszd_onSample(sample, sample.children);
+  const ret = chunk_gqesq3a3_onSample(sample, sample.children);
   if (ret) {
     return ret;
   }
   return null;
 };
-var chunk_n77gaszd_isLpcmAudioCodec = (trak) => {
-  return chunk_n77gaszd_getAudioCodecFromTrak(trak)?.format === "lpcm";
+var chunk_gqesq3a3_isLpcmAudioCodec = (trak) => {
+  return chunk_gqesq3a3_getAudioCodecFromTrak(trak)?.format === "lpcm";
 };
-var chunk_n77gaszd_isIn24AudioCodec = (trak) => {
-  return chunk_n77gaszd_getAudioCodecFromTrak(trak)?.format === "in24";
+var chunk_gqesq3a3_isIn24AudioCodec = (trak) => {
+  return chunk_gqesq3a3_getAudioCodecFromTrak(trak)?.format === "in24";
 };
-var chunk_n77gaszd_isTwosAudioCodec = (trak) => {
-  return chunk_n77gaszd_getAudioCodecFromTrak(trak)?.format === "twos";
+var chunk_gqesq3a3_isTwosAudioCodec = (trak) => {
+  return chunk_gqesq3a3_getAudioCodecFromTrak(trak)?.format === "twos";
 };
-var chunk_n77gaszd_getAudioCodecStringFromTrak = (trak) => {
-  const codec = chunk_n77gaszd_getAudioCodecFromTrak(trak);
+var chunk_gqesq3a3_getAudioCodecStringFromTrak = (trak) => {
+  const codec = chunk_gqesq3a3_getAudioCodecFromTrak(trak);
   if (!codec) {
     throw new Error("Expected codec");
   }
@@ -57715,7 +57735,7 @@ var chunk_n77gaszd_getAudioCodecStringFromTrak = (trak) => {
     } : undefined
   };
 };
-var chunk_n77gaszd_getAudioCodecFromAudioCodecInfo = (codec) => {
+var chunk_gqesq3a3_getAudioCodecFromAudioCodecInfo = (codec) => {
   if (codec.format === "twos") {
     return "pcm-s16";
   }
@@ -57748,14 +57768,14 @@ var chunk_n77gaszd_getAudioCodecFromAudioCodecInfo = (codec) => {
   }
   throw new Error(`Unknown audio format: ${codec.format}`);
 };
-var chunk_n77gaszd_getAudioCodecFromTrack = (track) => {
-  const audioSample = chunk_n77gaszd_getAudioCodecFromTrak(track);
+var chunk_gqesq3a3_getAudioCodecFromTrack = (track) => {
+  const audioSample = chunk_gqesq3a3_getAudioCodecFromTrak(track);
   if (!audioSample) {
     throw new Error("Could not find audio sample");
   }
-  return chunk_n77gaszd_getAudioCodecFromAudioCodecInfo(audioSample);
+  return chunk_gqesq3a3_getAudioCodecFromAudioCodecInfo(audioSample);
 };
-var chunk_n77gaszd_isAudioStructure = (structure) => {
+var chunk_gqesq3a3_isAudioStructure = (structure) => {
   if (structure.type === "mp3") {
     return true;
   }
@@ -57785,7 +57805,7 @@ var chunk_n77gaszd_isAudioStructure = (structure) => {
   }
   throw new Error(`Unhandled structure type: ${structure}`);
 };
-var chunk_n77gaszd_calculateFps = ({
+var chunk_gqesq3a3_calculateFps = ({
   sttsBox,
   timeScale,
   durationInSamples
@@ -57801,8 +57821,8 @@ var chunk_n77gaszd_calculateFps = ({
   const fps = totalSamples / durationInSeconds;
   return fps;
 };
-var chunk_n77gaszd_trakBoxContainsAudio = (trakBox) => {
-  const stsd = chunk_n77gaszd_getStsdBox(trakBox);
+var chunk_gqesq3a3_trakBoxContainsAudio = (trakBox) => {
+  const stsd = chunk_gqesq3a3_getStsdBox(trakBox);
   if (!stsd) {
     return false;
   }
@@ -57812,8 +57832,8 @@ var chunk_n77gaszd_trakBoxContainsAudio = (trakBox) => {
   }
   return true;
 };
-var chunk_n77gaszd_trakBoxContainsVideo = (trakBox) => {
-  const stsd = chunk_n77gaszd_getStsdBox(trakBox);
+var chunk_gqesq3a3_trakBoxContainsVideo = (trakBox) => {
+  const stsd = chunk_gqesq3a3_getStsdBox(trakBox);
   if (!stsd) {
     return false;
   }
@@ -57823,30 +57843,30 @@ var chunk_n77gaszd_trakBoxContainsVideo = (trakBox) => {
   }
   return true;
 };
-var chunk_n77gaszd_getTimescaleAndDuration = (trakBox) => {
-  const mdhdBox = chunk_n77gaszd_getMdhdBox(trakBox);
+var chunk_gqesq3a3_getTimescaleAndDuration = (trakBox) => {
+  const mdhdBox = chunk_gqesq3a3_getMdhdBox(trakBox);
   if (mdhdBox) {
     return { timescale: mdhdBox.timescale, duration: mdhdBox.duration };
   }
   return null;
 };
-var chunk_n77gaszd_getFpsFromMp4TrakBox = (trakBox) => {
-  const timescaleAndDuration = chunk_n77gaszd_getTimescaleAndDuration(trakBox);
+var chunk_gqesq3a3_getFpsFromMp4TrakBox = (trakBox) => {
+  const timescaleAndDuration = chunk_gqesq3a3_getTimescaleAndDuration(trakBox);
   if (!timescaleAndDuration) {
     return null;
   }
-  const sttsBox = chunk_n77gaszd_getSttsBox(trakBox);
+  const sttsBox = chunk_gqesq3a3_getSttsBox(trakBox);
   if (!sttsBox) {
     return null;
   }
-  return chunk_n77gaszd_calculateFps({
+  return chunk_gqesq3a3_calculateFps({
     sttsBox,
     timeScale: timescaleAndDuration.timescale,
     durationInSamples: timescaleAndDuration.duration
   });
 };
-var chunk_n77gaszd_getFpsFromIsoMaseMedia = (state) => {
-  const moovBox = chunk_n77gaszd_getMoovBoxFromState({
+var chunk_gqesq3a3_getFpsFromIsoMaseMedia = (state) => {
+  const moovBox = chunk_gqesq3a3_getMoovBoxFromState({
     structureState: state.structure,
     isoState: state.iso,
     mp4HeaderSegment: state.m3uPlaylistContext?.mp4HeaderSegment ?? null,
@@ -57855,17 +57875,17 @@ var chunk_n77gaszd_getFpsFromIsoMaseMedia = (state) => {
   if (!moovBox) {
     return null;
   }
-  const trackBoxes = chunk_n77gaszd_getTraks(moovBox);
-  const trackBox = trackBoxes.find(chunk_n77gaszd_trakBoxContainsVideo);
+  const trackBoxes = chunk_gqesq3a3_getTraks(moovBox);
+  const trackBox = trackBoxes.find(chunk_gqesq3a3_trakBoxContainsVideo);
   if (!trackBox) {
     return null;
   }
-  return chunk_n77gaszd_getFpsFromMp4TrakBox(trackBox);
+  return chunk_gqesq3a3_getFpsFromMp4TrakBox(trackBox);
 };
-var chunk_n77gaszd_getFpsFromAvi = (structure) => {
-  const strl = chunk_n77gaszd_getStrlBoxes(structure);
+var chunk_gqesq3a3_getFpsFromAvi = (structure) => {
+  const strl = chunk_gqesq3a3_getStrlBoxes(structure);
   for (const s of strl) {
-    const strh = chunk_n77gaszd_getStrhBox(s.children);
+    const strh = chunk_gqesq3a3_getStrhBox(s.children);
     if (!strh) {
       throw new Error("No strh box");
     }
@@ -57876,13 +57896,13 @@ var chunk_n77gaszd_getFpsFromAvi = (structure) => {
   }
   return null;
 };
-var chunk_n77gaszd_getFps = (state) => {
+var chunk_gqesq3a3_getFps = (state) => {
   const segments = state.structure.getStructure();
   if (segments.type === "iso-base-media") {
-    return chunk_n77gaszd_getFpsFromIsoMaseMedia(state);
+    return chunk_gqesq3a3_getFpsFromIsoMaseMedia(state);
   }
   if (segments.type === "riff") {
-    return chunk_n77gaszd_getFpsFromAvi(segments);
+    return chunk_gqesq3a3_getFpsFromAvi(segments);
   }
   if (segments.type === "matroska") {
     return null;
@@ -57898,16 +57918,16 @@ var chunk_n77gaszd_getFps = (state) => {
   }
   throw new Error("Cannot get fps, not implemented: " + segments);
 };
-var chunk_n77gaszd_hasFpsSuitedForSlowFps = (state) => {
+var chunk_gqesq3a3_hasFpsSuitedForSlowFps = (state) => {
   try {
-    return chunk_n77gaszd_getFps(state) !== null;
+    return chunk_gqesq3a3_getFps(state) !== null;
   } catch {
     return false;
   }
 };
-var chunk_n77gaszd_hasFps = (state) => {
+var chunk_gqesq3a3_hasFps = (state) => {
   const structure = state.structure.getStructure();
-  if (chunk_n77gaszd_isAudioStructure(structure)) {
+  if (chunk_gqesq3a3_isAudioStructure(structure)) {
     return true;
   }
   if (structure.type === "matroska") {
@@ -57919,10 +57939,10 @@ var chunk_n77gaszd_hasFps = (state) => {
   if (structure.type === "m3u") {
     return true;
   }
-  return chunk_n77gaszd_hasFpsSuitedForSlowFps(state);
+  return chunk_gqesq3a3_hasFpsSuitedForSlowFps(state);
 };
-var chunk_n77gaszd_getStsdVideoConfig = (trakBox) => {
-  const stsdBox = chunk_n77gaszd_getStsdBox(trakBox);
+var chunk_gqesq3a3_getStsdVideoConfig = (trakBox) => {
+  const stsdBox = chunk_gqesq3a3_getStsdBox(trakBox);
   if (!stsdBox) {
     return null;
   }
@@ -57932,8 +57952,8 @@ var chunk_n77gaszd_getStsdVideoConfig = (trakBox) => {
   }
   return videoConfig;
 };
-var chunk_n77gaszd_getAvccBox = (trakBox) => {
-  const videoConfig = chunk_n77gaszd_getStsdVideoConfig(trakBox);
+var chunk_gqesq3a3_getAvccBox = (trakBox) => {
+  const videoConfig = chunk_gqesq3a3_getStsdVideoConfig(trakBox);
   if (!videoConfig) {
     return null;
   }
@@ -57943,8 +57963,8 @@ var chunk_n77gaszd_getAvccBox = (trakBox) => {
   }
   return avccBox;
 };
-var chunk_n77gaszd_getAv1CBox = (trakBox) => {
-  const videoConfig = chunk_n77gaszd_getStsdVideoConfig(trakBox);
+var chunk_gqesq3a3_getAv1CBox = (trakBox) => {
+  const videoConfig = chunk_gqesq3a3_getStsdVideoConfig(trakBox);
   if (!videoConfig) {
     return null;
   }
@@ -57954,8 +57974,8 @@ var chunk_n77gaszd_getAv1CBox = (trakBox) => {
   }
   return av1cBox;
 };
-var chunk_n77gaszd_getPaspBox = (trakBox) => {
-  const videoConfig = chunk_n77gaszd_getStsdVideoConfig(trakBox);
+var chunk_gqesq3a3_getPaspBox = (trakBox) => {
+  const videoConfig = chunk_gqesq3a3_getStsdVideoConfig(trakBox);
   if (!videoConfig) {
     return null;
   }
@@ -57965,8 +57985,8 @@ var chunk_n77gaszd_getPaspBox = (trakBox) => {
   }
   return paspBox;
 };
-var chunk_n77gaszd_getHvccBox = (trakBox) => {
-  const videoConfig = chunk_n77gaszd_getStsdVideoConfig(trakBox);
+var chunk_gqesq3a3_getHvccBox = (trakBox) => {
+  const videoConfig = chunk_gqesq3a3_getStsdVideoConfig(trakBox);
   if (!videoConfig) {
     return null;
   }
@@ -57976,8 +57996,8 @@ var chunk_n77gaszd_getHvccBox = (trakBox) => {
   }
   return hvccBox;
 };
-var chunk_n77gaszd_getSampleAspectRatio = (trakBox) => {
-  const paspBox = chunk_n77gaszd_getPaspBox(trakBox);
+var chunk_gqesq3a3_getSampleAspectRatio = (trakBox) => {
+  const paspBox = chunk_gqesq3a3_getPaspBox(trakBox);
   if (!paspBox) {
     return {
       numerator: 1,
@@ -57989,14 +58009,14 @@ var chunk_n77gaszd_getSampleAspectRatio = (trakBox) => {
     denominator: paspBox.vSpacing
   };
 };
-var chunk_n77gaszd_getColrBox = (videoSample) => {
+var chunk_gqesq3a3_getColrBox = (videoSample) => {
   const colrBox = videoSample.descriptors.find((c) => c.type === "colr-box");
   if (!colrBox || colrBox.type !== "colr-box") {
     return null;
   }
   return colrBox;
 };
-var chunk_n77gaszd_applyTkhdBox = (aspectRatioApplied, tkhdBox) => {
+var chunk_gqesq3a3_applyTkhdBox = (aspectRatioApplied, tkhdBox) => {
   if (tkhdBox === null || tkhdBox.rotation === 0) {
     return {
       displayAspectWidth: aspectRatioApplied.width,
@@ -58014,7 +58034,7 @@ var chunk_n77gaszd_applyTkhdBox = (aspectRatioApplied, tkhdBox) => {
     displayAspectHeight: aspectRatioApplied.height
   };
 };
-var chunk_n77gaszd_applyAspectRatios = ({
+var chunk_gqesq3a3_applyAspectRatios = ({
   dimensions,
   sampleAspectRatio,
   displayAspectRatio
@@ -58032,36 +58052,36 @@ var chunk_n77gaszd_applyAspectRatios = ({
     height: newHeight
   };
 };
-function chunk_n77gaszd_gcd(a, b) {
-  return b === 0 ? a : chunk_n77gaszd_gcd(b, a % b);
+function chunk_gqesq3a3_gcd(a, b) {
+  return b === 0 ? a : chunk_gqesq3a3_gcd(b, a % b);
 }
-function chunk_n77gaszd_reduceFraction(numerator, denominator) {
-  const greatestCommonDivisor = chunk_n77gaszd_gcd(Math.abs(numerator), Math.abs(denominator));
+function chunk_gqesq3a3_reduceFraction(numerator, denominator) {
+  const greatestCommonDivisor = chunk_gqesq3a3_gcd(Math.abs(numerator), Math.abs(denominator));
   return {
     numerator: numerator / greatestCommonDivisor,
     denominator: denominator / greatestCommonDivisor
   };
 }
-var chunk_n77gaszd_getDisplayAspectRatio = ({
+var chunk_gqesq3a3_getDisplayAspectRatio = ({
   sampleAspectRatio,
   nativeDimensions
 }) => {
   const num = Math.round(nativeDimensions.width * sampleAspectRatio.numerator);
   const den = Math.round(nativeDimensions.height * sampleAspectRatio.denominator);
-  return chunk_n77gaszd_reduceFraction(num, den);
+  return chunk_gqesq3a3_reduceFraction(num, den);
 };
-var chunk_n77gaszd_getVideoCodec = (state) => {
-  const track = chunk_n77gaszd_getTracks(state, true);
+var chunk_gqesq3a3_getVideoCodec = (state) => {
+  const track = chunk_gqesq3a3_getTracks(state, true);
   return track.find((t) => t.type === "video")?.codecEnum ?? null;
 };
-var chunk_n77gaszd_hasVideoCodec = (state) => {
-  return chunk_n77gaszd_getHasTracks(state, true);
+var chunk_gqesq3a3_hasVideoCodec = (state) => {
+  return chunk_gqesq3a3_getHasTracks(state, true);
 };
-var chunk_n77gaszd_getVideoPrivateData = (trakBox) => {
-  const videoSample = chunk_n77gaszd_getStsdVideoConfig(trakBox);
-  const avccBox = chunk_n77gaszd_getAvccBox(trakBox);
-  const hvccBox = chunk_n77gaszd_getHvccBox(trakBox);
-  const av1cBox = chunk_n77gaszd_getAv1CBox(trakBox);
+var chunk_gqesq3a3_getVideoPrivateData = (trakBox) => {
+  const videoSample = chunk_gqesq3a3_getStsdVideoConfig(trakBox);
+  const avccBox = chunk_gqesq3a3_getAvccBox(trakBox);
+  const hvccBox = chunk_gqesq3a3_getHvccBox(trakBox);
+  const av1cBox = chunk_gqesq3a3_getAv1CBox(trakBox);
   if (!videoSample) {
     return null;
   }
@@ -58076,12 +58096,12 @@ var chunk_n77gaszd_getVideoPrivateData = (trakBox) => {
   }
   return null;
 };
-var chunk_n77gaszd_getIsoBmColrConfig = (trakBox) => {
-  const videoSample = chunk_n77gaszd_getStsdVideoConfig(trakBox);
+var chunk_gqesq3a3_getIsoBmColrConfig = (trakBox) => {
+  const videoSample = chunk_gqesq3a3_getStsdVideoConfig(trakBox);
   if (!videoSample) {
     return null;
   }
-  const colrAtom = chunk_n77gaszd_getColrBox(videoSample);
+  const colrAtom = chunk_gqesq3a3_getColrBox(videoSample);
   if (!colrAtom) {
     return null;
   }
@@ -58090,16 +58110,16 @@ var chunk_n77gaszd_getIsoBmColrConfig = (trakBox) => {
   }
   return {
     fullRange: colrAtom.fullRangeFlag,
-    matrix: chunk_n77gaszd_getMatrixCoefficientsFromIndex(colrAtom.matrixIndex),
-    primaries: chunk_n77gaszd_getPrimariesFromIndex(colrAtom.primaries),
-    transfer: chunk_n77gaszd_getTransferCharacteristicsFromIndex(colrAtom.transfer)
+    matrix: chunk_gqesq3a3_getMatrixCoefficientsFromIndex(colrAtom.matrixIndex),
+    primaries: chunk_gqesq3a3_getPrimariesFromIndex(colrAtom.primaries),
+    transfer: chunk_gqesq3a3_getTransferCharacteristicsFromIndex(colrAtom.transfer)
   };
 };
-var chunk_n77gaszd_getVideoCodecString = (trakBox) => {
-  const videoSample = chunk_n77gaszd_getStsdVideoConfig(trakBox);
-  const avccBox = chunk_n77gaszd_getAvccBox(trakBox);
-  const hvccBox = chunk_n77gaszd_getHvccBox(trakBox);
-  const av1cBox = chunk_n77gaszd_getAv1CBox(trakBox);
+var chunk_gqesq3a3_getVideoCodecString = (trakBox) => {
+  const videoSample = chunk_gqesq3a3_getStsdVideoConfig(trakBox);
+  const avccBox = chunk_gqesq3a3_getAvccBox(trakBox);
+  const hvccBox = chunk_gqesq3a3_getHvccBox(trakBox);
+  const av1cBox = chunk_gqesq3a3_getAv1CBox(trakBox);
   if (!videoSample) {
     return null;
   }
@@ -58110,12 +58130,12 @@ var chunk_n77gaszd_getVideoCodecString = (trakBox) => {
     return `${videoSample.format}.${hvccBox.configurationString}`;
   }
   if (av1cBox) {
-    const colrAtom = chunk_n77gaszd_getColrBox(videoSample);
-    return chunk_n77gaszd_parseAv1PrivateData(av1cBox.privateData, colrAtom);
+    const colrAtom = chunk_gqesq3a3_getColrBox(videoSample);
+    return chunk_gqesq3a3_parseAv1PrivateData(av1cBox.privateData, colrAtom);
   }
   return videoSample.format;
 };
-var chunk_n77gaszd_getActualDecoderParameters = ({
+var chunk_gqesq3a3_getActualDecoderParameters = ({
   audioCodec,
   codecPrivate: codecPrivate2,
   numberOfChannels,
@@ -58134,8 +58154,8 @@ var chunk_n77gaszd_getActualDecoderParameters = ({
   if (codecPrivate2.type !== "aac-config") {
     throw new Error("Expected AAC codec private data");
   }
-  const parsed = chunk_n77gaszd_parseAacCodecPrivate(codecPrivate2.data);
-  const actual = chunk_n77gaszd_createAacCodecPrivate({
+  const parsed = chunk_gqesq3a3_parseAacCodecPrivate(codecPrivate2.data);
+  const actual = chunk_gqesq3a3_createAacCodecPrivate({
     ...parsed,
     codecPrivate: codecPrivate2.data
   });
@@ -58145,8 +58165,8 @@ var chunk_n77gaszd_getActualDecoderParameters = ({
     codecPrivate: { type: "aac-config", data: actual }
   };
 };
-var chunk_n77gaszd_getVideoCodecFromIsoTrak = (trakBox) => {
-  const stsdBox = chunk_n77gaszd_getStsdBox(trakBox);
+var chunk_gqesq3a3_getVideoCodecFromIsoTrak = (trakBox) => {
+  const stsdBox = chunk_gqesq3a3_getStsdBox(trakBox);
   if (stsdBox && stsdBox.type === "stsd-box") {
     const videoSample = stsdBox.samples.find((s) => s.type === "video");
     if (videoSample && videoSample.type === "video") {
@@ -58187,29 +58207,29 @@ var chunk_n77gaszd_getVideoCodecFromIsoTrak = (trakBox) => {
   }
   throw new Error("Could not find video codec");
 };
-var chunk_n77gaszd_makeBaseMediaTrack = (trakBox, startTimeInSeconds) => {
-  const tkhdBox = chunk_n77gaszd_getTkhdBox(trakBox);
-  const videoDescriptors = chunk_n77gaszd_getVideoDescriptors(trakBox);
-  const timescaleAndDuration = chunk_n77gaszd_getTimescaleAndDuration(trakBox);
+var chunk_gqesq3a3_makeBaseMediaTrack = (trakBox, startTimeInSeconds) => {
+  const tkhdBox = chunk_gqesq3a3_getTkhdBox(trakBox);
+  const videoDescriptors = chunk_gqesq3a3_getVideoDescriptors(trakBox);
+  const timescaleAndDuration = chunk_gqesq3a3_getTimescaleAndDuration(trakBox);
   if (!tkhdBox) {
     throw new Error("Expected tkhd box in trak box");
   }
   if (!timescaleAndDuration) {
     throw new Error("Expected timescale and duration in trak box");
   }
-  if (chunk_n77gaszd_trakBoxContainsAudio(trakBox)) {
-    const numberOfChannels = chunk_n77gaszd_getNumberOfChannelsFromTrak(trakBox);
+  if (chunk_gqesq3a3_trakBoxContainsAudio(trakBox)) {
+    const numberOfChannels = chunk_gqesq3a3_getNumberOfChannelsFromTrak(trakBox);
     if (numberOfChannels === null) {
       throw new Error("Could not find number of channels");
     }
-    const sampleRate = chunk_n77gaszd_getSampleRate2(trakBox);
+    const sampleRate = chunk_gqesq3a3_getSampleRate2(trakBox);
     if (sampleRate === null) {
       throw new Error("Could not find sample rate");
     }
-    const { codecString, description } = chunk_n77gaszd_getAudioCodecStringFromTrak(trakBox);
-    const codecPrivate2 = chunk_n77gaszd_getCodecPrivateFromTrak(trakBox) ?? description ?? null;
-    const codecEnum = chunk_n77gaszd_getAudioCodecFromTrack(trakBox);
-    const actual = chunk_n77gaszd_getActualDecoderParameters({
+    const { codecString, description } = chunk_gqesq3a3_getAudioCodecStringFromTrak(trakBox);
+    const codecPrivate2 = chunk_gqesq3a3_getCodecPrivateFromTrak(trakBox) ?? description ?? null;
+    const codecEnum = chunk_gqesq3a3_getAudioCodecFromTrack(trakBox);
+    const actual = chunk_gqesq3a3_getActualDecoderParameters({
       audioCodec: codecEnum,
       codecPrivate: codecPrivate2 ?? null,
       numberOfChannels,
@@ -58226,39 +58246,39 @@ var chunk_n77gaszd_makeBaseMediaTrack = (trakBox, startTimeInSeconds) => {
       codecData: actual.codecPrivate,
       codecEnum,
       startInSeconds: startTimeInSeconds,
-      timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+      timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
     };
   }
-  if (!chunk_n77gaszd_trakBoxContainsVideo(trakBox)) {
+  if (!chunk_gqesq3a3_trakBoxContainsVideo(trakBox)) {
     return {
       type: "other",
       trackId: tkhdBox.trackId,
       originalTimescale: timescaleAndDuration.timescale,
       trakBox,
       startInSeconds: startTimeInSeconds,
-      timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+      timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
     };
   }
-  const videoSample = chunk_n77gaszd_getStsdVideoConfig(trakBox);
+  const videoSample = chunk_gqesq3a3_getStsdVideoConfig(trakBox);
   if (!videoSample) {
     throw new Error("No video sample");
   }
-  const sampleAspectRatio = chunk_n77gaszd_getSampleAspectRatio(trakBox);
-  const aspectRatioApplied = chunk_n77gaszd_applyAspectRatios({
+  const sampleAspectRatio = chunk_gqesq3a3_getSampleAspectRatio(trakBox);
+  const aspectRatioApplied = chunk_gqesq3a3_applyAspectRatios({
     dimensions: videoSample,
     sampleAspectRatio,
-    displayAspectRatio: chunk_n77gaszd_getDisplayAspectRatio({
+    displayAspectRatio: chunk_gqesq3a3_getDisplayAspectRatio({
       sampleAspectRatio,
       nativeDimensions: videoSample
     })
   });
-  const { displayAspectHeight, displayAspectWidth, height, rotation, width } = chunk_n77gaszd_applyTkhdBox(aspectRatioApplied, tkhdBox);
-  const codec = chunk_n77gaszd_getVideoCodecString(trakBox);
+  const { displayAspectHeight, displayAspectWidth, height, rotation, width } = chunk_gqesq3a3_applyTkhdBox(aspectRatioApplied, tkhdBox);
+  const codec = chunk_gqesq3a3_getVideoCodecString(trakBox);
   if (!codec) {
     throw new Error("Could not find video codec");
   }
-  const privateData = chunk_n77gaszd_getVideoPrivateData(trakBox);
-  const advancedColor = chunk_n77gaszd_getIsoBmColrConfig(trakBox) ?? {
+  const privateData = chunk_gqesq3a3_getVideoPrivateData(trakBox);
+  const advancedColor = chunk_gqesq3a3_getIsoBmColrConfig(trakBox) ?? {
     fullRange: null,
     matrix: null,
     primaries: null,
@@ -58271,7 +58291,7 @@ var chunk_n77gaszd_makeBaseMediaTrack = (trakBox, startTimeInSeconds) => {
     description: videoDescriptors ?? undefined,
     originalTimescale: timescaleAndDuration.timescale,
     codec,
-    sampleAspectRatio: chunk_n77gaszd_getSampleAspectRatio(trakBox),
+    sampleAspectRatio: chunk_gqesq3a3_getSampleAspectRatio(trakBox),
     width,
     height,
     codedWidth: videoSample.width,
@@ -58280,16 +58300,16 @@ var chunk_n77gaszd_makeBaseMediaTrack = (trakBox, startTimeInSeconds) => {
     displayAspectHeight,
     rotation,
     codecData: privateData,
-    colorSpace: chunk_n77gaszd_mediaParserAdvancedColorToWebCodecsColor(advancedColor),
+    colorSpace: chunk_gqesq3a3_mediaParserAdvancedColorToWebCodecsColor(advancedColor),
     advancedColor,
-    codecEnum: chunk_n77gaszd_getVideoCodecFromIsoTrak(trakBox),
-    fps: chunk_n77gaszd_getFpsFromMp4TrakBox(trakBox),
+    codecEnum: chunk_gqesq3a3_getVideoCodecFromIsoTrak(trakBox),
+    fps: chunk_gqesq3a3_getFpsFromMp4TrakBox(trakBox),
     startInSeconds: startTimeInSeconds,
-    timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+    timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
   };
   return track;
 };
-var chunk_n77gaszd_parseMdhd = ({
+var chunk_gqesq3a3_parseMdhd = ({
   data,
   size: size4,
   fileOffset
@@ -58317,7 +58337,7 @@ var chunk_n77gaszd_parseMdhd = ({
     modificationTime
   };
 };
-var chunk_n77gaszd_parseHdlr = ({
+var chunk_gqesq3a3_parseHdlr = ({
   iterator,
   size: size4,
   offset
@@ -58343,7 +58363,7 @@ var chunk_n77gaszd_parseHdlr = ({
     componentName
   });
 };
-var chunk_n77gaszd_parseFromWellKnownType = (wellKnownType, iterator, size4) => {
+var chunk_gqesq3a3_parseFromWellKnownType = (wellKnownType, iterator, size4) => {
   if (wellKnownType === 1) {
     const value = iterator.getByteString(size4, false);
     return { type: "text", value };
@@ -58393,7 +58413,7 @@ var chunk_n77gaszd_parseFromWellKnownType = (wellKnownType, iterator, size4) => 
   iterator.discard(size4);
   return { type: "unknown", value: null };
 };
-var chunk_n77gaszd_parseIlstBox = ({
+var chunk_gqesq3a3_parseIlstBox = ({
   iterator,
   size: size4,
   offset
@@ -58423,7 +58443,7 @@ var chunk_n77gaszd_parseIlstBox = ({
     }
     const wellKnownType = iterator.getUint24();
     iterator.discard(4);
-    const value = chunk_n77gaszd_parseFromWellKnownType(wellKnownType, iterator, innerSize - 16);
+    const value = chunk_gqesq3a3_parseFromWellKnownType(wellKnownType, iterator, innerSize - 16);
     entries.push({ index, type, wellKnownType, value });
   }
   box2.discardRest();
@@ -58434,7 +58454,7 @@ var chunk_n77gaszd_parseIlstBox = ({
     entries
   };
 };
-var chunk_n77gaszd_readTrafNumber = (iterator, lengthSizeOfTrafNum) => {
+var chunk_gqesq3a3_readTrafNumber = (iterator, lengthSizeOfTrafNum) => {
   const uintTypeTrafNum = (lengthSizeOfTrafNum + 1) * 8;
   if (uintTypeTrafNum === 8) {
     return iterator.getUint8();
@@ -58450,7 +58470,7 @@ var chunk_n77gaszd_readTrafNumber = (iterator, lengthSizeOfTrafNum) => {
   }
   throw new Error("Invalid traf number size");
 };
-var chunk_n77gaszd_readTrunNumber = (iterator, lengthSizeOfTrunNum) => {
+var chunk_gqesq3a3_readTrunNumber = (iterator, lengthSizeOfTrunNum) => {
   const uintTypeTrunNum = (lengthSizeOfTrunNum + 1) * 8;
   if (uintTypeTrunNum === 8) {
     return iterator.getUint8();
@@ -58466,7 +58486,7 @@ var chunk_n77gaszd_readTrunNumber = (iterator, lengthSizeOfTrunNum) => {
   }
   throw new Error("Invalid trun number size");
 };
-var chunk_n77gaszd_readSampleNumber = (iterator, lengthSizeOfSampleNum) => {
+var chunk_gqesq3a3_readSampleNumber = (iterator, lengthSizeOfSampleNum) => {
   const uintTypeSampleNum = (lengthSizeOfSampleNum + 1) * 8;
   if (uintTypeSampleNum === 8) {
     return iterator.getUint8();
@@ -58482,19 +58502,19 @@ var chunk_n77gaszd_readSampleNumber = (iterator, lengthSizeOfSampleNum) => {
   }
   throw new Error("Invalid sample number size");
 };
-var chunk_n77gaszd_readTime = (iterator, version) => {
+var chunk_gqesq3a3_readTime = (iterator, version) => {
   if (version === 1) {
     return Number(iterator.getUint64());
   }
   return iterator.getUint32();
 };
-var chunk_n77gaszd_readMoofOffset = (iterator, version) => {
+var chunk_gqesq3a3_readMoofOffset = (iterator, version) => {
   if (version === 1) {
     return Number(iterator.getUint64());
   }
   return iterator.getUint32();
 };
-var chunk_n77gaszd_parseTfraBox = ({
+var chunk_gqesq3a3_parseTfraBox = ({
   iterator,
   size: size4,
   offset
@@ -58511,11 +58531,11 @@ var chunk_n77gaszd_parseTfraBox = ({
   const numberOfEntries = iterator.getUint32();
   const entries = [];
   for (let i = 0;i < numberOfEntries; i++) {
-    const time2 = chunk_n77gaszd_readTime(iterator, version);
-    const moofOffset = chunk_n77gaszd_readMoofOffset(iterator, version);
-    const trafNumber = chunk_n77gaszd_readTrafNumber(iterator, lengthSizeOfTrafNum);
-    const trunNumber = chunk_n77gaszd_readTrunNumber(iterator, lengthSizeOfTrunNum);
-    const sampleNumber = chunk_n77gaszd_readSampleNumber(iterator, lengthSizeOfSampleNum);
+    const time2 = chunk_gqesq3a3_readTime(iterator, version);
+    const moofOffset = chunk_gqesq3a3_readMoofOffset(iterator, version);
+    const trafNumber = chunk_gqesq3a3_readTrafNumber(iterator, lengthSizeOfTrafNum);
+    const trunNumber = chunk_gqesq3a3_readTrunNumber(iterator, lengthSizeOfTrunNum);
+    const sampleNumber = chunk_gqesq3a3_readSampleNumber(iterator, lengthSizeOfSampleNum);
     entries.push({
       time: time2,
       moofOffset,
@@ -58533,7 +58553,7 @@ var chunk_n77gaszd_parseTfraBox = ({
     trackId
   };
 };
-var chunk_n77gaszd_parseMoov = async ({
+var chunk_gqesq3a3_parseMoov = async ({
   offset,
   size: size4,
   onlyIfMoovAtomExpected,
@@ -58541,7 +58561,7 @@ var chunk_n77gaszd_parseMoov = async ({
   logLevel,
   contentLength
 }) => {
-  const children = await chunk_n77gaszd_getIsoBaseMediaChildren({
+  const children = await chunk_gqesq3a3_getIsoBaseMediaChildren({
     onlyIfMoovAtomExpected,
     size: size4 - 8,
     iterator,
@@ -58555,7 +58575,7 @@ var chunk_n77gaszd_parseMoov = async ({
     children
   };
 };
-var chunk_n77gaszd_parseTrex = ({
+var chunk_gqesq3a3_parseTrex = ({
   iterator,
   offset,
   size: size4
@@ -58581,7 +58601,7 @@ var chunk_n77gaszd_parseTrex = ({
     defaultSampleFlags
   };
 };
-var chunk_n77gaszd_parseAv1C = ({
+var chunk_gqesq3a3_parseAv1C = ({
   data,
   size: size4
 }) => {
@@ -58590,7 +58610,7 @@ var chunk_n77gaszd_parseAv1C = ({
     privateData: data.getSlice(size4 - 8)
   };
 };
-var chunk_n77gaszd_parseAvcc = ({
+var chunk_gqesq3a3_parseAvcc = ({
   data,
   size: size4
 }) => {
@@ -58610,8 +58630,8 @@ var chunk_n77gaszd_parseAvcc = ({
     configurationString: str
   };
 };
-var chunk_n77gaszd_parseIccProfile = (data) => {
-  const iterator = chunk_n77gaszd_getArrayBufferIterator({
+var chunk_gqesq3a3_parseIccProfile = (data) => {
+  const iterator = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: data,
     maxBytes: data.length,
     logLevel: "error"
@@ -58660,7 +58680,7 @@ var chunk_n77gaszd_parseIccProfile = (data) => {
   for (const entry of entries) {
     const found = data.slice(entry.offset, entry.offset + entry.size);
     if (entry.tag === "rXYZ" || entry.tag === "gXYZ" || entry.tag === "bXYZ" || entry.tag === "wtpt") {
-      const it = chunk_n77gaszd_getArrayBufferIterator({
+      const it = chunk_gqesq3a3_getArrayBufferIterator({
         initialData: found,
         maxBytes: found.length,
         logLevel: "error"
@@ -58721,7 +58741,7 @@ var chunk_n77gaszd_parseIccProfile = (data) => {
   iterator.destroy();
   return profile;
 };
-var chunk_n77gaszd_parseColorParameterBox = ({
+var chunk_gqesq3a3_parseColorParameterBox = ({
   iterator,
   size: size4
 }) => {
@@ -58761,12 +58781,12 @@ var chunk_n77gaszd_parseColorParameterBox = ({
       type: "colr-box",
       colorType: "icc-profile",
       profile,
-      parsed: chunk_n77gaszd_parseIccProfile(profile)
+      parsed: chunk_gqesq3a3_parseIccProfile(profile)
     };
   }
   throw new Error("Unexpected box type " + byteString);
 };
-var chunk_n77gaszd_parseCtts = ({
+var chunk_gqesq3a3_parseCtts = ({
   iterator,
   offset,
   size: size4
@@ -58796,14 +58816,14 @@ var chunk_n77gaszd_parseCtts = ({
     entries
   };
 };
-var chunk_n77gaszd_parseHvcc = ({
+var chunk_gqesq3a3_parseHvcc = ({
   data,
   size: size4,
   offset
 }) => {
   const privateData = data.getSlice(size4 - 8);
   data.counter.decrement(size4 - 8);
-  const constraintString = chunk_n77gaszd_getHvc1CodecString(data);
+  const constraintString = chunk_gqesq3a3_getHvc1CodecString(data);
   const remaining = size4 - (data.counter.getOffset() - offset);
   data.discard(remaining);
   return {
@@ -58812,7 +58832,7 @@ var chunk_n77gaszd_parseHvcc = ({
     configurationString: constraintString
   };
 };
-var chunk_n77gaszd_parseKeys = ({
+var chunk_gqesq3a3_parseKeys = ({
   iterator,
   offset,
   size: size4
@@ -58843,7 +58863,7 @@ var chunk_n77gaszd_parseKeys = ({
     entries
   };
 };
-var chunk_n77gaszd_parseMebx = async ({
+var chunk_gqesq3a3_parseMebx = async ({
   offset,
   size: size4,
   iterator,
@@ -58852,7 +58872,7 @@ var chunk_n77gaszd_parseMebx = async ({
 }) => {
   iterator.discard(6);
   const dataReferenceIndex = iterator.getUint16();
-  const children = await chunk_n77gaszd_getIsoBaseMediaChildren({
+  const children = await chunk_gqesq3a3_getIsoBaseMediaChildren({
     iterator,
     size: size4 - 8,
     logLevel,
@@ -58868,7 +58888,7 @@ var chunk_n77gaszd_parseMebx = async ({
     children
   };
 };
-var chunk_n77gaszd_parsePasp = ({
+var chunk_gqesq3a3_parsePasp = ({
   iterator,
   offset,
   size: size4
@@ -58885,7 +58905,7 @@ var chunk_n77gaszd_parsePasp = ({
     vSpacing
   };
 };
-var chunk_n77gaszd_parseStco = ({
+var chunk_gqesq3a3_parseStco = ({
   iterator,
   offset,
   size: size4,
@@ -58916,7 +58936,7 @@ var chunk_n77gaszd_parseStco = ({
     entryCount
   };
 };
-var chunk_n77gaszd_parseStsc = ({
+var chunk_gqesq3a3_parseStsc = ({
   iterator,
   offset,
   size: size4
@@ -58947,7 +58967,7 @@ var chunk_n77gaszd_parseStsc = ({
     entries
   };
 };
-var chunk_n77gaszd_parseStsd = async ({
+var chunk_gqesq3a3_parseStsd = async ({
   offset,
   size: size4,
   iterator,
@@ -58961,7 +58981,7 @@ var chunk_n77gaszd_parseStsd = async ({
   iterator.discard(3);
   const numberOfEntries = iterator.getUint32();
   const bytesRemainingInBox = size4 - (iterator.counter.getOffset() - offset);
-  const boxes = await chunk_n77gaszd_parseIsoFormatBoxes({
+  const boxes = await chunk_gqesq3a3_parseIsoFormatBoxes({
     maxBytes: bytesRemainingInBox,
     logLevel,
     iterator,
@@ -58978,7 +58998,7 @@ var chunk_n77gaszd_parseStsd = async ({
     samples: boxes
   };
 };
-var chunk_n77gaszd_parseStss = ({
+var chunk_gqesq3a3_parseStss = ({
   iterator,
   offset,
   boxSize
@@ -59006,7 +59026,7 @@ var chunk_n77gaszd_parseStss = ({
     offset
   };
 };
-var chunk_n77gaszd_parseStsz = ({
+var chunk_gqesq3a3_parseStsz = ({
   iterator,
   offset,
   size: size4
@@ -59050,7 +59070,7 @@ var chunk_n77gaszd_parseStsz = ({
     entries: samples
   };
 };
-var chunk_n77gaszd_parseStts = ({
+var chunk_gqesq3a3_parseStts = ({
   data,
   size: size4,
   fileOffset
@@ -59082,7 +59102,7 @@ var chunk_n77gaszd_parseStts = ({
     sampleDistribution: sampleDistributions
   };
 };
-var chunk_n77gaszd_parseTfdt = ({
+var chunk_gqesq3a3_parseTfdt = ({
   iterator,
   size: size4,
   offset
@@ -59101,7 +59121,7 @@ var chunk_n77gaszd_parseTfdt = ({
     offset
   };
 };
-var chunk_n77gaszd_getTfhd = ({
+var chunk_gqesq3a3_getTfhd = ({
   iterator,
   offset,
   size: size4
@@ -59134,7 +59154,7 @@ var chunk_n77gaszd_getTfhd = ({
     defaultSampleFlags
   };
 };
-function chunk_n77gaszd_getRotationAngleFromMatrix(matrix) {
+function chunk_gqesq3a3_getRotationAngleFromMatrix(matrix) {
   const [a, b, c, d] = matrix;
   if (a === 0 && b === 0 && c === 0 && d === 0) {
     return 0;
@@ -59146,7 +59166,7 @@ function chunk_n77gaszd_getRotationAngleFromMatrix(matrix) {
   const angleDegrees = angleRadians * (180 / Math.PI);
   return angleDegrees;
 }
-var chunk_n77gaszd_applyRotation = ({
+var chunk_gqesq3a3_applyRotation = ({
   matrix,
   width,
   height
@@ -59158,7 +59178,7 @@ var chunk_n77gaszd_applyRotation = ({
     height: Math.abs(newHeight)
   };
 };
-var chunk_n77gaszd_parseTkhd = ({
+var chunk_gqesq3a3_parseTkhd = ({
   iterator,
   offset,
   size: size4
@@ -59190,18 +59210,18 @@ var chunk_n77gaszd_parseTkhd = ({
   const rotationMatrix = [matrix[0], matrix[1], matrix[3], matrix[4]];
   const widthWithoutRotationApplied = iterator.getFixedPointUnsigned1616Number();
   const heightWithoutRotationApplied = iterator.getFixedPointSigned1616Number();
-  const { width, height } = chunk_n77gaszd_applyRotation({
+  const { width, height } = chunk_gqesq3a3_applyRotation({
     matrix: rotationMatrix,
     width: widthWithoutRotationApplied,
     height: heightWithoutRotationApplied
   });
-  const rotation = chunk_n77gaszd_getRotationAngleFromMatrix(rotationMatrix);
+  const rotation = chunk_gqesq3a3_getRotationAngleFromMatrix(rotationMatrix);
   return {
     offset,
     boxSize: size4,
     type: "tkhd-box",
-    creationTime: chunk_n77gaszd_toUnixTimestamp(Number(creationTime)),
-    modificationTime: chunk_n77gaszd_toUnixTimestamp(Number(modificationTime)),
+    creationTime: chunk_gqesq3a3_toUnixTimestamp(Number(creationTime)),
+    modificationTime: chunk_gqesq3a3_toUnixTimestamp(Number(modificationTime)),
     trackId,
     duration: Number(duration2),
     layer,
@@ -59216,14 +59236,14 @@ var chunk_n77gaszd_parseTkhd = ({
     unrotatedHeight: heightWithoutRotationApplied
   };
 };
-var chunk_n77gaszd_parseTrak = async ({
+var chunk_gqesq3a3_parseTrak = async ({
   size: size4,
   offsetAtStart,
   iterator,
   logLevel,
   contentLength
 }) => {
-  const children = await chunk_n77gaszd_getIsoBaseMediaChildren({
+  const children = await chunk_gqesq3a3_getIsoBaseMediaChildren({
     onlyIfMoovAtomExpected: null,
     size: size4 - 8,
     iterator,
@@ -59237,7 +59257,7 @@ var chunk_n77gaszd_parseTrak = async ({
     children
   };
 };
-var chunk_n77gaszd_parseTrun = ({
+var chunk_gqesq3a3_parseTrun = ({
   iterator,
   offset,
   size: size4
@@ -59277,7 +59297,7 @@ var chunk_n77gaszd_parseTrun = ({
     samples
   };
 };
-var chunk_n77gaszd_processBox = async ({
+var chunk_gqesq3a3_processBox = async ({
   iterator,
   logLevel,
   onlyIfMoovAtomExpected,
@@ -59322,19 +59342,19 @@ var chunk_n77gaszd_processBox = async ({
     returnToCheckpoint();
     return {
       type: "fetch-more-data",
-      bytesNeeded: chunk_n77gaszd_makeFetchMoreData(boxSize - bytesRemaining)
+      bytesNeeded: chunk_gqesq3a3_makeFetchMoreData(boxSize - bytesRemaining)
     };
   }
   if (boxType === "ftyp") {
     return {
       type: "box",
-      box: chunk_n77gaszd_parseFtyp({ iterator, size: boxSize, offset: fileOffset })
+      box: chunk_gqesq3a3_parseFtyp({ iterator, size: boxSize, offset: fileOffset })
     };
   }
   if (boxType === "elst") {
     return {
       type: "box",
-      box: chunk_n77gaszd_parseElst({
+      box: chunk_gqesq3a3_parseElst({
         iterator,
         size: boxSize,
         offset: fileOffset
@@ -59344,14 +59364,14 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "colr") {
     return {
       type: "box",
-      box: chunk_n77gaszd_parseColorParameterBox({
+      box: chunk_gqesq3a3_parseColorParameterBox({
         iterator,
         size: boxSize
       })
     };
   }
   if (boxType === "mvhd") {
-    const mvhdBox = chunk_n77gaszd_parseMvhd({
+    const mvhdBox = chunk_gqesq3a3_parseMvhd({
       iterator,
       offset: fileOffset,
       size: boxSize
@@ -59368,25 +59388,25 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "tkhd") {
     return {
       type: "box",
-      box: chunk_n77gaszd_parseTkhd({ iterator, offset: fileOffset, size: boxSize })
+      box: chunk_gqesq3a3_parseTkhd({ iterator, offset: fileOffset, size: boxSize })
     };
   }
   if (boxType === "trun") {
     return {
       type: "box",
-      box: chunk_n77gaszd_parseTrun({ iterator, offset: fileOffset, size: boxSize })
+      box: chunk_gqesq3a3_parseTrun({ iterator, offset: fileOffset, size: boxSize })
     };
   }
   if (boxType === "tfdt") {
     return {
       type: "box",
-      box: chunk_n77gaszd_parseTfdt({ iterator, size: boxSize, offset: fileOffset })
+      box: chunk_gqesq3a3_parseTfdt({ iterator, size: boxSize, offset: fileOffset })
     };
   }
   if (boxType === "stsd") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseStsd({
+      box: await chunk_gqesq3a3_parseStsd({
         offset: fileOffset,
         size: boxSize,
         iterator,
@@ -59398,7 +59418,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "stsz") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseStsz({
+      box: await chunk_gqesq3a3_parseStsz({
         iterator,
         offset: fileOffset,
         size: boxSize
@@ -59408,7 +59428,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "stco" || boxType === "co64") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseStco({
+      box: await chunk_gqesq3a3_parseStco({
         iterator,
         offset: fileOffset,
         size: boxSize,
@@ -59419,7 +59439,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "pasp") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parsePasp({
+      box: await chunk_gqesq3a3_parsePasp({
         iterator,
         offset: fileOffset,
         size: boxSize
@@ -59429,7 +59449,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "stss") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseStss({
+      box: await chunk_gqesq3a3_parseStss({
         iterator,
         offset: fileOffset,
         boxSize
@@ -59439,7 +59459,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "ctts") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseCtts({
+      box: await chunk_gqesq3a3_parseCtts({
         iterator,
         offset: fileOffset,
         size: boxSize
@@ -59449,7 +59469,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "stsc") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseStsc({
+      box: await chunk_gqesq3a3_parseStsc({
         iterator,
         offset: fileOffset,
         size: boxSize
@@ -59459,7 +59479,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "mebx") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseMebx({
+      box: await chunk_gqesq3a3_parseMebx({
         offset: fileOffset,
         size: boxSize,
         iterator,
@@ -59471,19 +59491,19 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "hdlr") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseHdlr({ iterator, size: boxSize, offset: fileOffset })
+      box: await chunk_gqesq3a3_parseHdlr({ iterator, size: boxSize, offset: fileOffset })
     };
   }
   if (boxType === "keys") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseKeys({ iterator, size: boxSize, offset: fileOffset })
+      box: await chunk_gqesq3a3_parseKeys({ iterator, size: boxSize, offset: fileOffset })
     };
   }
   if (boxType === "ilst") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseIlstBox({
+      box: await chunk_gqesq3a3_parseIlstBox({
         iterator,
         offset: fileOffset,
         size: boxSize
@@ -59493,7 +59513,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "tfra") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseTfraBox({
+      box: await chunk_gqesq3a3_parseTfraBox({
         iterator,
         offset: fileOffset,
         size: boxSize
@@ -59510,11 +59530,11 @@ var chunk_n77gaszd_processBox = async ({
       return { type: "nothing" };
     }
     if (isoState && isoState.moov.getMoovBoxAndPrecomputed() && !isoState.moov.getMoovBoxAndPrecomputed()?.precomputed) {
-      chunk_n77gaszd_Log.verbose(logLevel, "Moov box already parsed, skipping");
+      chunk_gqesq3a3_Log.verbose(logLevel, "Moov box already parsed, skipping");
       iterator.discard(boxSize - 8);
       return { type: "nothing" };
     }
-    const box2 = await chunk_n77gaszd_parseMoov({
+    const box2 = await chunk_gqesq3a3_parseMoov({
       offset: fileOffset,
       size: boxSize,
       onlyIfMoovAtomExpected,
@@ -59530,7 +59550,7 @@ var chunk_n77gaszd_processBox = async ({
       throw new Error("State is required");
     }
     const { tracks: tracks2, onAudioTrack, onVideoTrack } = onlyIfMoovAtomExpected;
-    const trakBox = await chunk_n77gaszd_parseTrak({
+    const trakBox = await chunk_gqesq3a3_parseTrak({
       size: boxSize,
       offsetAtStart: fileOffset,
       iterator,
@@ -59541,10 +59561,10 @@ var chunk_n77gaszd_processBox = async ({
     if (movieTimeScale === null) {
       throw new Error("Movie timescale is not set");
     }
-    const editList = chunk_n77gaszd_findTrackStartTimeInSeconds({ movieTimeScale, trakBox });
-    const transformedTrack = chunk_n77gaszd_makeBaseMediaTrack(trakBox, editList);
+    const editList = chunk_gqesq3a3_findTrackStartTimeInSeconds({ movieTimeScale, trakBox });
+    const transformedTrack = chunk_gqesq3a3_makeBaseMediaTrack(trakBox, editList);
     if (transformedTrack && transformedTrack.type === "video") {
-      await chunk_n77gaszd_registerVideoTrack({
+      await chunk_gqesq3a3_registerVideoTrack({
         track: transformedTrack,
         container: "mp4",
         logLevel,
@@ -59554,7 +59574,7 @@ var chunk_n77gaszd_processBox = async ({
       });
     }
     if (transformedTrack && transformedTrack.type === "audio") {
-      await chunk_n77gaszd_registerAudioTrack({
+      await chunk_gqesq3a3_registerAudioTrack({
         track: transformedTrack,
         container: "mp4",
         registerAudioSampleCallback: onlyIfMoovAtomExpected.registerAudioSampleCallback,
@@ -59568,7 +59588,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "stts") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseStts({
+      box: await chunk_gqesq3a3_parseStts({
         data: iterator,
         size: boxSize,
         fileOffset
@@ -59578,7 +59598,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "avcC") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseAvcc({
+      box: await chunk_gqesq3a3_parseAvcc({
         data: iterator,
         size: boxSize
       })
@@ -59587,7 +59607,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "av1C") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseAv1C({
+      box: await chunk_gqesq3a3_parseAv1C({
         data: iterator,
         size: boxSize
       })
@@ -59596,7 +59616,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "hvcC") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseHvcc({
+      box: await chunk_gqesq3a3_parseHvcc({
         data: iterator,
         size: boxSize,
         offset: fileOffset
@@ -59606,7 +59626,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "tfhd") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_getTfhd({
+      box: await chunk_gqesq3a3_getTfhd({
         iterator,
         offset: fileOffset,
         size: boxSize
@@ -59616,7 +59636,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "mdhd") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseMdhd({
+      box: await chunk_gqesq3a3_parseMdhd({
         data: iterator,
         size: boxSize,
         fileOffset
@@ -59626,7 +59646,7 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "esds") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseEsds({
+      box: await chunk_gqesq3a3_parseEsds({
         data: iterator,
         size: boxSize,
         fileOffset
@@ -59636,14 +59656,14 @@ var chunk_n77gaszd_processBox = async ({
   if (boxType === "trex") {
     return {
       type: "box",
-      box: await chunk_n77gaszd_parseTrex({ iterator, offset: fileOffset, size: boxSize })
+      box: await chunk_gqesq3a3_parseTrex({ iterator, offset: fileOffset, size: boxSize })
     };
   }
   if (boxType === "moof") {
     await onlyIfMoovAtomExpected?.isoState?.mfra.triggerLoad();
   }
   if (boxType === "mdia" || boxType === "minf" || boxType === "stbl" || boxType === "udta" || boxType === "moof" || boxType === "dims" || boxType === "meta" || boxType === "wave" || boxType === "traf" || boxType === "mfra" || boxType === "edts" || boxType === "mvex" || boxType === "stsb") {
-    const children = await chunk_n77gaszd_getIsoBaseMediaChildren({
+    const children = await chunk_gqesq3a3_getIsoBaseMediaChildren({
       iterator,
       size: boxSize - 8,
       logLevel,
@@ -59662,7 +59682,7 @@ var chunk_n77gaszd_processBox = async ({
     };
   }
   iterator.discard(boxSize - 8);
-  chunk_n77gaszd_Log.verbose(logLevel, "Unknown ISO Base Media Box:", boxType);
+  chunk_gqesq3a3_Log.verbose(logLevel, "Unknown ISO Base Media Box:", boxType);
   return {
     type: "box",
     box: {
@@ -59674,7 +59694,7 @@ var chunk_n77gaszd_processBox = async ({
     }
   };
 };
-var chunk_n77gaszd_getIsoBaseMediaChildren = async ({
+var chunk_gqesq3a3_getIsoBaseMediaChildren = async ({
   size: size4,
   iterator,
   logLevel,
@@ -59684,7 +59704,7 @@ var chunk_n77gaszd_getIsoBaseMediaChildren = async ({
   const boxes = [];
   const initial = iterator.counter.getOffset();
   while (iterator.counter.getOffset() < size4 + initial) {
-    const parsed = await chunk_n77gaszd_processBox({
+    const parsed = await chunk_gqesq3a3_processBox({
       iterator,
       logLevel,
       onlyIfMoovAtomExpected,
@@ -59701,7 +59721,7 @@ var chunk_n77gaszd_getIsoBaseMediaChildren = async ({
   }
   return boxes;
 };
-var chunk_n77gaszd_videoTags = [
+var chunk_gqesq3a3_videoTags = [
   "cvid",
   "jpeg",
   "smc ",
@@ -59733,7 +59753,7 @@ var chunk_n77gaszd_videoTags = [
   "ap4h",
   "av01"
 ];
-var chunk_n77gaszd_audioTags = [
+var chunk_gqesq3a3_audioTags = [
   0,
   "NONE",
   "raw ",
@@ -59761,7 +59781,7 @@ var chunk_n77gaszd_audioTags = [
   "ac-3",
   "Opus"
 ];
-var chunk_n77gaszd_processIsoFormatBox = async ({
+var chunk_gqesq3a3_processIsoFormatBox = async ({
   iterator,
   logLevel,
   contentLength
@@ -59773,8 +59793,8 @@ var chunk_n77gaszd_processIsoFormatBox = async ({
     throw new Error(`Expected box size of ${bytesRemaining}, got ${boxSize}`);
   }
   const boxFormat = iterator.getAtom();
-  const isVideo = chunk_n77gaszd_videoTags.includes(boxFormat);
-  const isAudio = chunk_n77gaszd_audioTags.includes(boxFormat) || chunk_n77gaszd_audioTags.includes(Number(boxFormat));
+  const isVideo = chunk_gqesq3a3_videoTags.includes(boxFormat);
+  const isAudio = chunk_gqesq3a3_audioTags.includes(boxFormat) || chunk_gqesq3a3_audioTags.includes(Number(boxFormat));
   iterator.discard(6);
   const dataReferenceIndex = iterator.getUint16();
   if (!isVideo && !isAudio) {
@@ -59800,7 +59820,7 @@ var chunk_n77gaszd_processIsoFormatBox = async ({
       const compressionId = iterator.getUint16();
       const packetSize = iterator.getUint16();
       const sampleRate = iterator.getFixedPointUnsigned1616Number();
-      const children = await chunk_n77gaszd_getIsoBaseMediaChildren({
+      const children = await chunk_gqesq3a3_getIsoBaseMediaChildren({
         iterator,
         logLevel,
         size: boxSize - (iterator.counter.getOffset() - fileOffset),
@@ -59840,7 +59860,7 @@ var chunk_n77gaszd_processIsoFormatBox = async ({
       const bytesPerPacket = iterator.getUint32();
       const bytesPerFrame = iterator.getUint32();
       const bytesPerSample = iterator.getUint32();
-      const children = await chunk_n77gaszd_getIsoBaseMediaChildren({
+      const children = await chunk_gqesq3a3_getIsoBaseMediaChildren({
         iterator,
         logLevel,
         size: boxSize - (iterator.counter.getOffset() - fileOffset),
@@ -59884,7 +59904,7 @@ var chunk_n77gaszd_processIsoFormatBox = async ({
       iterator.getUint32();
       const bytesPerFrame = iterator.getUint32();
       const samplesPerPacket = iterator.getUint32();
-      const children = await chunk_n77gaszd_getIsoBaseMediaChildren({
+      const children = await chunk_gqesq3a3_getIsoBaseMediaChildren({
         iterator,
         logLevel,
         size: boxSize - (iterator.counter.getOffset() - fileOffset),
@@ -59932,7 +59952,7 @@ var chunk_n77gaszd_processIsoFormatBox = async ({
     const depth = iterator.getUint16();
     const colorTableId = iterator.getInt16();
     const bytesRemainingInBox = boxSize - (iterator.counter.getOffset() - fileOffset);
-    const children = bytesRemainingInBox > 8 ? await chunk_n77gaszd_getIsoBaseMediaChildren({
+    const children = bytesRemainingInBox > 8 ? await chunk_gqesq3a3_getIsoBaseMediaChildren({
       onlyIfMoovAtomExpected: null,
       iterator,
       logLevel,
@@ -59966,7 +59986,7 @@ var chunk_n77gaszd_processIsoFormatBox = async ({
   }
   throw new Error(`Unknown sample format ${boxFormat}`);
 };
-var chunk_n77gaszd_parseIsoFormatBoxes = async ({
+var chunk_gqesq3a3_parseIsoFormatBoxes = async ({
   maxBytes,
   logLevel,
   iterator,
@@ -59975,7 +59995,7 @@ var chunk_n77gaszd_parseIsoFormatBoxes = async ({
   const samples = [];
   const initialOffset = iterator.counter.getOffset();
   while (iterator.bytesRemaining() > 0 && iterator.counter.getOffset() - initialOffset < maxBytes) {
-    const { sample } = await chunk_n77gaszd_processIsoFormatBox({
+    const { sample } = await chunk_gqesq3a3_processIsoFormatBox({
       iterator,
       logLevel,
       contentLength
@@ -59986,8 +60006,8 @@ var chunk_n77gaszd_parseIsoFormatBoxes = async ({
   }
   return samples;
 };
-var chunk_n77gaszd_Extended_SAR = 255;
-var chunk_n77gaszd_getPoc = (iterator, sps, avcState, isReferencePicture) => {
+var chunk_gqesq3a3_Extended_SAR = 255;
+var chunk_gqesq3a3_getPoc = (iterator, sps, avcState, isReferencePicture) => {
   const { pic_order_cnt_type, log2_max_pic_order_cnt_lsb_minus4 } = sps;
   if (pic_order_cnt_type !== 0) {
     return null;
@@ -60014,7 +60034,7 @@ var chunk_n77gaszd_getPoc = (iterator, sps, avcState, isReferencePicture) => {
   }
   return poc;
 };
-var chunk_n77gaszd_readVuiParameters = (iterator) => {
+var chunk_gqesq3a3_readVuiParameters = (iterator) => {
   let sar_width = null;
   let sar_height = null;
   let overscan_appropriate_flag = null;
@@ -60028,7 +60048,7 @@ var chunk_n77gaszd_readVuiParameters = (iterator) => {
   const aspect_ratio_info_present_flag = iterator.getBits(1);
   if (aspect_ratio_info_present_flag) {
     const aspect_ratio_idc = iterator.getBits(8);
-    if (aspect_ratio_idc === chunk_n77gaszd_Extended_SAR) {
+    if (aspect_ratio_idc === chunk_gqesq3a3_Extended_SAR) {
       sar_width = iterator.getBits(16);
       sar_height = iterator.getBits(16);
     }
@@ -60066,7 +60086,7 @@ var chunk_n77gaszd_readVuiParameters = (iterator) => {
     video_full_range_flag
   };
 };
-var chunk_n77gaszd_readSps = (iterator) => {
+var chunk_gqesq3a3_readSps = (iterator) => {
   const profile = iterator.getUint8();
   const compatibility = iterator.getUint8();
   const level = iterator.getUint8();
@@ -60135,7 +60155,7 @@ var chunk_n77gaszd_readSps = (iterator) => {
   }
   const vui_parameters_present_flag = iterator.getBits(1);
   if (vui_parameters_present_flag) {
-    vui_parameters = chunk_n77gaszd_readVuiParameters(iterator);
+    vui_parameters = chunk_gqesq3a3_readVuiParameters(iterator);
   }
   iterator.stopReadingBits();
   return {
@@ -60163,7 +60183,7 @@ var chunk_n77gaszd_readSps = (iterator) => {
     pic_order_cnt_type
   };
 };
-var chunk_n77gaszd_findEnd = (buffer) => {
+var chunk_gqesq3a3_findEnd = (buffer) => {
   let zeroesInARow = 0;
   for (let i = 0;i < buffer.length; i++) {
     const val = buffer[i];
@@ -60178,8 +60198,8 @@ var chunk_n77gaszd_findEnd = (buffer) => {
   }
   return null;
 };
-var chunk_n77gaszd_inspect = (buffer, avcState) => {
-  const iterator = chunk_n77gaszd_getArrayBufferIterator({
+var chunk_gqesq3a3_inspect = (buffer, avcState) => {
+  const iterator = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: buffer,
     maxBytes: buffer.byteLength,
     logLevel: "error"
@@ -60191,8 +60211,8 @@ var chunk_n77gaszd_inspect = (buffer, avcState) => {
   const type = iterator.getBits(5);
   if (type === 7) {
     iterator.stopReadingBits();
-    const end = chunk_n77gaszd_findEnd(buffer);
-    const data = chunk_n77gaszd_readSps(iterator);
+    const end = chunk_gqesq3a3_findEnd(buffer);
+    const data = chunk_gqesq3a3_readSps(iterator);
     const sps = buffer.slice(0, end === null ? Infinity : end);
     avcState.setSps(data);
     if (isReferencePicture) {
@@ -60221,7 +60241,7 @@ var chunk_n77gaszd_inspect = (buffer, avcState) => {
     const { pic_order_cnt_type } = sps;
     let poc = null;
     if (pic_order_cnt_type === 0) {
-      poc = chunk_n77gaszd_getPoc(iterator, sps, avcState, isReferencePicture);
+      poc = chunk_gqesq3a3_getPoc(iterator, sps, avcState, isReferencePicture);
     }
     iterator.stopReadingBits();
     return {
@@ -60231,7 +60251,7 @@ var chunk_n77gaszd_inspect = (buffer, avcState) => {
   }
   if (type === 8) {
     iterator.stopReadingBits();
-    const end = chunk_n77gaszd_findEnd(buffer);
+    const end = chunk_gqesq3a3_findEnd(buffer);
     const pps = buffer.slice(0, end === null ? Infinity : end);
     return {
       type: "avc-pps",
@@ -60252,7 +60272,7 @@ var chunk_n77gaszd_inspect = (buffer, avcState) => {
     const { pic_order_cnt_type } = sps;
     let poc = null;
     if (pic_order_cnt_type === 0) {
-      poc = chunk_n77gaszd_getPoc(iterator, sps, avcState, isReferencePicture);
+      poc = chunk_gqesq3a3_getPoc(iterator, sps, avcState, isReferencePicture);
     }
     iterator.stopReadingBits();
     return {
@@ -60264,7 +60284,7 @@ var chunk_n77gaszd_inspect = (buffer, avcState) => {
   iterator.destroy();
   return null;
 };
-var chunk_n77gaszd_parseAvc = (buffer, avcState) => {
+var chunk_gqesq3a3_parseAvc = (buffer, avcState) => {
   let zeroesInARow = 0;
   const infos = [];
   for (let i = 0;i < buffer.length; i++) {
@@ -60275,7 +60295,7 @@ var chunk_n77gaszd_parseAvc = (buffer, avcState) => {
     }
     if (zeroesInARow >= 2 && val === 1) {
       zeroesInARow = 0;
-      const info = chunk_n77gaszd_inspect(buffer.slice(i + 1, i + 100), avcState);
+      const info = chunk_gqesq3a3_inspect(buffer.slice(i + 1, i + 100), avcState);
       if (info) {
         infos.push(info);
         if (info.type === "keyframe" || info.type === "delta-frame") {
@@ -60289,8 +60309,8 @@ var chunk_n77gaszd_parseAvc = (buffer, avcState) => {
   }
   return infos;
 };
-var chunk_n77gaszd_parseBlockFlags = (iterator, type) => {
-  if (type === chunk_n77gaszd_matroskaElements.Block) {
+var chunk_gqesq3a3_parseBlockFlags = (iterator, type) => {
+  if (type === chunk_gqesq3a3_matroskaElements.Block) {
     iterator.startReadingBits();
     iterator.getBits(4);
     const invisible = Boolean(iterator.getBits(1));
@@ -60303,7 +60323,7 @@ var chunk_n77gaszd_parseBlockFlags = (iterator, type) => {
       keyframe: null
     };
   }
-  if (type === chunk_n77gaszd_matroskaElements.SimpleBlock) {
+  if (type === chunk_gqesq3a3_matroskaElements.SimpleBlock) {
     iterator.startReadingBits();
     const keyframe = Boolean(iterator.getBits(1));
     iterator.getBits(3);
@@ -60319,7 +60339,7 @@ var chunk_n77gaszd_parseBlockFlags = (iterator, type) => {
   }
   throw new Error("Unexpected type");
 };
-var chunk_n77gaszd_addAvcToTrackAndActivateTrackIfNecessary = async ({
+var chunk_gqesq3a3_addAvcToTrackAndActivateTrackIfNecessary = async ({
   partialVideoSample,
   codec,
   structureState,
@@ -60333,14 +60353,14 @@ var chunk_n77gaszd_addAvcToTrackAndActivateTrackIfNecessary = async ({
   if (codec !== "V_MPEG4/ISO/AVC") {
     return;
   }
-  const missingTracks = chunk_n77gaszd_getTracksFromMatroska({
+  const missingTracks = chunk_gqesq3a3_getTracksFromMatroska({
     structureState,
     webmState
   }).missingInfo;
   if (missingTracks.length === 0) {
     return;
   }
-  const parsed = chunk_n77gaszd_parseAvc(partialVideoSample.data, avcState);
+  const parsed = chunk_gqesq3a3_parseAvc(partialVideoSample.data, avcState);
   for (const parse of parsed) {
     if (parse.type === "avc-profile") {
       webmState.setAvcProfileForTrackNumber(trackNumber2, parse);
@@ -60348,7 +60368,7 @@ var chunk_n77gaszd_addAvcToTrackAndActivateTrackIfNecessary = async ({
       if (!track) {
         throw new Error("Could not find track " + trackNumber2);
       }
-      const resolvedTracks = chunk_n77gaszd_getTracksFromMatroska({
+      const resolvedTracks = chunk_gqesq3a3_getTracksFromMatroska({
         structureState,
         webmState
       }).resolved;
@@ -60356,7 +60376,7 @@ var chunk_n77gaszd_addAvcToTrackAndActivateTrackIfNecessary = async ({
       if (!resolvedTrack) {
         throw new Error("Could not find track " + trackNumber2);
       }
-      await chunk_n77gaszd_registerVideoTrack({
+      await chunk_gqesq3a3_registerVideoTrack({
         track: resolvedTrack,
         container: "webm",
         logLevel,
@@ -60367,7 +60387,7 @@ var chunk_n77gaszd_addAvcToTrackAndActivateTrackIfNecessary = async ({
     }
   }
 };
-var chunk_n77gaszd_getSampleFromBlock = async ({
+var chunk_gqesq3a3_getSampleFromBlock = async ({
   ebml,
   webmState,
   offset,
@@ -60377,7 +60397,7 @@ var chunk_n77gaszd_getSampleFromBlock = async ({
   onVideoTrack,
   avcState
 }) => {
-  const iterator = chunk_n77gaszd_getArrayBufferIterator({
+  const iterator = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: ebml.value,
     maxBytes: ebml.value.length,
     logLevel: "error"
@@ -60387,7 +60407,7 @@ var chunk_n77gaszd_getSampleFromBlock = async ({
     throw new Error("Not enough data to get track number, should not happen");
   }
   const timecodeRelativeToCluster = iterator.getInt16();
-  const { keyframe } = chunk_n77gaszd_parseBlockFlags(iterator, ebml.type === "SimpleBlock" ? chunk_n77gaszd_matroskaElements.SimpleBlock : chunk_n77gaszd_matroskaElements.Block);
+  const { keyframe } = chunk_gqesq3a3_parseBlockFlags(iterator, ebml.type === "SimpleBlock" ? chunk_gqesq3a3_matroskaElements.SimpleBlock : chunk_gqesq3a3_matroskaElements.Block);
   const { codec, trackTimescale } = webmState.getTrackInfoByNumber(trackNumber2);
   const clusterOffset = webmState.getTimestampOffsetForByteOffset(offset);
   const timescale = webmState.getTimescale();
@@ -60414,10 +60434,10 @@ var chunk_n77gaszd_getSampleFromBlock = async ({
         type: "partial-video-sample",
         partialVideoSample,
         trackId: trackNumber2,
-        timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+        timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
       };
     }
-    await chunk_n77gaszd_addAvcToTrackAndActivateTrackIfNecessary({
+    await chunk_gqesq3a3_addAvcToTrackAndActivateTrackIfNecessary({
       codec,
       partialVideoSample,
       structureState,
@@ -60437,7 +60457,7 @@ var chunk_n77gaszd_getSampleFromBlock = async ({
       type: "video-sample",
       videoSample: sample,
       trackId: trackNumber2,
-      timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+      timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
     };
   }
   if (codec.startsWith("A_")) {
@@ -60454,7 +60474,7 @@ var chunk_n77gaszd_getSampleFromBlock = async ({
       type: "audio-sample",
       audioSample,
       trackId: trackNumber2,
-      timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+      timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
     };
   }
   iterator.destroy();
@@ -60462,7 +60482,7 @@ var chunk_n77gaszd_getSampleFromBlock = async ({
     type: "no-sample"
   };
 };
-var chunk_n77gaszd_parseEbml = async (iterator, statesForProcessing, logLevel) => {
+var chunk_gqesq3a3_parseEbml = async (iterator, statesForProcessing, logLevel) => {
   const hex = iterator.getMatroskaSegmentId();
   if (hex === null) {
     throw new Error("Not enough bytes left to parse EBML - this should not happen");
@@ -60473,9 +60493,9 @@ var chunk_n77gaszd_parseEbml = async (iterator, statesForProcessing, logLevel) =
   if (size4 === null) {
     throw new Error("Not enough bytes left to parse EBML - this should not happen");
   }
-  const hasInMap = chunk_n77gaszd_ebmlMap[hex];
+  const hasInMap = chunk_gqesq3a3_ebmlMap[hex];
   if (!hasInMap) {
-    chunk_n77gaszd_Log.verbose(logLevel, `Unknown EBML hex ID ${JSON.stringify(hex)}`);
+    chunk_gqesq3a3_Log.verbose(logLevel, `Unknown EBML hex ID ${JSON.stringify(hex)}`);
     iterator.discard(size4);
     return null;
   }
@@ -60533,9 +60553,9 @@ var chunk_n77gaszd_parseEbml = async (iterator, statesForProcessing, logLevel) =
         break;
       }
       const offset = iterator.counter.getOffset();
-      const value = await chunk_n77gaszd_parseEbml(iterator, statesForProcessing, logLevel);
+      const value = await chunk_gqesq3a3_parseEbml(iterator, statesForProcessing, logLevel);
       if (value) {
-        const remapped = statesForProcessing ? await chunk_n77gaszd_postprocessEbml({
+        const remapped = statesForProcessing ? await chunk_gqesq3a3_postprocessEbml({
           offset,
           ebml: value,
           statesForProcessing
@@ -60554,7 +60574,7 @@ var chunk_n77gaszd_parseEbml = async (iterator, statesForProcessing, logLevel) =
   }
   throw new Error(`Unknown segment type ${hasInMap.type}`);
 };
-var chunk_n77gaszd_postprocessEbml = async ({
+var chunk_gqesq3a3_postprocessEbml = async ({
   offset,
   ebml,
   statesForProcessing: {
@@ -60575,12 +60595,12 @@ var chunk_n77gaszd_postprocessEbml = async ({
   }
   if (ebml.type === "TrackEntry") {
     webmState.onTrackEntrySegment(ebml);
-    const track = chunk_n77gaszd_getTrack({
+    const track = chunk_gqesq3a3_getTrack({
       track: ebml,
       timescale: webmState.getTimescale()
     });
     if (track && track.type === "audio") {
-      await chunk_n77gaszd_registerAudioTrack({
+      await chunk_gqesq3a3_registerAudioTrack({
         track,
         container: "webm",
         registerAudioSampleCallback: callbacks.registerAudioSampleCallback,
@@ -60590,8 +60610,8 @@ var chunk_n77gaszd_postprocessEbml = async ({
       });
     }
     if (track && track.type === "video") {
-      if (track.codec !== chunk_n77gaszd_NO_CODEC_PRIVATE_SHOULD_BE_DERIVED_FROM_SPS) {
-        await chunk_n77gaszd_registerVideoTrack({
+      if (track.codec !== chunk_gqesq3a3_NO_CODEC_PRIVATE_SHOULD_BE_DERIVED_FROM_SPS) {
+        await chunk_gqesq3a3_registerVideoTrack({
           track,
           container: "webm",
           logLevel,
@@ -60606,7 +60626,7 @@ var chunk_n77gaszd_postprocessEbml = async ({
     webmState.setTimestampOffset(offset, ebml.value.value);
   }
   if (ebml.type === "Block" || ebml.type === "SimpleBlock") {
-    const sample = await chunk_n77gaszd_getSampleFromBlock({
+    const sample = await chunk_gqesq3a3_getSampleFromBlock({
       ebml,
       webmState,
       offset,
@@ -60652,7 +60672,7 @@ var chunk_n77gaszd_postprocessEbml = async ({
       throw new Error("Expected block segment");
     }
     const hasReferenceBlock = ebml.value.find((c) => c.type === "ReferenceBlock");
-    const sample = block2.value.length === 0 ? null : await chunk_n77gaszd_getSampleFromBlock({
+    const sample = block2.value.length === 0 ? null : await chunk_gqesq3a3_getSampleFromBlock({
       ebml: block2,
       webmState,
       offset,
@@ -60681,7 +60701,7 @@ var chunk_n77gaszd_postprocessEbml = async ({
   return ebml;
 };
 
-class chunk_n77gaszd_IsAnImageError extends Error {
+class chunk_gqesq3a3_IsAnImageError extends Error {
   imageType;
   dimensions;
   mimeType;
@@ -60703,12 +60723,12 @@ class chunk_n77gaszd_IsAnImageError extends Error {
     this.sizeInBytes = sizeInBytes;
     this.fileName = fileName;
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, chunk_n77gaszd_IsAnImageError);
+      Error.captureStackTrace(this, chunk_gqesq3a3_IsAnImageError);
     }
   }
 }
 
-class chunk_n77gaszd_IsAPdfError extends Error {
+class chunk_gqesq3a3_IsAPdfError extends Error {
   mimeType;
   sizeInBytes;
   fileName;
@@ -60724,12 +60744,12 @@ class chunk_n77gaszd_IsAPdfError extends Error {
     this.sizeInBytes = sizeInBytes;
     this.fileName = fileName;
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, chunk_n77gaszd_IsAPdfError);
+      Error.captureStackTrace(this, chunk_gqesq3a3_IsAPdfError);
     }
   }
 }
 
-class chunk_n77gaszd_IsAnUnsupportedFileTypeError extends Error {
+class chunk_gqesq3a3_IsAnUnsupportedFileTypeError extends Error {
   mimeType;
   sizeInBytes;
   fileName;
@@ -60745,22 +60765,22 @@ class chunk_n77gaszd_IsAnUnsupportedFileTypeError extends Error {
     this.sizeInBytes = sizeInBytes;
     this.fileName = fileName;
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, chunk_n77gaszd_IsAnUnsupportedFileTypeError);
+      Error.captureStackTrace(this, chunk_gqesq3a3_IsAnUnsupportedFileTypeError);
     }
   }
 }
 
-class chunk_n77gaszd_MediaParserAbortError extends Error {
+class chunk_gqesq3a3_MediaParserAbortError extends Error {
   constructor(message) {
     super(message);
     this.name = "MediaParserAbortError";
     this.cause = undefined;
   }
 }
-var chunk_n77gaszd_hasBeenAborted = (error) => {
-  return error instanceof chunk_n77gaszd_MediaParserAbortError || error.name === "MediaParserAbortError" || error.name === "AbortError";
+var chunk_gqesq3a3_hasBeenAborted = (error) => {
+  return error instanceof chunk_gqesq3a3_MediaParserAbortError || error.name === "MediaParserAbortError" || error.name === "AbortError";
 };
-var chunk_n77gaszd_withResolvers = function() {
+var chunk_gqesq3a3_withResolvers = function() {
   let resolve;
   let reject;
   const promise = new Promise((res, rej) => {
@@ -60770,7 +60790,7 @@ var chunk_n77gaszd_withResolvers = function() {
   return { promise, resolve, reject };
 };
 
-class chunk_n77gaszd_MediaParserEmitter {
+class chunk_gqesq3a3_MediaParserEmitter {
   listeners = {
     pause: [],
     resume: [],
@@ -60780,7 +60800,7 @@ class chunk_n77gaszd_MediaParserEmitter {
   readyPromise;
   #markAsReady;
   constructor() {
-    const { promise, resolve } = chunk_n77gaszd_withResolvers();
+    const { promise, resolve } = chunk_gqesq3a3_withResolvers();
     this.readyPromise = promise;
     this.#markAsReady = resolve;
   }
@@ -60819,7 +60839,7 @@ class chunk_n77gaszd_MediaParserEmitter {
     });
   };
 }
-var chunk_n77gaszd_makePauseSignal = (emitter) => {
+var chunk_gqesq3a3_makePauseSignal = (emitter) => {
   const waiterFns = [];
   let paused = false;
   return {
@@ -60852,7 +60872,7 @@ var chunk_n77gaszd_makePauseSignal = (emitter) => {
     }
   };
 };
-var chunk_n77gaszd_performedSeeksStats = () => {
+var chunk_gqesq3a3_performedSeeksStats = () => {
   const performedSeeks = [];
   const markLastSeekAsUserInitiated = () => {
     if (performedSeeks.length > 0) {
@@ -60869,7 +60889,7 @@ var chunk_n77gaszd_performedSeeksStats = () => {
     markLastSeekAsUserInitiated
   };
 };
-var chunk_n77gaszd_makeSeekSignal = (emitter) => {
+var chunk_gqesq3a3_makeSeekSignal = (emitter) => {
   let seek2 = null;
   return {
     seek: (seekRequest) => {
@@ -60888,15 +60908,15 @@ var chunk_n77gaszd_makeSeekSignal = (emitter) => {
     }
   };
 };
-var chunk_n77gaszd_mediaParserController = () => {
+var chunk_gqesq3a3_mediaParserController = () => {
   const abortController = new AbortController;
-  const emitter = new chunk_n77gaszd_MediaParserEmitter;
-  const pauseSignal = chunk_n77gaszd_makePauseSignal(emitter);
-  const seekSignal = chunk_n77gaszd_makeSeekSignal(emitter);
-  const performedSeeksSignal = chunk_n77gaszd_performedSeeksStats();
+  const emitter = new chunk_gqesq3a3_MediaParserEmitter;
+  const pauseSignal = chunk_gqesq3a3_makePauseSignal(emitter);
+  const seekSignal = chunk_gqesq3a3_makeSeekSignal(emitter);
+  const performedSeeksSignal = chunk_gqesq3a3_performedSeeksStats();
   const checkForAbortAndPause = async () => {
     if (abortController.signal.aborted) {
-      const err = new chunk_n77gaszd_MediaParserAbortError("Aborted");
+      const err = new chunk_gqesq3a3_MediaParserAbortError("Aborted");
       if (abortController.signal.reason) {
         err.cause = abortController.signal.reason;
       }
@@ -60953,13 +60973,13 @@ var chunk_n77gaszd_mediaParserController = () => {
     }
   };
 };
-var chunk_n77gaszd_isIndependentSegments = (structure) => {
+var chunk_gqesq3a3_isIndependentSegments = (structure) => {
   if (structure === null || structure.type !== "m3u") {
     return false;
   }
   return structure.boxes.some((box2) => box2.type === "m3u-independent-segments" || box2.type === "m3u-stream-info");
 };
-var chunk_n77gaszd_getM3uStreams = ({
+var chunk_gqesq3a3_getM3uStreams = ({
   structure,
   originalSrc,
   readerInterface
@@ -61019,7 +61039,7 @@ var chunk_n77gaszd_getM3uStreams = ({
   });
   return sorted.map((box2, index) => ({ ...box2, id: index }));
 };
-var chunk_n77gaszd_m3uHasStreams = (state) => {
+var chunk_gqesq3a3_m3uHasStreams = (state) => {
   const structure = state.structure.getStructureOrNull();
   if (!structure) {
     return false;
@@ -61029,7 +61049,7 @@ var chunk_n77gaszd_m3uHasStreams = (state) => {
   }
   return state.m3u.hasFinishedManifest();
 };
-var chunk_n77gaszd_getContainer = (segments) => {
+var chunk_gqesq3a3_getContainer = (segments) => {
   if (segments.type === "iso-base-media") {
     return "mp4";
   }
@@ -61049,7 +61069,7 @@ var chunk_n77gaszd_getContainer = (segments) => {
     return "flac";
   }
   if (segments.type === "riff") {
-    if (chunk_n77gaszd_isRiffAvi2(segments)) {
+    if (chunk_gqesq3a3_isRiffAvi2(segments)) {
       return "avi";
     }
     throw new Error("Unknown RIFF container " + segments.type);
@@ -61062,19 +61082,19 @@ var chunk_n77gaszd_getContainer = (segments) => {
   }
   throw new Error("Unknown container " + segments);
 };
-var chunk_n77gaszd_hasContainer = (boxes) => {
+var chunk_gqesq3a3_hasContainer = (boxes) => {
   try {
-    return chunk_n77gaszd_getContainer(boxes) !== null;
+    return chunk_gqesq3a3_getContainer(boxes) !== null;
   } catch {
     return false;
   }
 };
-var chunk_n77gaszd_getDimensions = (state) => {
+var chunk_gqesq3a3_getDimensions = (state) => {
   const structure = state.structure.getStructureOrNull();
-  if (structure && chunk_n77gaszd_isAudioStructure(structure)) {
+  if (structure && chunk_gqesq3a3_isAudioStructure(structure)) {
     return null;
   }
-  const tracks2 = chunk_n77gaszd_getTracks(state, true);
+  const tracks2 = chunk_gqesq3a3_getTracks(state, true);
   if (!tracks2.length) {
     return null;
   }
@@ -61090,18 +61110,18 @@ var chunk_n77gaszd_getDimensions = (state) => {
     unrotatedWidth: firstVideoTrack.displayAspectWidth
   };
 };
-var chunk_n77gaszd_hasDimensions = (state) => {
+var chunk_gqesq3a3_hasDimensions = (state) => {
   const structure = state.structure.getStructureOrNull();
-  if (structure && chunk_n77gaszd_isAudioStructure(structure)) {
+  if (structure && chunk_gqesq3a3_isAudioStructure(structure)) {
     return true;
   }
   try {
-    return chunk_n77gaszd_getDimensions(state) !== null;
+    return chunk_gqesq3a3_getDimensions(state) !== null;
   } catch {
     return false;
   }
 };
-var chunk_n77gaszd_getDurationFromFlac = (parserState) => {
+var chunk_gqesq3a3_getDurationFromFlac = (parserState) => {
   const structure = parserState.structure.getFlacStructure();
   const streaminfo = structure.boxes.find((b) => b.type === "flac-streaminfo");
   if (!streaminfo) {
@@ -61109,7 +61129,7 @@ var chunk_n77gaszd_getDurationFromFlac = (parserState) => {
   }
   return streaminfo.totalSamples / streaminfo.sampleRate;
 };
-var chunk_n77gaszd_areSamplesComplete = ({
+var chunk_gqesq3a3_areSamplesComplete = ({
   moofBoxes,
   tfraBoxes
 }) => {
@@ -61118,17 +61138,17 @@ var chunk_n77gaszd_areSamplesComplete = ({
   }
   return tfraBoxes.length > 0 && tfraBoxes.every((t) => t.entries.length === moofBoxes.length);
 };
-var chunk_n77gaszd_getSamplesFromTraf = (trafSegment, moofOffset, trexBoxes) => {
+var chunk_gqesq3a3_getSamplesFromTraf = (trafSegment, moofOffset, trexBoxes) => {
   if (trafSegment.type !== "regular-box" || trafSegment.boxType !== "traf") {
     throw new Error("Expected traf-box");
   }
-  const tfhdBox = chunk_n77gaszd_getTfhdBox(trafSegment);
+  const tfhdBox = chunk_gqesq3a3_getTfhdBox(trafSegment);
   const trexBox = trexBoxes.find((t) => t.trackId === tfhdBox?.trackId) ?? null;
   const defaultTrackSampleDuration = tfhdBox?.defaultSampleDuration || trexBox?.defaultSampleDuration || null;
   const defaultTrackSampleSize = tfhdBox?.defaultSampleSize || trexBox?.defaultSampleSize || null;
   const defaultTrackSampleFlags = tfhdBox?.defaultSampleFlags ?? trexBox?.defaultSampleFlags ?? null;
-  const tfdtBox = chunk_n77gaszd_getTfdtBox(trafSegment);
-  const trunBoxes = chunk_n77gaszd_getTrunBoxes(trafSegment);
+  const tfdtBox = chunk_gqesq3a3_getTfdtBox(trafSegment);
+  const trunBoxes = chunk_gqesq3a3_getTrunBoxes(trafSegment);
   let time2 = 0;
   let offset = 0;
   let dataOffset = 0;
@@ -61174,21 +61194,21 @@ var chunk_n77gaszd_getSamplesFromTraf = (trafSegment, moofOffset, trexBoxes) => 
   }
   return samples;
 };
-var chunk_n77gaszd_getSamplesFromMoof = ({
+var chunk_gqesq3a3_getSamplesFromMoof = ({
   moofBox,
   trackId,
   trexBoxes
 }) => {
   const mapped = moofBox.trafBoxes.map((traf) => {
-    const tfhdBox = chunk_n77gaszd_getTfhdBox(traf);
+    const tfhdBox = chunk_gqesq3a3_getTfhdBox(traf);
     if (!tfhdBox || tfhdBox.trackId !== trackId) {
       return [];
     }
-    return chunk_n77gaszd_getSamplesFromTraf(traf, moofBox.offset, trexBoxes);
+    return chunk_gqesq3a3_getSamplesFromTraf(traf, moofBox.offset, trexBoxes);
   });
   return mapped.flat(1);
 };
-var chunk_n77gaszd_collectSamplePositionsFromMoofBoxes = ({
+var chunk_gqesq3a3_collectSamplePositionsFromMoofBoxes = ({
   moofBoxes,
   tkhdBox,
   isComplete,
@@ -61198,7 +61218,7 @@ var chunk_n77gaszd_collectSamplePositionsFromMoofBoxes = ({
     const isLastFragment = index === moofBoxes.length - 1 && isComplete;
     return {
       isLastFragment,
-      samples: chunk_n77gaszd_getSamplesFromMoof({
+      samples: chunk_gqesq3a3_getSamplesFromMoof({
         moofBox: m,
         trackId: tkhdBox.trackId,
         trexBoxes
@@ -61207,7 +61227,7 @@ var chunk_n77gaszd_collectSamplePositionsFromMoofBoxes = ({
   });
   return { samplePositions, isComplete };
 };
-var chunk_n77gaszd_getSamplePositions = ({
+var chunk_gqesq3a3_getSamplePositions = ({
   stcoBox,
   stszBox,
   stscBox,
@@ -61262,13 +61282,13 @@ var chunk_n77gaszd_getSamplePositions = ({
   }
   return samples;
 };
-var chunk_n77gaszd_getGroupedSamplesPositionsFromMp4 = ({
+var chunk_gqesq3a3_getGroupedSamplesPositionsFromMp4 = ({
   trakBox,
   bigEndian
 }) => {
-  const stscBox = chunk_n77gaszd_getStscBox(trakBox);
-  const stszBox = chunk_n77gaszd_getStszBox(trakBox);
-  const stcoBox = chunk_n77gaszd_getStcoBox(trakBox);
+  const stscBox = chunk_gqesq3a3_getStscBox(trakBox);
+  const stszBox = chunk_gqesq3a3_getStszBox(trakBox);
+  const stcoBox = chunk_gqesq3a3_getStcoBox(trakBox);
   if (!stscBox) {
     throw new Error("Expected stsc box in trak box");
   }
@@ -61310,10 +61330,10 @@ var chunk_n77gaszd_getGroupedSamplesPositionsFromMp4 = ({
   }
   return samples;
 };
-var chunk_n77gaszd_shouldGroupAudioSamples = (trakBox) => {
-  const isLpcm = chunk_n77gaszd_isLpcmAudioCodec(trakBox);
-  const isIn24 = chunk_n77gaszd_isIn24AudioCodec(trakBox);
-  const isTwos = chunk_n77gaszd_isTwosAudioCodec(trakBox);
+var chunk_gqesq3a3_shouldGroupAudioSamples = (trakBox) => {
+  const isLpcm = chunk_gqesq3a3_isLpcmAudioCodec(trakBox);
+  const isIn24 = chunk_gqesq3a3_isIn24AudioCodec(trakBox);
+  const isTwos = chunk_gqesq3a3_isTwosAudioCodec(trakBox);
   if (isLpcm || isIn24 || isTwos) {
     return {
       bigEndian: isTwos || isIn24
@@ -61321,21 +61341,21 @@ var chunk_n77gaszd_shouldGroupAudioSamples = (trakBox) => {
   }
   return null;
 };
-var chunk_n77gaszd_collectSamplePositionsFromTrak = (trakBox) => {
-  const shouldGroupSamples = chunk_n77gaszd_shouldGroupAudioSamples(trakBox);
-  const timescaleAndDuration = chunk_n77gaszd_getTimescaleAndDuration(trakBox);
+var chunk_gqesq3a3_collectSamplePositionsFromTrak = (trakBox) => {
+  const shouldGroupSamples = chunk_gqesq3a3_shouldGroupAudioSamples(trakBox);
+  const timescaleAndDuration = chunk_gqesq3a3_getTimescaleAndDuration(trakBox);
   if (shouldGroupSamples) {
-    return chunk_n77gaszd_getGroupedSamplesPositionsFromMp4({
+    return chunk_gqesq3a3_getGroupedSamplesPositionsFromMp4({
       trakBox,
       bigEndian: shouldGroupSamples.bigEndian
     });
   }
-  const stszBox = chunk_n77gaszd_getStszBox(trakBox);
-  const stcoBox = chunk_n77gaszd_getStcoBox(trakBox);
-  const stscBox = chunk_n77gaszd_getStscBox(trakBox);
-  const stssBox = chunk_n77gaszd_getStssBox(trakBox);
-  const sttsBox = chunk_n77gaszd_getSttsBox(trakBox);
-  const cttsBox = chunk_n77gaszd_getCttsBox(trakBox);
+  const stszBox = chunk_gqesq3a3_getStszBox(trakBox);
+  const stcoBox = chunk_gqesq3a3_getStcoBox(trakBox);
+  const stscBox = chunk_gqesq3a3_getStscBox(trakBox);
+  const stssBox = chunk_gqesq3a3_getStssBox(trakBox);
+  const sttsBox = chunk_gqesq3a3_getSttsBox(trakBox);
+  const cttsBox = chunk_gqesq3a3_getCttsBox(trakBox);
   if (!stszBox) {
     throw new Error("Expected stsz box in trak box");
   }
@@ -61351,7 +61371,7 @@ var chunk_n77gaszd_collectSamplePositionsFromTrak = (trakBox) => {
   if (!timescaleAndDuration) {
     throw new Error("Expected timescale and duration in trak box");
   }
-  const samplePositions = chunk_n77gaszd_getSamplePositions({
+  const samplePositions = chunk_gqesq3a3_getSamplePositions({
     stcoBox,
     stscBox,
     stszBox,
@@ -61361,18 +61381,18 @@ var chunk_n77gaszd_collectSamplePositionsFromTrak = (trakBox) => {
   });
   return samplePositions;
 };
-var chunk_n77gaszd_getSamplePositionsFromTrack = ({
+var chunk_gqesq3a3_getSamplePositionsFromTrack = ({
   trakBox,
   moofBoxes,
   moofComplete,
   trexBoxes
 }) => {
-  const tkhdBox = chunk_n77gaszd_getTkhdBox(trakBox);
+  const tkhdBox = chunk_gqesq3a3_getTkhdBox(trakBox);
   if (!tkhdBox) {
     throw new Error("Expected tkhd box in trak box");
   }
   if (moofBoxes.length > 0) {
-    const { samplePositions } = chunk_n77gaszd_collectSamplePositionsFromMoofBoxes({
+    const { samplePositions } = chunk_gqesq3a3_collectSamplePositionsFromMoofBoxes({
       moofBoxes,
       tkhdBox,
       isComplete: moofComplete,
@@ -61384,15 +61404,15 @@ var chunk_n77gaszd_getSamplePositionsFromTrack = ({
     };
   }
   return {
-    samplePositions: chunk_n77gaszd_collectSamplePositionsFromTrak(trakBox),
+    samplePositions: chunk_gqesq3a3_collectSamplePositionsFromTrak(trakBox),
     isComplete: true
   };
 };
-var chunk_n77gaszd_getAllPlaylists = ({
+var chunk_gqesq3a3_getAllPlaylists = ({
   structure,
   src
 }) => {
-  const isIndependent = chunk_n77gaszd_isIndependentSegments(structure);
+  const isIndependent = chunk_gqesq3a3_isIndependentSegments(structure);
   if (!isIndependent) {
     return [
       {
@@ -61405,31 +61425,31 @@ var chunk_n77gaszd_getAllPlaylists = ({
   const playlists = structure.boxes.filter((box2) => box2.type === "m3u-playlist");
   return playlists;
 };
-var chunk_n77gaszd_getPlaylist = (structure, src) => {
-  const allPlaylists = chunk_n77gaszd_getAllPlaylists({ structure, src });
+var chunk_gqesq3a3_getPlaylist = (structure, src) => {
+  const allPlaylists = chunk_gqesq3a3_getAllPlaylists({ structure, src });
   const playlists = allPlaylists.find((box2) => box2.src === src);
   if (!playlists) {
     throw new Error(`Expected m3u-playlist with src ${src}`);
   }
   return playlists;
 };
-var chunk_n77gaszd_getDurationFromPlaylist = (playlist) => {
+var chunk_gqesq3a3_getDurationFromPlaylist = (playlist) => {
   const duration2 = playlist.boxes.filter((box2) => box2.type === "m3u-extinf");
   if (duration2.length === 0) {
     throw new Error("Expected duration in m3u playlist");
   }
   return duration2.reduce((acc, d) => acc + d.value, 0);
 };
-var chunk_n77gaszd_getDurationFromM3u = (state) => {
-  const playlists = chunk_n77gaszd_getAllPlaylists({
+var chunk_gqesq3a3_getDurationFromM3u = (state) => {
+  const playlists = chunk_gqesq3a3_getAllPlaylists({
     structure: state.structure.getM3uStructure(),
     src: state.src
   });
   return Math.max(...playlists.map((p) => {
-    return chunk_n77gaszd_getDurationFromPlaylist(p);
+    return chunk_gqesq3a3_getDurationFromPlaylist(p);
   }));
 };
-var chunk_n77gaszd_getUnroundedMpegFrameLength = ({
+var chunk_gqesq3a3_getUnroundedMpegFrameLength = ({
   samplesPerFrame,
   bitrateKbit,
   samplingFrequency: samplingFrequency2,
@@ -61441,13 +61461,13 @@ var chunk_n77gaszd_getUnroundedMpegFrameLength = ({
   }
   return samplesPerFrame / 8 * bitrateKbit / samplingFrequency2 * 1000 + (padding3 ? layer === 1 ? 4 : 1 : 0);
 };
-var chunk_n77gaszd_getAverageMpegFrameLength = ({
+var chunk_gqesq3a3_getAverageMpegFrameLength = ({
   samplesPerFrame,
   bitrateKbit,
   samplingFrequency: samplingFrequency2,
   layer
 }) => {
-  const withoutPadding = chunk_n77gaszd_getUnroundedMpegFrameLength({
+  const withoutPadding = chunk_gqesq3a3_getUnroundedMpegFrameLength({
     bitrateKbit,
     layer,
     padding: false,
@@ -61458,14 +61478,14 @@ var chunk_n77gaszd_getAverageMpegFrameLength = ({
   const rest = withoutPadding % 1;
   return rest * (rounded + 1) + (1 - rest) * rounded;
 };
-var chunk_n77gaszd_getMpegFrameLength = ({
+var chunk_gqesq3a3_getMpegFrameLength = ({
   samplesPerFrame,
   bitrateKbit,
   samplingFrequency: samplingFrequency2,
   padding: padding3,
   layer
 }) => {
-  return Math.floor(chunk_n77gaszd_getUnroundedMpegFrameLength({
+  return Math.floor(chunk_gqesq3a3_getUnroundedMpegFrameLength({
     bitrateKbit,
     layer,
     padding: padding3,
@@ -61473,7 +61493,7 @@ var chunk_n77gaszd_getMpegFrameLength = ({
     samplingFrequency: samplingFrequency2
   }));
 };
-var chunk_n77gaszd_getSamplesPerMpegFrame = ({
+var chunk_gqesq3a3_getSamplesPerMpegFrame = ({
   mpegVersion,
   layer
 }) => {
@@ -61498,7 +61518,7 @@ var chunk_n77gaszd_getSamplesPerMpegFrame = ({
   }
   throw new Error("Invalid MPEG layer");
 };
-var chunk_n77gaszd_getDurationFromMp3Xing = ({
+var chunk_gqesq3a3_getDurationFromMp3Xing = ({
   xingData,
   samplesPerFrame
 }) => {
@@ -61513,23 +61533,23 @@ var chunk_n77gaszd_getDurationFromMp3Xing = ({
   const xingSamples = xingFrames * samplesPerFrame;
   return xingSamples / sampleRate;
 };
-var chunk_n77gaszd_getDurationFromMp3 = (state) => {
+var chunk_gqesq3a3_getDurationFromMp3 = (state) => {
   const mp3Info = state.mp3.getMp3Info();
   const mp3BitrateInfo = state.mp3.getMp3BitrateInfo();
   if (!mp3Info || !mp3BitrateInfo) {
     return null;
   }
-  const samplesPerFrame = chunk_n77gaszd_getSamplesPerMpegFrame({
+  const samplesPerFrame = chunk_gqesq3a3_getSamplesPerMpegFrame({
     layer: mp3Info.layer,
     mpegVersion: mp3Info.mpegVersion
   });
   if (mp3BitrateInfo.type === "variable") {
-    return chunk_n77gaszd_getDurationFromMp3Xing({
+    return chunk_gqesq3a3_getDurationFromMp3Xing({
       xingData: mp3BitrateInfo.xingData,
       samplesPerFrame
     });
   }
-  const frameLengthInBytes = chunk_n77gaszd_getMpegFrameLength({
+  const frameLengthInBytes = chunk_gqesq3a3_getMpegFrameLength({
     bitrateKbit: mp3BitrateInfo.bitrateInKbit,
     padding: false,
     samplesPerFrame,
@@ -61541,11 +61561,11 @@ var chunk_n77gaszd_getDurationFromMp3 = (state) => {
   const durationInSeconds = samples / mp3Info.sampleRate;
   return durationInSeconds;
 };
-var chunk_n77gaszd_getDurationFromAvi = (structure) => {
-  const strl = chunk_n77gaszd_getStrlBoxes(structure);
+var chunk_gqesq3a3_getDurationFromAvi = (structure) => {
+  const strl = chunk_gqesq3a3_getStrlBoxes(structure);
   const lengths = [];
   for (const s of strl) {
-    const strh = chunk_n77gaszd_getStrhBox(s.children);
+    const strh = chunk_gqesq3a3_getStrhBox(s.children);
     if (!strh) {
       throw new Error("No strh box");
     }
@@ -61555,7 +61575,7 @@ var chunk_n77gaszd_getDurationFromAvi = (structure) => {
   }
   return Math.max(...lengths);
 };
-var chunk_n77gaszd_getDurationFromWav = (state) => {
+var chunk_gqesq3a3_getDurationFromWav = (state) => {
   const structure = state.structure.getWavStructure();
   const fmt = structure.boxes.find((b) => b.type === "wav-fmt");
   if (!fmt) {
@@ -61568,7 +61588,7 @@ var chunk_n77gaszd_getDurationFromWav = (state) => {
   const durationInSeconds = dataBox.dataSize / (fmt.sampleRate * fmt.blockAlign);
   return durationInSeconds;
 };
-var chunk_n77gaszd_precomputedTfraState = () => {
+var chunk_gqesq3a3_precomputedTfraState = () => {
   let tfraBoxes = [];
   return {
     getTfraBoxes: () => tfraBoxes,
@@ -61577,10 +61597,10 @@ var chunk_n77gaszd_precomputedTfraState = () => {
     }
   };
 };
-var chunk_n77gaszd_deduplicateTfraBoxesByOffset = (tfraBoxes) => {
+var chunk_gqesq3a3_deduplicateTfraBoxesByOffset = (tfraBoxes) => {
   return tfraBoxes.filter((m, i, arr) => i === arr.findIndex((t) => t.offset === m.offset));
 };
-var chunk_n77gaszd_getDurationFromMatroska = (segments) => {
+var chunk_gqesq3a3_getDurationFromMatroska = (segments) => {
   const mainSegment = segments.find((s) => s.type === "Segment");
   if (!mainSegment || mainSegment.type !== "Segment") {
     return null;
@@ -61604,9 +61624,9 @@ var chunk_n77gaszd_getDurationFromMatroska = (segments) => {
   }
   return duration2.value.value / timestampScale2.value.value * 1000;
 };
-var chunk_n77gaszd_getDurationFromIsoBaseMedia = (parserState) => {
+var chunk_gqesq3a3_getDurationFromIsoBaseMedia = (parserState) => {
   const structure = parserState.structure.getIsoStructure();
-  const moovBox = chunk_n77gaszd_getMoovBoxFromState({
+  const moovBox = chunk_gqesq3a3_getMoovBoxFromState({
     structureState: parserState.structure,
     isoState: parserState.iso,
     mp4HeaderSegment: parserState.m3uPlaylistContext?.mp4HeaderSegment ?? null,
@@ -61615,16 +61635,16 @@ var chunk_n77gaszd_getDurationFromIsoBaseMedia = (parserState) => {
   if (!moovBox) {
     return null;
   }
-  const moofBoxes = chunk_n77gaszd_getMoofBoxes(structure.boxes);
+  const moofBoxes = chunk_gqesq3a3_getMoofBoxes(structure.boxes);
   const mfra = parserState.iso.mfra.getIfAlreadyLoaded();
-  const tfraBoxes = chunk_n77gaszd_deduplicateTfraBoxesByOffset([
-    ...mfra ? chunk_n77gaszd_getTfraBoxesFromMfraBoxChildren(mfra) : [],
-    ...chunk_n77gaszd_getTfraBoxes(structure.boxes)
+  const tfraBoxes = chunk_gqesq3a3_deduplicateTfraBoxesByOffset([
+    ...mfra ? chunk_gqesq3a3_getTfraBoxesFromMfraBoxChildren(mfra) : [],
+    ...chunk_gqesq3a3_getTfraBoxes(structure.boxes)
   ]);
-  if (!chunk_n77gaszd_areSamplesComplete({ moofBoxes, tfraBoxes })) {
+  if (!chunk_gqesq3a3_areSamplesComplete({ moofBoxes, tfraBoxes })) {
     return null;
   }
-  const mvhdBox = chunk_n77gaszd_getMvhdBox(moovBox);
+  const mvhdBox = chunk_gqesq3a3_getMvhdBox(moovBox);
   if (!mvhdBox) {
     return null;
   }
@@ -61634,18 +61654,18 @@ var chunk_n77gaszd_getDurationFromIsoBaseMedia = (parserState) => {
   if (mvhdBox.durationInSeconds > 0) {
     return mvhdBox.durationInSeconds;
   }
-  const tracks2 = chunk_n77gaszd_getTracks(parserState, true);
+  const tracks2 = chunk_gqesq3a3_getTracks(parserState, true);
   const allSamples = tracks2.map((t) => {
     const { originalTimescale: ts } = t;
-    const trakBox = chunk_n77gaszd_getTrakBoxByTrackId(moovBox, t.trackId);
+    const trakBox = chunk_gqesq3a3_getTrakBoxByTrackId(moovBox, t.trackId);
     if (!trakBox) {
       return null;
     }
-    const { samplePositions, isComplete } = chunk_n77gaszd_getSamplePositionsFromTrack({
+    const { samplePositions, isComplete } = chunk_gqesq3a3_getSamplePositionsFromTrack({
       trakBox,
       moofBoxes,
-      moofComplete: chunk_n77gaszd_areSamplesComplete({ moofBoxes, tfraBoxes }),
-      trexBoxes: chunk_n77gaszd_getTrexBoxes(moovBox)
+      moofComplete: chunk_gqesq3a3_areSamplesComplete({ moofBoxes, tfraBoxes }),
+      trexBoxes: chunk_gqesq3a3_getTrexBoxes(moovBox)
     });
     if (!isComplete) {
       return null;
@@ -61662,66 +61682,66 @@ var chunk_n77gaszd_getDurationFromIsoBaseMedia = (parserState) => {
   const highestTimestamp = Math.max(...allSamples.filter((s) => s !== null));
   return highestTimestamp;
 };
-var chunk_n77gaszd_getDuration = (parserState) => {
+var chunk_gqesq3a3_getDuration = (parserState) => {
   const structure = parserState.structure.getStructure();
   if (structure.type === "matroska") {
-    return chunk_n77gaszd_getDurationFromMatroska(structure.boxes);
+    return chunk_gqesq3a3_getDurationFromMatroska(structure.boxes);
   }
   if (structure.type === "iso-base-media") {
-    return chunk_n77gaszd_getDurationFromIsoBaseMedia(parserState);
+    return chunk_gqesq3a3_getDurationFromIsoBaseMedia(parserState);
   }
   if (structure.type === "riff") {
-    return chunk_n77gaszd_getDurationFromAvi(structure);
+    return chunk_gqesq3a3_getDurationFromAvi(structure);
   }
   if (structure.type === "transport-stream") {
     return null;
   }
   if (structure.type === "mp3") {
-    return chunk_n77gaszd_getDurationFromMp3(parserState);
+    return chunk_gqesq3a3_getDurationFromMp3(parserState);
   }
   if (structure.type === "wav") {
-    return chunk_n77gaszd_getDurationFromWav(parserState);
+    return chunk_gqesq3a3_getDurationFromWav(parserState);
   }
   if (structure.type === "aac") {
     return null;
   }
   if (structure.type === "flac") {
-    return chunk_n77gaszd_getDurationFromFlac(parserState);
+    return chunk_gqesq3a3_getDurationFromFlac(parserState);
   }
   if (structure.type === "m3u") {
-    return chunk_n77gaszd_getDurationFromM3u(parserState);
+    return chunk_gqesq3a3_getDurationFromM3u(parserState);
   }
   throw new Error("Has no duration " + structure);
 };
-var chunk_n77gaszd_hasDuration = (parserState) => {
+var chunk_gqesq3a3_hasDuration = (parserState) => {
   const structure = parserState.structure.getStructureOrNull();
   if (structure === null) {
     return false;
   }
-  return chunk_n77gaszd_getHasTracks(parserState, true);
+  return chunk_gqesq3a3_getHasTracks(parserState, true);
 };
-var chunk_n77gaszd_hasSlowDuration = (parserState) => {
+var chunk_gqesq3a3_hasSlowDuration = (parserState) => {
   try {
-    if (!chunk_n77gaszd_hasDuration(parserState)) {
+    if (!chunk_gqesq3a3_hasDuration(parserState)) {
       return false;
     }
-    return chunk_n77gaszd_getDuration(parserState) !== null;
+    return chunk_gqesq3a3_getDuration(parserState) !== null;
   } catch {
     return false;
   }
 };
-var chunk_n77gaszd_isVideoTrackHdr = (track) => {
+var chunk_gqesq3a3_isVideoTrackHdr = (track) => {
   return track.advancedColor.matrix === "bt2020-ncl" && (track.advancedColor.transfer === "hlg" || track.advancedColor.transfer === "pq") && track.advancedColor.primaries === "bt2020";
 };
-var chunk_n77gaszd_getIsHdr = (state) => {
-  const tracks2 = chunk_n77gaszd_getTracks(state, true);
-  return tracks2.some((track) => track.type === "video" && chunk_n77gaszd_isVideoTrackHdr(track));
+var chunk_gqesq3a3_getIsHdr = (state) => {
+  const tracks2 = chunk_gqesq3a3_getTracks(state, true);
+  return tracks2.some((track) => track.type === "video" && chunk_gqesq3a3_isVideoTrackHdr(track));
 };
-var chunk_n77gaszd_hasHdr = (state) => {
-  return chunk_n77gaszd_getHasTracks(state, true);
+var chunk_gqesq3a3_hasHdr = (state) => {
+  return chunk_gqesq3a3_getHasTracks(state, true);
 };
-var chunk_n77gaszd_getKeyframesFromIsoBaseMedia = (state) => {
-  const tracks2 = chunk_n77gaszd_getTracksFromIsoBaseMedia({
+var chunk_gqesq3a3_getKeyframesFromIsoBaseMedia = (state) => {
+  const tracks2 = chunk_gqesq3a3_getTracksFromIsoBaseMedia({
     isoState: state.iso,
     m3uPlaylistContext: state.m3uPlaylistContext,
     structure: state.structure,
@@ -61729,26 +61749,26 @@ var chunk_n77gaszd_getKeyframesFromIsoBaseMedia = (state) => {
   });
   const videoTracks = tracks2.filter((t) => t.type === "video");
   const structure = state.structure.getIsoStructure();
-  const moofBoxes = chunk_n77gaszd_getMoofBoxes(structure.boxes);
-  const tfraBoxes = chunk_n77gaszd_getTfraBoxes(structure.boxes);
-  const moov = chunk_n77gaszd_getMoovFromFromIsoStructure(structure);
+  const moofBoxes = chunk_gqesq3a3_getMoofBoxes(structure.boxes);
+  const tfraBoxes = chunk_gqesq3a3_getTfraBoxes(structure.boxes);
+  const moov = chunk_gqesq3a3_getMoovFromFromIsoStructure(structure);
   if (!moov) {
     return [];
   }
   const allSamples = videoTracks.map((t) => {
     const { originalTimescale: ts } = t;
-    const trakBox = chunk_n77gaszd_getTrakBoxByTrackId(moov, t.trackId);
+    const trakBox = chunk_gqesq3a3_getTrakBoxByTrackId(moov, t.trackId);
     if (!trakBox) {
       return [];
     }
-    const { samplePositions, isComplete } = chunk_n77gaszd_getSamplePositionsFromTrack({
+    const { samplePositions, isComplete } = chunk_gqesq3a3_getSamplePositionsFromTrack({
       trakBox,
       moofBoxes,
-      moofComplete: chunk_n77gaszd_areSamplesComplete({
+      moofComplete: chunk_gqesq3a3_areSamplesComplete({
         moofBoxes,
         tfraBoxes
       }),
-      trexBoxes: chunk_n77gaszd_getTrexBoxes(moov)
+      trexBoxes: chunk_gqesq3a3_getTrexBoxes(moov)
     });
     if (!isComplete) {
       return [];
@@ -61768,39 +61788,39 @@ var chunk_n77gaszd_getKeyframesFromIsoBaseMedia = (state) => {
   });
   return allSamples.flat();
 };
-var chunk_n77gaszd_getKeyframes = (state) => {
+var chunk_gqesq3a3_getKeyframes = (state) => {
   const structure = state.structure.getStructure();
   if (structure.type === "iso-base-media") {
-    return chunk_n77gaszd_getKeyframesFromIsoBaseMedia(state);
+    return chunk_gqesq3a3_getKeyframesFromIsoBaseMedia(state);
   }
   return null;
 };
-var chunk_n77gaszd_hasKeyframes = (parserState) => {
+var chunk_gqesq3a3_hasKeyframes = (parserState) => {
   const structure = parserState.structure.getStructure();
   if (structure.type === "iso-base-media") {
-    return chunk_n77gaszd_getHasTracks(parserState, true);
+    return chunk_gqesq3a3_getHasTracks(parserState, true);
   }
   return true;
 };
-var chunk_n77gaszd_getMetadataFromFlac = (structure) => {
+var chunk_gqesq3a3_getMetadataFromFlac = (structure) => {
   const box2 = structure.boxes.find((b) => b.type === "flac-vorbis-comment");
   if (!box2) {
     return null;
   }
   return box2.fields;
 };
-var chunk_n77gaszd_getMetadataFromMp3 = (mp3Structure) => {
+var chunk_gqesq3a3_getMetadataFromMp3 = (mp3Structure) => {
   const findHeader = mp3Structure.boxes.find((b) => b.type === "id3-header");
   return findHeader ? findHeader.metatags : null;
 };
-var chunk_n77gaszd_getMetadataFromWav = (structure) => {
+var chunk_gqesq3a3_getMetadataFromWav = (structure) => {
   const list2 = structure.boxes.find((b) => b.type === "wav-list");
   if (!list2) {
     return null;
   }
   return list2.metadata;
 };
-var chunk_n77gaszd_mapToKey = (index) => {
+var chunk_gqesq3a3_mapToKey = (index) => {
   if (index === "�ART") {
     return "artist";
   }
@@ -61839,9 +61859,9 @@ var chunk_n77gaszd_mapToKey = (index) => {
   }
   return null;
 };
-var chunk_n77gaszd_parseIlstBoxWithoutKeys = (ilstBox) => {
+var chunk_gqesq3a3_parseIlstBoxWithoutKeys = (ilstBox) => {
   return ilstBox.entries.map((entry) => {
-    const key4 = chunk_n77gaszd_mapToKey(entry.index);
+    const key4 = chunk_gqesq3a3_mapToKey(entry.index);
     if (!key4) {
       return null;
     }
@@ -61853,14 +61873,14 @@ var chunk_n77gaszd_parseIlstBoxWithoutKeys = (ilstBox) => {
       key: key4,
       value: entry.value.value
     };
-  }).filter(chunk_n77gaszd_truthy);
+  }).filter(chunk_gqesq3a3_truthy);
 };
-var chunk_n77gaszd_parseIsoMetaBox = (meta, trackId) => {
+var chunk_gqesq3a3_parseIsoMetaBox = (meta, trackId) => {
   const ilstBox = meta.children.find((b) => b.type === "ilst-box");
   const keysBox = meta.children.find((b) => b.type === "keys-box");
   if (!ilstBox || !keysBox) {
     if (ilstBox) {
-      return chunk_n77gaszd_parseIlstBoxWithoutKeys(ilstBox);
+      return chunk_gqesq3a3_parseIlstBoxWithoutKeys(ilstBox);
     }
     return [];
   }
@@ -61879,8 +61899,8 @@ var chunk_n77gaszd_parseIsoMetaBox = (meta, trackId) => {
   }
   return entries;
 };
-var chunk_n77gaszd_getMetadataFromIsoBase = (state) => {
-  const moov = chunk_n77gaszd_getMoovBoxFromState({
+var chunk_gqesq3a3_getMetadataFromIsoBase = (state) => {
+  const moov = chunk_gqesq3a3_getMoovBoxFromState({
     structureState: state.structure,
     isoState: state.iso,
     mp4HeaderSegment: state.m3uPlaylistContext?.mp4HeaderSegment ?? null,
@@ -61889,7 +61909,7 @@ var chunk_n77gaszd_getMetadataFromIsoBase = (state) => {
   if (!moov) {
     return [];
   }
-  const traks = chunk_n77gaszd_getTraks(moov);
+  const traks = chunk_gqesq3a3_getTraks(moov);
   const meta = moov.children.find((b) => b.type === "regular-box" && b.boxType === "meta");
   const udta = moov.children.find((b) => b.type === "regular-box" && b.boxType === "udta");
   const metaInUdta = udta?.children.find((b) => {
@@ -61898,24 +61918,24 @@ var chunk_n77gaszd_getMetadataFromIsoBase = (state) => {
   const metaInTracks = traks.map((t) => {
     const metaBox = t.children.find((child) => child.type === "regular-box" && child.boxType === "meta");
     if (metaBox) {
-      const tkhd = chunk_n77gaszd_getTkhdBox(t);
+      const tkhd = chunk_gqesq3a3_getTkhdBox(t);
       if (!tkhd) {
         throw new Error("No tkhd box found");
       }
-      return chunk_n77gaszd_parseIsoMetaBox(metaBox, tkhd.trackId);
+      return chunk_gqesq3a3_parseIsoMetaBox(metaBox, tkhd.trackId);
     }
     return null;
-  }).filter(chunk_n77gaszd_truthy);
+  }).filter(chunk_gqesq3a3_truthy);
   return [
-    ...meta ? chunk_n77gaszd_parseIsoMetaBox(meta, null) : [],
-    ...metaInUdta ? chunk_n77gaszd_parseIsoMetaBox(metaInUdta, null) : [],
+    ...meta ? chunk_gqesq3a3_parseIsoMetaBox(meta, null) : [],
+    ...metaInUdta ? chunk_gqesq3a3_parseIsoMetaBox(metaInUdta, null) : [],
     ...metaInTracks.flat(1)
   ];
 };
-var chunk_n77gaszd_removeEndZeroes = (value) => {
-  return value.endsWith("\x00") ? chunk_n77gaszd_removeEndZeroes(value.slice(0, -1)) : value;
+var chunk_gqesq3a3_removeEndZeroes = (value) => {
+  return value.endsWith("\x00") ? chunk_gqesq3a3_removeEndZeroes(value.slice(0, -1)) : value;
 };
-var chunk_n77gaszd_parseSimpleTagIntoEbml = (children, trackId) => {
+var chunk_gqesq3a3_parseSimpleTagIntoEbml = (children, trackId) => {
   const tagName = children.find((c) => c.type === "TagName");
   const tagString = children.find((c) => c.type === "TagString");
   if (!tagName || !tagString) {
@@ -61924,10 +61944,10 @@ var chunk_n77gaszd_parseSimpleTagIntoEbml = (children, trackId) => {
   return {
     trackId,
     key: tagName.value.toLowerCase(),
-    value: chunk_n77gaszd_removeEndZeroes(tagString.value)
+    value: chunk_gqesq3a3_removeEndZeroes(tagString.value)
   };
 };
-var chunk_n77gaszd_getMetadataFromMatroska = (structure) => {
+var chunk_gqesq3a3_getMetadataFromMatroska = (structure) => {
   const entries = [];
   for (const segment of structure.boxes) {
     if (segment.type !== "Segment") {
@@ -61944,12 +61964,12 @@ var chunk_n77gaszd_getMetadataFromMatroska = (structure) => {
         if (target) {
           const tagTrackId = target.value.find((c) => c.type === "TagTrackUID")?.value;
           if (tagTrackId) {
-            trackId = chunk_n77gaszd_getTrackWithUid(segment, tagTrackId);
+            trackId = chunk_gqesq3a3_getTrackWithUid(segment, tagTrackId);
           }
         }
         const simpleTags = child.value.filter((s) => s.type === "SimpleTag");
         for (const simpleTag of simpleTags) {
-          const parsed = chunk_n77gaszd_parseSimpleTagIntoEbml(simpleTag.value, trackId);
+          const parsed = chunk_gqesq3a3_parseSimpleTagIntoEbml(simpleTag.value, trackId);
           if (parsed) {
             entries.push(parsed);
           }
@@ -61959,7 +61979,7 @@ var chunk_n77gaszd_getMetadataFromMatroska = (structure) => {
   }
   return entries;
 };
-var chunk_n77gaszd_getMetadataFromRiff = (structure) => {
+var chunk_gqesq3a3_getMetadataFromRiff = (structure) => {
   const boxes = structure.boxes.find((b) => b.type === "list-box" && b.listType === "INFO");
   if (!boxes) {
     return [];
@@ -61974,52 +61994,52 @@ var chunk_n77gaszd_getMetadataFromRiff = (structure) => {
       key: "encoder",
       value: child.software
     };
-  }).filter(chunk_n77gaszd_truthy);
+  }).filter(chunk_gqesq3a3_truthy);
 };
-var chunk_n77gaszd_getMetadata = (state) => {
+var chunk_gqesq3a3_getMetadata = (state) => {
   const structure = state.structure.getStructure();
   if (structure.type === "matroska") {
-    return chunk_n77gaszd_getMetadataFromMatroska(structure);
+    return chunk_gqesq3a3_getMetadataFromMatroska(structure);
   }
   if (structure.type === "riff") {
-    return chunk_n77gaszd_getMetadataFromRiff(structure);
+    return chunk_gqesq3a3_getMetadataFromRiff(structure);
   }
   if (structure.type === "transport-stream" || structure.type === "m3u") {
     return [];
   }
   if (structure.type === "mp3") {
-    const tags2 = chunk_n77gaszd_getMetadataFromMp3(structure);
+    const tags2 = chunk_gqesq3a3_getMetadataFromMp3(structure);
     if (tags2 === null) {
       throw new Error("Failed to get metadata from mp3");
     }
     return tags2;
   }
   if (structure.type === "wav") {
-    return chunk_n77gaszd_getMetadataFromWav(structure) ?? [];
+    return chunk_gqesq3a3_getMetadataFromWav(structure) ?? [];
   }
   if (structure.type === "aac") {
     return [];
   }
   if (structure.type === "flac") {
-    return chunk_n77gaszd_getMetadataFromFlac(structure) ?? [];
+    return chunk_gqesq3a3_getMetadataFromFlac(structure) ?? [];
   }
   if (structure.type === "iso-base-media") {
-    return chunk_n77gaszd_getMetadataFromIsoBase(state);
+    return chunk_gqesq3a3_getMetadataFromIsoBase(state);
   }
   throw new Error("Unknown container " + structure);
 };
-var chunk_n77gaszd_hasMetadata = (structure) => {
+var chunk_gqesq3a3_hasMetadata = (structure) => {
   if (structure.type === "mp3") {
-    return chunk_n77gaszd_getMetadataFromMp3(structure) !== null;
+    return chunk_gqesq3a3_getMetadataFromMp3(structure) !== null;
   }
   if (structure.type === "wav") {
-    return chunk_n77gaszd_getMetadataFromWav(structure) !== null;
+    return chunk_gqesq3a3_getMetadataFromWav(structure) !== null;
   }
   if (structure.type === "m3u" || structure.type === "transport-stream" || structure.type === "aac") {
     return true;
   }
   if (structure.type === "flac") {
-    return chunk_n77gaszd_getMetadataFromFlac(structure) !== null;
+    return chunk_gqesq3a3_getMetadataFromFlac(structure) !== null;
   }
   if (structure.type === "iso-base-media") {
     return false;
@@ -62032,7 +62052,7 @@ var chunk_n77gaszd_hasMetadata = (structure) => {
   }
   throw new Error("Unknown container " + structure);
 };
-function chunk_n77gaszd_parseLocation(locationString) {
+function chunk_gqesq3a3_parseLocation(locationString) {
   const locationPattern = /^([+-]\d{2}\.?\d{0,10})([+-]\d{3}\.?\d{0,10})([+-]\d+(\.\d+)?)?\/$/;
   const match = locationString.match(locationPattern);
   if (!match) {
@@ -62047,12 +62067,12 @@ function chunk_n77gaszd_parseLocation(locationString) {
     altitude
   };
 }
-var chunk_n77gaszd_getLocation = (state) => {
-  const metadata = chunk_n77gaszd_getMetadata(state);
+var chunk_gqesq3a3_getLocation = (state) => {
+  const metadata = chunk_gqesq3a3_getMetadata(state);
   const locationEntry = metadata.find((entry) => entry.key === "com.apple.quicktime.location.ISO6709");
   const horizontalAccuracy = metadata.find((entry) => entry.key === "com.apple.quicktime.location.accuracy.horizontal");
   if (locationEntry) {
-    const parsed = chunk_n77gaszd_parseLocation(locationEntry.value);
+    const parsed = chunk_gqesq3a3_parseLocation(locationEntry.value);
     if (parsed === null) {
       return null;
     }
@@ -62063,23 +62083,23 @@ var chunk_n77gaszd_getLocation = (state) => {
   }
   return null;
 };
-var chunk_n77gaszd_getNumberOfAudioChannels = (state) => {
+var chunk_gqesq3a3_getNumberOfAudioChannels = (state) => {
   return state.callbacks.tracks.getTracks().find((track) => {
     return track.type === "audio";
   })?.numberOfChannels ?? null;
 };
-var chunk_n77gaszd_hasNumberOfAudioChannels = (state) => {
+var chunk_gqesq3a3_hasNumberOfAudioChannels = (state) => {
   return state.callbacks.tracks.hasAllTracks();
 };
-var chunk_n77gaszd_getSampleRate3 = (state) => {
+var chunk_gqesq3a3_getSampleRate3 = (state) => {
   return state.callbacks.tracks.getTracks().find((track) => {
     return track.type === "audio";
   })?.sampleRate ?? null;
 };
-var chunk_n77gaszd_hasSampleRate = (state) => {
+var chunk_gqesq3a3_hasSampleRate = (state) => {
   return state.callbacks.tracks.hasAllTracks();
 };
-var chunk_n77gaszd_getSeekingByteForAac = ({
+var chunk_gqesq3a3_getSeekingByteForAac = ({
   time: time2,
   seekingHints
 }) => {
@@ -62108,7 +62128,7 @@ var chunk_n77gaszd_getSeekingByteForAac = ({
   }
   return { type: "valid-but-must-wait" };
 };
-var chunk_n77gaszd_getSeekingByteForFlac = ({
+var chunk_gqesq3a3_getSeekingByteForFlac = ({
   time: time2,
   seekingHints
 }) => {
@@ -62133,7 +62153,7 @@ var chunk_n77gaszd_getSeekingByteForFlac = ({
   }
   return null;
 };
-var chunk_n77gaszd_findKeyframeBeforeTime = ({
+var chunk_gqesq3a3_findKeyframeBeforeTime = ({
   samplePositions,
   time: time2,
   timescale,
@@ -62162,30 +62182,30 @@ var chunk_n77gaszd_findKeyframeBeforeTime = ({
   }
   const mediaSection = mediaSections.find((section) => videoSample.offset >= section.start && videoSample.offset < section.start + section.size);
   if (!mediaSection) {
-    chunk_n77gaszd_Log.trace(logLevel, "Found a sample, but the offset has not yet been marked as a video section yet. Not yet able to seek, but probably once we have started reading the next box.", videoSample);
+    chunk_gqesq3a3_Log.trace(logLevel, "Found a sample, but the offset has not yet been marked as a video section yet. Not yet able to seek, but probably once we have started reading the next box.", videoSample);
     return null;
   }
   return videoSample;
 };
-var chunk_n77gaszd_findAnyTrackWithSamplePositions = (allTracks, struc) => {
-  const moov = chunk_n77gaszd_getMoovFromFromIsoStructure(struc);
+var chunk_gqesq3a3_findAnyTrackWithSamplePositions = (allTracks, struc) => {
+  const moov = chunk_gqesq3a3_getMoovFromFromIsoStructure(struc);
   if (!moov) {
     return null;
   }
   for (const track of allTracks) {
     if (track.type === "video" || track.type === "audio") {
-      const trakBox = chunk_n77gaszd_getTrakBoxByTrackId(moov, track.trackId);
+      const trakBox = chunk_gqesq3a3_getTrakBoxByTrackId(moov, track.trackId);
       if (!trakBox) {
         continue;
       }
-      const { samplePositions } = chunk_n77gaszd_getSamplePositionsFromTrack({
+      const { samplePositions } = chunk_gqesq3a3_getSamplePositionsFromTrack({
         trakBox,
-        moofBoxes: chunk_n77gaszd_getMoofBoxes(struc.boxes),
-        moofComplete: chunk_n77gaszd_areSamplesComplete({
-          moofBoxes: chunk_n77gaszd_getMoofBoxes(struc.boxes),
-          tfraBoxes: chunk_n77gaszd_getTfraBoxes(struc.boxes)
+        moofBoxes: chunk_gqesq3a3_getMoofBoxes(struc.boxes),
+        moofComplete: chunk_gqesq3a3_areSamplesComplete({
+          moofBoxes: chunk_gqesq3a3_getMoofBoxes(struc.boxes),
+          tfraBoxes: chunk_gqesq3a3_getTfraBoxes(struc.boxes)
         }),
-        trexBoxes: chunk_n77gaszd_getTrexBoxes(moov)
+        trexBoxes: chunk_gqesq3a3_getTrexBoxes(moov)
       });
       if (samplePositions.length === 0) {
         continue;
@@ -62195,35 +62215,35 @@ var chunk_n77gaszd_findAnyTrackWithSamplePositions = (allTracks, struc) => {
   }
   return null;
 };
-var chunk_n77gaszd_findTrackToSeek = (allTracks, structure) => {
+var chunk_gqesq3a3_findTrackToSeek = (allTracks, structure) => {
   const firstVideoTrack = allTracks.find((t) => t.type === "video");
   const struc = structure.getIsoStructure();
   if (!firstVideoTrack) {
-    return chunk_n77gaszd_findAnyTrackWithSamplePositions(allTracks, struc);
+    return chunk_gqesq3a3_findAnyTrackWithSamplePositions(allTracks, struc);
   }
-  const moov = chunk_n77gaszd_getMoovFromFromIsoStructure(struc);
+  const moov = chunk_gqesq3a3_getMoovFromFromIsoStructure(struc);
   if (!moov) {
     return null;
   }
-  const trakBox = chunk_n77gaszd_getTrakBoxByTrackId(moov, firstVideoTrack.trackId);
+  const trakBox = chunk_gqesq3a3_getTrakBoxByTrackId(moov, firstVideoTrack.trackId);
   if (!trakBox) {
     return null;
   }
-  const { samplePositions } = chunk_n77gaszd_getSamplePositionsFromTrack({
+  const { samplePositions } = chunk_gqesq3a3_getSamplePositionsFromTrack({
     trakBox,
-    moofBoxes: chunk_n77gaszd_getMoofBoxes(struc.boxes),
-    moofComplete: chunk_n77gaszd_areSamplesComplete({
-      moofBoxes: chunk_n77gaszd_getMoofBoxes(struc.boxes),
-      tfraBoxes: chunk_n77gaszd_getTfraBoxes(struc.boxes)
+    moofBoxes: chunk_gqesq3a3_getMoofBoxes(struc.boxes),
+    moofComplete: chunk_gqesq3a3_areSamplesComplete({
+      moofBoxes: chunk_gqesq3a3_getMoofBoxes(struc.boxes),
+      tfraBoxes: chunk_gqesq3a3_getTfraBoxes(struc.boxes)
     }),
-    trexBoxes: chunk_n77gaszd_getTrexBoxes(moov)
+    trexBoxes: chunk_gqesq3a3_getTrexBoxes(moov)
   });
   if (samplePositions.length === 0) {
-    return chunk_n77gaszd_findAnyTrackWithSamplePositions(allTracks, struc);
+    return chunk_gqesq3a3_findAnyTrackWithSamplePositions(allTracks, struc);
   }
   return { track: firstVideoTrack, samplePositions };
 };
-var chunk_n77gaszd_isByteInMediaSection = ({
+var chunk_gqesq3a3_isByteInMediaSection = ({
   position,
   mediaSections
 }) => {
@@ -62237,7 +62257,7 @@ var chunk_n77gaszd_isByteInMediaSection = ({
   }
   return "outside-section";
 };
-var chunk_n77gaszd_getCurrentMediaSection = ({
+var chunk_gqesq3a3_getCurrentMediaSection = ({
   offset,
   mediaSections
 }) => {
@@ -62248,7 +62268,7 @@ var chunk_n77gaszd_getCurrentMediaSection = ({
   }
   return null;
 };
-var chunk_n77gaszd_mediaSectionState = () => {
+var chunk_gqesq3a3_mediaSectionState = () => {
   const mediaSections = [];
   const addMediaSection = (section) => {
     const overlaps = mediaSections.some((existingSection) => section.start < existingSection.start + existingSection.size && section.start + section.size > existingSection.start);
@@ -62268,7 +62288,7 @@ var chunk_n77gaszd_mediaSectionState = () => {
   };
   const isCurrentByteInMediaSection = (iterator) => {
     const offset = iterator.counter.getOffset();
-    return chunk_n77gaszd_isByteInMediaSection({
+    return chunk_gqesq3a3_isByteInMediaSection({
       position: offset,
       mediaSections
     });
@@ -62283,13 +62303,13 @@ var chunk_n77gaszd_mediaSectionState = () => {
     addMediaSection,
     getMediaSections,
     isCurrentByteInMediaSection,
-    isByteInMediaSection: chunk_n77gaszd_isByteInMediaSection,
-    getCurrentMediaSection: chunk_n77gaszd_getCurrentMediaSection,
+    isByteInMediaSection: chunk_gqesq3a3_isByteInMediaSection,
+    getCurrentMediaSection: chunk_gqesq3a3_getCurrentMediaSection,
     getMediaSectionAssertOnlyOne,
     mediaSections
   };
 };
-var chunk_n77gaszd_getSamplePositionBounds = (samplePositions, timescale) => {
+var chunk_gqesq3a3_getSamplePositionBounds = (samplePositions, timescale) => {
   let min = Infinity;
   let max = -Infinity;
   for (const samplePosition of samplePositions) {
@@ -62304,7 +62324,7 @@ var chunk_n77gaszd_getSamplePositionBounds = (samplePositions, timescale) => {
   }
   return { min: min / timescale, max: max / timescale };
 };
-var chunk_n77gaszd_findBestSegmentFromTfra = ({
+var chunk_gqesq3a3_findBestSegmentFromTfra = ({
   mfra,
   time: time2,
   firstTrack,
@@ -62330,7 +62350,7 @@ var chunk_n77gaszd_findBestSegmentFromTfra = ({
     end: offsetOfNext
   };
 };
-var chunk_n77gaszd_getSeekingByteFromFragmentedMp4 = async ({
+var chunk_gqesq3a3_getSeekingByteFromFragmentedMp4 = async ({
   info,
   time: time2,
   logLevel,
@@ -62346,7 +62366,7 @@ var chunk_n77gaszd_getSeekingByteFromFragmentedMp4 = async ({
   if (!firstTrack) {
     throw new Error("no video and no audio tracks");
   }
-  const moov = chunk_n77gaszd_getMoovBoxFromState({
+  const moov = chunk_gqesq3a3_getMoovBoxFromState({
     structureState: structure,
     isoState,
     mp4HeaderSegment,
@@ -62355,30 +62375,30 @@ var chunk_n77gaszd_getSeekingByteFromFragmentedMp4 = async ({
   if (!moov) {
     throw new Error("No moov atom found");
   }
-  const trakBox = chunk_n77gaszd_getTrakBoxByTrackId(moov, firstTrack.trackId);
+  const trakBox = chunk_gqesq3a3_getTrakBoxByTrackId(moov, firstTrack.trackId);
   if (!trakBox) {
     throw new Error("No trak box found");
   }
-  const tkhdBox = chunk_n77gaszd_getTkhdBox(trakBox);
+  const tkhdBox = chunk_gqesq3a3_getTkhdBox(trakBox);
   if (!tkhdBox) {
     throw new Error("Expected tkhd box in trak box");
   }
-  const isComplete = chunk_n77gaszd_areSamplesComplete({
+  const isComplete = chunk_gqesq3a3_areSamplesComplete({
     moofBoxes: info.moofBoxes,
     tfraBoxes: info.tfraBoxes
   });
-  const { samplePositions: samplePositionsArray } = chunk_n77gaszd_collectSamplePositionsFromMoofBoxes({
+  const { samplePositions: samplePositionsArray } = chunk_gqesq3a3_collectSamplePositionsFromMoofBoxes({
     moofBoxes: info.moofBoxes,
     tkhdBox,
     isComplete,
-    trexBoxes: chunk_n77gaszd_getTrexBoxes(moov)
+    trexBoxes: chunk_gqesq3a3_getTrexBoxes(moov)
   });
-  chunk_n77gaszd_Log.trace(logLevel, "Fragmented MP4 - Checking if we have seeking info for this time range");
+  chunk_gqesq3a3_Log.trace(logLevel, "Fragmented MP4 - Checking if we have seeking info for this time range");
   for (const positions of samplePositionsArray) {
-    const { min, max } = chunk_n77gaszd_getSamplePositionBounds(positions.samples, firstTrack.originalTimescale);
+    const { min, max } = chunk_gqesq3a3_getSamplePositionBounds(positions.samples, firstTrack.originalTimescale);
     if (min <= time2 && (positions.isLastFragment || isLastChunkInPlaylist || time2 <= max)) {
-      chunk_n77gaszd_Log.trace(logLevel, `Fragmented MP4 - Found that we have seeking info for this time range: ${min} <= ${time2} <= ${max}`);
-      const kf = chunk_n77gaszd_findKeyframeBeforeTime({
+      chunk_gqesq3a3_Log.trace(logLevel, `Fragmented MP4 - Found that we have seeking info for this time range: ${min} <= ${time2} <= ${max}`);
+      const kf = chunk_gqesq3a3_findKeyframeBeforeTime({
         samplePositions: positions.samples,
         time: time2,
         timescale: firstTrack.originalTimescale,
@@ -62397,22 +62417,22 @@ var chunk_n77gaszd_getSeekingByteFromFragmentedMp4 = async ({
   }
   const atom = await (info.mfraAlreadyLoaded ? Promise.resolve(info.mfraAlreadyLoaded) : isoState.mfra.triggerLoad());
   if (atom) {
-    const moofOffset = chunk_n77gaszd_findBestSegmentFromTfra({
+    const moofOffset = chunk_gqesq3a3_findBestSegmentFromTfra({
       mfra: atom,
       time: time2,
       firstTrack,
       timescale: firstTrack.originalTimescale
     });
     if (moofOffset !== null && !(moofOffset.start <= currentPosition && currentPosition < moofOffset.end)) {
-      chunk_n77gaszd_Log.verbose(logLevel, `Fragmented MP4 - Found based on mfra information that we should seek to: ${moofOffset.start} ${moofOffset.end}`);
+      chunk_gqesq3a3_Log.verbose(logLevel, `Fragmented MP4 - Found based on mfra information that we should seek to: ${moofOffset.start} ${moofOffset.end}`);
       return {
         type: "intermediary-seek",
         byte: moofOffset.start
       };
     }
   }
-  chunk_n77gaszd_Log.trace(logLevel, "Fragmented MP4 - No seeking info found for this time range.");
-  if (chunk_n77gaszd_isByteInMediaSection({
+  chunk_gqesq3a3_Log.trace(logLevel, "Fragmented MP4 - No seeking info found for this time range.");
+  if (chunk_gqesq3a3_isByteInMediaSection({
     position: currentPosition,
     mediaSections: info.mediaSections
   }) !== "in-section") {
@@ -62420,8 +62440,8 @@ var chunk_n77gaszd_getSeekingByteFromFragmentedMp4 = async ({
       type: "valid-but-must-wait"
     };
   }
-  chunk_n77gaszd_Log.trace(logLevel, "Fragmented MP4 - Inside the wrong video section, skipping to the end of the section");
-  const mediaSection = chunk_n77gaszd_getCurrentMediaSection({
+  chunk_gqesq3a3_Log.trace(logLevel, "Fragmented MP4 - Inside the wrong video section, skipping to the end of the section");
+  const mediaSection = chunk_gqesq3a3_getCurrentMediaSection({
     offset: currentPosition,
     mediaSections: info.mediaSections
   });
@@ -62433,7 +62453,7 @@ var chunk_n77gaszd_getSeekingByteFromFragmentedMp4 = async ({
     byte: mediaSection.start + mediaSection.size
   };
 };
-var chunk_n77gaszd_getSeekingByteFromIsoBaseMedia = ({
+var chunk_gqesq3a3_getSeekingByteFromIsoBaseMedia = ({
   info,
   time: time2,
   logLevel,
@@ -62442,26 +62462,26 @@ var chunk_n77gaszd_getSeekingByteFromIsoBaseMedia = ({
   m3uPlaylistContext,
   structure
 }) => {
-  const tracks2 = chunk_n77gaszd_getTracksFromIsoBaseMedia({
+  const tracks2 = chunk_gqesq3a3_getTracksFromIsoBaseMedia({
     isoState,
     m3uPlaylistContext,
     structure,
     mayUsePrecomputed: false
   });
-  const hasMoov = Boolean(chunk_n77gaszd_getMoovBoxFromState({
+  const hasMoov = Boolean(chunk_gqesq3a3_getMoovBoxFromState({
     structureState: structure,
     isoState,
     mayUsePrecomputed: false,
     mp4HeaderSegment: m3uPlaylistContext?.mp4HeaderSegment ?? null
   }));
   if (!hasMoov) {
-    chunk_n77gaszd_Log.trace(logLevel, "No moov box found, must wait");
+    chunk_gqesq3a3_Log.trace(logLevel, "No moov box found, must wait");
     return Promise.resolve({
       type: "valid-but-must-wait"
     });
   }
   if (info.moofBoxes.length > 0) {
-    return chunk_n77gaszd_getSeekingByteFromFragmentedMp4({
+    return chunk_gqesq3a3_getSeekingByteFromFragmentedMp4({
       info,
       time: time2,
       logLevel,
@@ -62473,14 +62493,14 @@ var chunk_n77gaszd_getSeekingByteFromIsoBaseMedia = ({
       mp4HeaderSegment: m3uPlaylistContext?.mp4HeaderSegment ?? null
     });
   }
-  const trackWithSamplePositions = chunk_n77gaszd_findTrackToSeek(tracks2, structure);
+  const trackWithSamplePositions = chunk_gqesq3a3_findTrackToSeek(tracks2, structure);
   if (!trackWithSamplePositions) {
     return Promise.resolve({
       type: "valid-but-must-wait"
     });
   }
   const { track, samplePositions } = trackWithSamplePositions;
-  const keyframe = chunk_n77gaszd_findKeyframeBeforeTime({
+  const keyframe = chunk_gqesq3a3_findKeyframeBeforeTime({
     samplePositions,
     time: time2,
     timescale: track.originalTimescale,
@@ -62499,7 +62519,7 @@ var chunk_n77gaszd_getSeekingByteFromIsoBaseMedia = ({
     type: "invalid"
   });
 };
-var chunk_n77gaszd_clearM3uStateInPrepareForSeek = ({
+var chunk_gqesq3a3_clearM3uStateInPrepareForSeek = ({
   m3uState,
   logLevel
 }) => {
@@ -62509,19 +62529,19 @@ var chunk_n77gaszd_clearM3uStateInPrepareForSeek = ({
     if (streamRun) {
       streamRun.abort();
     }
-    chunk_n77gaszd_Log.trace(logLevel, "Clearing M3U stream run for", playlistUrl);
+    chunk_gqesq3a3_Log.trace(logLevel, "Clearing M3U stream run for", playlistUrl);
     m3uState.setM3uStreamRun(playlistUrl, null);
   }
   m3uState.clearAllChunksProcessed();
   m3uState.sampleSorter.clearSamples();
 };
-var chunk_n77gaszd_getSeekingByteForM3u8 = ({
+var chunk_gqesq3a3_getSeekingByteForM3u8 = ({
   time: time2,
   currentPosition,
   m3uState,
   logLevel
 }) => {
-  chunk_n77gaszd_clearM3uStateInPrepareForSeek({ m3uState, logLevel });
+  chunk_gqesq3a3_clearM3uStateInPrepareForSeek({ m3uState, logLevel });
   const selectedPlaylists = m3uState.getSelectedPlaylists();
   for (const playlistUrl of selectedPlaylists) {
     m3uState.setSeekToSecondsToProcess(playlistUrl, {
@@ -62534,7 +62554,7 @@ var chunk_n77gaszd_getSeekingByteForM3u8 = ({
     timeInSeconds: time2
   };
 };
-var chunk_n77gaszd_getApproximateByteFromBitrate = ({
+var chunk_gqesq3a3_getApproximateByteFromBitrate = ({
   mp3BitrateInfo,
   timeInSeconds,
   mp3Info,
@@ -62544,11 +62564,11 @@ var chunk_n77gaszd_getApproximateByteFromBitrate = ({
   if (mp3BitrateInfo.type === "variable") {
     return null;
   }
-  const samplesPerFrame = chunk_n77gaszd_getSamplesPerMpegFrame({
+  const samplesPerFrame = chunk_gqesq3a3_getSamplesPerMpegFrame({
     layer: mp3Info.layer,
     mpegVersion: mp3Info.mpegVersion
   });
-  const frameLengthInBytes = chunk_n77gaszd_getMpegFrameLength({
+  const frameLengthInBytes = chunk_gqesq3a3_getMpegFrameLength({
     bitrateKbit: mp3BitrateInfo.bitrateInKbit,
     padding: false,
     samplesPerFrame,
@@ -62562,7 +62582,7 @@ var chunk_n77gaszd_getApproximateByteFromBitrate = ({
   const byteBeforeFrame = byteRelativeToMediaSection + mediaSection.start;
   return byteBeforeFrame;
 };
-var chunk_n77gaszd_getByteFromObservedSamples = ({
+var chunk_gqesq3a3_getByteFromObservedSamples = ({
   info,
   timeInSeconds
 }) => {
@@ -62584,12 +62604,12 @@ var chunk_n77gaszd_getByteFromObservedSamples = ({
   }
   return bestAudioSample;
 };
-var chunk_n77gaszd_SAMPLE_RATES = [44100, 48000, 32000, 99999];
-var chunk_n77gaszd_FRAMES_FLAG = 1;
-var chunk_n77gaszd_BYTES_FLAG = 2;
-var chunk_n77gaszd_TOC_FLAG = 4;
-var chunk_n77gaszd_VBR_SCALE_FLAG = 8;
-var chunk_n77gaszd_extractI4 = (data, offset) => {
+var chunk_gqesq3a3_SAMPLE_RATES = [44100, 48000, 32000, 99999];
+var chunk_gqesq3a3_FRAMES_FLAG = 1;
+var chunk_gqesq3a3_BYTES_FLAG = 2;
+var chunk_gqesq3a3_TOC_FLAG = 4;
+var chunk_gqesq3a3_VBR_SCALE_FLAG = 8;
+var chunk_gqesq3a3_extractI4 = (data, offset) => {
   let x = 0;
   x = data[offset];
   x <<= 8;
@@ -62600,7 +62620,7 @@ var chunk_n77gaszd_extractI4 = (data, offset) => {
   x |= data[offset + 3];
   return x;
 };
-var chunk_n77gaszd_parseXing = (data) => {
+var chunk_gqesq3a3_parseXing = (data) => {
   const h_id = data[1] >> 3 & 1;
   const h_sr_index = data[2] >> 2 & 3;
   const h_mode = data[3] >> 6 & 3;
@@ -62620,31 +62640,31 @@ var chunk_n77gaszd_parseXing = (data) => {
   if (expectXing !== "Xing") {
     throw new Error("Invalid Xing header");
   }
-  let sampleRate = chunk_n77gaszd_SAMPLE_RATES[h_sr_index];
+  let sampleRate = chunk_gqesq3a3_SAMPLE_RATES[h_sr_index];
   if (h_id === 0) {
     sampleRate >>= 1;
   }
   let offset = xingOffset + 4;
-  const flags = chunk_n77gaszd_extractI4(data, offset);
+  const flags = chunk_gqesq3a3_extractI4(data, offset);
   offset += 4;
   let numberOfFrames;
   let fileSize;
   let tableOfContents;
   let vbrScale;
-  if (flags & chunk_n77gaszd_FRAMES_FLAG) {
-    numberOfFrames = chunk_n77gaszd_extractI4(data, offset);
+  if (flags & chunk_gqesq3a3_FRAMES_FLAG) {
+    numberOfFrames = chunk_gqesq3a3_extractI4(data, offset);
     offset += 4;
   }
-  if (flags & chunk_n77gaszd_BYTES_FLAG) {
-    fileSize = chunk_n77gaszd_extractI4(data, offset);
+  if (flags & chunk_gqesq3a3_BYTES_FLAG) {
+    fileSize = chunk_gqesq3a3_extractI4(data, offset);
     offset += 4;
   }
-  if (flags & chunk_n77gaszd_TOC_FLAG) {
+  if (flags & chunk_gqesq3a3_TOC_FLAG) {
     tableOfContents = data.slice(offset, offset + 100);
     offset += 100;
   }
-  if (flags & chunk_n77gaszd_VBR_SCALE_FLAG) {
-    vbrScale = chunk_n77gaszd_extractI4(data, offset);
+  if (flags & chunk_gqesq3a3_VBR_SCALE_FLAG) {
+    vbrScale = chunk_gqesq3a3_extractI4(data, offset);
     offset += 4;
   }
   if (offset > data.length) {
@@ -62658,7 +62678,7 @@ var chunk_n77gaszd_parseXing = (data) => {
     vbrScale: vbrScale ?? null
   };
 };
-var chunk_n77gaszd_getSeekPointInBytes = ({
+var chunk_gqesq3a3_getSeekPointInBytes = ({
   fileSize,
   percentBetween0And100,
   tableOfContents
@@ -62678,7 +62698,7 @@ var chunk_n77gaszd_getSeekPointInBytes = ({
   const seekPoint = 1 / 256 * fx * fileSize;
   return Math.floor(seekPoint);
 };
-var chunk_n77gaszd_getTimeFromPosition = ({
+var chunk_gqesq3a3_getTimeFromPosition = ({
   position,
   fileSize,
   tableOfContents,
@@ -62695,16 +62715,16 @@ var chunk_n77gaszd_getTimeFromPosition = ({
   const percentBetween0And100 = index + percentWithinSegment;
   return percentBetween0And100 / 100 * durationInSeconds;
 };
-var chunk_n77gaszd_getSeekPointFromXing = ({
+var chunk_gqesq3a3_getSeekPointFromXing = ({
   timeInSeconds,
   xingData,
   mp3Info
 }) => {
-  const samplesPerFrame = chunk_n77gaszd_getSamplesPerMpegFrame({
+  const samplesPerFrame = chunk_gqesq3a3_getSamplesPerMpegFrame({
     layer: mp3Info.layer,
     mpegVersion: mp3Info.mpegVersion
   });
-  const duration2 = chunk_n77gaszd_getDurationFromMp3Xing({
+  const duration2 = chunk_gqesq3a3_getDurationFromMp3Xing({
     xingData,
     samplesPerFrame
   });
@@ -62714,13 +62734,13 @@ var chunk_n77gaszd_getSeekPointFromXing = ({
   if (!xingData.fileSize || !xingData.tableOfContents) {
     throw new Error("Cannot seek of VBR MP3 file");
   }
-  return chunk_n77gaszd_getSeekPointInBytes({
+  return chunk_gqesq3a3_getSeekPointInBytes({
     fileSize: xingData.fileSize,
     percentBetween0And100: timeToTarget / duration2 * 100,
     tableOfContents: xingData.tableOfContents
   });
 };
-var chunk_n77gaszd_getSeekingByteForMp3 = ({
+var chunk_gqesq3a3_getSeekingByteForMp3 = ({
   time: time2,
   info
 }) => {
@@ -62729,18 +62749,18 @@ var chunk_n77gaszd_getSeekingByteForMp3 = ({
       type: "valid-but-must-wait"
     };
   }
-  const approximateByte = chunk_n77gaszd_getApproximateByteFromBitrate({
+  const approximateByte = chunk_gqesq3a3_getApproximateByteFromBitrate({
     mp3BitrateInfo: info.mp3BitrateInfo,
     timeInSeconds: time2,
     mp3Info: info.mp3Info,
     mediaSection: info.mediaSection,
     contentLength: info.contentLength
   });
-  const bestAudioSample = chunk_n77gaszd_getByteFromObservedSamples({
+  const bestAudioSample = chunk_gqesq3a3_getByteFromObservedSamples({
     info,
     timeInSeconds: time2
   });
-  const xingSeekPoint = info.mp3BitrateInfo.type === "variable" ? chunk_n77gaszd_getSeekPointFromXing({
+  const xingSeekPoint = info.mp3BitrateInfo.type === "variable" ? chunk_gqesq3a3_getSeekPointFromXing({
     mp3Info: info.mp3Info,
     timeInSeconds: time2,
     xingData: info.mp3BitrateInfo.xingData
@@ -62763,7 +62783,7 @@ var chunk_n77gaszd_getSeekingByteForMp3 = ({
     timeInSeconds
   };
 };
-function chunk_n77gaszd_findLastKeyframe({
+function chunk_gqesq3a3_findLastKeyframe({
   keyframes,
   timeInSeconds
 }) {
@@ -62778,7 +62798,7 @@ function chunk_n77gaszd_findLastKeyframe({
   }
   return bestKeyframe;
 }
-var chunk_n77gaszd_getSeekingByteForRiff = async ({
+var chunk_gqesq3a3_getSeekingByteForRiff = async ({
   info,
   time: time2,
   riffState,
@@ -62786,7 +62806,7 @@ var chunk_n77gaszd_getSeekingByteForRiff = async ({
 }) => {
   const idx1Entries = await (info.hasIndex ? riffState.lazyIdx1.waitForLoaded() : Promise.resolve(null));
   if (idx1Entries === null) {
-    const lastKeyframe = chunk_n77gaszd_findLastKeyframe({
+    const lastKeyframe = chunk_gqesq3a3_findLastKeyframe({
       keyframes: info.observedKeyframes,
       timeInSeconds: time2
     });
@@ -62836,7 +62856,7 @@ var chunk_n77gaszd_getSeekingByteForRiff = async ({
     timeInSeconds: bestEntry.sampleCounts[idx1Entries.videoTrackIndex] / info.samplesPerSecond
   };
 };
-var chunk_n77gaszd_fixFloat = (value) => {
+var chunk_gqesq3a3_fixFloat = (value) => {
   if (value % 1 < 0.0000001) {
     return Math.floor(value);
   }
@@ -62845,25 +62865,25 @@ var chunk_n77gaszd_fixFloat = (value) => {
   }
   return value;
 };
-var chunk_n77gaszd_convertAudioOrVideoSampleToWebCodecsTimestamps = ({
+var chunk_gqesq3a3_convertAudioOrVideoSampleToWebCodecsTimestamps = ({
   sample,
   timescale
 }) => {
-  if (timescale === chunk_n77gaszd_WEBCODECS_TIMESCALE) {
+  if (timescale === chunk_gqesq3a3_WEBCODECS_TIMESCALE) {
     return sample;
   }
   const { decodingTimestamp: dts, timestamp } = sample;
   return {
-    decodingTimestamp: chunk_n77gaszd_fixFloat(dts * (chunk_n77gaszd_WEBCODECS_TIMESCALE / timescale)),
-    timestamp: chunk_n77gaszd_fixFloat(timestamp * (chunk_n77gaszd_WEBCODECS_TIMESCALE / timescale)),
-    duration: sample.duration === undefined ? undefined : chunk_n77gaszd_fixFloat(sample.duration * (chunk_n77gaszd_WEBCODECS_TIMESCALE / timescale)),
+    decodingTimestamp: chunk_gqesq3a3_fixFloat(dts * (chunk_gqesq3a3_WEBCODECS_TIMESCALE / timescale)),
+    timestamp: chunk_gqesq3a3_fixFloat(timestamp * (chunk_gqesq3a3_WEBCODECS_TIMESCALE / timescale)),
+    duration: sample.duration === undefined ? undefined : chunk_gqesq3a3_fixFloat(sample.duration * (chunk_gqesq3a3_WEBCODECS_TIMESCALE / timescale)),
     data: sample.data,
     type: sample.type,
     offset: sample.offset,
     ..."avc" in sample ? { avc: sample.avc } : {}
   };
 };
-var chunk_n77gaszd_getDimensionsFromSps = (sps) => {
+var chunk_gqesq3a3_getDimensionsFromSps = (sps) => {
   const height = sps.pic_height_in_map_units_minus1;
   const width = sps.pic_width_in_mbs_minus1;
   return {
@@ -62871,7 +62891,7 @@ var chunk_n77gaszd_getDimensionsFromSps = (sps) => {
     width: (width + 1) * 16 - (sps.frame_crop_right_offset ?? 0) * 2 - (sps.frame_crop_left_offset ?? 0) * 2
   };
 };
-var chunk_n77gaszd_getSampleAspectRatioFromSps = (sps) => {
+var chunk_gqesq3a3_getSampleAspectRatioFromSps = (sps) => {
   if (sps.vui_parameters?.sar_height && sps.vui_parameters.sar_width) {
     return {
       width: sps.vui_parameters.sar_width,
@@ -62883,25 +62903,25 @@ var chunk_n77gaszd_getSampleAspectRatioFromSps = (sps) => {
     height: 1
   };
 };
-var chunk_n77gaszd_getVideoColorFromSps = (sps) => {
+var chunk_gqesq3a3_getVideoColorFromSps = (sps) => {
   const matrixCoefficients2 = sps.vui_parameters?.matrix_coefficients;
   const transferCharacteristics2 = sps.vui_parameters?.transfer_characteristics;
   const colorPrimaries = sps.vui_parameters?.colour_primaries;
   return {
-    matrix: matrixCoefficients2 ? chunk_n77gaszd_getMatrixCoefficientsFromIndex(matrixCoefficients2) : null,
-    transfer: transferCharacteristics2 ? chunk_n77gaszd_getTransferCharacteristicsFromIndex(transferCharacteristics2) : null,
-    primaries: colorPrimaries ? chunk_n77gaszd_getPrimariesFromIndex(colorPrimaries) : null,
+    matrix: matrixCoefficients2 ? chunk_gqesq3a3_getMatrixCoefficientsFromIndex(matrixCoefficients2) : null,
+    transfer: transferCharacteristics2 ? chunk_gqesq3a3_getTransferCharacteristicsFromIndex(transferCharacteristics2) : null,
+    primaries: colorPrimaries ? chunk_gqesq3a3_getPrimariesFromIndex(colorPrimaries) : null,
     fullRange: sps.vui_parameters?.video_full_range_flag ?? null
   };
 };
-var chunk_n77gaszd_getKeyFrameOrDeltaFromAvcInfo = (infos) => {
+var chunk_gqesq3a3_getKeyFrameOrDeltaFromAvcInfo = (infos) => {
   const keyOrDelta = infos.find((i) => i.type === "keyframe" || i.type === "delta-frame");
   if (!keyOrDelta) {
     throw new Error("expected avc to contain info about key or delta");
   }
   return keyOrDelta.type === "keyframe" ? "key" : keyOrDelta.isBidirectionalFrame ? "bidirectional" : "delta";
 };
-var chunk_n77gaszd_getSpsAndPps = (infos) => {
+var chunk_gqesq3a3_getSpsAndPps = (infos) => {
   const avcProfile = infos.find((i) => i.type === "avc-profile");
   const ppsProfile = infos.find((i) => i.type === "avc-pps");
   if (!avcProfile || !ppsProfile) {
@@ -62909,8 +62929,8 @@ var chunk_n77gaszd_getSpsAndPps = (infos) => {
   }
   return { pps: ppsProfile, sps: avcProfile };
 };
-var chunk_n77gaszd_MPEG_TIMESCALE = 90000;
-var chunk_n77gaszd_handleAvcPacket = async ({
+var chunk_gqesq3a3_MPEG_TIMESCALE = 90000;
+var chunk_gqesq3a3_handleAvcPacket = async ({
   streamBuffer,
   programId,
   offset,
@@ -62921,28 +62941,28 @@ var chunk_n77gaszd_handleAvcPacket = async ({
   makeSamplesStartAtZero,
   avcState
 }) => {
-  const avc = chunk_n77gaszd_parseAvc(streamBuffer.getBuffer(), avcState);
+  const avc = chunk_gqesq3a3_parseAvc(streamBuffer.getBuffer(), avcState);
   const isTrackRegistered = sampleCallbacks.tracks.getTracks().find((t) => {
     return t.trackId === programId;
   });
   if (!isTrackRegistered) {
-    const spsAndPps = chunk_n77gaszd_getSpsAndPps(avc);
-    const dimensions = chunk_n77gaszd_getDimensionsFromSps(spsAndPps.sps.spsData);
-    const sampleAspectRatio = chunk_n77gaszd_getSampleAspectRatioFromSps(spsAndPps.sps.spsData);
+    const spsAndPps = chunk_gqesq3a3_getSpsAndPps(avc);
+    const dimensions = chunk_gqesq3a3_getDimensionsFromSps(spsAndPps.sps.spsData);
+    const sampleAspectRatio = chunk_gqesq3a3_getSampleAspectRatioFromSps(spsAndPps.sps.spsData);
     const startOffset = makeSamplesStartAtZero ? Math.min(streamBuffer.pesHeader.pts, streamBuffer.pesHeader.dts ?? Infinity) : 0;
     transportStream.startOffset.setOffset({
       trackId: programId,
       newOffset: startOffset
     });
-    const codecPrivate2 = chunk_n77gaszd_createSpsPpsData(spsAndPps);
-    const advancedColor = chunk_n77gaszd_getVideoColorFromSps(spsAndPps.sps.spsData);
+    const codecPrivate2 = chunk_gqesq3a3_createSpsPpsData(spsAndPps);
+    const advancedColor = chunk_gqesq3a3_getVideoColorFromSps(spsAndPps.sps.spsData);
     const track = {
       m3uStreamFormat: null,
       rotation: 0,
       trackId: programId,
       type: "video",
-      originalTimescale: chunk_n77gaszd_MPEG_TIMESCALE,
-      codec: chunk_n77gaszd_getCodecStringFromSpsAndPps(spsAndPps.sps),
+      originalTimescale: chunk_gqesq3a3_MPEG_TIMESCALE,
+      codec: chunk_gqesq3a3_getCodecStringFromSpsAndPps(spsAndPps.sps),
       codecData: { type: "avc-sps-pps", data: codecPrivate2 },
       fps: null,
       codedWidth: dimensions.width,
@@ -62957,12 +62977,12 @@ var chunk_n77gaszd_handleAvcPacket = async ({
         denominator: sampleAspectRatio.height,
         numerator: sampleAspectRatio.width
       },
-      colorSpace: chunk_n77gaszd_mediaParserAdvancedColorToWebCodecsColor(advancedColor),
+      colorSpace: chunk_gqesq3a3_mediaParserAdvancedColorToWebCodecsColor(advancedColor),
       advancedColor,
       startInSeconds: 0,
-      timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+      timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
     };
-    await chunk_n77gaszd_registerVideoTrack({
+    await chunk_gqesq3a3_registerVideoTrack({
       track,
       container: "transport-stream",
       logLevel,
@@ -62971,7 +62991,7 @@ var chunk_n77gaszd_handleAvcPacket = async ({
       tracks: sampleCallbacks.tracks
     });
   }
-  const type = chunk_n77gaszd_getKeyFrameOrDeltaFromAvcInfo(avc);
+  const type = chunk_gqesq3a3_getKeyFrameOrDeltaFromAvcInfo(avc);
   const sample = {
     decodingTimestamp: (streamBuffer.pesHeader.dts ?? streamBuffer.pesHeader.pts) - transportStream.startOffset.getOffset(programId),
     timestamp: streamBuffer.pesHeader.pts - transportStream.startOffset.getOffset(programId),
@@ -62983,9 +63003,9 @@ var chunk_n77gaszd_handleAvcPacket = async ({
   if (type === "key") {
     transportStream.observedPesHeaders.markPtsAsKeyframe(streamBuffer.pesHeader.pts);
   }
-  const videoSample = chunk_n77gaszd_convertAudioOrVideoSampleToWebCodecsTimestamps({
+  const videoSample = chunk_gqesq3a3_convertAudioOrVideoSampleToWebCodecsTimestamps({
     sample,
-    timescale: chunk_n77gaszd_MPEG_TIMESCALE
+    timescale: chunk_gqesq3a3_MPEG_TIMESCALE
   });
   await sampleCallbacks.onVideoSample({
     videoSample,
@@ -62993,14 +63013,14 @@ var chunk_n77gaszd_handleAvcPacket = async ({
   });
   transportStream.lastEmittedSample.setLastEmittedSample(sample);
 };
-var chunk_n77gaszd_WAVE_SAMPLES_PER_SECOND = 25;
-var chunk_n77gaszd_getSeekingByteFromWav = ({
+var chunk_gqesq3a3_WAVE_SAMPLES_PER_SECOND = 25;
+var chunk_gqesq3a3_getSeekingByteFromWav = ({
   info,
   time: time2
 }) => {
   const bytesPerSecond = info.sampleRate * info.blockAlign;
   const durationInSeconds = info.mediaSection.size / bytesPerSecond;
-  const timeRoundedDown = Math.floor(Math.min(time2, durationInSeconds - 0.0000001) * chunk_n77gaszd_WAVE_SAMPLES_PER_SECOND) / chunk_n77gaszd_WAVE_SAMPLES_PER_SECOND;
+  const timeRoundedDown = Math.floor(Math.min(time2, durationInSeconds - 0.0000001) * chunk_gqesq3a3_WAVE_SAMPLES_PER_SECOND) / chunk_gqesq3a3_WAVE_SAMPLES_PER_SECOND;
   const byteOffset = bytesPerSecond * timeRoundedDown;
   return Promise.resolve({
     type: "do-seek",
@@ -63008,24 +63028,24 @@ var chunk_n77gaszd_getSeekingByteFromWav = ({
     timeInSeconds: timeRoundedDown
   });
 };
-var chunk_n77gaszd_toSeconds = (timeInTimescale, track) => {
+var chunk_gqesq3a3_toSeconds = (timeInTimescale, track) => {
   return timeInTimescale / track.timescale * 1000;
 };
-var chunk_n77gaszd_findBiggestCueBeforeTime = ({
+var chunk_gqesq3a3_findBiggestCueBeforeTime = ({
   cues,
   time: time2,
   track
 }) => {
   let biggestCueBeforeTime;
   for (const cue of cues) {
-    const cueTimeInSeconds = chunk_n77gaszd_toSeconds(cue.timeInTimescale, track);
-    if (cueTimeInSeconds < time2 && (!biggestCueBeforeTime || cueTimeInSeconds > chunk_n77gaszd_toSeconds(biggestCueBeforeTime.timeInTimescale, track))) {
+    const cueTimeInSeconds = chunk_gqesq3a3_toSeconds(cue.timeInTimescale, track);
+    if (cueTimeInSeconds < time2 && (!biggestCueBeforeTime || cueTimeInSeconds > chunk_gqesq3a3_toSeconds(biggestCueBeforeTime.timeInTimescale, track))) {
       biggestCueBeforeTime = cue;
     }
   }
   return biggestCueBeforeTime;
 };
-var chunk_n77gaszd_findKeyframeBeforeTime2 = ({
+var chunk_gqesq3a3_findKeyframeBeforeTime2 = ({
   keyframes,
   time: time2
 }) => {
@@ -63037,19 +63057,19 @@ var chunk_n77gaszd_findKeyframeBeforeTime2 = ({
   }
   return keyframeBeforeTime ?? null;
 };
-var chunk_n77gaszd_getByteFromCues = ({
+var chunk_gqesq3a3_getByteFromCues = ({
   cuesResponse,
   time: time2,
   info,
   logLevel
 }) => {
   if (!cuesResponse) {
-    chunk_n77gaszd_Log.trace(logLevel, "Has no Matroska cues at the moment, cannot use them");
+    chunk_gqesq3a3_Log.trace(logLevel, "Has no Matroska cues at the moment, cannot use them");
     return null;
   }
   const { cues, segmentOffset } = cuesResponse;
-  chunk_n77gaszd_Log.trace(logLevel, "Has Matroska cues. Will use them to perform a seek.");
-  const biggestCueBeforeTime = chunk_n77gaszd_findBiggestCueBeforeTime({
+  chunk_gqesq3a3_Log.trace(logLevel, "Has Matroska cues. Will use them to perform a seek.");
+  const biggestCueBeforeTime = chunk_gqesq3a3_findBiggestCueBeforeTime({
     cues,
     time: time2,
     track: info.track
@@ -63059,10 +63079,10 @@ var chunk_n77gaszd_getByteFromCues = ({
   }
   return {
     byte: biggestCueBeforeTime.clusterPositionInSegment + segmentOffset,
-    timeInSeconds: chunk_n77gaszd_toSeconds(biggestCueBeforeTime.timeInTimescale, info.track)
+    timeInSeconds: chunk_gqesq3a3_toSeconds(biggestCueBeforeTime.timeInTimescale, info.track)
   };
 };
-var chunk_n77gaszd_getSeekingByteFromMatroska = async ({
+var chunk_gqesq3a3_getSeekingByteFromMatroska = async ({
   time: time2,
   webmState,
   info,
@@ -63070,17 +63090,17 @@ var chunk_n77gaszd_getSeekingByteFromMatroska = async ({
   mediaSection
 }) => {
   if (!info.track) {
-    chunk_n77gaszd_Log.trace(logLevel, "No video track found, cannot seek yet");
+    chunk_gqesq3a3_Log.trace(logLevel, "No video track found, cannot seek yet");
     return {
       type: "valid-but-must-wait"
     };
   }
   const cuesResponse = info.loadedCues ?? await webmState.cues.getLoadedCues();
-  const byteFromObservedKeyframe = chunk_n77gaszd_findKeyframeBeforeTime2({
+  const byteFromObservedKeyframe = chunk_gqesq3a3_findKeyframeBeforeTime2({
     keyframes: info.keyframes,
     time: time2
   });
-  const byteFromCues = chunk_n77gaszd_getByteFromCues({
+  const byteFromCues = chunk_gqesq3a3_getByteFromCues({
     cuesResponse,
     time: time2,
     info,
@@ -63120,7 +63140,7 @@ var chunk_n77gaszd_getSeekingByteFromMatroska = async ({
     timeInSeconds
   };
 };
-var chunk_n77gaszd_makeObservedPesHeader = () => {
+var chunk_gqesq3a3_makeObservedPesHeader = () => {
   const pesHeaders = [];
   const confirmedAsKeyframe = [];
   const addPesHeader = (pesHeader) => {
@@ -63150,14 +63170,14 @@ var chunk_n77gaszd_makeObservedPesHeader = () => {
   };
   return state;
 };
-var chunk_n77gaszd_getLastKeyFrameBeforeTimeInSeconds = ({
+var chunk_gqesq3a3_getLastKeyFrameBeforeTimeInSeconds = ({
   observedPesHeaders,
   timeInSeconds,
   ptsStartOffset
 }) => {
-  return observedPesHeaders.findLast((k) => (k.pts - ptsStartOffset) / chunk_n77gaszd_MPEG_TIMESCALE <= timeInSeconds);
+  return observedPesHeaders.findLast((k) => (k.pts - ptsStartOffset) / chunk_gqesq3a3_MPEG_TIMESCALE <= timeInSeconds);
 };
-var chunk_n77gaszd_getSeekingByte = ({
+var chunk_gqesq3a3_getSeekingByte = ({
   info,
   time: time2,
   logLevel,
@@ -63173,7 +63193,7 @@ var chunk_n77gaszd_getSeekingByte = ({
   avcState
 }) => {
   if (info.type === "iso-base-media-seeking-hints") {
-    return chunk_n77gaszd_getSeekingByteFromIsoBaseMedia({
+    return chunk_gqesq3a3_getSeekingByteFromIsoBaseMedia({
       info,
       time: time2,
       logLevel,
@@ -63184,13 +63204,13 @@ var chunk_n77gaszd_getSeekingByte = ({
     });
   }
   if (info.type === "wav-seeking-hints") {
-    return chunk_n77gaszd_getSeekingByteFromWav({
+    return chunk_gqesq3a3_getSeekingByteFromWav({
       info,
       time: time2
     });
   }
   if (info.type === "webm-seeking-hints") {
-    return chunk_n77gaszd_getSeekingByteFromMatroska({
+    return chunk_gqesq3a3_getSeekingByteFromMatroska({
       info,
       time: time2,
       webmState,
@@ -63199,7 +63219,7 @@ var chunk_n77gaszd_getSeekingByte = ({
     });
   }
   if (info.type === "flac-seeking-hints") {
-    const byte = chunk_n77gaszd_getSeekingByteForFlac({
+    const byte = chunk_gqesq3a3_getSeekingByteForFlac({
       seekingHints: info,
       time: time2
     });
@@ -63215,7 +63235,7 @@ var chunk_n77gaszd_getSeekingByte = ({
     });
   }
   if (info.type === "transport-stream-seeking-hints") {
-    const lastKeyframeBeforeTimeInSeconds = chunk_n77gaszd_getLastKeyFrameBeforeTimeInSeconds({
+    const lastKeyframeBeforeTimeInSeconds = chunk_gqesq3a3_getLastKeyFrameBeforeTimeInSeconds({
       observedPesHeaders: info.observedPesHeaders,
       timeInSeconds: time2,
       ptsStartOffset: info.ptsStartOffset
@@ -63233,11 +63253,11 @@ var chunk_n77gaszd_getSeekingByte = ({
     return Promise.resolve({
       type: "do-seek",
       byte,
-      timeInSeconds: Math.min(lastKeyframeBeforeTimeInSeconds.pts, lastKeyframeBeforeTimeInSeconds.dts ?? Infinity) / chunk_n77gaszd_MPEG_TIMESCALE
+      timeInSeconds: Math.min(lastKeyframeBeforeTimeInSeconds.pts, lastKeyframeBeforeTimeInSeconds.dts ?? Infinity) / chunk_gqesq3a3_MPEG_TIMESCALE
     });
   }
   if (info.type === "riff-seeking-hints") {
-    return chunk_n77gaszd_getSeekingByteForRiff({
+    return chunk_gqesq3a3_getSeekingByteForRiff({
       info,
       time: time2,
       riffState,
@@ -63245,19 +63265,19 @@ var chunk_n77gaszd_getSeekingByte = ({
     });
   }
   if (info.type === "mp3-seeking-hints") {
-    return Promise.resolve(chunk_n77gaszd_getSeekingByteForMp3({
+    return Promise.resolve(chunk_gqesq3a3_getSeekingByteForMp3({
       info,
       time: time2
     }));
   }
   if (info.type === "aac-seeking-hints") {
-    return Promise.resolve(chunk_n77gaszd_getSeekingByteForAac({
+    return Promise.resolve(chunk_gqesq3a3_getSeekingByteForAac({
       time: time2,
       seekingHints: info
     }));
   }
   if (info.type === "m3u8-seeking-hints") {
-    return Promise.resolve(chunk_n77gaszd_getSeekingByteForM3u8({
+    return Promise.resolve(chunk_gqesq3a3_getSeekingByteForM3u8({
       time: time2,
       currentPosition,
       m3uState,
@@ -63266,7 +63286,7 @@ var chunk_n77gaszd_getSeekingByte = ({
   }
   throw new Error(`Unknown seeking info type: ${info}`);
 };
-var chunk_n77gaszd_getSeekingHintsForAac = ({
+var chunk_gqesq3a3_getSeekingHintsForAac = ({
   aacState,
   samplesObserved
 }) => {
@@ -63276,8 +63296,8 @@ var chunk_n77gaszd_getSeekingHintsForAac = ({
     lastSampleObserved: samplesObserved.getLastSampleObserved()
   };
 };
-var chunk_n77gaszd_setSeekingHintsForAac = () => {};
-var chunk_n77gaszd_getSeekingHintsForFlac = ({
+var chunk_gqesq3a3_setSeekingHintsForAac = () => {};
+var chunk_gqesq3a3_getSeekingHintsForFlac = ({
   flacState,
   samplesObserved
 }) => {
@@ -63288,7 +63308,7 @@ var chunk_n77gaszd_getSeekingHintsForFlac = ({
     lastSampleObserved: samplesObserved.getLastSampleObserved()
   };
 };
-var chunk_n77gaszd_setSeekingHintsForFlac = ({
+var chunk_gqesq3a3_setSeekingHintsForFlac = ({
   hints,
   state
 }) => {
@@ -63297,26 +63317,26 @@ var chunk_n77gaszd_setSeekingHintsForFlac = ({
   }
   state.flac.audioSamples.setFromSeekingHints(hints.audioSampleMap);
 };
-var chunk_n77gaszd_getSeekingHintsFromMp4 = ({
+var chunk_gqesq3a3_getSeekingHintsFromMp4 = ({
   structureState,
   isoState,
   mp4HeaderSegment,
   mediaSectionState: mediaSectionState2
 }) => {
   const structure = structureState.getIsoStructure();
-  const moovAtom = chunk_n77gaszd_getMoovBoxFromState({
+  const moovAtom = chunk_gqesq3a3_getMoovBoxFromState({
     isoState,
     mp4HeaderSegment,
     structureState,
     mayUsePrecomputed: true
   });
-  const moofBoxes = chunk_n77gaszd_deduplicateMoofBoxesByOffset([
+  const moofBoxes = chunk_gqesq3a3_deduplicateMoofBoxesByOffset([
     ...isoState.moof.getMoofBoxes(),
-    ...chunk_n77gaszd_getMoofBoxes(structure.boxes)
+    ...chunk_gqesq3a3_getMoofBoxes(structure.boxes)
   ]);
-  const tfraBoxes = chunk_n77gaszd_deduplicateTfraBoxesByOffset([
+  const tfraBoxes = chunk_gqesq3a3_deduplicateTfraBoxesByOffset([
     ...isoState.tfra.getTfraBoxes(),
-    ...chunk_n77gaszd_getTfraBoxes(structure.boxes)
+    ...chunk_gqesq3a3_getTfraBoxes(structure.boxes)
   ]);
   if (!moovAtom) {
     return null;
@@ -63330,13 +63350,13 @@ var chunk_n77gaszd_getSeekingHintsFromMp4 = ({
     mfraAlreadyLoaded: isoState.mfra.getIfAlreadyLoaded()
   };
 };
-var chunk_n77gaszd_setSeekingHintsForMp4 = ({}) => {};
-var chunk_n77gaszd_getSeekingHintsForM3u = () => {
+var chunk_gqesq3a3_setSeekingHintsForMp4 = ({}) => {};
+var chunk_gqesq3a3_getSeekingHintsForM3u = () => {
   return {
     type: "m3u8-seeking-hints"
   };
 };
-var chunk_n77gaszd_getSeekingHintsForMp3 = ({
+var chunk_gqesq3a3_getSeekingHintsForMp3 = ({
   mp3State,
   samplesObserved,
   mediaSectionState: mediaSectionState2,
@@ -63352,25 +63372,25 @@ var chunk_n77gaszd_getSeekingHintsForMp3 = ({
     contentLength
   };
 };
-var chunk_n77gaszd_setSeekingHintsForMp3 = ({
+var chunk_gqesq3a3_setSeekingHintsForMp3 = ({
   hints,
   state
 }) => {
   state.mp3.audioSamples.setFromSeekingHints(hints.audioSampleMap);
 };
-var chunk_n77gaszd_riffHasIndex = (structure) => {
+var chunk_gqesq3a3_riffHasIndex = (structure) => {
   return structure.boxes.find((b) => b.type === "list-box" && b.listType === "hdrl")?.children.find((box2) => box2.type === "avih-box")?.hasIndex ?? false;
 };
-var chunk_n77gaszd_getSeekingHintsForRiff = ({
+var chunk_gqesq3a3_getSeekingHintsForRiff = ({
   structureState,
   riffState,
   mediaSectionState: mediaSectionState2
 }) => {
   const structure = structureState.getRiffStructure();
-  const strl = chunk_n77gaszd_getStrlBoxes(structure);
+  const strl = chunk_gqesq3a3_getStrlBoxes(structure);
   let samplesPerSecond = null;
   for (const s of strl) {
-    const strh = chunk_n77gaszd_getStrhBox(s.children);
+    const strh = chunk_gqesq3a3_getStrhBox(s.children);
     if (!strh) {
       throw new Error("No strh box");
     }
@@ -63382,21 +63402,21 @@ var chunk_n77gaszd_getSeekingHintsForRiff = ({
   }
   return {
     type: "riff-seeking-hints",
-    hasIndex: chunk_n77gaszd_riffHasIndex(structure),
+    hasIndex: chunk_gqesq3a3_riffHasIndex(structure),
     idx1Entries: riffState.lazyIdx1.getIfAlreadyLoaded(),
     samplesPerSecond,
     moviOffset: mediaSectionState2.getMediaSections()[0]?.start ?? null,
     observedKeyframes: riffState.sampleCounter.riffKeys.getKeyframes()
   };
 };
-var chunk_n77gaszd_setSeekingHintsForRiff = ({
+var chunk_gqesq3a3_setSeekingHintsForRiff = ({
   hints,
   state
 }) => {
   state.riff.lazyIdx1.setFromSeekingHints(hints);
   state.riff.sampleCounter.riffKeys.setFromSeekingHints(hints.observedKeyframes);
 };
-var chunk_n77gaszd_getSeekingHintsFromTransportStream = (transportStream, tracksState) => {
+var chunk_gqesq3a3_getSeekingHintsFromTransportStream = (transportStream, tracksState) => {
   const firstVideoTrack = tracksState.getTracks().find((t) => t.type === "video");
   if (!firstVideoTrack) {
     return null;
@@ -63408,7 +63428,7 @@ var chunk_n77gaszd_getSeekingHintsFromTransportStream = (transportStream, tracks
     firstVideoTrackId: firstVideoTrack.trackId
   };
 };
-var chunk_n77gaszd_setSeekingHintsForTransportStream = ({
+var chunk_gqesq3a3_setSeekingHintsForTransportStream = ({
   hints,
   state
 }) => {
@@ -63418,7 +63438,7 @@ var chunk_n77gaszd_setSeekingHintsForTransportStream = ({
     newOffset: hints.ptsStartOffset
   });
 };
-var chunk_n77gaszd_getSeekingHintsFromWav = ({
+var chunk_gqesq3a3_getSeekingHintsFromWav = ({
   structure,
   mediaSectionState: mediaSectionState2
 }) => {
@@ -63437,13 +63457,13 @@ var chunk_n77gaszd_getSeekingHintsFromWav = ({
     mediaSection: mediaSection[0]
   };
 };
-var chunk_n77gaszd_setSeekingHintsForWav = ({
+var chunk_gqesq3a3_setSeekingHintsForWav = ({
   hints,
   state
 }) => {
   state.mediaSection.addMediaSection(hints.mediaSection);
 };
-var chunk_n77gaszd_getSeekingHintsFromMatroska = (tracksState, keyframesState, webmState) => {
+var chunk_gqesq3a3_getSeekingHintsFromMatroska = (tracksState, keyframesState, webmState) => {
   const tracks2 = tracksState.getTracks();
   const firstVideoTrack = tracks2.find((track) => track.type === "video");
   const keyframes = keyframesState.getKeyframes();
@@ -63459,7 +63479,7 @@ var chunk_n77gaszd_getSeekingHintsFromMatroska = (tracksState, keyframesState, w
     timestampMap: webmState.getTimeStampMapForSeekingHints()
   };
 };
-var chunk_n77gaszd_setSeekingHintsForWebm = ({
+var chunk_gqesq3a3_setSeekingHintsForWebm = ({
   hints,
   state
 }) => {
@@ -63467,7 +63487,7 @@ var chunk_n77gaszd_setSeekingHintsForWebm = ({
   state.keyframes.setFromSeekingHints(hints.keyframes);
   state.webm.setTimeStampMapForSeekingHints(hints.timestampMap);
 };
-var chunk_n77gaszd_getSeekingHints = ({
+var chunk_gqesq3a3_getSeekingHints = ({
   structureState,
   m3uPlaylistContext,
   mediaSectionState: mediaSectionState2,
@@ -63488,7 +63508,7 @@ var chunk_n77gaszd_getSeekingHints = ({
     return null;
   }
   if (structure.type === "iso-base-media") {
-    return chunk_n77gaszd_getSeekingHintsFromMp4({
+    return chunk_gqesq3a3_getSeekingHintsFromMp4({
       structureState,
       isoState,
       mp4HeaderSegment: m3uPlaylistContext?.mp4HeaderSegment ?? null,
@@ -63496,32 +63516,32 @@ var chunk_n77gaszd_getSeekingHints = ({
     });
   }
   if (structure.type === "wav") {
-    return chunk_n77gaszd_getSeekingHintsFromWav({
+    return chunk_gqesq3a3_getSeekingHintsFromWav({
       structure,
       mediaSectionState: mediaSectionState2
     });
   }
   if (structure.type === "matroska") {
-    return chunk_n77gaszd_getSeekingHintsFromMatroska(tracksState, keyframesState, webmState);
+    return chunk_gqesq3a3_getSeekingHintsFromMatroska(tracksState, keyframesState, webmState);
   }
   if (structure.type === "transport-stream") {
-    return chunk_n77gaszd_getSeekingHintsFromTransportStream(transportStream, tracksState);
+    return chunk_gqesq3a3_getSeekingHintsFromTransportStream(transportStream, tracksState);
   }
   if (structure.type === "flac") {
-    return chunk_n77gaszd_getSeekingHintsForFlac({
+    return chunk_gqesq3a3_getSeekingHintsForFlac({
       flacState,
       samplesObserved
     });
   }
   if (structure.type === "riff") {
-    return chunk_n77gaszd_getSeekingHintsForRiff({
+    return chunk_gqesq3a3_getSeekingHintsForRiff({
       structureState,
       riffState,
       mediaSectionState: mediaSectionState2
     });
   }
   if (structure.type === "mp3") {
-    return chunk_n77gaszd_getSeekingHintsForMp3({
+    return chunk_gqesq3a3_getSeekingHintsForMp3({
       mp3State,
       samplesObserved,
       mediaSectionState: mediaSectionState2,
@@ -63529,17 +63549,17 @@ var chunk_n77gaszd_getSeekingHints = ({
     });
   }
   if (structure.type === "aac") {
-    return chunk_n77gaszd_getSeekingHintsForAac({
+    return chunk_gqesq3a3_getSeekingHintsForAac({
       aacState,
       samplesObserved
     });
   }
   if (structure.type === "m3u") {
-    return chunk_n77gaszd_getSeekingHintsForM3u();
+    return chunk_gqesq3a3_getSeekingHintsForM3u();
   }
   throw new Error(`Seeking is not supported for this format: ${structure}`);
 };
-var chunk_n77gaszd_seekBackwards = async ({
+var chunk_gqesq3a3_seekBackwards = async ({
   iterator,
   seekTo,
   readerInterface,
@@ -63551,12 +63571,12 @@ var chunk_n77gaszd_seekBackwards = async ({
 }) => {
   const howManyBytesWeCanGoBack = iterator.counter.getDiscardedOffset();
   if (iterator.counter.getOffset() - howManyBytesWeCanGoBack <= seekTo) {
-    chunk_n77gaszd_Log.verbose(logLevel, `Seeking back to ${seekTo}`);
+    chunk_gqesq3a3_Log.verbose(logLevel, `Seeking back to ${seekTo}`);
     iterator.skipTo(seekTo);
     return;
   }
   const time2 = Date.now();
-  chunk_n77gaszd_Log.verbose(logLevel, `Seeking in video from position ${iterator.counter.getOffset()} -> ${seekTo}. Re-reading because this portion is not available.`);
+  chunk_gqesq3a3_Log.verbose(logLevel, `Seeking in video from position ${iterator.counter.getOffset()} -> ${seekTo}. Re-reading because this portion is not available.`);
   await currentReader.getCurrent().abort();
   const { reader: newReader } = await readerInterface.read({
     src,
@@ -63566,10 +63586,10 @@ var chunk_n77gaszd_seekBackwards = async ({
     prefetchCache
   });
   iterator.replaceData(new Uint8Array([]), seekTo);
-  chunk_n77gaszd_Log.verbose(logLevel, `Re-reading took ${Date.now() - time2}ms. New position: ${iterator.counter.getOffset()}`);
+  chunk_gqesq3a3_Log.verbose(logLevel, `Re-reading took ${Date.now() - time2}ms. New position: ${iterator.counter.getOffset()}`);
   currentReader.setCurrent(newReader);
 };
-var chunk_n77gaszd_fieldsNeedSamplesMap = {
+var chunk_gqesq3a3_fieldsNeedSamplesMap = {
   slowDurationInSeconds: true,
   slowFps: true,
   slowKeyframes: true,
@@ -63599,37 +63619,37 @@ var chunk_n77gaszd_fieldsNeedSamplesMap = {
   slowVideoBitrate: true,
   m3uStreams: false
 };
-var chunk_n77gaszd_needsToIterateOverSamples = ({
+var chunk_gqesq3a3_needsToIterateOverSamples = ({
   fields,
   emittedFields
 }) => {
   const keys = Object.keys(fields ?? {});
   const selectedKeys = keys.filter((k) => fields[k]);
-  return selectedKeys.some((k) => chunk_n77gaszd_fieldsNeedSamplesMap[k] && !emittedFields[k]);
+  return selectedKeys.some((k) => chunk_gqesq3a3_fieldsNeedSamplesMap[k] && !emittedFields[k]);
 };
-var chunk_n77gaszd_fieldsNeedEverySampleMap = {
-  ...chunk_n77gaszd_fieldsNeedSamplesMap,
+var chunk_gqesq3a3_fieldsNeedEverySampleMap = {
+  ...chunk_gqesq3a3_fieldsNeedSamplesMap,
   slowDurationInSeconds: false
 };
-var chunk_n77gaszd_needsToIterateOverEverySample = ({
+var chunk_gqesq3a3_needsToIterateOverEverySample = ({
   fields,
   emittedFields
 }) => {
   const keys = Object.keys(fields ?? {});
   const selectedKeys = keys.filter((k) => fields[k]);
-  return selectedKeys.some((k) => chunk_n77gaszd_fieldsNeedEverySampleMap[k] && !emittedFields[k]);
+  return selectedKeys.some((k) => chunk_gqesq3a3_fieldsNeedEverySampleMap[k] && !emittedFields[k]);
 };
-var chunk_n77gaszd_disallowForwardSeekIfSamplesAreNeeded = ({
+var chunk_gqesq3a3_disallowForwardSeekIfSamplesAreNeeded = ({
   seekTo,
   previousPosition,
   fields
 }) => {
-  const fieldsNeedingSamples = Object.entries(fields).filter(([, value]) => value).map(([key4]) => key4).filter((key4) => chunk_n77gaszd_fieldsNeedSamplesMap[key4]);
+  const fieldsNeedingSamples = Object.entries(fields).filter(([, value]) => value).map(([key4]) => key4).filter((key4) => chunk_gqesq3a3_fieldsNeedSamplesMap[key4]);
   if (fieldsNeedingSamples.length > 0) {
     throw new Error(`Forward seeking is not allowed when the following fields are requested from parseMedia(): ${fieldsNeedingSamples.join(", ")}. Seek was from 0x${previousPosition.toString(16)} to 0x${seekTo.toString(16)}. Either don't seek forward, or don't request these fields.`);
   }
 };
-var chunk_n77gaszd_seekForward = async ({
+var chunk_gqesq3a3_seekForward = async ({
   seekTo,
   userInitiated,
   iterator,
@@ -63643,21 +63663,21 @@ var chunk_n77gaszd_seekForward = async ({
   prefetchCache
 }) => {
   if (userInitiated) {
-    chunk_n77gaszd_disallowForwardSeekIfSamplesAreNeeded({
+    chunk_gqesq3a3_disallowForwardSeekIfSamplesAreNeeded({
       fields,
       seekTo,
       previousPosition: iterator.counter.getOffset()
     });
   }
   const alreadyHasBuffer = iterator.bytesRemaining() >= seekTo - iterator.counter.getOffset();
-  chunk_n77gaszd_Log.verbose(logLevel, `Performing seek from ${iterator.counter.getOffset()} to ${seekTo}`);
+  chunk_gqesq3a3_Log.verbose(logLevel, `Performing seek from ${iterator.counter.getOffset()} to ${seekTo}`);
   if (alreadyHasBuffer) {
     iterator.skipTo(seekTo);
-    chunk_n77gaszd_Log.verbose(logLevel, `Already read ahead enough, skipping forward`);
+    chunk_gqesq3a3_Log.verbose(logLevel, `Already read ahead enough, skipping forward`);
     return;
   }
   const time2 = Date.now();
-  chunk_n77gaszd_Log.verbose(logLevel, `Skipping over video data from position ${iterator.counter.getOffset()} -> ${seekTo}. Re-reading because this portion is not available`);
+  chunk_gqesq3a3_Log.verbose(logLevel, `Skipping over video data from position ${iterator.counter.getOffset()} -> ${seekTo}. Re-reading because this portion is not available`);
   await currentReader.getCurrent().abort();
   const { reader: newReader } = await readerInterface.read({
     src,
@@ -63668,10 +63688,10 @@ var chunk_n77gaszd_seekForward = async ({
   });
   iterator.skipTo(seekTo);
   await discardReadBytes(true);
-  chunk_n77gaszd_Log.verbose(logLevel, `Re-reading took ${Date.now() - time2}ms. New position: ${iterator.counter.getOffset()}`);
+  chunk_gqesq3a3_Log.verbose(logLevel, `Re-reading took ${Date.now() - time2}ms. New position: ${iterator.counter.getOffset()}`);
   currentReader.setCurrent(newReader);
 };
-var chunk_n77gaszd_performSeek = async ({
+var chunk_gqesq3a3_performSeek = async ({
   seekTo,
   userInitiated,
   controller,
@@ -63688,7 +63708,7 @@ var chunk_n77gaszd_performSeek = async ({
   fields,
   prefetchCache
 }) => {
-  const byteInMediaSection = chunk_n77gaszd_isByteInMediaSection({
+  const byteInMediaSection = chunk_gqesq3a3_isByteInMediaSection({
     position: seekTo,
     mediaSections: mediaSection.getMediaSections()
   });
@@ -63707,14 +63727,14 @@ var chunk_n77gaszd_performSeek = async ({
     throw new Error(`Cannot seek beyond the end of the file: ${seekTo} > ${contentLength}`);
   }
   if (mode === "download") {
-    chunk_n77gaszd_Log.verbose(logLevel, `Skipping over video data from position ${iterator.counter.getOffset()} -> ${seekTo}. Fetching but not reading all the data inbetween because in download mode`);
+    chunk_gqesq3a3_Log.verbose(logLevel, `Skipping over video data from position ${iterator.counter.getOffset()} -> ${seekTo}. Fetching but not reading all the data inbetween because in download mode`);
     iterator.discard(seekTo - iterator.counter.getOffset());
     return;
   }
   await controller._internals.checkForAbortAndPause();
   const alreadyAtByte = iterator.counter.getOffset() === seekTo;
   if (alreadyAtByte) {
-    chunk_n77gaszd_Log.verbose(logLevel, `Already at the desired position, seeking done`);
+    chunk_gqesq3a3_Log.verbose(logLevel, `Already at the desired position, seeking done`);
     controller._internals.performedSeeksSignal.markLastSeekAsUserInitiated();
     return;
   }
@@ -63725,7 +63745,7 @@ var chunk_n77gaszd_performSeek = async ({
     type: userInitiated ? "user-initiated" : "internal"
   });
   if (skippingForward) {
-    await chunk_n77gaszd_seekForward({
+    await chunk_gqesq3a3_seekForward({
       seekTo,
       userInitiated,
       iterator,
@@ -63739,7 +63759,7 @@ var chunk_n77gaszd_performSeek = async ({
       prefetchCache
     });
   } else {
-    await chunk_n77gaszd_seekBackwards({
+    await chunk_gqesq3a3_seekBackwards({
       controller,
       seekTo,
       iterator,
@@ -63752,7 +63772,7 @@ var chunk_n77gaszd_performSeek = async ({
   }
   await controller._internals.checkForAbortAndPause();
 };
-var chunk_n77gaszd_turnSeekIntoByte = async ({
+var chunk_gqesq3a3_turnSeekIntoByte = async ({
   seek: seek2,
   mediaSectionState: mediaSectionState2,
   logLevel,
@@ -63775,7 +63795,7 @@ var chunk_n77gaszd_turnSeekIntoByte = async ({
 }) => {
   const mediaSections = mediaSectionState2.getMediaSections();
   if (mediaSections.length === 0) {
-    chunk_n77gaszd_Log.trace(logLevel, "No media sections defined, cannot seek yet");
+    chunk_gqesq3a3_Log.trace(logLevel, "No media sections defined, cannot seek yet");
     return {
       type: "valid-but-must-wait"
     };
@@ -63783,7 +63803,7 @@ var chunk_n77gaszd_turnSeekIntoByte = async ({
   if (seek2 < 0) {
     throw new Error(`Cannot seek to a negative time: ${JSON.stringify(seek2)}`);
   }
-  const seekingHints = chunk_n77gaszd_getSeekingHints({
+  const seekingHints = chunk_gqesq3a3_getSeekingHints({
     riffState,
     samplesObserved,
     structureState,
@@ -63800,12 +63820,12 @@ var chunk_n77gaszd_turnSeekIntoByte = async ({
     m3uPlaylistContext
   });
   if (!seekingHints) {
-    chunk_n77gaszd_Log.trace(logLevel, "No seeking info, cannot seek yet");
+    chunk_gqesq3a3_Log.trace(logLevel, "No seeking info, cannot seek yet");
     return {
       type: "valid-but-must-wait"
     };
   }
-  const seekingByte = await chunk_n77gaszd_getSeekingByte({
+  const seekingByte = await chunk_gqesq3a3_getSeekingByte({
     info: seekingHints,
     time: seek2,
     logLevel,
@@ -63822,7 +63842,7 @@ var chunk_n77gaszd_turnSeekIntoByte = async ({
   });
   return seekingByte;
 };
-var chunk_n77gaszd_getWorkOnSeekRequestOptions = (state) => {
+var chunk_gqesq3a3_getWorkOnSeekRequestOptions = (state) => {
   return {
     logLevel: state.logLevel,
     controller: state.controller,
@@ -63853,7 +63873,7 @@ var chunk_n77gaszd_getWorkOnSeekRequestOptions = (state) => {
     avcState: state.avc
   };
 };
-var chunk_n77gaszd_workOnSeekRequest = async (options) => {
+var chunk_gqesq3a3_workOnSeekRequest = async (options) => {
   const {
     logLevel,
     controller,
@@ -63887,8 +63907,8 @@ var chunk_n77gaszd_workOnSeekRequest = async (options) => {
   if (seek2 === null) {
     return;
   }
-  chunk_n77gaszd_Log.trace(logLevel, `Has seek request for ${src}: ${JSON.stringify(seek2)}`);
-  const resolution = await chunk_n77gaszd_turnSeekIntoByte({
+  chunk_gqesq3a3_Log.trace(logLevel, `Has seek request for ${src}: ${JSON.stringify(seek2)}`);
+  const resolution = await chunk_gqesq3a3_turnSeekIntoByte({
     seek: seek2,
     mediaSectionState: mediaSection,
     logLevel,
@@ -63909,9 +63929,9 @@ var chunk_n77gaszd_workOnSeekRequest = async (options) => {
     m3uState,
     avcState
   });
-  chunk_n77gaszd_Log.trace(logLevel, `Seek action: ${JSON.stringify(resolution)}`);
+  chunk_gqesq3a3_Log.trace(logLevel, `Seek action: ${JSON.stringify(resolution)}`);
   if (resolution.type === "intermediary-seek") {
-    await chunk_n77gaszd_performSeek({
+    await chunk_gqesq3a3_performSeek({
       seekTo: resolution.byte,
       userInitiated: false,
       controller,
@@ -63931,7 +63951,7 @@ var chunk_n77gaszd_workOnSeekRequest = async (options) => {
     return;
   }
   if (resolution.type === "do-seek") {
-    await chunk_n77gaszd_performSeek({
+    await chunk_gqesq3a3_performSeek({
       seekTo: resolution.byte,
       userInitiated: true,
       controller,
@@ -63950,8 +63970,8 @@ var chunk_n77gaszd_workOnSeekRequest = async (options) => {
     });
     const { hasChanged } = controller._internals.seekSignal.clearSeekIfStillSame(seek2);
     if (hasChanged) {
-      chunk_n77gaszd_Log.trace(logLevel, `Seek request has changed while seeking, seeking again`);
-      await chunk_n77gaszd_workOnSeekRequest(options);
+      chunk_gqesq3a3_Log.trace(logLevel, `Seek request has changed while seeking, seeking again`);
+      await chunk_gqesq3a3_workOnSeekRequest(options);
     }
     return;
   }
@@ -63959,10 +63979,10 @@ var chunk_n77gaszd_workOnSeekRequest = async (options) => {
     throw new Error(`The seek request ${JSON.stringify(seek2)} cannot be processed`);
   }
   if (resolution.type === "valid-but-must-wait") {
-    chunk_n77gaszd_Log.trace(logLevel, "Seek request is valid but cannot be processed yet");
+    chunk_gqesq3a3_Log.trace(logLevel, "Seek request is valid but cannot be processed yet");
   }
 };
-var chunk_n77gaszd_emitAvailableInfo = async ({
+var chunk_gqesq3a3_emitAvailableInfo = async ({
   hasInfo,
   state
 }) => {
@@ -63975,7 +63995,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     callbackFunctions
   } = state;
   for (const key4 of keys) {
-    await chunk_n77gaszd_workOnSeekRequest(chunk_n77gaszd_getWorkOnSeekRequestOptions(state));
+    await chunk_gqesq3a3_workOnSeekRequest(chunk_gqesq3a3_getWorkOnSeekRequestOptions(state));
     if (key4 === "slowStructure") {
       if (hasInfo.slowStructure && !emittedFields.slowStructure) {
         await callbackFunctions.onSlowStructure?.(state.structure.getStructure());
@@ -63989,7 +64009,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     if (key4 === "durationInSeconds") {
       if (hasInfo.durationInSeconds) {
         if (!emittedFields.durationInSeconds) {
-          const durationInSeconds = chunk_n77gaszd_getDuration(state);
+          const durationInSeconds = chunk_gqesq3a3_getDuration(state);
           await callbackFunctions.onDurationInSeconds?.(durationInSeconds);
           if (fieldsInReturnValue.durationInSeconds) {
             returnValue.durationInSeconds = durationInSeconds;
@@ -64001,7 +64021,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "slowDurationInSeconds") {
       if (hasInfo.slowDurationInSeconds && !emittedFields.slowDurationInSeconds) {
-        const slowDurationInSeconds = chunk_n77gaszd_getDuration(state) ?? state.samplesObserved.getSlowDurationInSeconds();
+        const slowDurationInSeconds = chunk_gqesq3a3_getDuration(state) ?? state.samplesObserved.getSlowDurationInSeconds();
         await callbackFunctions.onSlowDurationInSeconds?.(slowDurationInSeconds);
         if (fieldsInReturnValue.slowDurationInSeconds) {
           returnValue.slowDurationInSeconds = slowDurationInSeconds;
@@ -64013,7 +64033,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     if (key4 === "fps") {
       if (hasInfo.fps) {
         if (!emittedFields.fps) {
-          const fps = chunk_n77gaszd_getFps(state);
+          const fps = chunk_gqesq3a3_getFps(state);
           await callbackFunctions.onFps?.(fps);
           if (fieldsInReturnValue.fps) {
             returnValue.fps = fps;
@@ -64021,7 +64041,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
           emittedFields.fps = true;
         }
         if (!emittedFields.slowFps) {
-          const fps = chunk_n77gaszd_getFps(state);
+          const fps = chunk_gqesq3a3_getFps(state);
           if (fps) {
             await callbackFunctions.onSlowFps?.(fps);
             if (fieldsInReturnValue.slowFps) {
@@ -64035,7 +64055,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "slowFps") {
       if (hasInfo.slowFps && !emittedFields.slowFps) {
-        const slowFps = chunk_n77gaszd_getFps(state) ?? state.samplesObserved.getFps();
+        const slowFps = chunk_gqesq3a3_getFps(state) ?? state.samplesObserved.getFps();
         await callbackFunctions.onSlowFps?.(slowFps);
         if (fieldsInReturnValue.slowFps) {
           returnValue.slowFps = slowFps;
@@ -64046,7 +64066,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "dimensions") {
       if (hasInfo.dimensions && !emittedFields.dimensions) {
-        const dimensionsQueried = chunk_n77gaszd_getDimensions(state);
+        const dimensionsQueried = chunk_gqesq3a3_getDimensions(state);
         const dimensions = dimensionsQueried === null ? null : {
           height: dimensionsQueried.height,
           width: dimensionsQueried.width
@@ -64061,7 +64081,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "unrotatedDimensions") {
       if (hasInfo.unrotatedDimensions && !emittedFields.unrotatedDimensions) {
-        const dimensionsQueried = chunk_n77gaszd_getDimensions(state);
+        const dimensionsQueried = chunk_gqesq3a3_getDimensions(state);
         const unrotatedDimensions = dimensionsQueried === null ? null : {
           height: dimensionsQueried.unrotatedHeight,
           width: dimensionsQueried.unrotatedWidth
@@ -64076,7 +64096,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "rotation") {
       if (hasInfo.rotation && !emittedFields.rotation) {
-        const dimensionsQueried = chunk_n77gaszd_getDimensions(state);
+        const dimensionsQueried = chunk_gqesq3a3_getDimensions(state);
         const rotation = dimensionsQueried?.rotation ?? 0;
         await callbackFunctions.onRotation?.(rotation);
         if (fieldsInReturnValue.rotation) {
@@ -64088,7 +64108,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "videoCodec") {
       if (!emittedFields.videoCodec && hasInfo.videoCodec) {
-        const videoCodec = chunk_n77gaszd_getVideoCodec(state);
+        const videoCodec = chunk_gqesq3a3_getVideoCodec(state);
         await callbackFunctions.onVideoCodec?.(videoCodec);
         if (fieldsInReturnValue.videoCodec) {
           returnValue.videoCodec = videoCodec;
@@ -64099,7 +64119,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "audioCodec") {
       if (!emittedFields.audioCodec && hasInfo.audioCodec) {
-        const audioCodec = chunk_n77gaszd_getAudioCodec(state);
+        const audioCodec = chunk_gqesq3a3_getAudioCodec(state);
         await callbackFunctions.onAudioCodec?.(audioCodec);
         if (fieldsInReturnValue.audioCodec) {
           returnValue.audioCodec = audioCodec;
@@ -64110,7 +64130,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "tracks") {
       if (!emittedFields.tracks && hasInfo.tracks) {
-        const tracks2 = chunk_n77gaszd_getTracks(state, true);
+        const tracks2 = chunk_gqesq3a3_getTracks(state, true);
         await callbackFunctions.onTracks?.(tracks2);
         if (fieldsInReturnValue.tracks) {
           returnValue.tracks = tracks2;
@@ -64161,7 +64181,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "isHdr") {
       if (!returnValue.isHdr && hasInfo.isHdr) {
-        const isHdr = chunk_n77gaszd_getIsHdr(state);
+        const isHdr = chunk_gqesq3a3_getIsHdr(state);
         await callbackFunctions.onIsHdr?.(isHdr);
         if (fieldsInReturnValue.isHdr) {
           returnValue.isHdr = isHdr;
@@ -64172,7 +64192,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "container") {
       if (!returnValue.container && hasInfo.container) {
-        const container42 = chunk_n77gaszd_getContainer(state.structure.getStructure());
+        const container42 = chunk_gqesq3a3_getContainer(state.structure.getStructure());
         await callbackFunctions.onContainer?.(container42);
         if (fieldsInReturnValue.container) {
           returnValue.container = container42;
@@ -64183,7 +64203,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "metadata") {
       if (!emittedFields.metadata && hasInfo.metadata) {
-        const metadata = chunk_n77gaszd_getMetadata(state);
+        const metadata = chunk_gqesq3a3_getMetadata(state);
         await callbackFunctions.onMetadata?.(metadata);
         if (fieldsInReturnValue.metadata) {
           returnValue.metadata = metadata;
@@ -64194,7 +64214,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "location") {
       if (!emittedFields.location && hasInfo.location) {
-        const location2 = chunk_n77gaszd_getLocation(state);
+        const location2 = chunk_gqesq3a3_getLocation(state);
         await callbackFunctions.onLocation?.(location2);
         if (fieldsInReturnValue.location) {
           returnValue.location = location2;
@@ -64245,9 +64265,9 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "keyframes") {
       if (!emittedFields.keyframes && hasInfo.keyframes) {
-        await callbackFunctions.onKeyframes?.(chunk_n77gaszd_getKeyframes(state));
+        await callbackFunctions.onKeyframes?.(chunk_gqesq3a3_getKeyframes(state));
         if (fieldsInReturnValue.keyframes) {
-          returnValue.keyframes = chunk_n77gaszd_getKeyframes(state);
+          returnValue.keyframes = chunk_gqesq3a3_getKeyframes(state);
         }
         emittedFields.keyframes = true;
       }
@@ -64265,7 +64285,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "sampleRate") {
       if (!emittedFields.sampleRate && hasInfo.sampleRate) {
-        const sampleRate = chunk_n77gaszd_getSampleRate3(state);
+        const sampleRate = chunk_gqesq3a3_getSampleRate3(state);
         await callbackFunctions.onSampleRate?.(sampleRate);
         if (fieldsInReturnValue.sampleRate) {
           returnValue.sampleRate = sampleRate;
@@ -64276,7 +64296,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "numberOfAudioChannels") {
       if (!emittedFields.numberOfAudioChannels && hasInfo.numberOfAudioChannels) {
-        const numberOfAudioChannels = chunk_n77gaszd_getNumberOfAudioChannels(state);
+        const numberOfAudioChannels = chunk_gqesq3a3_getNumberOfAudioChannels(state);
         await callbackFunctions.onNumberOfAudioChannels?.(numberOfAudioChannels);
         if (fieldsInReturnValue.numberOfAudioChannels) {
           returnValue.numberOfAudioChannels = numberOfAudioChannels;
@@ -64287,7 +64307,7 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     if (key4 === "m3uStreams") {
       if (!emittedFields.m3uStreams && hasInfo.m3uStreams) {
-        const streams = chunk_n77gaszd_getM3uStreams({
+        const streams = chunk_gqesq3a3_getM3uStreams({
           structure: state.structure.getStructureOrNull(),
           originalSrc: state.src,
           readerInterface: state.readerInterface
@@ -64302,9 +64322,9 @@ var chunk_n77gaszd_emitAvailableInfo = async ({
     }
     throw new Error(`Unhandled key: ${key4}`);
   }
-  await chunk_n77gaszd_workOnSeekRequest(chunk_n77gaszd_getWorkOnSeekRequestOptions(state));
+  await chunk_gqesq3a3_workOnSeekRequest(chunk_gqesq3a3_getWorkOnSeekRequestOptions(state));
 };
-var chunk_n77gaszd_getHasCallbacks = (state) => {
+var chunk_gqesq3a3_getHasCallbacks = (state) => {
   const hasNoTrackHandlers = !state.callbacks.hasAudioTrackHandlers && !state.callbacks.hasVideoTrackHandlers;
   if (hasNoTrackHandlers) {
     return false;
@@ -64312,7 +64332,7 @@ var chunk_n77gaszd_getHasCallbacks = (state) => {
   const hasAllTracksAndNoCallbacks = !state.callbacks.tracks.hasAllTracks() || Object.values(state.callbacks.videoSampleCallbacks).length > 0 || Object.values(state.callbacks.audioSampleCallbacks).length > 0;
   return hasAllTracksAndNoCallbacks;
 };
-var chunk_n77gaszd_missesMatroskaTracks = (state) => {
+var chunk_gqesq3a3_missesMatroskaTracks = (state) => {
   const struct = state.structure.getStructureOrNull();
   if (struct === null) {
     return false;
@@ -64320,32 +64340,32 @@ var chunk_n77gaszd_missesMatroskaTracks = (state) => {
   if (struct.type !== "matroska") {
     return false;
   }
-  const mainSegment = chunk_n77gaszd_getMainSegment(struct.boxes);
+  const mainSegment = chunk_gqesq3a3_getMainSegment(struct.boxes);
   if (mainSegment === null) {
     return false;
   }
-  return chunk_n77gaszd_getTracksFromMatroska({
+  return chunk_gqesq3a3_getTracksFromMatroska({
     structureState: state.structure,
     webmState: state.webm
   }).missingInfo.length > 0;
 };
-var chunk_n77gaszd_maySkipVideoData = ({ state }) => {
-  const hasCallbacks = chunk_n77gaszd_getHasCallbacks(state);
-  return !hasCallbacks && !chunk_n77gaszd_needsToIterateOverSamples({
+var chunk_gqesq3a3_maySkipVideoData = ({ state }) => {
+  const hasCallbacks = chunk_gqesq3a3_getHasCallbacks(state);
+  return !hasCallbacks && !chunk_gqesq3a3_needsToIterateOverSamples({
     emittedFields: state.emittedFields,
     fields: state.fields
-  }) && !chunk_n77gaszd_missesMatroskaTracks(state);
+  }) && !chunk_gqesq3a3_missesMatroskaTracks(state);
 };
-var chunk_n77gaszd_maySkipOverSamplesInTheMiddle = ({
+var chunk_gqesq3a3_maySkipOverSamplesInTheMiddle = ({
   state
 }) => {
-  const hasCallbacks = chunk_n77gaszd_getHasCallbacks(state);
-  return !hasCallbacks && !chunk_n77gaszd_needsToIterateOverEverySample({
+  const hasCallbacks = chunk_gqesq3a3_getHasCallbacks(state);
+  return !hasCallbacks && !chunk_gqesq3a3_needsToIterateOverEverySample({
     emittedFields: state.emittedFields,
     fields: state.fields
   });
 };
-var chunk_n77gaszd_getAvailableInfo = ({
+var chunk_gqesq3a3_getAvailableInfo = ({
   state
 }) => {
   const keys = Object.entries(state.fields).filter(([, value]) => value);
@@ -64356,35 +64376,35 @@ var chunk_n77gaszd_getAvailableInfo = ({
       return false;
     }
     if (key4 === "durationInSeconds") {
-      return Boolean(structure && chunk_n77gaszd_hasDuration(state));
+      return Boolean(structure && chunk_gqesq3a3_hasDuration(state));
     }
     if (key4 === "slowDurationInSeconds") {
-      const res = Boolean(structure && chunk_n77gaszd_hasSlowDuration(state));
+      const res = Boolean(structure && chunk_gqesq3a3_hasSlowDuration(state));
       return res;
     }
     if (key4 === "dimensions" || key4 === "rotation" || key4 === "unrotatedDimensions") {
-      return Boolean(structure && chunk_n77gaszd_hasDimensions(state));
+      return Boolean(structure && chunk_gqesq3a3_hasDimensions(state));
     }
     if (key4 === "fps") {
-      return Boolean(structure && chunk_n77gaszd_hasFps(state));
+      return Boolean(structure && chunk_gqesq3a3_hasFps(state));
     }
     if (key4 === "slowFps") {
-      return Boolean(structure && chunk_n77gaszd_hasFpsSuitedForSlowFps(state));
+      return Boolean(structure && chunk_gqesq3a3_hasFpsSuitedForSlowFps(state));
     }
     if (key4 === "isHdr") {
-      return Boolean(structure && chunk_n77gaszd_hasHdr(state));
+      return Boolean(structure && chunk_gqesq3a3_hasHdr(state));
     }
     if (key4 === "videoCodec") {
-      return Boolean(structure && chunk_n77gaszd_hasVideoCodec(state));
+      return Boolean(structure && chunk_gqesq3a3_hasVideoCodec(state));
     }
     if (key4 === "audioCodec") {
-      return Boolean(structure && chunk_n77gaszd_hasAudioCodec(state));
+      return Boolean(structure && chunk_gqesq3a3_hasAudioCodec(state));
     }
     if (key4 === "tracks") {
-      return Boolean(structure && chunk_n77gaszd_getHasTracks(state, true));
+      return Boolean(structure && chunk_gqesq3a3_getHasTracks(state, true));
     }
     if (key4 === "keyframes") {
-      return Boolean(structure && chunk_n77gaszd_hasKeyframes(state));
+      return Boolean(structure && chunk_gqesq3a3_hasKeyframes(state));
     }
     if (key4 === "internalStats") {
       return true;
@@ -64399,22 +64419,22 @@ var chunk_n77gaszd_getAvailableInfo = ({
       return true;
     }
     if (key4 === "container") {
-      return Boolean(structure && chunk_n77gaszd_hasContainer(structure));
+      return Boolean(structure && chunk_gqesq3a3_hasContainer(structure));
     }
     if (key4 === "metadata" || key4 === "location" || key4 === "images") {
-      return Boolean(structure && chunk_n77gaszd_hasMetadata(structure));
+      return Boolean(structure && chunk_gqesq3a3_hasMetadata(structure));
     }
     if (key4 === "slowKeyframes" || key4 === "slowVideoBitrate" || key4 === "slowAudioBitrate" || key4 === "slowNumberOfFrames") {
       return false;
     }
     if (key4 === "numberOfAudioChannels") {
-      return chunk_n77gaszd_hasNumberOfAudioChannels(state);
+      return chunk_gqesq3a3_hasNumberOfAudioChannels(state);
     }
     if (key4 === "sampleRate") {
-      return chunk_n77gaszd_hasSampleRate(state);
+      return chunk_gqesq3a3_hasSampleRate(state);
     }
     if (key4 === "m3uStreams") {
-      return chunk_n77gaszd_m3uHasStreams(state);
+      return chunk_gqesq3a3_m3uHasStreams(state);
     }
     throw new Error(`Unknown field passed: ${key4}. Available fields: ${Object.keys(state.fields).join(", ")}`);
   });
@@ -64425,14 +64445,14 @@ var chunk_n77gaszd_getAvailableInfo = ({
   }
   return Object.fromEntries(entries);
 };
-var chunk_n77gaszd_hasAllInfo = ({ state }) => {
-  const availableInfo = chunk_n77gaszd_getAvailableInfo({
+var chunk_gqesq3a3_hasAllInfo = ({ state }) => {
+  const availableInfo = chunk_gqesq3a3_getAvailableInfo({
     state
   });
   if (!Object.values(availableInfo).every(Boolean)) {
     return false;
   }
-  if (chunk_n77gaszd_maySkipVideoData({ state })) {
+  if (chunk_gqesq3a3_maySkipVideoData({ state })) {
     return true;
   }
   if (state.callbacks.canSkipTracksState.canSkipTracks()) {
@@ -64440,35 +64460,35 @@ var chunk_n77gaszd_hasAllInfo = ({ state }) => {
   }
   return false;
 };
-var chunk_n77gaszd_emitAllInfo = async (state) => {
+var chunk_gqesq3a3_emitAllInfo = async (state) => {
   const allFields = Object.keys(state.fields).reduce((acc, key4) => {
     if (state.fields?.[key4]) {
       acc[key4] = true;
     }
     return acc;
   }, {});
-  await chunk_n77gaszd_emitAvailableInfo({
+  await chunk_gqesq3a3_emitAvailableInfo({
     hasInfo: allFields,
     state
   });
 };
-var chunk_n77gaszd_triggerInfoEmit = async (state) => {
-  const availableInfo = chunk_n77gaszd_getAvailableInfo({
+var chunk_gqesq3a3_triggerInfoEmit = async (state) => {
+  const availableInfo = chunk_gqesq3a3_getAvailableInfo({
     state
   });
-  await chunk_n77gaszd_emitAvailableInfo({
+  await chunk_gqesq3a3_emitAvailableInfo({
     hasInfo: availableInfo,
     state
   });
 };
-var chunk_n77gaszd_checkIfDone = async (state) => {
+var chunk_gqesq3a3_checkIfDone = async (state) => {
   const startCheck = Date.now();
-  const hasAll = chunk_n77gaszd_hasAllInfo({
+  const hasAll = chunk_gqesq3a3_hasAllInfo({
     state
   });
   state.timings.timeCheckingIfDone += Date.now() - startCheck;
   if (hasAll && state.mode === "query") {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Got all info, skipping to the end.");
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Got all info, skipping to the end.");
     state.increaseSkippedBytes(state.contentLength - state.iterator.counter.getOffset());
     return true;
   }
@@ -64480,24 +64500,24 @@ var chunk_n77gaszd_checkIfDone = async (state) => {
     if (state.riff.queuedBFrames.hasReleasedFrames()) {
       return false;
     }
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Reached end of file");
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Reached end of file");
     await state.discardReadBytes(true);
     return true;
   }
   if (state.iterator.counter.getOffset() + state.iterator.bytesRemaining() === state.contentLength && state.errored) {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Reached end of file and errorred");
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Reached end of file and errorred");
     return true;
   }
   return false;
 };
-var chunk_n77gaszd_makeProgressObject = (state) => {
+var chunk_gqesq3a3_makeProgressObject = (state) => {
   return {
     bytes: state.iterator.counter.getOffset(),
     percentage: state.contentLength ? state.iterator.counter.getOffset() / state.contentLength : null,
     totalBytes: state.contentLength
   };
 };
-var chunk_n77gaszd_parseAac = async (state) => {
+var chunk_gqesq3a3_parseAac = async (state) => {
   const { iterator } = state;
   const startOffset = iterator.counter.getOffset();
   iterator.startReadingBits();
@@ -64516,10 +64536,10 @@ var chunk_n77gaszd_parseAac = async (state) => {
   const protectionAbsent = iterator.getBits(1);
   const audioObjectType = iterator.getBits(2);
   const samplingFrequencyIndex = iterator.getBits(4);
-  const sampleRate = chunk_n77gaszd_getSampleRateFromSampleFrequencyIndex(samplingFrequencyIndex);
+  const sampleRate = chunk_gqesq3a3_getSampleRateFromSampleFrequencyIndex(samplingFrequencyIndex);
   iterator.getBits(1);
   const channelConfiguration = iterator.getBits(3);
-  const codecPrivate2 = chunk_n77gaszd_createAacCodecPrivate({
+  const codecPrivate2 = chunk_gqesq3a3_createAacCodecPrivate({
     audioObjectType,
     sampleRate,
     channelConfiguration,
@@ -64543,20 +64563,20 @@ var chunk_n77gaszd_parseAac = async (state) => {
       start: startOffset,
       size: state.contentLength - startOffset
     });
-    await chunk_n77gaszd_registerAudioTrack({
+    await chunk_gqesq3a3_registerAudioTrack({
       container: "aac",
       track: {
-        codec: chunk_n77gaszd_mapAudioObjectTypeToCodecString(audioObjectType),
+        codec: chunk_gqesq3a3_mapAudioObjectTypeToCodecString(audioObjectType),
         codecEnum: "aac",
         codecData: { type: "aac-config", data: codecPrivate2 },
         description: codecPrivate2,
         numberOfChannels: channelConfiguration,
         sampleRate,
-        originalTimescale: chunk_n77gaszd_WEBCODECS_TIMESCALE,
+        originalTimescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE,
         trackId: 0,
         type: "audio",
         startInSeconds: 0,
-        timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+        timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
       },
       registerAudioSampleCallback: state.callbacks.registerAudioSampleCallback,
       tracks: state.callbacks.tracks,
@@ -64573,7 +64593,7 @@ var chunk_n77gaszd_parseAac = async (state) => {
     offset: startOffset,
     durationInSeconds: duration2
   });
-  const audioSample = chunk_n77gaszd_convertAudioOrVideoSampleToWebCodecsTimestamps({
+  const audioSample = chunk_gqesq3a3_convertAudioOrVideoSampleToWebCodecsTimestamps({
     sample: {
       duration: duration2,
       type: "key",
@@ -64590,7 +64610,7 @@ var chunk_n77gaszd_parseAac = async (state) => {
   });
   return Promise.resolve(null);
 };
-var chunk_n77gaszd_getBlockSize = (iterator) => {
+var chunk_gqesq3a3_getBlockSize = (iterator) => {
   const bits = iterator.getBits(4);
   if (bits === 0) {
     throw new Error("Reserved block size");
@@ -64612,7 +64632,7 @@ var chunk_n77gaszd_getBlockSize = (iterator) => {
   }
   throw new Error("Invalid block size");
 };
-var chunk_n77gaszd_getChannelCount = (iterator) => {
+var chunk_gqesq3a3_getChannelCount = (iterator) => {
   const bits = iterator.getBits(4);
   if (bits === 0) {
     return 1;
@@ -64643,7 +64663,7 @@ var chunk_n77gaszd_getChannelCount = (iterator) => {
   }
   throw new Error(`Invalid channel count: ${bits.toString(2)}`);
 };
-var chunk_n77gaszd_getSampleRate4 = (iterator, state) => {
+var chunk_gqesq3a3_getSampleRate4 = (iterator, state) => {
   const mode = iterator.getBits(4);
   if (mode === 0) {
     const structure = state.structure.getFlacStructure();
@@ -64697,7 +64717,7 @@ var chunk_n77gaszd_getSampleRate4 = (iterator, state) => {
   }
   throw new Error(`Invalid sample rate mode: ${mode.toString(2)}`);
 };
-function chunk_n77gaszd_calculateCRC8(data) {
+function chunk_gqesq3a3_calculateCRC8(data) {
   const polynomial = 7;
   let crc = 0;
   for (const byte of data) {
@@ -64713,7 +64733,7 @@ function chunk_n77gaszd_calculateCRC8(data) {
   }
   return crc;
 }
-var chunk_n77gaszd_parseFrameHeader = ({
+var chunk_gqesq3a3_parseFrameHeader = ({
   iterator,
   state
 }) => {
@@ -64723,9 +64743,9 @@ var chunk_n77gaszd_parseFrameHeader = ({
   const startOffset = iterator.counter.getOffset();
   iterator.discard(2);
   iterator.startReadingBits();
-  const blockSizeBits = chunk_n77gaszd_getBlockSize(iterator);
-  const sampleRateBits = chunk_n77gaszd_getSampleRate4(iterator, state);
-  chunk_n77gaszd_getChannelCount(iterator);
+  const blockSizeBits = chunk_gqesq3a3_getBlockSize(iterator);
+  const sampleRateBits = chunk_gqesq3a3_getSampleRate4(iterator, state);
+  chunk_gqesq3a3_getChannelCount(iterator);
   iterator.getBits(3);
   iterator.getBits(1);
   const num = iterator.getFlacCodecNumber();
@@ -64735,24 +64755,24 @@ var chunk_n77gaszd_parseFrameHeader = ({
   const size4 = iterator.counter.getOffset() - startOffset;
   const crc = iterator.getUint8();
   iterator.counter.decrement(size4 + 1);
-  const crcCalculated = chunk_n77gaszd_calculateCRC8(iterator.getSlice(size4));
+  const crcCalculated = chunk_gqesq3a3_calculateCRC8(iterator.getSlice(size4));
   iterator.counter.decrement(size4);
   if (crcCalculated !== crc) {
     return null;
   }
   return { num, blockSize, sampleRate };
 };
-var chunk_n77gaszd_emitSample = async ({
+var chunk_gqesq3a3_emitSample = async ({
   state,
   data,
   offset
 }) => {
-  const iterator = chunk_n77gaszd_getArrayBufferIterator({
+  const iterator = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: data,
     maxBytes: data.length,
     logLevel: "error"
   });
-  const parsed = chunk_n77gaszd_parseFrameHeader({ iterator, state });
+  const parsed = chunk_gqesq3a3_parseFrameHeader({ iterator, state });
   if (!parsed) {
     throw new Error("Invalid CRC");
   }
@@ -64772,7 +64792,7 @@ var chunk_n77gaszd_emitSample = async ({
     offset,
     durationInSeconds: duration2
   });
-  const audioSample = chunk_n77gaszd_convertAudioOrVideoSampleToWebCodecsTimestamps({
+  const audioSample = chunk_gqesq3a3_convertAudioOrVideoSampleToWebCodecsTimestamps({
     sample: {
       data,
       duration: duration2,
@@ -64789,7 +64809,7 @@ var chunk_n77gaszd_emitSample = async ({
   });
   iterator.destroy();
 };
-var chunk_n77gaszd_parseFlacFrame = async ({
+var chunk_gqesq3a3_parseFlacFrame = async ({
   state,
   iterator
 }) => {
@@ -64832,7 +64852,7 @@ var chunk_n77gaszd_parseFlacFrame = async ({
       const size4 = iterator.counter.getOffset() - offset;
       returnToCheckpoint();
       const slice = iterator.getSlice(size4);
-      await chunk_n77gaszd_emitSample({ state, data: slice, offset });
+      await chunk_gqesq3a3_emitSample({ state, data: slice, offset });
       break;
     }
     if (iterator.bytesRemaining() === 0) {
@@ -64848,7 +64868,7 @@ var chunk_n77gaszd_parseFlacFrame = async ({
         continue;
       }
       iterator.counter.decrement(2);
-      const nextIsLegit = chunk_n77gaszd_parseFrameHeader({ iterator, state });
+      const nextIsLegit = chunk_gqesq3a3_parseFrameHeader({ iterator, state });
       if (!nextIsLegit) {
         iterator.discard(1);
         continue;
@@ -64856,13 +64876,13 @@ var chunk_n77gaszd_parseFlacFrame = async ({
       const size4 = iterator.counter.getOffset() - offset;
       returnToCheckpoint();
       const data = iterator.getSlice(size4);
-      await chunk_n77gaszd_emitSample({ state, data, offset });
+      await chunk_gqesq3a3_emitSample({ state, data, offset });
       break;
     }
   }
   return null;
 };
-var chunk_n77gaszd_parseFlacHeader = ({
+var chunk_gqesq3a3_parseFlacHeader = ({
   state
 }) => {
   state.structure.getFlacStructure().boxes.push({
@@ -64870,7 +64890,7 @@ var chunk_n77gaszd_parseFlacHeader = ({
   });
   return Promise.resolve(null);
 };
-var chunk_n77gaszd_parseVorbisComment = ({
+var chunk_gqesq3a3_parseVorbisComment = ({
   state,
   iterator,
   size: size4
@@ -64894,7 +64914,7 @@ var chunk_n77gaszd_parseVorbisComment = ({
   expectNoMoreBytes();
   return Promise.resolve(null);
 };
-var chunk_n77gaszd_parseStreamInfo = async ({
+var chunk_gqesq3a3_parseStreamInfo = async ({
   iterator,
   state
 }) => {
@@ -64926,7 +64946,7 @@ var chunk_n77gaszd_parseStreamInfo = async ({
     totalSamples
   };
   state.structure.getFlacStructure().boxes.push(flacStreamInfo);
-  await chunk_n77gaszd_registerAudioTrack({
+  await chunk_gqesq3a3_registerAudioTrack({
     container: "flac",
     track: {
       codec: "flac",
@@ -64936,10 +64956,10 @@ var chunk_n77gaszd_parseStreamInfo = async ({
       codecEnum: "flac",
       numberOfChannels: channels2,
       sampleRate,
-      originalTimescale: chunk_n77gaszd_WEBCODECS_TIMESCALE,
+      originalTimescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE,
       trackId: 0,
       startInSeconds: 0,
-      timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+      timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
     },
     registerAudioSampleCallback: state.callbacks.registerAudioSampleCallback,
     tracks: state.callbacks.tracks,
@@ -64949,7 +64969,7 @@ var chunk_n77gaszd_parseStreamInfo = async ({
   state.callbacks.tracks.setIsDone(state.logLevel);
   return Promise.resolve(null);
 };
-var chunk_n77gaszd_parseFlacUnkownBlock = ({
+var chunk_gqesq3a3_parseFlacUnkownBlock = ({
   iterator,
   state,
   size: size4
@@ -64960,11 +64980,11 @@ var chunk_n77gaszd_parseFlacUnkownBlock = ({
   });
   return Promise.resolve(null);
 };
-var chunk_n77gaszd_flacTypes = {
+var chunk_gqesq3a3_flacTypes = {
   streaminfo: 0,
   vorbisComment: 4
 };
-var chunk_n77gaszd_parseMetaBlock = ({
+var chunk_gqesq3a3_parseMetaBlock = ({
   iterator,
   state
 }) => {
@@ -64979,51 +64999,51 @@ var chunk_n77gaszd_parseMetaBlock = ({
       size: state.contentLength - iterator.counter.getOffset() - size4
     });
   }
-  if (metaBlockType === chunk_n77gaszd_flacTypes.streaminfo) {
-    return chunk_n77gaszd_parseStreamInfo({ iterator, state });
+  if (metaBlockType === chunk_gqesq3a3_flacTypes.streaminfo) {
+    return chunk_gqesq3a3_parseStreamInfo({ iterator, state });
   }
-  if (metaBlockType === chunk_n77gaszd_flacTypes.vorbisComment) {
-    return chunk_n77gaszd_parseVorbisComment({ iterator, state, size: size4 });
+  if (metaBlockType === chunk_gqesq3a3_flacTypes.vorbisComment) {
+    return chunk_gqesq3a3_parseVorbisComment({ iterator, state, size: size4 });
   }
-  return chunk_n77gaszd_parseFlacUnkownBlock({ iterator, state, size: size4 });
+  return chunk_gqesq3a3_parseFlacUnkownBlock({ iterator, state, size: size4 });
 };
-var chunk_n77gaszd_parseFlac = ({
+var chunk_gqesq3a3_parseFlac = ({
   iterator,
   state
 }) => {
   const mediaSectionState2 = state.mediaSection.isCurrentByteInMediaSection(iterator);
   if (mediaSectionState2 === "in-section") {
-    if (chunk_n77gaszd_maySkipVideoData({ state })) {
-      return Promise.resolve(chunk_n77gaszd_makeSkip(state.contentLength));
+    if (chunk_gqesq3a3_maySkipVideoData({ state })) {
+      return Promise.resolve(chunk_gqesq3a3_makeSkip(state.contentLength));
     }
-    return chunk_n77gaszd_parseFlacFrame({ state, iterator });
+    return chunk_gqesq3a3_parseFlacFrame({ state, iterator });
   }
   const bytes = iterator.getByteString(4, true);
   if (bytes === "fLaC") {
-    return chunk_n77gaszd_parseFlacHeader({ state, iterator });
+    return chunk_gqesq3a3_parseFlacHeader({ state, iterator });
   }
   iterator.counter.decrement(4);
-  return chunk_n77gaszd_parseMetaBlock({
+  return chunk_gqesq3a3_parseMetaBlock({
     iterator,
     state
   });
 };
-var chunk_n77gaszd_calculateFlatSamples = ({
+var chunk_gqesq3a3_calculateFlatSamples = ({
   state,
   mediaSectionStart
 }) => {
-  const tracks2 = chunk_n77gaszd_getTracks(state, true);
-  const moofBoxes = chunk_n77gaszd_getMoofBoxes(state.structure.getIsoStructure().boxes);
-  const tfraBoxes = chunk_n77gaszd_deduplicateTfraBoxesByOffset([
+  const tracks2 = chunk_gqesq3a3_getTracks(state, true);
+  const moofBoxes = chunk_gqesq3a3_getMoofBoxes(state.structure.getIsoStructure().boxes);
+  const tfraBoxes = chunk_gqesq3a3_deduplicateTfraBoxesByOffset([
     ...state.iso.tfra.getTfraBoxes(),
-    ...chunk_n77gaszd_getTfraBoxes(state.structure.getIsoStructure().boxes)
+    ...chunk_gqesq3a3_getTfraBoxes(state.structure.getIsoStructure().boxes)
   ]);
-  const moofComplete = chunk_n77gaszd_areSamplesComplete({ moofBoxes, tfraBoxes });
+  const moofComplete = chunk_gqesq3a3_areSamplesComplete({ moofBoxes, tfraBoxes });
   const relevantMoofBox = moofBoxes.find((moofBox) => moofBox.offset + moofBox.size + 8 === mediaSectionStart);
   if (moofBoxes.length > 0 && !relevantMoofBox) {
     throw new Error("No relevant moof box found");
   }
-  const moov = chunk_n77gaszd_getMoovBoxFromState({
+  const moov = chunk_gqesq3a3_getMoovBoxFromState({
     structureState: state.structure,
     isoState: state.iso,
     mp4HeaderSegment: state.m3uPlaylistContext?.mp4HeaderSegment ?? null,
@@ -65033,15 +65053,15 @@ var chunk_n77gaszd_calculateFlatSamples = ({
     throw new Error("No moov box found");
   }
   const flatSamples = tracks2.map((track) => {
-    const trakBox = chunk_n77gaszd_getTrakBoxByTrackId(moov, track.trackId);
+    const trakBox = chunk_gqesq3a3_getTrakBoxByTrackId(moov, track.trackId);
     if (!trakBox) {
       throw new Error("No trak box found");
     }
-    const { samplePositions } = chunk_n77gaszd_getSamplePositionsFromTrack({
+    const { samplePositions } = chunk_gqesq3a3_getSamplePositionsFromTrack({
       trakBox,
       moofBoxes: relevantMoofBox ? [relevantMoofBox] : [],
       moofComplete,
-      trexBoxes: chunk_n77gaszd_getTrexBoxes(moov)
+      trexBoxes: chunk_gqesq3a3_getTrexBoxes(moov)
     });
     return samplePositions.map((samplePosition) => {
       return {
@@ -65052,7 +65072,7 @@ var chunk_n77gaszd_calculateFlatSamples = ({
   });
   return flatSamples;
 };
-var chunk_n77gaszd_cachedSamplePositionsState = () => {
+var chunk_gqesq3a3_cachedSamplePositionsState = () => {
   const cachedForMdatStart = {};
   const jumpMarksForMdatStart = {};
   return {
@@ -65070,7 +65090,7 @@ var chunk_n77gaszd_cachedSamplePositionsState = () => {
     }
   };
 };
-var chunk_n77gaszd_getLastMoofBox = (boxes) => {
+var chunk_gqesq3a3_getLastMoofBox = (boxes) => {
   if (boxes) {
     const tfras = boxes.filter((b) => b.type === "tfra-box");
     const lastMoofOffsets = tfras.map((f) => {
@@ -65080,20 +65100,20 @@ var chunk_n77gaszd_getLastMoofBox = (boxes) => {
       return f.entries[f.entries.length - 1].moofOffset;
     });
     if (lastMoofOffsets.length > 0) {
-      const maxOffset = Math.max(...lastMoofOffsets.filter(chunk_n77gaszd_truthy));
+      const maxOffset = Math.max(...lastMoofOffsets.filter(chunk_gqesq3a3_truthy));
       return maxOffset;
     }
     return null;
   }
 };
-var chunk_n77gaszd_getMaxFirstMoofOffset = (boxes) => {
+var chunk_gqesq3a3_getMaxFirstMoofOffset = (boxes) => {
   const tfras = boxes.filter((b) => b.type === "tfra-box");
   const firstMoofOffsets = tfras.map((f) => {
     return f.entries[0].moofOffset;
   });
-  return Math.max(...firstMoofOffsets.filter(chunk_n77gaszd_truthy));
+  return Math.max(...firstMoofOffsets.filter(chunk_gqesq3a3_truthy));
 };
-var chunk_n77gaszd_needsTracksForField = ({
+var chunk_gqesq3a3_needsTracksForField = ({
   field,
   structure
 }) => {
@@ -65111,7 +65131,7 @@ var chunk_n77gaszd_needsTracksForField = ({
   }
   throw new Error(`field not implemeted ${field}`);
 };
-var chunk_n77gaszd_makeCanSkipTracksState = ({
+var chunk_gqesq3a3_makeCanSkipTracksState = ({
   hasAudioTrackHandlers,
   fields,
   hasVideoTrackHandlers,
@@ -65120,7 +65140,7 @@ var chunk_n77gaszd_makeCanSkipTracksState = ({
   const doFieldsNeedTracks = () => {
     const keys = Object.keys(fields ?? {});
     const selectedKeys = keys.filter((k) => fields[k]);
-    return selectedKeys.some((k) => chunk_n77gaszd_needsTracksForField({
+    return selectedKeys.some((k) => chunk_gqesq3a3_needsTracksForField({
       field: k,
       structure: structure.getStructureOrNull()
     }));
@@ -65135,7 +65155,7 @@ var chunk_n77gaszd_makeCanSkipTracksState = ({
     }
   };
 };
-var chunk_n77gaszd_makeTracksSectionState = (canSkipTracksState, src) => {
+var chunk_gqesq3a3_makeTracksSectionState = (canSkipTracksState, src) => {
   const tracks2 = [];
   let doneWithTracks = false;
   return {
@@ -65145,7 +65165,7 @@ var chunk_n77gaszd_makeTracksSectionState = (canSkipTracksState, src) => {
       if (doneWithTracks) {
         throw new Error("Error in Media Parser: Tracks have already been parsed");
       }
-      chunk_n77gaszd_Log.verbose(logLevel, "All tracks have been parsed");
+      chunk_gqesq3a3_Log.verbose(logLevel, "All tracks have been parsed");
       doneWithTracks = true;
     },
     addTrack: (track) => {
@@ -65167,7 +65187,7 @@ var chunk_n77gaszd_makeTracksSectionState = (canSkipTracksState, src) => {
     }
   };
 };
-var chunk_n77gaszd_structureState = () => {
+var chunk_gqesq3a3_structureState = () => {
   let structure = null;
   const getStructure = () => {
     if (structure === null) {
@@ -65241,20 +65261,20 @@ var chunk_n77gaszd_structureState = () => {
     }
   };
 };
-var chunk_n77gaszd_getMoovAtom = async ({
+var chunk_gqesq3a3_getMoovAtom = async ({
   endOfMdat,
   state
 }) => {
   const headerSegment = state.m3uPlaylistContext?.mp4HeaderSegment;
   if (headerSegment) {
-    const segment = chunk_n77gaszd_getMoovFromFromIsoStructure(headerSegment);
+    const segment = chunk_gqesq3a3_getMoovFromFromIsoStructure(headerSegment);
     if (!segment) {
       throw new Error("No moov box found in header segment");
     }
     return segment;
   }
   const start = Date.now();
-  chunk_n77gaszd_Log.verbose(state.logLevel, "Starting second fetch to get moov atom");
+  chunk_gqesq3a3_Log.verbose(state.logLevel, "Starting second fetch to get moov atom");
   const { reader } = await state.readerInterface.read({
     src: state.src,
     range: endOfMdat,
@@ -65263,7 +65283,7 @@ var chunk_n77gaszd_getMoovAtom = async ({
     prefetchCache: state.prefetchCache
   });
   const onAudioTrack = state.onAudioTrack ? async ({ track, container: container42 }) => {
-    await chunk_n77gaszd_registerAudioTrack({
+    await chunk_gqesq3a3_registerAudioTrack({
       track,
       container: container42,
       logLevel: state.logLevel,
@@ -65274,7 +65294,7 @@ var chunk_n77gaszd_getMoovAtom = async ({
     return null;
   } : null;
   const onVideoTrack = state.onVideoTrack ? async ({ track, container: container42 }) => {
-    await chunk_n77gaszd_registerVideoTrack({
+    await chunk_gqesq3a3_registerVideoTrack({
       track,
       container: container42,
       logLevel: state.logLevel,
@@ -65284,7 +65304,7 @@ var chunk_n77gaszd_getMoovAtom = async ({
     });
     return null;
   } : null;
-  const iterator = chunk_n77gaszd_getArrayBufferIterator({
+  const iterator = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: new Uint8Array([]),
     maxBytes: state.contentLength - endOfMdat,
     logLevel: "error"
@@ -65299,15 +65319,15 @@ var chunk_n77gaszd_getMoovAtom = async ({
     }
   }
   const boxes = [];
-  const canSkipTracksState = chunk_n77gaszd_makeCanSkipTracksState({
+  const canSkipTracksState = chunk_gqesq3a3_makeCanSkipTracksState({
     hasAudioTrackHandlers: false,
     fields: { slowStructure: true },
     hasVideoTrackHandlers: false,
-    structure: chunk_n77gaszd_structureState()
+    structure: chunk_gqesq3a3_structureState()
   });
-  const tracksState = chunk_n77gaszd_makeTracksSectionState(canSkipTracksState, state.src);
+  const tracksState = chunk_gqesq3a3_makeTracksSectionState(canSkipTracksState, state.src);
   while (true) {
-    const box2 = await chunk_n77gaszd_processBox({
+    const box2 = await chunk_gqesq3a3_processBox({
       iterator,
       logLevel: state.logLevel,
       onlyIfMoovAtomExpected: {
@@ -65336,24 +65356,24 @@ var chunk_n77gaszd_getMoovAtom = async ({
   if (!moov) {
     throw new Error("No moov box found");
   }
-  chunk_n77gaszd_Log.verbose(state.logLevel, `Finished fetching moov atom in ${Date.now() - start}ms`);
+  chunk_gqesq3a3_Log.verbose(state.logLevel, `Finished fetching moov atom in ${Date.now() - start}ms`);
   return moov;
 };
-var chunk_n77gaszd_MAX_SPREAD_IN_SECONDS = 8;
-var chunk_n77gaszd_getKey = (samplePositionTrack) => {
+var chunk_gqesq3a3_MAX_SPREAD_IN_SECONDS = 8;
+var chunk_gqesq3a3_getKey = (samplePositionTrack) => {
   return `${samplePositionTrack.track.trackId}-${samplePositionTrack.samplePosition.decodingTimestamp}`;
 };
-var chunk_n77gaszd_findBestJump = ({
+var chunk_gqesq3a3_findBestJump = ({
   allSamplesSortedByOffset,
   visited,
   progresses
 }) => {
   const minProgress = Math.min(...Object.values(progresses));
   const trackNumberWithLowestProgress = Object.entries(progresses).find(([, progress]) => progress === minProgress)?.[0];
-  const firstSampleAboveMinProgress = allSamplesSortedByOffset.findIndex((sample) => sample.track.trackId === Number(trackNumberWithLowestProgress) && !visited.has(chunk_n77gaszd_getKey(sample)));
+  const firstSampleAboveMinProgress = allSamplesSortedByOffset.findIndex((sample) => sample.track.trackId === Number(trackNumberWithLowestProgress) && !visited.has(chunk_gqesq3a3_getKey(sample)));
   return firstSampleAboveMinProgress;
 };
-var chunk_n77gaszd_calculateJumpMarks = (samplePositionTracks, endOfMdat) => {
+var chunk_gqesq3a3_calculateJumpMarks = (samplePositionTracks, endOfMdat) => {
   const progresses = {};
   for (const track of samplePositionTracks) {
     progresses[track[0].track.trackId] = 0;
@@ -65394,7 +65414,7 @@ var chunk_n77gaszd_calculateJumpMarks = (samplePositionTracks, endOfMdat) => {
     });
   };
   const considerJump = () => {
-    const firstSampleAboveMinProgress = chunk_n77gaszd_findBestJump({
+    const firstSampleAboveMinProgress = chunk_gqesq3a3_findBestJump({
       allSamplesSortedByOffset,
       visited,
       progresses
@@ -65405,7 +65425,7 @@ var chunk_n77gaszd_calculateJumpMarks = (samplePositionTracks, endOfMdat) => {
     } else {
       while (true) {
         increaseIndex();
-        if (!visited.has(chunk_n77gaszd_getKey(allSamplesSortedByOffset[indexToVisit]))) {
+        if (!visited.has(chunk_gqesq3a3_getKey(allSamplesSortedByOffset[indexToVisit]))) {
           break;
         }
       }
@@ -65413,7 +65433,7 @@ var chunk_n77gaszd_calculateJumpMarks = (samplePositionTracks, endOfMdat) => {
   };
   while (true) {
     const currentSamplePosition = allSamplesSortedByOffset[indexToVisit];
-    const sampleKey = chunk_n77gaszd_getKey(currentSamplePosition);
+    const sampleKey = chunk_gqesq3a3_getKey(currentSamplePosition);
     if (visited.has(sampleKey)) {
       considerJump();
       continue;
@@ -65444,7 +65464,7 @@ var chunk_n77gaszd_calculateJumpMarks = (samplePositionTracks, endOfMdat) => {
       addFinalJumpIfNecessary();
       break;
     }
-    if (spread > chunk_n77gaszd_MAX_SPREAD_IN_SECONDS) {
+    if (spread > chunk_gqesq3a3_MAX_SPREAD_IN_SECONDS) {
       considerJump();
     } else {
       increaseIndex();
@@ -65452,7 +65472,7 @@ var chunk_n77gaszd_calculateJumpMarks = (samplePositionTracks, endOfMdat) => {
   }
   return jumpMarks;
 };
-var chunk_n77gaszd_postprocessBytes = ({
+var chunk_gqesq3a3_postprocessBytes = ({
   bytes,
   bigEndian,
   chunkSize
@@ -65471,8 +65491,8 @@ var chunk_n77gaszd_postprocessBytes = ({
   }
   return newBuffer;
 };
-var chunk_n77gaszd_parseMdatSection = async (state) => {
-  const mediaSection = chunk_n77gaszd_getCurrentMediaSection({
+var chunk_gqesq3a3_parseMdatSection = async (state) => {
+  const mediaSection = chunk_gqesq3a3_getCurrentMediaSection({
     offset: state.iterator.counter.getOffset(),
     mediaSections: state.mediaSection.getMediaSections()
   });
@@ -65480,32 +65500,32 @@ var chunk_n77gaszd_parseMdatSection = async (state) => {
     throw new Error("No video section defined");
   }
   const endOfMdat = mediaSection.size + mediaSection.start;
-  if (chunk_n77gaszd_maySkipVideoData({ state })) {
+  if (chunk_gqesq3a3_maySkipVideoData({ state })) {
     const mfra = state.iso.mfra.getIfAlreadyLoaded();
     if (mfra) {
-      const lastMoof = chunk_n77gaszd_getLastMoofBox(mfra);
+      const lastMoof = chunk_gqesq3a3_getLastMoofBox(mfra);
       if (lastMoof && lastMoof > endOfMdat) {
-        chunk_n77gaszd_Log.verbose(state.logLevel, "Skipping to last moof", lastMoof);
-        return chunk_n77gaszd_makeSkip(lastMoof);
+        chunk_gqesq3a3_Log.verbose(state.logLevel, "Skipping to last moof", lastMoof);
+        return chunk_gqesq3a3_makeSkip(lastMoof);
       }
     }
-    return chunk_n77gaszd_makeSkip(endOfMdat);
+    return chunk_gqesq3a3_makeSkip(endOfMdat);
   }
-  if (chunk_n77gaszd_maySkipOverSamplesInTheMiddle({ state })) {
+  if (chunk_gqesq3a3_maySkipOverSamplesInTheMiddle({ state })) {
     const mfra = state.iso.mfra.getIfAlreadyLoaded();
     if (mfra) {
-      const lastMoof = chunk_n77gaszd_getLastMoofBox(mfra);
-      const firstMax = chunk_n77gaszd_getMaxFirstMoofOffset(mfra);
+      const lastMoof = chunk_gqesq3a3_getLastMoofBox(mfra);
+      const firstMax = chunk_gqesq3a3_getMaxFirstMoofOffset(mfra);
       const mediaSectionsBiggerThanMoof = state.mediaSection.getMediaSections().filter((m) => m.start > firstMax).length;
       if (mediaSectionsBiggerThanMoof > 1 && lastMoof && lastMoof > endOfMdat) {
-        chunk_n77gaszd_Log.verbose(state.logLevel, "Skipping to last moof because only first and last samples are needed");
-        return chunk_n77gaszd_makeSkip(lastMoof);
+        chunk_gqesq3a3_Log.verbose(state.logLevel, "Skipping to last moof because only first and last samples are needed");
+        return chunk_gqesq3a3_makeSkip(lastMoof);
       }
     }
   }
-  const alreadyHasMoov = chunk_n77gaszd_getHasTracks(state, true);
+  const alreadyHasMoov = chunk_gqesq3a3_getHasTracks(state, true);
   if (!alreadyHasMoov) {
-    const moov = await chunk_n77gaszd_getMoovAtom({
+    const moov = await chunk_gqesq3a3_getMoovAtom({
       endOfMdat,
       state
     });
@@ -65515,14 +65535,14 @@ var chunk_n77gaszd_parseMdatSection = async (state) => {
     });
     state.callbacks.tracks.setIsDone(state.logLevel);
     state.structure.getIsoStructure().boxes.push(moov);
-    return chunk_n77gaszd_parseMdatSection(state);
+    return chunk_gqesq3a3_parseMdatSection(state);
   }
   if (!state.iso.flatSamples.getSamples(mediaSection.start)) {
-    const flattedSamples = chunk_n77gaszd_calculateFlatSamples({
+    const flattedSamples = chunk_gqesq3a3_calculateFlatSamples({
       state,
       mediaSectionStart: mediaSection.start
     });
-    const calcedJumpMarks = chunk_n77gaszd_calculateJumpMarks(flattedSamples, endOfMdat);
+    const calcedJumpMarks = chunk_gqesq3a3_calculateJumpMarks(flattedSamples, endOfMdat);
     state.iso.flatSamples.setJumpMarks(mediaSection.start, calcedJumpMarks);
     state.iso.flatSamples.setSamples(mediaSection.start, flattedSamples.flat(1));
   }
@@ -65538,15 +65558,15 @@ var chunk_n77gaszd_parseMdatSection = async (state) => {
       iterator.discard(nextSample_.samplePosition.offset - iterator.counter.getOffset());
       return null;
     }
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Could not find sample at offset", iterator.counter.getOffset(), "skipping to end of mdat");
-    return chunk_n77gaszd_makeSkip(endOfMdat);
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Could not find sample at offset", iterator.counter.getOffset(), "skipping to end of mdat");
+    return chunk_gqesq3a3_makeSkip(endOfMdat);
   }
   if (samplesWithIndex.samplePosition.offset + samplesWithIndex.samplePosition.size > state.contentLength) {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Sample is beyond the end of the file. Don't process it.", samplesWithIndex.samplePosition.offset + samplesWithIndex.samplePosition.size, endOfMdat);
-    return chunk_n77gaszd_makeSkip(endOfMdat);
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Sample is beyond the end of the file. Don't process it.", samplesWithIndex.samplePosition.offset + samplesWithIndex.samplePosition.size, endOfMdat);
+    return chunk_gqesq3a3_makeSkip(endOfMdat);
   }
   if (iterator.bytesRemaining() < samplesWithIndex.samplePosition.size) {
-    return chunk_n77gaszd_makeFetchMoreData(samplesWithIndex.samplePosition.size - iterator.bytesRemaining());
+    return chunk_gqesq3a3_makeFetchMoreData(samplesWithIndex.samplePosition.size - iterator.bytesRemaining());
   }
   const {
     timestamp: rawCts,
@@ -65560,13 +65580,13 @@ var chunk_n77gaszd_parseMdatSection = async (state) => {
   const { originalTimescale, startInSeconds } = samplesWithIndex.track;
   const cts = rawCts + startInSeconds * originalTimescale;
   const dts = rawDts + startInSeconds * originalTimescale;
-  const bytes = chunk_n77gaszd_postprocessBytes({
+  const bytes = chunk_gqesq3a3_postprocessBytes({
     bytes: iterator.getSlice(samplesWithIndex.samplePosition.size),
     bigEndian,
     chunkSize
   });
   if (samplesWithIndex.track.type === "audio") {
-    const audioSample = chunk_n77gaszd_convertAudioOrVideoSampleToWebCodecsTimestamps({
+    const audioSample = chunk_gqesq3a3_convertAudioOrVideoSampleToWebCodecsTimestamps({
       sample: {
         data: bytes,
         timestamp: cts,
@@ -65589,7 +65609,7 @@ var chunk_n77gaszd_parseMdatSection = async (state) => {
       const seiType = bytes[5];
       isRecoveryPoint = seiType === 6;
     }
-    const videoSample = chunk_n77gaszd_convertAudioOrVideoSampleToWebCodecsTimestamps({
+    const videoSample = chunk_gqesq3a3_convertAudioOrVideoSampleToWebCodecsTimestamps({
       sample: {
         data: bytes,
         timestamp: cts,
@@ -65607,18 +65627,18 @@ var chunk_n77gaszd_parseMdatSection = async (state) => {
   }
   const jump = jumpMarks.find((j) => j.afterSampleWithOffset === offset);
   if (jump) {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Found jump mark", jump.jumpToOffset, "skipping to jump mark");
-    return chunk_n77gaszd_makeSkip(jump.jumpToOffset);
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Found jump mark", jump.jumpToOffset, "skipping to jump mark");
+    return chunk_gqesq3a3_makeSkip(jump.jumpToOffset);
   }
   return null;
 };
-var chunk_n77gaszd_parseIsoBaseMedia = async (state) => {
+var chunk_gqesq3a3_parseIsoBaseMedia = async (state) => {
   const mediaSectionState2 = state.mediaSection.isCurrentByteInMediaSection(state.iterator);
   if (mediaSectionState2 === "in-section") {
-    const skipTo = await chunk_n77gaszd_parseMdatSection(state);
+    const skipTo = await chunk_gqesq3a3_parseMdatSection(state);
     return skipTo;
   }
-  const result = await chunk_n77gaszd_processBox({
+  const result = await chunk_gqesq3a3_processBox({
     iterator: state.iterator,
     logLevel: state.logLevel,
     onlyIfMoovAtomExpected: {
@@ -65643,7 +65663,7 @@ var chunk_n77gaszd_parseIsoBaseMedia = async (state) => {
   }
   return null;
 };
-function chunk_n77gaszd_splitRespectingQuotes(input2) {
+function chunk_gqesq3a3_splitRespectingQuotes(input2) {
   const result = [];
   let currentPart = "";
   let insideQuote = false;
@@ -65664,8 +65684,8 @@ function chunk_n77gaszd_splitRespectingQuotes(input2) {
   }
   return result;
 }
-var chunk_n77gaszd_parseStreamInf = (str) => {
-  const quotes = chunk_n77gaszd_splitRespectingQuotes(str);
+var chunk_gqesq3a3_parseStreamInf = (str) => {
+  const quotes = chunk_gqesq3a3_splitRespectingQuotes(str);
   const map = {};
   for (const quote of quotes) {
     const firstColon = quote.indexOf("=");
@@ -65689,8 +65709,8 @@ var chunk_n77gaszd_parseStreamInf = (str) => {
     audio: map.AUDIO || null
   };
 };
-var chunk_n77gaszd_parseM3uKeyValue = (str) => {
-  const quotes = chunk_n77gaszd_splitRespectingQuotes(str);
+var chunk_gqesq3a3_parseM3uKeyValue = (str) => {
+  const quotes = chunk_gqesq3a3_splitRespectingQuotes(str);
   const map = {};
   for (const quote of quotes) {
     const firstColon = quote.indexOf("=");
@@ -65704,8 +65724,8 @@ var chunk_n77gaszd_parseM3uKeyValue = (str) => {
   }
   return map;
 };
-var chunk_n77gaszd_parseM3uMediaDirective = (str) => {
-  const map = chunk_n77gaszd_parseM3uKeyValue(str);
+var chunk_gqesq3a3_parseM3uMediaDirective = (str) => {
+  const map = chunk_gqesq3a3_parseM3uKeyValue(str);
   return {
     type: "m3u-media-info",
     autoselect: map.AUTOSELECT === "YES",
@@ -65718,7 +65738,7 @@ var chunk_n77gaszd_parseM3uMediaDirective = (str) => {
     mediaType: map.TYPE || null
   };
 };
-var chunk_n77gaszd_parseM3uDirective = (str) => {
+var chunk_gqesq3a3_parseM3uDirective = (str) => {
   const firstColon = str.indexOf(":");
   const directive = (firstColon === -1 ? str : str.slice(0, firstColon)).trim();
   const value = firstColon === -1 ? null : str.slice(firstColon + 1);
@@ -65740,7 +65760,7 @@ var chunk_n77gaszd_parseM3uDirective = (str) => {
     if (!value) {
       throw new Error("EXT-X-MEDIA directive must have a value");
     }
-    const parsed = chunk_n77gaszd_parseM3uMediaDirective(value);
+    const parsed = chunk_gqesq3a3_parseM3uMediaDirective(value);
     return parsed;
   }
   if (directive === "#EXT-X-TARGETDURATION") {
@@ -65797,7 +65817,7 @@ var chunk_n77gaszd_parseM3uDirective = (str) => {
     if (!value) {
       throw new Error("EXT-X-STREAM-INF directive must have a value");
     }
-    const res = chunk_n77gaszd_parseStreamInf(value);
+    const res = chunk_gqesq3a3_parseStreamInf(value);
     return res;
   }
   if (directive === "#EXT-X-I-FRAME-STREAM-INF") {
@@ -65818,7 +65838,7 @@ var chunk_n77gaszd_parseM3uDirective = (str) => {
     if (!value) {
       throw new Error("#EXT-X-MAP directive must have a value");
     }
-    const p = chunk_n77gaszd_parseM3uKeyValue(value);
+    const p = chunk_gqesq3a3_parseM3uKeyValue(value);
     if (!p.URI) {
       throw new Error("EXT-X-MAP directive must have a URI");
     }
@@ -65829,7 +65849,7 @@ var chunk_n77gaszd_parseM3uDirective = (str) => {
   }
   throw new Error(`Unknown directive ${directive}. Value: ${value}`);
 };
-var chunk_n77gaszd_parseM3u8Text = (line4, boxes) => {
+var chunk_gqesq3a3_parseM3u8Text = (line4, boxes) => {
   if (line4 === "#EXTM3U") {
     boxes.push({
       type: "m3u-header"
@@ -65837,7 +65857,7 @@ var chunk_n77gaszd_parseM3u8Text = (line4, boxes) => {
     return;
   }
   if (line4.startsWith("#")) {
-    boxes.push(chunk_n77gaszd_parseM3uDirective(line4));
+    boxes.push(chunk_gqesq3a3_parseM3uDirective(line4));
     return;
   }
   if (line4.trim()) {
@@ -65847,7 +65867,7 @@ var chunk_n77gaszd_parseM3u8Text = (line4, boxes) => {
     });
   }
 };
-var chunk_n77gaszd_fetchM3u8Stream = async ({
+var chunk_gqesq3a3_fetchM3u8Stream = async ({
   url,
   readerInterface
 }) => {
@@ -65856,11 +65876,11 @@ var chunk_n77gaszd_fetchM3u8Stream = async ({
 `);
   const boxes = [];
   for (const line4 of lines2) {
-    chunk_n77gaszd_parseM3u8Text(line4.trim(), boxes);
+    chunk_gqesq3a3_parseM3u8Text(line4.trim(), boxes);
   }
   return boxes;
 };
-var chunk_n77gaszd_selectAssociatedPlaylists = async ({
+var chunk_gqesq3a3_selectAssociatedPlaylists = async ({
   playlists,
   fn,
   skipAudioTracks
@@ -65884,13 +65904,13 @@ var chunk_n77gaszd_selectAssociatedPlaylists = async ({
   }
   return selectedStreams;
 };
-var chunk_n77gaszd_defaultSelectM3uAssociatedPlaylists = ({ associatedPlaylists }) => {
+var chunk_gqesq3a3_defaultSelectM3uAssociatedPlaylists = ({ associatedPlaylists }) => {
   if (associatedPlaylists.length === 1) {
     return associatedPlaylists;
   }
   return associatedPlaylists.filter((playlist) => playlist.default);
 };
-var chunk_n77gaszd_selectStream = async ({
+var chunk_gqesq3a3_selectStream = async ({
   streams,
   fn
 }) => {
@@ -65904,10 +65924,10 @@ var chunk_n77gaszd_selectStream = async ({
   }
   return Promise.resolve(selectedStream);
 };
-var chunk_n77gaszd_defaultSelectM3uStreamFn = ({ streams }) => {
+var chunk_gqesq3a3_defaultSelectM3uStreamFn = ({ streams }) => {
   return Promise.resolve(streams[0].id);
 };
-var chunk_n77gaszd_afterManifestFetch = async ({
+var chunk_gqesq3a3_afterManifestFetch = async ({
   structure,
   m3uState,
   src,
@@ -65918,7 +65938,7 @@ var chunk_n77gaszd_afterManifestFetch = async ({
   onAudioTrack,
   canSkipTracks
 }) => {
-  const independentSegments = chunk_n77gaszd_isIndependentSegments(structure);
+  const independentSegments = chunk_gqesq3a3_isIndependentSegments(structure);
   if (!independentSegments) {
     if (!src) {
       throw new Error("No src");
@@ -65929,11 +65949,11 @@ var chunk_n77gaszd_afterManifestFetch = async ({
     });
     return m3uState.setReadyToIterateOverM3u();
   }
-  const streams = chunk_n77gaszd_getM3uStreams({ structure, originalSrc: src, readerInterface });
+  const streams = chunk_gqesq3a3_getM3uStreams({ structure, originalSrc: src, readerInterface });
   if (streams === null) {
     throw new Error("No streams found");
   }
-  const selectedPlaylist = await chunk_n77gaszd_selectStream({ streams, fn: selectM3uStreamFn });
+  const selectedPlaylist = await chunk_gqesq3a3_selectStream({ streams, fn: selectM3uStreamFn });
   if (!selectedPlaylist.dimensions) {
     throw new Error("Stream does not have a resolution");
   }
@@ -65942,7 +65962,7 @@ var chunk_n77gaszd_afterManifestFetch = async ({
     stream: selectedPlaylist
   });
   const skipAudioTracks = onAudioTrack === null && canSkipTracks.doFieldsNeedTracks() === false;
-  const associatedPlaylists = await chunk_n77gaszd_selectAssociatedPlaylists({
+  const associatedPlaylists = await chunk_gqesq3a3_selectAssociatedPlaylists({
     playlists: selectedPlaylist.associatedPlaylists,
     fn: selectAssociatedPlaylistsFn,
     skipAudioTracks
@@ -65953,8 +65973,8 @@ var chunk_n77gaszd_afterManifestFetch = async ({
     ...associatedPlaylists.map((p) => p.src)
   ];
   const struc = await Promise.all(playlistUrls.map(async (url) => {
-    chunk_n77gaszd_Log.verbose(logLevel, `Fetching playlist ${url}`);
-    const boxes = await chunk_n77gaszd_fetchM3u8Stream({ url, readerInterface });
+    chunk_gqesq3a3_Log.verbose(logLevel, `Fetching playlist ${url}`);
+    const boxes = await chunk_gqesq3a3_fetchM3u8Stream({ url, readerInterface });
     return {
       type: "m3u-playlist",
       boxes,
@@ -65964,7 +65984,7 @@ var chunk_n77gaszd_afterManifestFetch = async ({
   structure.boxes.push(...struc);
   m3uState.setReadyToIterateOverM3u();
 };
-var chunk_n77gaszd_parseM3uManifest = ({
+var chunk_gqesq3a3_parseM3uManifest = ({
   iterator,
   structure,
   contentLength
@@ -65978,10 +65998,10 @@ var chunk_n77gaszd_parseM3uManifest = ({
     start.returnToCheckpoint();
     return Promise.resolve(null);
   }
-  chunk_n77gaszd_parseM3u8Text(line4.trim(), structure.boxes);
+  chunk_gqesq3a3_parseM3u8Text(line4.trim(), structure.boxes);
   return Promise.resolve(null);
 };
-var chunk_n77gaszd_forwardMediaParserControllerPauseResume = ({
+var chunk_gqesq3a3_forwardMediaParserControllerPauseResume = ({
   parentController,
   childController
 }) => {
@@ -66005,7 +66025,7 @@ var chunk_n77gaszd_forwardMediaParserControllerPauseResume = ({
     }
   };
 };
-var chunk_n77gaszd_getLengthAndReader = async ({
+var chunk_gqesq3a3_getLengthAndReader = async ({
   canLiveWithoutContentLength,
   res,
   ownController,
@@ -66062,7 +66082,7 @@ var chunk_n77gaszd_getLengthAndReader = async ({
     needsContentRange: true
   };
 };
-var chunk_n77gaszd_resolveUrl = (src) => {
+var chunk_gqesq3a3_resolveUrl = (src) => {
   try {
     const resolvedUrl = typeof window !== "undefined" && typeof window.location !== "undefined" ? new URL(src, window.location.origin) : new URL(src);
     return resolvedUrl;
@@ -66070,7 +66090,7 @@ var chunk_n77gaszd_resolveUrl = (src) => {
     return src;
   }
 };
-function chunk_n77gaszd_parseContentRange(input2) {
+function chunk_gqesq3a3_parseContentRange(input2) {
   const matches = input2.match(/^(\w+) ((\d+)-(\d+)|\*)\/(\d+|\*)$/);
   if (!matches)
     return null;
@@ -66086,7 +66106,7 @@ function chunk_n77gaszd_parseContentRange(input2) {
   }
   return range2;
 }
-var chunk_n77gaszd_validateContentRangeAndDetectIfSupported = ({
+var chunk_gqesq3a3_validateContentRangeAndDetectIfSupported = ({
   requestedRange,
   parsedContentRange,
   statusCode
@@ -66105,12 +66125,12 @@ var chunk_n77gaszd_validateContentRangeAndDetectIfSupported = ({
   }
   return { supportsContentRange: true };
 };
-var chunk_n77gaszd_makeFetchRequest = async ({
+var chunk_gqesq3a3_makeFetchRequest = async ({
   range: range2,
   src,
   controller
 }) => {
-  const resolvedUrl = chunk_n77gaszd_resolveUrl(src);
+  const resolvedUrl = chunk_gqesq3a3_resolveUrl(src);
   const resolvedUrlString = resolvedUrl.toString();
   if (!resolvedUrlString.startsWith("https://") && !resolvedUrlString.startsWith("blob:") && !resolvedUrlString.startsWith("http://")) {
     return Promise.reject(new Error(`${resolvedUrlString} is not a URL - needs to start with http:// or https:// or blob:. If you want to read a local file, pass \`reader: nodeReader\` to parseMedia().`));
@@ -66132,23 +66152,23 @@ var chunk_n77gaszd_makeFetchRequest = async ({
     cache
   });
   const contentRange = res.headers.get("content-range");
-  const parsedContentRange = contentRange ? chunk_n77gaszd_parseContentRange(contentRange) : null;
+  const parsedContentRange = contentRange ? chunk_gqesq3a3_parseContentRange(contentRange) : null;
   if (!res.ok) {
     throw new Error(`Server returned status code ${res.status} for ${resolvedUrl} and range ${requestedRange}`);
   }
-  const { supportsContentRange } = chunk_n77gaszd_validateContentRangeAndDetectIfSupported({
+  const { supportsContentRange } = chunk_gqesq3a3_validateContentRangeAndDetectIfSupported({
     requestedRange,
     parsedContentRange,
     statusCode: res.status
   });
   if (controller) {
     controller._internals.signal.addEventListener("abort", () => {
-      ownController.abort(new chunk_n77gaszd_MediaParserAbortError("Aborted by user"));
+      ownController.abort(new chunk_gqesq3a3_MediaParserAbortError("Aborted by user"));
     }, { once: true });
   }
   const contentDisposition = res.headers.get("content-disposition");
   const name = contentDisposition?.match(/filename="([^"]+)"/)?.[1];
-  const { contentLength, needsContentRange, reader } = await chunk_n77gaszd_getLengthAndReader({
+  const { contentLength, needsContentRange, reader } = await chunk_gqesq3a3_getLengthAndReader({
     canLiveWithoutContentLength,
     res,
     ownController,
@@ -66164,31 +66184,31 @@ var chunk_n77gaszd_makeFetchRequest = async ({
     supportsContentRange
   };
 };
-var chunk_n77gaszd_cacheKey = ({
+var chunk_gqesq3a3_cacheKey = ({
   src,
   range: range2
 }) => {
   return `${src}-${JSON.stringify(range2)}`;
 };
-var chunk_n77gaszd_makeFetchRequestOrGetCached = ({
+var chunk_gqesq3a3_makeFetchRequestOrGetCached = ({
   range: range2,
   src,
   controller,
   logLevel,
   prefetchCache
 }) => {
-  const key4 = chunk_n77gaszd_cacheKey({ src, range: range2 });
+  const key4 = chunk_gqesq3a3_cacheKey({ src, range: range2 });
   const cached = prefetchCache.get(key4);
   if (cached) {
-    chunk_n77gaszd_Log.verbose(logLevel, `Reading from preload cache for ${key4}`);
+    chunk_gqesq3a3_Log.verbose(logLevel, `Reading from preload cache for ${key4}`);
     return cached;
   }
-  chunk_n77gaszd_Log.verbose(logLevel, `Fetching ${key4}`);
-  const result = chunk_n77gaszd_makeFetchRequest({ range: range2, src, controller });
+  chunk_gqesq3a3_Log.verbose(logLevel, `Fetching ${key4}`);
+  const result = chunk_gqesq3a3_makeFetchRequest({ range: range2, src, controller });
   prefetchCache.set(key4, result);
   return result;
 };
-var chunk_n77gaszd_fetchReadContent = async ({
+var chunk_gqesq3a3_fetchReadContent = async ({
   src,
   range: range2,
   controller,
@@ -66199,14 +66219,14 @@ var chunk_n77gaszd_fetchReadContent = async ({
     throw new Error("src must be a string when using `fetchReader`");
   }
   const fallbackName = src.toString().split("/").pop();
-  const res = chunk_n77gaszd_makeFetchRequestOrGetCached({
+  const res = chunk_gqesq3a3_makeFetchRequestOrGetCached({
     range: range2,
     src,
     controller,
     logLevel,
     prefetchCache
   });
-  const key4 = chunk_n77gaszd_cacheKey({ src, range: range2 });
+  const key4 = chunk_gqesq3a3_cacheKey({ src, range: range2 });
   prefetchCache.delete(key4);
   const {
     reader,
@@ -66230,7 +66250,7 @@ var chunk_n77gaszd_fetchReadContent = async ({
     needsContentRange
   };
 };
-var chunk_n77gaszd_fetchPreload = ({
+var chunk_gqesq3a3_fetchPreload = ({
   src,
   range: range2,
   logLevel,
@@ -66239,11 +66259,11 @@ var chunk_n77gaszd_fetchPreload = ({
   if (typeof src !== "string" && src instanceof URL === false) {
     throw new Error("src must be a string when using `fetchReader`");
   }
-  const key4 = chunk_n77gaszd_cacheKey({ src, range: range2 });
+  const key4 = chunk_gqesq3a3_cacheKey({ src, range: range2 });
   if (prefetchCache.has(key4)) {
     return prefetchCache.get(key4);
   }
-  chunk_n77gaszd_makeFetchRequestOrGetCached({
+  chunk_gqesq3a3_makeFetchRequestOrGetCached({
     range: range2,
     src,
     controller: null,
@@ -66251,7 +66271,7 @@ var chunk_n77gaszd_fetchPreload = ({
     prefetchCache
   });
 };
-var chunk_n77gaszd_fetchReadWholeAsText = async (src) => {
+var chunk_gqesq3a3_fetchReadWholeAsText = async (src) => {
   if (typeof src !== "string" && src instanceof URL === false) {
     throw new Error("src must be a string when using `fetchReader`");
   }
@@ -66261,13 +66281,13 @@ var chunk_n77gaszd_fetchReadWholeAsText = async (src) => {
   }
   return res.text();
 };
-var chunk_n77gaszd_fetchCreateAdjacentFileSource = (relativePath, src) => {
+var chunk_gqesq3a3_fetchCreateAdjacentFileSource = (relativePath, src) => {
   if (typeof src !== "string" && src instanceof URL === false) {
     throw new Error("src must be a string or URL when using `fetchReader`");
   }
   return new URL(relativePath, src).toString();
 };
-var chunk_n77gaszd_webFileReadContent = ({ src, range: range2, controller }) => {
+var chunk_gqesq3a3_webFileReadContent = ({ src, range: range2, controller }) => {
   if (typeof src === "string" || src instanceof URL) {
     throw new Error("`inputTypeFileReader` only supports `File` objects");
   }
@@ -66296,43 +66316,43 @@ var chunk_n77gaszd_webFileReadContent = ({ src, range: range2, controller }) => 
     needsContentRange: true
   });
 };
-var chunk_n77gaszd_webFileReadWholeAsText = () => {
+var chunk_gqesq3a3_webFileReadWholeAsText = () => {
   throw new Error("`webFileReader` cannot read auxiliary files.");
 };
-var chunk_n77gaszd_webFileCreateAdjacentFileSource = () => {
+var chunk_gqesq3a3_webFileCreateAdjacentFileSource = () => {
   throw new Error("`webFileReader` cannot create adjacent file sources.");
 };
-var chunk_n77gaszd_webReader = {
+var chunk_gqesq3a3_webReader = {
   read: (params) => {
     if (params.src instanceof Blob) {
-      return chunk_n77gaszd_webFileReadContent(params);
+      return chunk_gqesq3a3_webFileReadContent(params);
     }
-    return chunk_n77gaszd_fetchReadContent(params);
+    return chunk_gqesq3a3_fetchReadContent(params);
   },
   createAdjacentFileSource: (relativePath, src) => {
     if (src instanceof Blob) {
-      return chunk_n77gaszd_webFileCreateAdjacentFileSource(relativePath, src);
+      return chunk_gqesq3a3_webFileCreateAdjacentFileSource(relativePath, src);
     }
-    return chunk_n77gaszd_fetchCreateAdjacentFileSource(relativePath, src);
+    return chunk_gqesq3a3_fetchCreateAdjacentFileSource(relativePath, src);
   },
   readWholeAsText: (src) => {
     if (src instanceof Blob) {
-      return chunk_n77gaszd_webFileReadWholeAsText(src);
+      return chunk_gqesq3a3_webFileReadWholeAsText(src);
     }
-    return chunk_n77gaszd_fetchReadWholeAsText(src);
+    return chunk_gqesq3a3_fetchReadWholeAsText(src);
   },
   preload: ({ range: range2, src, logLevel, prefetchCache }) => {
     if (src instanceof Blob) {
       return;
     }
-    return chunk_n77gaszd_fetchPreload({ range: range2, src, logLevel, prefetchCache });
+    return chunk_gqesq3a3_fetchPreload({ range: range2, src, logLevel, prefetchCache });
   }
 };
-var chunk_n77gaszd_parseMedia = (options) => {
+var chunk_gqesq3a3_parseMedia = (options) => {
   if (!options) {
     return Promise.reject(new Error("No options provided. See https://www.remotion.dev/media-parser for how to get started."));
   }
-  return chunk_n77gaszd_internalParseMedia({
+  return chunk_gqesq3a3_internalParseMedia({
     fields: options.fields ?? null,
     logLevel: options.logLevel ?? "info",
     onAudioCodec: options.onAudioCodec ?? null,
@@ -66367,10 +66387,10 @@ var chunk_n77gaszd_parseMedia = (options) => {
     onVideoCodec: options.onVideoCodec ?? null,
     onVideoTrack: options.onVideoTrack ?? null,
     progressIntervalInMs: options.progressIntervalInMs ?? null,
-    reader: options.reader ?? chunk_n77gaszd_webReader,
+    reader: options.reader ?? chunk_gqesq3a3_webReader,
     controller: options.controller ?? undefined,
-    selectM3uStream: options.selectM3uStream ?? chunk_n77gaszd_defaultSelectM3uStreamFn,
-    selectM3uAssociatedPlaylists: options.selectM3uAssociatedPlaylists ?? chunk_n77gaszd_defaultSelectM3uAssociatedPlaylists,
+    selectM3uStream: options.selectM3uStream ?? chunk_gqesq3a3_defaultSelectM3uStreamFn,
+    selectM3uAssociatedPlaylists: options.selectM3uAssociatedPlaylists ?? chunk_gqesq3a3_defaultSelectM3uAssociatedPlaylists,
     m3uPlaylistContext: options.m3uPlaylistContext ?? null,
     src: options.src,
     mode: "query",
@@ -66382,7 +66402,7 @@ var chunk_n77gaszd_parseMedia = (options) => {
     seekingHints: options.seekingHints ?? null
   });
 };
-var chunk_n77gaszd_considerSeekBasedOnChunk = async ({
+var chunk_gqesq3a3_considerSeekBasedOnChunk = async ({
   sample,
   parentController,
   childController,
@@ -66397,7 +66417,7 @@ var chunk_n77gaszd_considerSeekBasedOnChunk = async ({
     await callback(sample);
     return;
   }
-  const timestamp = Math.min(sample.decodingTimestamp / chunk_n77gaszd_WEBCODECS_TIMESCALE, sample.timestamp / chunk_n77gaszd_WEBCODECS_TIMESCALE);
+  const timestamp = Math.min(sample.decodingTimestamp / chunk_gqesq3a3_WEBCODECS_TIMESCALE, sample.timestamp / chunk_gqesq3a3_WEBCODECS_TIMESCALE);
   if (timestamp > pendingSeek.targetTime && chunkIndex !== null && chunkIndex > 0) {
     m3uState.setNextSeekShouldSubtractChunks(playlistUrl, subtractChunks + 1);
     parentController.seek(pendingSeek.targetTime);
@@ -66407,7 +66427,7 @@ var chunk_n77gaszd_considerSeekBasedOnChunk = async ({
   m3uState.setNextSeekShouldSubtractChunks(playlistUrl, 0);
   m3uState.setSeekToSecondsToProcess(playlistUrl, null);
 };
-var chunk_n77gaszd_getChunks = (playlist) => {
+var chunk_gqesq3a3_getChunks = (playlist) => {
   const chunks = [];
   for (let i = 0;i < playlist.boxes.length; i++) {
     const box2 = playlist.boxes[i];
@@ -66427,7 +66447,7 @@ var chunk_n77gaszd_getChunks = (playlist) => {
   }
   return chunks;
 };
-var chunk_n77gaszd_getChunkToSeekTo = ({
+var chunk_gqesq3a3_getChunkToSeekTo = ({
   chunks,
   seekToSecondsToProcess
 }) => {
@@ -66440,21 +66460,21 @@ var chunk_n77gaszd_getChunkToSeekTo = ({
   }
   return Math.max(0, chunks.length - 1);
 };
-var chunk_n77gaszd_processM3uChunk = ({
+var chunk_gqesq3a3_processM3uChunk = ({
   playlistUrl,
   state,
   structure,
   audioDone,
   videoDone
 }) => {
-  const { promise, reject, resolve } = chunk_n77gaszd_withResolvers();
+  const { promise, reject, resolve } = chunk_gqesq3a3_withResolvers();
   const onGlobalAudioTrack = audioDone ? null : async (track) => {
     const existingTracks = state.callbacks.tracks.getTracks();
     let { trackId } = track;
     while (existingTracks.find((t) => t.trackId === trackId)) {
       trackId++;
     }
-    const onAudioSample = await chunk_n77gaszd_registerAudioTrack({
+    const onAudioSample = await chunk_gqesq3a3_registerAudioTrack({
       container: "m3u8",
       track: {
         ...track,
@@ -66480,7 +66500,7 @@ var chunk_n77gaszd_processM3uChunk = ({
     while (existingTracks.find((t) => t.trackId === trackId)) {
       trackId++;
     }
-    const onVideoSample = await chunk_n77gaszd_registerVideoTrack({
+    const onVideoSample = await chunk_gqesq3a3_registerVideoTrack({
       container: "m3u8",
       track: {
         ...track,
@@ -66501,13 +66521,13 @@ var chunk_n77gaszd_processM3uChunk = ({
     };
   };
   const pausableIterator = async () => {
-    const playlist = chunk_n77gaszd_getPlaylist(structure, playlistUrl);
-    const chunks = chunk_n77gaszd_getChunks(playlist);
+    const playlist = chunk_gqesq3a3_getPlaylist(structure, playlistUrl);
+    const chunks = chunk_gqesq3a3_getChunks(playlist);
     const seekToSecondsToProcess = state.m3u.getSeekToSecondsToProcess(playlistUrl);
     const chunksToSubtract = state.m3u.getNextSeekShouldSubtractChunks(playlistUrl);
     let chunkIndex = null;
     if (seekToSecondsToProcess !== null) {
-      chunkIndex = Math.max(0, chunk_n77gaszd_getChunkToSeekTo({
+      chunkIndex = Math.max(0, chunk_gqesq3a3_getChunkToSeekTo({
         chunks,
         seekToSecondsToProcess: seekToSecondsToProcess.targetTime
       }) - chunksToSubtract);
@@ -66532,8 +66552,8 @@ var chunk_n77gaszd_processM3uChunk = ({
         resolve();
       };
       currentPromise.rejector = reject;
-      const childController = chunk_n77gaszd_mediaParserController();
-      const forwarded = chunk_n77gaszd_forwardMediaParserControllerPauseResume({
+      const childController = chunk_gqesq3a3_mediaParserController();
+      const forwarded = chunk_gqesq3a3_forwardMediaParserControllerPauseResume({
         childController,
         parentController: state.controller
       });
@@ -66550,7 +66570,7 @@ var chunk_n77gaszd_processM3uChunk = ({
       const makeContinuationFn = () => {
         return {
           continue() {
-            const resolver = chunk_n77gaszd_withResolvers();
+            const resolver = chunk_gqesq3a3_withResolvers();
             currentPromise.resolver = resolver.resolve;
             currentPromise.rejector = resolver.reject;
             childController.resume();
@@ -66565,7 +66585,7 @@ var chunk_n77gaszd_processM3uChunk = ({
       await childController._internals.checkForAbortAndPause();
       const src = state.readerInterface.createAdjacentFileSource(chunk.url, playlistUrl);
       try {
-        const data = await chunk_n77gaszd_parseMedia({
+        const data = await chunk_gqesq3a3_parseMedia({
           src,
           acknowledgeRemotionLicense: true,
           logLevel: state.logLevel,
@@ -66596,7 +66616,7 @@ var chunk_n77gaszd_processM3uChunk = ({
               }
               state.m3u.setHasEmittedAudioTrack(playlistUrl, callback);
               return async (sample) => {
-                await chunk_n77gaszd_considerSeekBasedOnChunk({
+                await chunk_gqesq3a3_considerSeekBasedOnChunk({
                   sample,
                   callback,
                   parentController: state.controller,
@@ -66612,7 +66632,7 @@ var chunk_n77gaszd_processM3uChunk = ({
               return null;
             }
             return async (sample) => {
-              await chunk_n77gaszd_considerSeekBasedOnChunk({
+              await chunk_gqesq3a3_considerSeekBasedOnChunk({
                 sample,
                 m3uState: state.m3u,
                 playlistUrl,
@@ -66637,7 +66657,7 @@ var chunk_n77gaszd_processM3uChunk = ({
               }
               state.m3u.setHasEmittedVideoTrack(playlistUrl, callback);
               return async (sample) => {
-                await chunk_n77gaszd_considerSeekBasedOnChunk({
+                await chunk_gqesq3a3_considerSeekBasedOnChunk({
                   sample,
                   m3uState: state.m3u,
                   playlistUrl,
@@ -66653,7 +66673,7 @@ var chunk_n77gaszd_processM3uChunk = ({
               return null;
             }
             return async (sample) => {
-              await chunk_n77gaszd_considerSeekBasedOnChunk({
+              await chunk_gqesq3a3_considerSeekBasedOnChunk({
                 sample,
                 m3uState: state.m3u,
                 playlistUrl,
@@ -66696,7 +66716,7 @@ var chunk_n77gaszd_processM3uChunk = ({
   });
   return promise;
 };
-var chunk_n77gaszd_runOverM3u = async ({
+var chunk_gqesq3a3_runOverM3u = async ({
   state,
   structure,
   playlistUrl,
@@ -66714,7 +66734,7 @@ var chunk_n77gaszd_runOverM3u = async ({
   }
   const existingRun = state.m3u.getM3uStreamRun(playlistUrl);
   if (existingRun) {
-    chunk_n77gaszd_Log.trace(logLevel, "Existing M3U parsing process found for", playlistUrl);
+    chunk_gqesq3a3_Log.trace(logLevel, "Existing M3U parsing process found for", playlistUrl);
     const run = await existingRun.continue();
     state.m3u.setM3uStreamRun(playlistUrl, run);
     if (!run) {
@@ -66722,8 +66742,8 @@ var chunk_n77gaszd_runOverM3u = async ({
     }
     return;
   }
-  chunk_n77gaszd_Log.trace(logLevel, "Starting new M3U parsing process for", playlistUrl);
-  await chunk_n77gaszd_processM3uChunk({
+  chunk_gqesq3a3_Log.trace(logLevel, "Starting new M3U parsing process for", playlistUrl);
+  await chunk_gqesq3a3_processM3uChunk({
     playlistUrl,
     state,
     structure,
@@ -66731,12 +66751,12 @@ var chunk_n77gaszd_runOverM3u = async ({
     videoDone
   });
 };
-var chunk_n77gaszd_parseM3u = async ({ state }) => {
+var chunk_gqesq3a3_parseM3u = async ({ state }) => {
   const structure = state.structure.getM3uStructure();
   if (state.m3u.isReadyToIterateOverM3u()) {
     const selectedPlaylists = state.m3u.getSelectedPlaylists();
     const whichPlaylistToRunOver = state.m3u.sampleSorter.getNextStreamToRun(selectedPlaylists);
-    await chunk_n77gaszd_runOverM3u({
+    await chunk_gqesq3a3_runOverM3u({
       state,
       structure,
       playlistUrl: whichPlaylistToRunOver,
@@ -66752,7 +66772,7 @@ var chunk_n77gaszd_parseM3u = async ({ state }) => {
       start: 0,
       size: state.contentLength + 1
     });
-    await chunk_n77gaszd_afterManifestFetch({
+    await chunk_gqesq3a3_afterManifestFetch({
       structure,
       m3uState: state.m3u,
       src: state.src.toString(),
@@ -66765,7 +66785,7 @@ var chunk_n77gaszd_parseM3u = async ({ state }) => {
     });
     return null;
   }
-  const box2 = await chunk_n77gaszd_parseM3uManifest({
+  const box2 = await chunk_gqesq3a3_parseM3uManifest({
     iterator: state.iterator,
     structure,
     contentLength: state.contentLength
@@ -66776,14 +66796,14 @@ var chunk_n77gaszd_parseM3u = async ({ state }) => {
   }
   return box2;
 };
-function chunk_n77gaszd_combine28Bits(a, b, c, d) {
+function chunk_gqesq3a3_combine28Bits(a, b, c, d) {
   const val1 = a & 127;
   const val2 = b & 127;
   const val3 = c & 127;
   const val4 = d & 127;
   return val1 << 21 | val2 << 14 | val3 << 7 | val4;
 }
-var chunk_n77gaszd_parseId3 = ({ state }) => {
+var chunk_gqesq3a3_parseId3 = ({ state }) => {
   const { iterator } = state;
   if (iterator.bytesRemaining() < 9) {
     return;
@@ -66794,7 +66814,7 @@ var chunk_n77gaszd_parseId3 = ({ state }) => {
   const versionMinor = iterator.getUint8();
   const flags = iterator.getUint8();
   const sizeArr = iterator.getSlice(4);
-  const size4 = chunk_n77gaszd_combine28Bits(sizeArr[0], sizeArr[1], sizeArr[2], sizeArr[3]);
+  const size4 = chunk_gqesq3a3_combine28Bits(sizeArr[0], sizeArr[1], sizeArr[2], sizeArr[3]);
   if (iterator.bytesRemaining() < size4) {
     returnToCheckpoint();
     return;
@@ -66846,13 +66866,13 @@ var chunk_n77gaszd_parseId3 = ({ state }) => {
     metatags: entries
   });
 };
-var chunk_n77gaszd_parseID3V1 = (iterator) => {
+var chunk_gqesq3a3_parseID3V1 = (iterator) => {
   if (iterator.bytesRemaining() < 128) {
     return;
   }
   iterator.discard(128);
 };
-function chunk_n77gaszd_getSamplingFrequency({
+function chunk_gqesq3a3_getSamplingFrequency({
   bits,
   mpegVersion
 }) {
@@ -66872,7 +66892,7 @@ function chunk_n77gaszd_getSamplingFrequency({
   }
   return value;
 }
-function chunk_n77gaszd_getBitrateKB({
+function chunk_gqesq3a3_getBitrateKB({
   bits,
   mpegVersion,
   level
@@ -66993,7 +67013,7 @@ function chunk_n77gaszd_getBitrateKB({
   }
   return bitrateTable[bits][key4];
 }
-var chunk_n77gaszd_innerParseMp3PacketHeader = (iterator) => {
+var chunk_gqesq3a3_innerParseMp3PacketHeader = (iterator) => {
   for (let i = 0;i < 11; i++) {
     const expectToBe1 = iterator.getBits(1);
     if (expectToBe1 !== 1) {
@@ -67015,7 +67035,7 @@ var chunk_n77gaszd_innerParseMp3PacketHeader = (iterator) => {
     throw new Error("Does not support CRC yet");
   }
   const bitrateIndex = iterator.getBits(4);
-  const bitrateInKbit = chunk_n77gaszd_getBitrateKB({
+  const bitrateInKbit = chunk_gqesq3a3_getBitrateKB({
     bits: bitrateIndex,
     mpegVersion,
     level: audioVersionId
@@ -67027,7 +67047,7 @@ var chunk_n77gaszd_innerParseMp3PacketHeader = (iterator) => {
     throw new Error("Free bitrate not supported");
   }
   const samplingFrequencyIndex = iterator.getBits(2);
-  const sampleRate = chunk_n77gaszd_getSamplingFrequency({
+  const sampleRate = chunk_gqesq3a3_getSamplingFrequency({
     bits: samplingFrequencyIndex,
     mpegVersion
   });
@@ -67039,8 +67059,8 @@ var chunk_n77gaszd_innerParseMp3PacketHeader = (iterator) => {
   iterator.getBits(1);
   iterator.getBits(2);
   const numberOfChannels = channelMode === 3 ? 1 : 2;
-  const samplesPerFrame = chunk_n77gaszd_getSamplesPerMpegFrame({ mpegVersion, layer });
-  const frameLength = chunk_n77gaszd_getMpegFrameLength({
+  const samplesPerFrame = chunk_gqesq3a3_getSamplesPerMpegFrame({ mpegVersion, layer });
+  const frameLength = chunk_gqesq3a3_getMpegFrameLength({
     bitrateKbit: bitrateInKbit,
     padding: padding3,
     samplesPerFrame,
@@ -67057,17 +67077,17 @@ var chunk_n77gaszd_innerParseMp3PacketHeader = (iterator) => {
     samplesPerFrame
   };
 };
-var chunk_n77gaszd_parseMp3PacketHeader = (iterator) => {
+var chunk_gqesq3a3_parseMp3PacketHeader = (iterator) => {
   iterator.startReadingBits();
-  const d = chunk_n77gaszd_innerParseMp3PacketHeader(iterator);
+  const d = chunk_gqesq3a3_innerParseMp3PacketHeader(iterator);
   iterator.stopReadingBits();
   return d;
 };
-var chunk_n77gaszd_isMp3PacketHeaderHere = (iterator) => {
+var chunk_gqesq3a3_isMp3PacketHeaderHere = (iterator) => {
   const offset = iterator.counter.getOffset();
   iterator.startReadingBits();
   try {
-    const res = chunk_n77gaszd_innerParseMp3PacketHeader(iterator);
+    const res = chunk_gqesq3a3_innerParseMp3PacketHeader(iterator);
     iterator.stopReadingBits();
     iterator.counter.decrement(iterator.counter.getOffset() - offset);
     return res;
@@ -67077,9 +67097,9 @@ var chunk_n77gaszd_isMp3PacketHeaderHere = (iterator) => {
     return false;
   }
 };
-var chunk_n77gaszd_isMp3PacketHeaderHereAndInNext = (iterator) => {
+var chunk_gqesq3a3_isMp3PacketHeaderHereAndInNext = (iterator) => {
   const offset = iterator.counter.getOffset();
-  const res = chunk_n77gaszd_isMp3PacketHeaderHere(iterator);
+  const res = chunk_gqesq3a3_isMp3PacketHeaderHere(iterator);
   if (!res) {
     return false;
   }
@@ -67087,11 +67107,11 @@ var chunk_n77gaszd_isMp3PacketHeaderHereAndInNext = (iterator) => {
     return true;
   }
   iterator.counter.increment(res.frameLength);
-  const isHere = chunk_n77gaszd_isMp3PacketHeaderHere(iterator);
+  const isHere = chunk_gqesq3a3_isMp3PacketHeaderHere(iterator);
   iterator.counter.decrement(iterator.counter.getOffset() - offset);
   return isHere;
 };
-var chunk_n77gaszd_getAudioSampleFromCbr = ({
+var chunk_gqesq3a3_getAudioSampleFromCbr = ({
   bitrateInKbit,
   initialOffset,
   layer,
@@ -67100,7 +67120,7 @@ var chunk_n77gaszd_getAudioSampleFromCbr = ({
   data,
   state
 }) => {
-  const avgLength = chunk_n77gaszd_getAverageMpegFrameLength({
+  const avgLength = chunk_gqesq3a3_getAverageMpegFrameLength({
     bitrateKbit: bitrateInKbit,
     layer,
     samplesPerFrame,
@@ -67113,8 +67133,8 @@ var chunk_n77gaszd_getAudioSampleFromCbr = ({
   const nthFrame = Math.round((initialOffset - state.mediaSection.getMediaSectionAssertOnlyOne().start) / avgLength);
   const durationInSeconds = samplesPerFrame / sampleRate;
   const timeInSeconds = nthFrame * samplesPerFrame / sampleRate;
-  const timestamp = Math.floor(timeInSeconds * chunk_n77gaszd_WEBCODECS_TIMESCALE);
-  const duration2 = Math.floor(durationInSeconds * chunk_n77gaszd_WEBCODECS_TIMESCALE);
+  const timestamp = Math.floor(timeInSeconds * chunk_gqesq3a3_WEBCODECS_TIMESCALE);
+  const duration2 = Math.floor(durationInSeconds * chunk_gqesq3a3_WEBCODECS_TIMESCALE);
   const audioSample = {
     data,
     decodingTimestamp: timestamp,
@@ -67125,7 +67145,7 @@ var chunk_n77gaszd_getAudioSampleFromCbr = ({
   };
   return { audioSample, timeInSeconds, durationInSeconds };
 };
-var chunk_n77gaszd_getAudioSampleFromVbr = ({
+var chunk_gqesq3a3_getAudioSampleFromVbr = ({
   info,
   position,
   mp3Info,
@@ -67134,11 +67154,11 @@ var chunk_n77gaszd_getAudioSampleFromVbr = ({
   if (!mp3Info) {
     throw new Error("No MP3 info");
   }
-  const samplesPerFrame = chunk_n77gaszd_getSamplesPerMpegFrame({
+  const samplesPerFrame = chunk_gqesq3a3_getSamplesPerMpegFrame({
     layer: mp3Info.layer,
     mpegVersion: mp3Info.mpegVersion
   });
-  const wholeFileDuration = chunk_n77gaszd_getDurationFromMp3Xing({
+  const wholeFileDuration = chunk_gqesq3a3_getDurationFromMp3Xing({
     samplesPerFrame,
     xingData: info.xingData
   });
@@ -67148,15 +67168,15 @@ var chunk_n77gaszd_getAudioSampleFromVbr = ({
   if (!info.xingData.tableOfContents) {
     throw new Error("table of contents");
   }
-  const timeInSeconds = chunk_n77gaszd_getTimeFromPosition({
+  const timeInSeconds = chunk_gqesq3a3_getTimeFromPosition({
     durationInSeconds: wholeFileDuration,
     fileSize: info.xingData.fileSize,
     position,
     tableOfContents: info.xingData.tableOfContents
   });
   const durationInSeconds = samplesPerFrame / info.xingData.sampleRate;
-  const timestamp = Math.floor(timeInSeconds * chunk_n77gaszd_WEBCODECS_TIMESCALE);
-  const duration2 = Math.floor(durationInSeconds * chunk_n77gaszd_WEBCODECS_TIMESCALE);
+  const timestamp = Math.floor(timeInSeconds * chunk_gqesq3a3_WEBCODECS_TIMESCALE);
+  const duration2 = Math.floor(durationInSeconds * chunk_gqesq3a3_WEBCODECS_TIMESCALE);
   const audioSample = {
     data,
     decodingTimestamp: timestamp,
@@ -67167,7 +67187,7 @@ var chunk_n77gaszd_getAudioSampleFromVbr = ({
   };
   return { timeInSeconds, audioSample, durationInSeconds };
 };
-var chunk_n77gaszd_parseMpegHeader = async ({
+var chunk_gqesq3a3_parseMpegHeader = async ({
   state
 }) => {
   const { iterator } = state;
@@ -67183,7 +67203,7 @@ var chunk_n77gaszd_parseMpegHeader = async ({
     numberOfChannels,
     sampleRate,
     samplesPerFrame
-  } = chunk_n77gaszd_parseMp3PacketHeader(iterator);
+  } = chunk_gqesq3a3_parseMp3PacketHeader(iterator);
   const cbrMp3Info = state.mp3.getMp3BitrateInfo();
   if (cbrMp3Info && cbrMp3Info.type === "constant") {
     if (bitrateInKbit !== cbrMp3Info.bitrateInKbit) {
@@ -67208,8 +67228,8 @@ var chunk_n77gaszd_parseMpegHeader = async ({
     }
     const isVbr = asText.includes("Xing");
     if (isVbr) {
-      const xingData = chunk_n77gaszd_parseXing(data);
-      chunk_n77gaszd_Log.verbose(state.logLevel, "MP3 has variable bit rate. Requiring whole file to be read");
+      const xingData = chunk_gqesq3a3_parseXing(data);
+      chunk_gqesq3a3_Log.verbose(state.logLevel, "MP3 has variable bit rate. Requiring whole file to be read");
       state.mp3.setMp3BitrateInfo({
         type: "variable",
         xingData
@@ -67223,7 +67243,7 @@ var chunk_n77gaszd_parseMpegHeader = async ({
       });
     }
     state.mp3.setMp3Info(info);
-    await chunk_n77gaszd_registerAudioTrack({
+    await chunk_gqesq3a3_registerAudioTrack({
       container: "mp3",
       track: {
         type: "audio",
@@ -67236,7 +67256,7 @@ var chunk_n77gaszd_parseMpegHeader = async ({
         originalTimescale: 1e6,
         trackId: 0,
         startInSeconds: 0,
-        timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+        timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
       },
       registerAudioSampleCallback: state.callbacks.registerAudioSampleCallback,
       tracks: state.callbacks.tracks,
@@ -67253,7 +67273,7 @@ var chunk_n77gaszd_parseMpegHeader = async ({
   if (!bitrateInfo) {
     throw new Error("No bitrate info");
   }
-  const sample = bitrateInfo.type === "constant" ? chunk_n77gaszd_getAudioSampleFromCbr({
+  const sample = bitrateInfo.type === "constant" ? chunk_gqesq3a3_getAudioSampleFromCbr({
     bitrateInKbit,
     data,
     initialOffset,
@@ -67261,7 +67281,7 @@ var chunk_n77gaszd_parseMpegHeader = async ({
     sampleRate,
     samplesPerFrame,
     state
-  }) : chunk_n77gaszd_getAudioSampleFromVbr({
+  }) : chunk_gqesq3a3_getAudioSampleFromVbr({
     data,
     info: bitrateInfo,
     mp3Info: state.mp3.getMp3Info(),
@@ -67278,7 +67298,7 @@ var chunk_n77gaszd_parseMpegHeader = async ({
     trackId: 0
   });
 };
-var chunk_n77gaszd_discardUntilSyncword = ({
+var chunk_gqesq3a3_discardUntilSyncword = ({
   iterator
 }) => {
   while (true) {
@@ -67292,21 +67312,21 @@ var chunk_n77gaszd_discardUntilSyncword = ({
       continue;
     }
     iterator.counter.decrement(2);
-    if (chunk_n77gaszd_isMp3PacketHeaderHereAndInNext(iterator)) {
+    if (chunk_gqesq3a3_isMp3PacketHeaderHereAndInNext(iterator)) {
       break;
     } else {
       iterator.counter.increment(2);
     }
   }
 };
-var chunk_n77gaszd_parseMp3 = async (state) => {
+var chunk_gqesq3a3_parseMp3 = async (state) => {
   const { iterator } = state;
   if (iterator.bytesRemaining() < 3) {
     return null;
   }
   if (state.mediaSection.isCurrentByteInMediaSection(iterator) === "in-section") {
-    chunk_n77gaszd_discardUntilSyncword({ iterator });
-    await chunk_n77gaszd_parseMpegHeader({
+    chunk_gqesq3a3_discardUntilSyncword({ iterator });
+    await chunk_gqesq3a3_parseMpegHeader({
       state
     });
     return null;
@@ -67315,34 +67335,34 @@ var chunk_n77gaszd_parseMp3 = async (state) => {
   const bytes = iterator.getSlice(3);
   returnToCheckpoint();
   if (bytes[0] === 84 && bytes[1] === 65 && bytes[2] === 71) {
-    chunk_n77gaszd_parseID3V1(iterator);
+    chunk_gqesq3a3_parseID3V1(iterator);
     return null;
   }
   if (bytes[0] === 73 && bytes[1] === 68 && bytes[2] === 51) {
-    chunk_n77gaszd_parseId3({ state });
+    chunk_gqesq3a3_parseId3({ state });
     return null;
   }
   if (bytes[0] === 255) {
-    await chunk_n77gaszd_parseMpegHeader({
+    await chunk_gqesq3a3_parseMpegHeader({
       state
     });
     return null;
   }
   throw new Error("Unknown MP3 header " + JSON.stringify(bytes));
 };
-var chunk_n77gaszd_getStrhForIndex = (structure, trackId) => {
-  const boxes = chunk_n77gaszd_getStrlBoxes(structure);
+var chunk_gqesq3a3_getStrhForIndex = (structure, trackId) => {
+  const boxes = chunk_gqesq3a3_getStrlBoxes(structure);
   const box2 = boxes[trackId];
   if (!box2) {
     throw new Error("Expected box");
   }
-  const strh = chunk_n77gaszd_getStrhBox(box2.children);
+  const strh = chunk_gqesq3a3_getStrhBox(box2.children);
   if (!strh) {
     throw new Error("strh");
   }
   return strh;
 };
-var chunk_n77gaszd_getKeyFrameOffsetAndPocs = ({
+var chunk_gqesq3a3_getKeyFrameOffsetAndPocs = ({
   state,
   sample,
   trackId
@@ -67370,14 +67390,14 @@ var chunk_n77gaszd_getKeyFrameOffsetAndPocs = ({
     pocsAtKeyframeOffset
   };
 };
-var chunk_n77gaszd_convertQueuedSampleToMediaParserSample = ({
+var chunk_gqesq3a3_convertQueuedSampleToMediaParserSample = ({
   sample,
   state,
   trackId
 }) => {
-  const strh = chunk_n77gaszd_getStrhForIndex(state.structure.getRiffStructure(), trackId);
+  const strh = chunk_gqesq3a3_getStrhForIndex(state.structure.getRiffStructure(), trackId);
   const samplesPerSecond = strh.rate / strh.scale;
-  const { sampleOffsetAtKeyframe, pocsAtKeyframeOffset } = chunk_n77gaszd_getKeyFrameOffsetAndPocs({
+  const { sampleOffsetAtKeyframe, pocsAtKeyframeOffset } = chunk_gqesq3a3_getKeyFrameOffsetAndPocs({
     sample,
     state,
     trackId
@@ -67388,7 +67408,7 @@ var chunk_n77gaszd_convertQueuedSampleToMediaParserSample = ({
   }
   const nthSample = indexOfPoc + sampleOffsetAtKeyframe;
   const timestamp = nthSample / samplesPerSecond;
-  const videoSample = chunk_n77gaszd_convertAudioOrVideoSampleToWebCodecsTimestamps({
+  const videoSample = chunk_gqesq3a3_convertAudioOrVideoSampleToWebCodecsTimestamps({
     sample: {
       ...sample,
       timestamp,
@@ -67398,7 +67418,7 @@ var chunk_n77gaszd_convertQueuedSampleToMediaParserSample = ({
   });
   return videoSample;
 };
-var chunk_n77gaszd_isMoviAtom = (iterator, ckId) => {
+var chunk_gqesq3a3_isMoviAtom = (iterator, ckId) => {
   if (ckId !== "LIST") {
     return false;
   }
@@ -67406,8 +67426,8 @@ var chunk_n77gaszd_isMoviAtom = (iterator, ckId) => {
   iterator.counter.decrement(4);
   return listType === "movi";
 };
-var chunk_n77gaszd_AVIF_HAS_INDEX = 16;
-var chunk_n77gaszd_parseAvih = ({
+var chunk_gqesq3a3_AVIF_HAS_INDEX = 16;
+var chunk_gqesq3a3_parseAvih = ({
   iterator,
   size: size4
 }) => {
@@ -67422,7 +67442,7 @@ var chunk_n77gaszd_parseAvih = ({
   const suggestedBufferSize = iterator.getUint32Le();
   const width = iterator.getUint32Le();
   const height = iterator.getUint32Le();
-  const hasIndex = (flags & chunk_n77gaszd_AVIF_HAS_INDEX) !== 0;
+  const hasIndex = (flags & chunk_gqesq3a3_AVIF_HAS_INDEX) !== 0;
   iterator.discard(16);
   expectNoMoreBytes();
   return {
@@ -67440,8 +67460,8 @@ var chunk_n77gaszd_parseAvih = ({
     width
   };
 };
-var chunk_n77gaszd_AVIIF_KEYFRAME = 16;
-var chunk_n77gaszd_parseIdx1 = ({
+var chunk_gqesq3a3_AVIIF_KEYFRAME = 16;
+var chunk_gqesq3a3_parseIdx1 = ({
   iterator,
   size: size4
 }) => {
@@ -67467,7 +67487,7 @@ var chunk_n77gaszd_parseIdx1 = ({
     if (!sampleCounts[trackId]) {
       sampleCounts[trackId] = 0;
     }
-    const isKeyFrame = (flags & chunk_n77gaszd_AVIIF_KEYFRAME) !== 0;
+    const isKeyFrame = (flags & chunk_gqesq3a3_AVIIF_KEYFRAME) !== 0;
     if (isKeyFrame) {
       entries.push({
         flags,
@@ -67486,7 +67506,7 @@ var chunk_n77gaszd_parseIdx1 = ({
     videoTrackIndex
   };
 };
-var chunk_n77gaszd_parseIsft = ({
+var chunk_gqesq3a3_parseIsft = ({
   iterator,
   size: size4
 }) => {
@@ -67502,7 +67522,7 @@ var chunk_n77gaszd_parseIsft = ({
     software
   };
 };
-var chunk_n77gaszd_parseListBox = async ({
+var chunk_gqesq3a3_parseListBox = async ({
   size: size4,
   iterator,
   stateIfExpectingSideEffects
@@ -67515,7 +67535,7 @@ var chunk_n77gaszd_parseListBox = async ({
   const boxes = [];
   const maxOffset = counter + size4;
   while (iterator.counter.getOffset() < maxOffset) {
-    const box2 = await chunk_n77gaszd_expectRiffBox({
+    const box2 = await chunk_gqesq3a3_expectRiffBox({
       iterator,
       stateIfExpectingSideEffects
     });
@@ -67523,7 +67543,7 @@ var chunk_n77gaszd_parseListBox = async ({
       throw new Error("Unexpected result");
     }
     if (stateIfExpectingSideEffects) {
-      await chunk_n77gaszd_postProcessRiffBox(stateIfExpectingSideEffects, box2);
+      await chunk_gqesq3a3_postProcessRiffBox(stateIfExpectingSideEffects, box2);
     }
     boxes.push(box2);
   }
@@ -67533,7 +67553,7 @@ var chunk_n77gaszd_parseListBox = async ({
     children: boxes
   };
 };
-var chunk_n77gaszd_parseStrfAudio = ({
+var chunk_gqesq3a3_parseStrfAudio = ({
   iterator,
   size: size4
 }) => {
@@ -67557,7 +67577,7 @@ var chunk_n77gaszd_parseStrfAudio = ({
     sampleRate: samplesPerSec
   };
 };
-var chunk_n77gaszd_parseStrfVideo = ({
+var chunk_gqesq3a3_parseStrfVideo = ({
   iterator,
   size: size4
 }) => {
@@ -67589,20 +67609,20 @@ var chunk_n77gaszd_parseStrfVideo = ({
     yPelsPerMeter
   };
 };
-var chunk_n77gaszd_parseStrf = ({
+var chunk_gqesq3a3_parseStrf = ({
   iterator,
   size: size4,
   fccType
 }) => {
   if (fccType === "vids") {
-    return chunk_n77gaszd_parseStrfVideo({ iterator, size: size4 });
+    return chunk_gqesq3a3_parseStrfVideo({ iterator, size: size4 });
   }
   if (fccType === "auds") {
-    return chunk_n77gaszd_parseStrfAudio({ iterator, size: size4 });
+    return chunk_gqesq3a3_parseStrfAudio({ iterator, size: size4 });
   }
   throw new Error(`Unsupported fccType: ${fccType}`);
 };
-var chunk_n77gaszd_parseStrh = ({
+var chunk_gqesq3a3_parseStrh = ({
   iterator,
   size: size4
 }) => {
@@ -67638,7 +67658,7 @@ var chunk_n77gaszd_parseStrh = ({
   if (iterator.bytesRemaining() < ckSize) {
     throw new Error("Expected strf to be complete");
   }
-  const strf = chunk_n77gaszd_parseStrf({ iterator, size: ckSize, fccType });
+  const strf = chunk_gqesq3a3_parseStrf({ iterator, size: ckSize, fccType });
   return {
     type: "strh-box",
     fccType,
@@ -67657,30 +67677,30 @@ var chunk_n77gaszd_parseStrh = ({
     strf
   };
 };
-var chunk_n77gaszd_parseRiffBox = ({
+var chunk_gqesq3a3_parseRiffBox = ({
   size: size4,
   id,
   iterator,
   stateIfExpectingSideEffects
 }) => {
   if (id === "LIST") {
-    return chunk_n77gaszd_parseListBox({
+    return chunk_gqesq3a3_parseListBox({
       size: size4,
       iterator,
       stateIfExpectingSideEffects
     });
   }
   if (id === "ISFT") {
-    return Promise.resolve(chunk_n77gaszd_parseIsft({ iterator, size: size4 }));
+    return Promise.resolve(chunk_gqesq3a3_parseIsft({ iterator, size: size4 }));
   }
   if (id === "avih") {
-    return Promise.resolve(chunk_n77gaszd_parseAvih({ iterator, size: size4 }));
+    return Promise.resolve(chunk_gqesq3a3_parseAvih({ iterator, size: size4 }));
   }
   if (id === "strh") {
-    return Promise.resolve(chunk_n77gaszd_parseStrh({ iterator, size: size4 }));
+    return Promise.resolve(chunk_gqesq3a3_parseStrh({ iterator, size: size4 }));
   }
   if (id === "idx1") {
-    return Promise.resolve(chunk_n77gaszd_parseIdx1({ iterator, size: size4 }));
+    return Promise.resolve(chunk_gqesq3a3_parseIdx1({ iterator, size: size4 }));
   }
   iterator.discard(size4);
   const box2 = {
@@ -67690,14 +67710,14 @@ var chunk_n77gaszd_parseRiffBox = ({
   };
   return Promise.resolve(box2);
 };
-var chunk_n77gaszd_postProcessRiffBox = async (state, box2) => {
+var chunk_gqesq3a3_postProcessRiffBox = async (state, box2) => {
   if (box2.type === "strh-box") {
     if (box2.strf.type === "strf-box-audio" && state.onAudioTrack) {
-      const audioTrack = chunk_n77gaszd_makeAviAudioTrack({
+      const audioTrack = chunk_gqesq3a3_makeAviAudioTrack({
         index: state.riff.getNextTrackIndex(),
         strf: box2.strf
       });
-      await chunk_n77gaszd_registerAudioTrack({
+      await chunk_gqesq3a3_registerAudioTrack({
         track: audioTrack,
         container: "avi",
         registerAudioSampleCallback: state.callbacks.registerAudioSampleCallback,
@@ -67707,12 +67727,12 @@ var chunk_n77gaszd_postProcessRiffBox = async (state, box2) => {
       });
     }
     if (state.onVideoTrack && box2.strf.type === "strf-box-video") {
-      const videoTrack = chunk_n77gaszd_makeAviVideoTrack({
+      const videoTrack = chunk_gqesq3a3_makeAviVideoTrack({
         strh: box2,
         index: state.riff.getNextTrackIndex(),
         strf: box2.strf
       });
-      chunk_n77gaszd_registerVideoTrackWhenProfileIsAvailable({
+      chunk_gqesq3a3_registerVideoTrackWhenProfileIsAvailable({
         state,
         track: videoTrack,
         container: "avi"
@@ -67721,7 +67741,7 @@ var chunk_n77gaszd_postProcessRiffBox = async (state, box2) => {
     state.riff.incrementNextTrackIndex();
   }
 };
-var chunk_n77gaszd_expectRiffBox = async ({
+var chunk_gqesq3a3_expectRiffBox = async ({
   iterator,
   stateIfExpectingSideEffects
 }) => {
@@ -67731,7 +67751,7 @@ var chunk_n77gaszd_expectRiffBox = async ({
   const checkpoint = iterator.startCheckpoint();
   const ckId = iterator.getByteString(4, false);
   const ckSize = iterator.getUint32Le();
-  if (chunk_n77gaszd_isMoviAtom(iterator, ckId)) {
+  if (chunk_gqesq3a3_isMoviAtom(iterator, ckId)) {
     iterator.discard(4);
     if (!stateIfExpectingSideEffects) {
       throw new Error("No state if expecting side effects");
@@ -67740,7 +67760,7 @@ var chunk_n77gaszd_expectRiffBox = async ({
       start: iterator.counter.getOffset(),
       size: ckSize - 4
     });
-    if (chunk_n77gaszd_riffHasIndex(stateIfExpectingSideEffects.structure.getRiffStructure())) {
+    if (chunk_gqesq3a3_riffHasIndex(stateIfExpectingSideEffects.structure.getRiffStructure())) {
       stateIfExpectingSideEffects.riff.lazyIdx1.triggerLoad(iterator.counter.getOffset() + ckSize - 4);
     }
     return null;
@@ -67749,7 +67769,7 @@ var chunk_n77gaszd_expectRiffBox = async ({
     checkpoint.returnToCheckpoint();
     return null;
   }
-  const box2 = await chunk_n77gaszd_parseRiffBox({
+  const box2 = await chunk_gqesq3a3_parseRiffBox({
     id: ckId,
     size: ckSize,
     iterator,
@@ -67757,7 +67777,7 @@ var chunk_n77gaszd_expectRiffBox = async ({
   });
   return box2;
 };
-var chunk_n77gaszd_handleChunk = async ({
+var chunk_gqesq3a3_handleChunk = async ({
   state,
   ckId,
   ckSize
@@ -67767,11 +67787,11 @@ var chunk_n77gaszd_handleChunk = async ({
   const videoChunk = ckId.match(/^([0-9]{2})dc$/);
   if (videoChunk) {
     const trackId = parseInt(videoChunk[1], 10);
-    const strh = chunk_n77gaszd_getStrhForIndex(state.structure.getRiffStructure(), trackId);
+    const strh = chunk_gqesq3a3_getStrhForIndex(state.structure.getRiffStructure(), trackId);
     const samplesPerSecond = strh.rate / strh.scale;
     const data = iterator.getSlice(ckSize);
-    const infos = chunk_n77gaszd_parseAvc(data, state.avc);
-    const keyOrDelta = chunk_n77gaszd_getKeyFrameOrDeltaFromAvcInfo(infos);
+    const infos = chunk_gqesq3a3_parseAvc(data, state.avc);
+    const keyOrDelta = chunk_gqesq3a3_getKeyFrameOrDeltaFromAvcInfo(infos);
     const info = infos.find((i) => i.type === "keyframe" || i.type === "delta-frame");
     const avcProfile = infos.find((i) => i.type === "avc-profile");
     const ppsProfile = infos.find((i) => i.type === "avc-pps");
@@ -67810,7 +67830,7 @@ var chunk_n77gaszd_handleChunk = async ({
     if (!releasedFrame) {
       return;
     }
-    const videoSample = chunk_n77gaszd_convertQueuedSampleToMediaParserSample({
+    const videoSample = chunk_gqesq3a3_convertQueuedSampleToMediaParserSample({
       sample: releasedFrame.sample,
       state,
       trackId: releasedFrame.trackId
@@ -67827,7 +67847,7 @@ var chunk_n77gaszd_handleChunk = async ({
   const audioChunk = ckId.match(/^([0-9]{2})wb$/);
   if (audioChunk) {
     const trackId = parseInt(audioChunk[1], 10);
-    const strh = chunk_n77gaszd_getStrhForIndex(state.structure.getRiffStructure(), trackId);
+    const strh = chunk_gqesq3a3_getStrhForIndex(state.structure.getRiffStructure(), trackId);
     const { strf } = strh;
     if (strf.type !== "strf-box-audio") {
       throw new Error("audio");
@@ -67837,7 +67857,7 @@ var chunk_n77gaszd_handleChunk = async ({
       trackId
     });
     const timeInSec = nthSample / samplesPerSecond;
-    const timestamp = Math.floor(timeInSec * chunk_n77gaszd_WEBCODECS_TIMESCALE);
+    const timestamp = Math.floor(timeInSec * chunk_gqesq3a3_WEBCODECS_TIMESCALE);
     const data = iterator.getSlice(ckSize);
     const audioSample = {
       decodingTimestamp: timestamp,
@@ -67854,7 +67874,7 @@ var chunk_n77gaszd_handleChunk = async ({
     });
   }
 };
-var chunk_n77gaszd_parseMovi = async ({
+var chunk_gqesq3a3_parseMovi = async ({
   state
 }) => {
   const { iterator } = state;
@@ -67868,7 +67888,7 @@ var chunk_n77gaszd_parseMovi = async ({
     checkpoint.returnToCheckpoint();
     return Promise.resolve();
   }
-  await chunk_n77gaszd_handleChunk({ state, ckId, ckSize });
+  await chunk_gqesq3a3_handleChunk({ state, ckId, ckSize });
   const mediaSection = state.mediaSection.getMediaSectionAssertOnlyOne();
   const maxOffset = mediaSection.start + mediaSection.size;
   while (iterator.counter.getOffset() < maxOffset && iterator.bytesRemaining() > 0) {
@@ -67878,19 +67898,19 @@ var chunk_n77gaszd_parseMovi = async ({
     }
   }
 };
-var chunk_n77gaszd_parseMediaSection = async (state) => {
-  await chunk_n77gaszd_parseMovi({
+var chunk_gqesq3a3_parseMediaSection = async (state) => {
+  await chunk_gqesq3a3_parseMovi({
     state
   });
-  const tracks2 = chunk_n77gaszd_getTracks(state, false);
-  if (!tracks2.some((t) => t.type === "video" && t.codec === chunk_n77gaszd_TO_BE_OVERRIDDEN_LATER) && !state.callbacks.tracks.getIsDone()) {
+  const tracks2 = chunk_gqesq3a3_getTracks(state, false);
+  if (!tracks2.some((t) => t.type === "video" && t.codec === chunk_gqesq3a3_TO_BE_OVERRIDDEN_LATER) && !state.callbacks.tracks.getIsDone()) {
     state.callbacks.tracks.setIsDone(state.logLevel);
   }
 };
-var chunk_n77gaszd_parseRiffBody = async (state) => {
+var chunk_gqesq3a3_parseRiffBody = async (state) => {
   const releasedFrame = state.riff.queuedBFrames.getReleasedFrame();
   if (releasedFrame) {
-    const converted = chunk_n77gaszd_convertQueuedSampleToMediaParserSample({
+    const converted = chunk_gqesq3a3_convertQueuedSampleToMediaParserSample({
       sample: releasedFrame.sample,
       state,
       trackId: releasedFrame.trackId
@@ -67906,33 +67926,33 @@ var chunk_n77gaszd_parseRiffBody = async (state) => {
     return null;
   }
   if (state.mediaSection.isCurrentByteInMediaSection(state.iterator) === "in-section") {
-    if (chunk_n77gaszd_maySkipVideoData({
+    if (chunk_gqesq3a3_maySkipVideoData({
       state
     }) && state.riff.getAvcProfile()) {
-      const mediaSection = chunk_n77gaszd_getCurrentMediaSection({
+      const mediaSection = chunk_gqesq3a3_getCurrentMediaSection({
         offset: state.iterator.counter.getOffset(),
         mediaSections: state.mediaSection.getMediaSections()
       });
       if (!mediaSection) {
         throw new Error("No video section defined");
       }
-      return Promise.resolve(chunk_n77gaszd_makeSkip(mediaSection.start + mediaSection.size));
+      return Promise.resolve(chunk_gqesq3a3_makeSkip(mediaSection.start + mediaSection.size));
     }
-    await chunk_n77gaszd_parseMediaSection(state);
+    await chunk_gqesq3a3_parseMediaSection(state);
     return null;
   }
-  const box2 = await chunk_n77gaszd_expectRiffBox({
+  const box2 = await chunk_gqesq3a3_expectRiffBox({
     iterator: state.iterator,
     stateIfExpectingSideEffects: state
   });
   if (box2 !== null) {
-    await chunk_n77gaszd_postProcessRiffBox(state, box2);
+    await chunk_gqesq3a3_postProcessRiffBox(state, box2);
     const structure = state.structure.getRiffStructure();
     structure.boxes.push(box2);
   }
   return null;
 };
-var chunk_n77gaszd_parseRiffHeader = (state) => {
+var chunk_gqesq3a3_parseRiffHeader = (state) => {
   const riff = state.iterator.getByteString(4, false);
   if (riff !== "RIFF") {
     throw new Error("Not a RIFF file");
@@ -67946,21 +67966,21 @@ var chunk_n77gaszd_parseRiffHeader = (state) => {
   structure.boxes.push({ type: "riff-header", fileSize: size4, fileType });
   return null;
 };
-var chunk_n77gaszd_parseRiff = (state) => {
+var chunk_gqesq3a3_parseRiff = (state) => {
   if (state.iterator.counter.getOffset() === 0) {
-    return Promise.resolve(chunk_n77gaszd_parseRiffHeader(state));
+    return Promise.resolve(chunk_gqesq3a3_parseRiffHeader(state));
   }
-  return chunk_n77gaszd_parseRiffBody(state);
+  return chunk_gqesq3a3_parseRiffBody(state);
 };
-var chunk_n77gaszd_discardRestOfPacket = (iterator) => {
+var chunk_gqesq3a3_discardRestOfPacket = (iterator) => {
   const next188 = 188 - iterator.counter.getOffset() % 188;
   iterator.discard(next188);
 };
-var chunk_n77gaszd_getRestOfPacket = (iterator) => {
+var chunk_gqesq3a3_getRestOfPacket = (iterator) => {
   const next188 = 188 - iterator.counter.getOffset() % 188;
   return iterator.getSlice(next188);
 };
-var chunk_n77gaszd_parsePatTable = (iterator, tableId) => {
+var chunk_gqesq3a3_parsePatTable = (iterator, tableId) => {
   iterator.getUint16();
   iterator.startReadingBits();
   iterator.getBits(7);
@@ -67988,7 +68008,7 @@ var chunk_n77gaszd_parsePatTable = (iterator, tableId) => {
     pat: tables
   };
 };
-var chunk_n77gaszd_parsePat = (iterator) => {
+var chunk_gqesq3a3_parsePat = (iterator) => {
   iterator.startReadingBits();
   const tableId = iterator.getBits(8);
   iterator.getBits(1);
@@ -67999,11 +68019,11 @@ var chunk_n77gaszd_parsePat = (iterator) => {
     throw new Error("Invalid section length");
   }
   iterator.stopReadingBits();
-  const tables = chunk_n77gaszd_parsePatTable(iterator, tableId);
-  chunk_n77gaszd_discardRestOfPacket(iterator);
+  const tables = chunk_gqesq3a3_parsePatTable(iterator, tableId);
+  chunk_gqesq3a3_discardRestOfPacket(iterator);
   return tables;
 };
-var chunk_n77gaszd_parseSdt = (iterator) => {
+var chunk_gqesq3a3_parseSdt = (iterator) => {
   iterator.startReadingBits();
   iterator.getBits(8);
   iterator.getBits(1);
@@ -68012,12 +68032,12 @@ var chunk_n77gaszd_parseSdt = (iterator) => {
   const sectionLength = iterator.getBits(12);
   iterator.stopReadingBits();
   iterator.discard(sectionLength);
-  chunk_n77gaszd_discardRestOfPacket(iterator);
+  chunk_gqesq3a3_discardRestOfPacket(iterator);
   return {
     type: "transport-stream-sdt-box"
   };
 };
-var chunk_n77gaszd_parsePes = ({
+var chunk_gqesq3a3_parsePes = ({
   iterator,
   offset
 }) => {
@@ -68093,7 +68113,7 @@ var chunk_n77gaszd_parsePes = ({
   };
   return packet;
 };
-var chunk_n77gaszd_parsePmtTable = ({
+var chunk_gqesq3a3_parsePmtTable = ({
   iterator,
   tableId,
   sectionLength
@@ -68141,7 +68161,7 @@ var chunk_n77gaszd_parsePmtTable = ({
     streams: tables[0].streams
   };
 };
-var chunk_n77gaszd_parsePmt = (iterator) => {
+var chunk_gqesq3a3_parsePmt = (iterator) => {
   iterator.startReadingBits();
   const tableId = iterator.getBits(8);
   iterator.getBits(1);
@@ -68152,11 +68172,11 @@ var chunk_n77gaszd_parsePmt = (iterator) => {
     throw new Error("Invalid section length");
   }
   iterator.stopReadingBits();
-  const tables = chunk_n77gaszd_parsePmtTable({ iterator, tableId, sectionLength });
-  chunk_n77gaszd_discardRestOfPacket(iterator);
+  const tables = chunk_gqesq3a3_parsePmtTable({ iterator, tableId, sectionLength });
+  chunk_gqesq3a3_discardRestOfPacket(iterator);
   return tables;
 };
-function chunk_n77gaszd_findNthSubarrayIndex({
+function chunk_gqesq3a3_findNthSubarrayIndex({
   array,
   subarray,
   n,
@@ -68184,11 +68204,11 @@ function chunk_n77gaszd_findNthSubarrayIndex({
   }
   return { type: "not-found", index: i, count };
 }
-var chunk_n77gaszd_readAdtsHeader = (buffer) => {
+var chunk_gqesq3a3_readAdtsHeader = (buffer) => {
   if (buffer.byteLength < 9) {
     return null;
   }
-  const iterator = chunk_n77gaszd_getArrayBufferIterator({
+  const iterator = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: buffer,
     maxBytes: buffer.byteLength,
     logLevel: "error"
@@ -68209,10 +68229,10 @@ var chunk_n77gaszd_readAdtsHeader = (buffer) => {
   const protectionAbsent = iterator.getBits(1);
   const audioObjectType = iterator.getBits(2);
   const samplingFrequencyIndex = iterator.getBits(4);
-  const sampleRate = chunk_n77gaszd_getSampleRateFromSampleFrequencyIndex(samplingFrequencyIndex);
+  const sampleRate = chunk_gqesq3a3_getSampleRateFromSampleFrequencyIndex(samplingFrequencyIndex);
   iterator.getBits(1);
   const channelConfiguration = iterator.getBits(3);
-  const codecPrivate2 = chunk_n77gaszd_createAacCodecPrivate({
+  const codecPrivate2 = chunk_gqesq3a3_createAacCodecPrivate({
     audioObjectType,
     sampleRate,
     channelConfiguration,
@@ -68238,7 +68258,7 @@ var chunk_n77gaszd_readAdtsHeader = (buffer) => {
     audioObjectType
   };
 };
-var chunk_n77gaszd_handleAacPacket = async ({
+var chunk_gqesq3a3_handleAacPacket = async ({
   streamBuffer,
   programId,
   offset,
@@ -68248,7 +68268,7 @@ var chunk_n77gaszd_handleAacPacket = async ({
   transportStream,
   makeSamplesStartAtZero
 }) => {
-  const adtsHeader = chunk_n77gaszd_readAdtsHeader(streamBuffer.getBuffer());
+  const adtsHeader = chunk_gqesq3a3_readAdtsHeader(streamBuffer.getBuffer());
   if (!adtsHeader) {
     throw new Error("Invalid ADTS header - too short");
   }
@@ -68266,16 +68286,16 @@ var chunk_n77gaszd_handleAacPacket = async ({
       type: "audio",
       codecData: { type: "aac-config", data: codecPrivate2 },
       trackId: programId,
-      originalTimescale: chunk_n77gaszd_MPEG_TIMESCALE,
+      originalTimescale: chunk_gqesq3a3_MPEG_TIMESCALE,
       codecEnum: "aac",
-      codec: chunk_n77gaszd_mapAudioObjectTypeToCodecString(audioObjectType),
+      codec: chunk_gqesq3a3_mapAudioObjectTypeToCodecString(audioObjectType),
       description: codecPrivate2,
       numberOfChannels: channelConfiguration,
       sampleRate,
       startInSeconds: 0,
-      timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+      timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
     };
-    await chunk_n77gaszd_registerAudioTrack({
+    await chunk_gqesq3a3_registerAudioTrack({
       track,
       container: "transport-stream",
       registerAudioSampleCallback: sampleCallbacks.registerAudioSampleCallback,
@@ -68292,9 +68312,9 @@ var chunk_n77gaszd_handleAacPacket = async ({
     type: "key",
     offset
   };
-  const audioSample = chunk_n77gaszd_convertAudioOrVideoSampleToWebCodecsTimestamps({
+  const audioSample = chunk_gqesq3a3_convertAudioOrVideoSampleToWebCodecsTimestamps({
     sample,
-    timescale: chunk_n77gaszd_MPEG_TIMESCALE
+    timescale: chunk_gqesq3a3_MPEG_TIMESCALE
   });
   await sampleCallbacks.onAudioSample({
     audioSample,
@@ -68302,7 +68322,7 @@ var chunk_n77gaszd_handleAacPacket = async ({
   });
   transportStream.lastEmittedSample.setLastEmittedSample(sample);
 };
-var chunk_n77gaszd_makeTransportStreamPacketBuffer = ({
+var chunk_gqesq3a3_makeTransportStreamPacketBuffer = ({
   buffers,
   pesHeader,
   offset
@@ -68316,7 +68336,7 @@ var chunk_n77gaszd_makeTransportStreamPacketBuffer = ({
     if (currentBuf.length === 1) {
       return currentBuf[0];
     }
-    currentBuf = [chunk_n77gaszd_combineUint8Arrays(currentBuf)];
+    currentBuf = [chunk_gqesq3a3_combineUint8Arrays(currentBuf)];
     return currentBuf[0];
   };
   let fastFind = null;
@@ -68330,7 +68350,7 @@ var chunk_n77gaszd_makeTransportStreamPacketBuffer = ({
     },
     get2ndSubArrayIndex: () => {
       if (subarrayIndex === null) {
-        const result = chunk_n77gaszd_findNthSubarrayIndex({
+        const result = chunk_gqesq3a3_findNthSubarrayIndex({
           array: getBuffer(),
           subarray: new Uint8Array([0, 0, 1, 9]),
           n: 2,
@@ -68349,7 +68369,7 @@ var chunk_n77gaszd_makeTransportStreamPacketBuffer = ({
     }
   };
 };
-var chunk_n77gaszd_processStreamBuffer = async ({
+var chunk_gqesq3a3_processStreamBuffer = async ({
   streamBuffer,
   programId,
   structure,
@@ -68361,7 +68381,7 @@ var chunk_n77gaszd_processStreamBuffer = async ({
   makeSamplesStartAtZero,
   avcState
 }) => {
-  const stream = chunk_n77gaszd_getStreamForId(structure, programId);
+  const stream = chunk_gqesq3a3_getStreamForId(structure, programId);
   if (!stream) {
     throw new Error("No stream found");
   }
@@ -68369,7 +68389,7 @@ var chunk_n77gaszd_processStreamBuffer = async ({
     throw new Error("H.262 video stream not supported");
   }
   if (stream.streamType === 27) {
-    await chunk_n77gaszd_handleAvcPacket({
+    await chunk_gqesq3a3_handleAvcPacket({
       programId,
       streamBuffer,
       sampleCallbacks,
@@ -68381,7 +68401,7 @@ var chunk_n77gaszd_processStreamBuffer = async ({
       avcState
     });
   } else if (stream.streamType === 15) {
-    await chunk_n77gaszd_handleAacPacket({
+    await chunk_gqesq3a3_handleAacPacket({
       streamBuffer,
       programId,
       offset: streamBuffer.offset,
@@ -68394,13 +68414,13 @@ var chunk_n77gaszd_processStreamBuffer = async ({
   }
   if (!sampleCallbacks.tracks.hasAllTracks()) {
     const tracksRegistered = sampleCallbacks.tracks.getTracks().length;
-    const { streams } = chunk_n77gaszd_findProgramMapTableOrThrow(structure);
-    if (chunk_n77gaszd_filterStreamsBySupportedTypes(streams).length === tracksRegistered) {
+    const { streams } = chunk_gqesq3a3_findProgramMapTableOrThrow(structure);
+    if (chunk_gqesq3a3_filterStreamsBySupportedTypes(streams).length === tracksRegistered) {
       sampleCallbacks.tracks.setIsDone(logLevel);
     }
   }
 };
-var chunk_n77gaszd_processFinalStreamBuffers = async ({
+var chunk_gqesq3a3_processFinalStreamBuffers = async ({
   structure,
   sampleCallbacks,
   logLevel,
@@ -68412,7 +68432,7 @@ var chunk_n77gaszd_processFinalStreamBuffers = async ({
 }) => {
   for (const [programId, buffer] of transportStream.streamBuffers) {
     if (buffer.getBuffer().byteLength > 0) {
-      await chunk_n77gaszd_processStreamBuffer({
+      await chunk_gqesq3a3_processStreamBuffer({
         streamBuffer: buffer,
         programId,
         structure,
@@ -68428,17 +68448,17 @@ var chunk_n77gaszd_processFinalStreamBuffers = async ({
     }
   }
 };
-var chunk_n77gaszd_parseStream = ({
+var chunk_gqesq3a3_parseStream = ({
   transportStreamEntry,
   programId,
   iterator,
   transportStream
 }) => {
-  const restOfPacket = chunk_n77gaszd_getRestOfPacket(iterator);
+  const restOfPacket = chunk_gqesq3a3_getRestOfPacket(iterator);
   const offset = iterator.counter.getOffset();
   const { streamBuffers, nextPesHeaderStore: nextPesHeader } = transportStream;
   if (!streamBuffers.has(transportStreamEntry.pid)) {
-    streamBuffers.set(programId, chunk_n77gaszd_makeTransportStreamPacketBuffer({
+    streamBuffers.set(programId, chunk_gqesq3a3_makeTransportStreamPacketBuffer({
       pesHeader: nextPesHeader.getNextPesHeader(),
       buffers: null,
       offset
@@ -68447,7 +68467,7 @@ var chunk_n77gaszd_parseStream = ({
   const streamBuffer = streamBuffers.get(transportStreamEntry.pid);
   streamBuffer.addBuffer(restOfPacket);
 };
-var chunk_n77gaszd_parsePacket = ({
+var chunk_gqesq3a3_parsePacket = ({
   iterator,
   structure,
   transportStream
@@ -68493,26 +68513,26 @@ var chunk_n77gaszd_parsePacket = ({
   const pat = structure.boxes.find((b) => b.type === "transport-stream-pmt-box");
   const isPes = payloadUnitStartIndicator && pat?.streams.find((e) => e.pid === programId);
   if (isPes) {
-    const packetPes = chunk_n77gaszd_parsePes({ iterator, offset });
+    const packetPes = chunk_gqesq3a3_parsePes({ iterator, offset });
     transportStream.nextPesHeaderStore.setNextPesHeader(packetPes);
     transportStream.observedPesHeaders.addPesHeader(packetPes);
   } else if (payloadUnitStartIndicator === 1) {
     iterator.getUint8();
   }
   if (programId === 0) {
-    return chunk_n77gaszd_parsePat(iterator);
+    return chunk_gqesq3a3_parsePat(iterator);
   }
   if (programId === 17) {
-    return chunk_n77gaszd_parseSdt(iterator);
+    return chunk_gqesq3a3_parseSdt(iterator);
   }
-  const program = programId === 17 ? null : chunk_n77gaszd_getProgramForId(structure, programId);
+  const program = programId === 17 ? null : chunk_gqesq3a3_getProgramForId(structure, programId);
   if (program) {
-    const pmt = chunk_n77gaszd_parsePmt(iterator);
+    const pmt = chunk_gqesq3a3_parsePmt(iterator);
     return pmt;
   }
-  const transportStreamEntry = chunk_n77gaszd_getStreamForId(structure, programId);
+  const transportStreamEntry = chunk_gqesq3a3_getStreamForId(structure, programId);
   if (transportStreamEntry) {
-    chunk_n77gaszd_parseStream({
+    chunk_gqesq3a3_parseStream({
       transportStreamEntry,
       iterator,
       transportStream,
@@ -68522,10 +68542,10 @@ var chunk_n77gaszd_parsePacket = ({
   }
   throw new Error("Unknown packet identifier");
 };
-var chunk_n77gaszd_canProcessAudio = ({
+var chunk_gqesq3a3_canProcessAudio = ({
   streamBuffer
 }) => {
-  const expectedLength = chunk_n77gaszd_readAdtsHeader(streamBuffer.getBuffer())?.frameLength ?? null;
+  const expectedLength = chunk_gqesq3a3_readAdtsHeader(streamBuffer.getBuffer())?.frameLength ?? null;
   if (expectedLength === null) {
     return false;
   }
@@ -68534,7 +68554,7 @@ var chunk_n77gaszd_canProcessAudio = ({
   }
   return true;
 };
-var chunk_n77gaszd_processAudio = async ({
+var chunk_gqesq3a3_processAudio = async ({
   transportStreamEntry,
   structure,
   offset,
@@ -68551,15 +68571,15 @@ var chunk_n77gaszd_processAudio = async ({
   if (!streamBuffer) {
     throw new Error("Stream buffer not found");
   }
-  const expectedLength = chunk_n77gaszd_readAdtsHeader(streamBuffer.getBuffer())?.frameLength ?? null;
+  const expectedLength = chunk_gqesq3a3_readAdtsHeader(streamBuffer.getBuffer())?.frameLength ?? null;
   if (expectedLength === null) {
     throw new Error("Expected length is null");
   }
   if (expectedLength > streamBuffer.getBuffer().length) {
     throw new Error("Expected length is greater than stream buffer length");
   }
-  await chunk_n77gaszd_processStreamBuffer({
-    streamBuffer: chunk_n77gaszd_makeTransportStreamPacketBuffer({
+  await chunk_gqesq3a3_processStreamBuffer({
+    streamBuffer: chunk_gqesq3a3_makeTransportStreamPacketBuffer({
       buffers: streamBuffer.getBuffer().slice(0, expectedLength),
       offset,
       pesHeader: streamBuffer.pesHeader
@@ -68575,13 +68595,13 @@ var chunk_n77gaszd_processAudio = async ({
     avcState
   });
   const rest = streamBuffer.getBuffer().slice(expectedLength);
-  streamBuffers.set(transportStreamEntry.pid, chunk_n77gaszd_makeTransportStreamPacketBuffer({
+  streamBuffers.set(transportStreamEntry.pid, chunk_gqesq3a3_makeTransportStreamPacketBuffer({
     buffers: rest,
     pesHeader: nextPesHeader.getNextPesHeader(),
     offset
   }));
 };
-var chunk_n77gaszd_canProcessVideo = ({
+var chunk_gqesq3a3_canProcessVideo = ({
   streamBuffer
 }) => {
   const indexOfSeparator = streamBuffer.get2ndSubArrayIndex();
@@ -68590,7 +68610,7 @@ var chunk_n77gaszd_canProcessVideo = ({
   }
   return true;
 };
-var chunk_n77gaszd_processVideo = async ({
+var chunk_gqesq3a3_processVideo = async ({
   programId,
   structure,
   streamBuffer,
@@ -68609,8 +68629,8 @@ var chunk_n77gaszd_processVideo = async ({
   const buf = streamBuffer.getBuffer();
   const packet = buf.slice(0, indexOfSeparator);
   const rest = buf.slice(indexOfSeparator);
-  await chunk_n77gaszd_processStreamBuffer({
-    streamBuffer: chunk_n77gaszd_makeTransportStreamPacketBuffer({
+  await chunk_gqesq3a3_processStreamBuffer({
+    streamBuffer: chunk_gqesq3a3_makeTransportStreamPacketBuffer({
       offset: streamBuffer.offset,
       pesHeader: streamBuffer.pesHeader,
       buffers: packet
@@ -68627,8 +68647,8 @@ var chunk_n77gaszd_processVideo = async ({
   });
   return rest;
 };
-var chunk_n77gaszd_processSampleIfPossible = async (state) => {
-  const programMap = chunk_n77gaszd_findProgramMapOrNull(state.structure.getTsStructure());
+var chunk_gqesq3a3_processSampleIfPossible = async (state) => {
+  const programMap = chunk_gqesq3a3_findProgramMapOrNull(state.structure.getTsStructure());
   if (!programMap) {
     return;
   }
@@ -68639,8 +68659,8 @@ var chunk_n77gaszd_processSampleIfPossible = async (state) => {
       continue;
     }
     if (stream.streamType === 27) {
-      if (chunk_n77gaszd_canProcessVideo({ streamBuffer })) {
-        const rest = await chunk_n77gaszd_processVideo({
+      if (chunk_gqesq3a3_canProcessVideo({ streamBuffer })) {
+        const rest = await chunk_gqesq3a3_processVideo({
           programId: stream.pid,
           structure: state.structure.getTsStructure(),
           streamBuffer,
@@ -68653,7 +68673,7 @@ var chunk_n77gaszd_processSampleIfPossible = async (state) => {
           avcState: state.avc
         });
         state.transportStream.streamBuffers.delete(stream.pid);
-        state.transportStream.streamBuffers.set(stream.pid, chunk_n77gaszd_makeTransportStreamPacketBuffer({
+        state.transportStream.streamBuffers.set(stream.pid, chunk_gqesq3a3_makeTransportStreamPacketBuffer({
           pesHeader: state.transportStream.nextPesHeaderStore.getNextPesHeader(),
           buffers: rest,
           offset: state.iterator.counter.getOffset()
@@ -68663,8 +68683,8 @@ var chunk_n77gaszd_processSampleIfPossible = async (state) => {
       }
     }
     if (stream.streamType === 15) {
-      if (chunk_n77gaszd_canProcessAudio({ streamBuffer })) {
-        await chunk_n77gaszd_processAudio({
+      if (chunk_gqesq3a3_canProcessAudio({ streamBuffer })) {
+        await chunk_gqesq3a3_processAudio({
           structure: state.structure.getTsStructure(),
           offset: state.iterator.counter.getOffset(),
           sampleCallbacks: state.callbacks,
@@ -68683,9 +68703,9 @@ var chunk_n77gaszd_processSampleIfPossible = async (state) => {
   }
   return processed;
 };
-var chunk_n77gaszd_parseTransportStream = async (state) => {
+var chunk_gqesq3a3_parseTransportStream = async (state) => {
   const structure = state.structure.getTsStructure();
-  const processed = await chunk_n77gaszd_processSampleIfPossible(state);
+  const processed = await chunk_gqesq3a3_processSampleIfPossible(state);
   if (processed) {
     return Promise.resolve(null);
   }
@@ -68693,7 +68713,7 @@ var chunk_n77gaszd_parseTransportStream = async (state) => {
   if (iterator.bytesRemaining() < 188) {
     return Promise.resolve(null);
   }
-  const packet = chunk_n77gaszd_parsePacket({
+  const packet = chunk_gqesq3a3_parsePacket({
     iterator,
     structure,
     transportStream: state.transportStream
@@ -68702,7 +68722,7 @@ var chunk_n77gaszd_parseTransportStream = async (state) => {
     structure.boxes.push(packet);
   }
   if (iterator.bytesRemaining() === 0) {
-    await chunk_n77gaszd_processFinalStreamBuffers({
+    await chunk_gqesq3a3_processFinalStreamBuffers({
       transportStream: state.transportStream,
       structure,
       sampleCallbacks: state.callbacks,
@@ -68715,7 +68735,7 @@ var chunk_n77gaszd_parseTransportStream = async (state) => {
   }
   return Promise.resolve(null);
 };
-var chunk_n77gaszd_parseData = ({
+var chunk_gqesq3a3_parseData = ({
   state
 }) => {
   const { iterator } = state;
@@ -68730,12 +68750,12 @@ var chunk_n77gaszd_parseData = ({
     size: ckSize,
     start: iterator.counter.getOffset()
   });
-  if (chunk_n77gaszd_maySkipVideoData({ state })) {
-    return Promise.resolve(chunk_n77gaszd_makeSkip(iterator.counter.getOffset() + ckSize));
+  if (chunk_gqesq3a3_maySkipVideoData({ state })) {
+    return Promise.resolve(chunk_gqesq3a3_makeSkip(iterator.counter.getOffset() + ckSize));
   }
   return Promise.resolve(null);
 };
-var chunk_n77gaszd_parseFact = ({
+var chunk_gqesq3a3_parseFact = ({
   state
 }) => {
   const { iterator } = state;
@@ -68751,7 +68771,7 @@ var chunk_n77gaszd_parseFact = ({
   state.structure.getWavStructure().boxes.push(factBox);
   return Promise.resolve(null);
 };
-var chunk_n77gaszd_WMMEDIASUBTYPE_PCM = [
+var chunk_gqesq3a3_WMMEDIASUBTYPE_PCM = [
   1,
   0,
   0,
@@ -68769,7 +68789,7 @@ var chunk_n77gaszd_WMMEDIASUBTYPE_PCM = [
   155,
   113
 ];
-var chunk_n77gaszd_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT = [
+var chunk_gqesq3a3_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT = [
   3,
   0,
   0,
@@ -68787,13 +68807,13 @@ var chunk_n77gaszd_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT = [
   155,
   113
 ];
-var chunk_n77gaszd_subformatIsPcm = (subformat) => {
-  return subformat.every((value, index) => value === chunk_n77gaszd_WMMEDIASUBTYPE_PCM[index]);
+var chunk_gqesq3a3_subformatIsPcm = (subformat) => {
+  return subformat.every((value, index) => value === chunk_gqesq3a3_WMMEDIASUBTYPE_PCM[index]);
 };
-var chunk_n77gaszd_subformatIsIeeeFloat = (subformat) => {
-  return subformat.every((value, index) => value === chunk_n77gaszd_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT[index]);
+var chunk_gqesq3a3_subformatIsIeeeFloat = (subformat) => {
+  return subformat.every((value, index) => value === chunk_gqesq3a3_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT[index]);
 };
-var chunk_n77gaszd_CHANNELS = {
+var chunk_gqesq3a3_CHANNELS = {
   0: "Front Left",
   1: "Front Right",
   2: "Front Center",
@@ -68813,11 +68833,11 @@ var chunk_n77gaszd_CHANNELS = {
   16: "Top Back Center",
   17: "Top Back Right"
 };
-function chunk_n77gaszd_getChannelsFromMask(channelMask) {
+function chunk_gqesq3a3_getChannelsFromMask(channelMask) {
   const channels2 = [];
   for (let bit = 0;bit < 18; bit++) {
     if ((channelMask & 1 << bit) !== 0) {
-      const channelName = chunk_n77gaszd_CHANNELS[bit];
+      const channelName = chunk_gqesq3a3_CHANNELS[bit];
       if (channelName) {
         channels2.push(channelName);
       } else {
@@ -68827,7 +68847,7 @@ function chunk_n77gaszd_getChannelsFromMask(channelMask) {
   }
   return channels2;
 }
-var chunk_n77gaszd_parseFmt = async ({
+var chunk_gqesq3a3_parseFmt = async ({
   state
 }) => {
   const { iterator } = state;
@@ -68866,13 +68886,13 @@ var chunk_n77gaszd_parseFmt = async ({
     if (subFormat.length !== 16) {
       throw new Error(`Only supporting WAVE with PCM audio format, but got ${subFormat.length}`);
     }
-    if (chunk_n77gaszd_subformatIsPcm(subFormat)) {} else if (chunk_n77gaszd_subformatIsIeeeFloat(subFormat)) {} else {
+    if (chunk_gqesq3a3_subformatIsPcm(subFormat)) {} else if (chunk_gqesq3a3_subformatIsIeeeFloat(subFormat)) {} else {
       throw new Error(`Unsupported subformat: ${subFormat}`);
     }
-    const channels2 = chunk_n77gaszd_getChannelsFromMask(channelMask);
+    const channels2 = chunk_gqesq3a3_getChannelsFromMask(channelMask);
     wavHeader.numberOfChannels = channels2.length;
   }
-  await chunk_n77gaszd_registerAudioTrack({
+  await chunk_gqesq3a3_registerAudioTrack({
     track: {
       type: "audio",
       codec: format,
@@ -68884,7 +68904,7 @@ var chunk_n77gaszd_parseFmt = async ({
       originalTimescale: 1e6,
       trackId: 0,
       startInSeconds: 0,
-      timescale: chunk_n77gaszd_WEBCODECS_TIMESCALE
+      timescale: chunk_gqesq3a3_WEBCODECS_TIMESCALE
     },
     container: "wav",
     registerAudioSampleCallback: state.callbacks.registerAudioSampleCallback,
@@ -68895,7 +68915,7 @@ var chunk_n77gaszd_parseFmt = async ({
   box2.expectNoMoreBytes();
   return Promise.resolve(null);
 };
-var chunk_n77gaszd_parseHeader = ({
+var chunk_gqesq3a3_parseHeader = ({
   state
 }) => {
   const fileSize = state.iterator.getUint32Le();
@@ -68910,7 +68930,7 @@ var chunk_n77gaszd_parseHeader = ({
   state.structure.getWavStructure().boxes.push(header2);
   return Promise.resolve(null);
 };
-var chunk_n77gaszd_parseId32 = ({
+var chunk_gqesq3a3_parseId32 = ({
   state
 }) => {
   const { iterator } = state;
@@ -68922,16 +68942,16 @@ var chunk_n77gaszd_parseId32 = ({
   state.structure.getWavStructure().boxes.push(id3Box);
   return Promise.resolve(null);
 };
-var chunk_n77gaszd_parseJunk = ({
+var chunk_gqesq3a3_parseJunk = ({
   state
 }) => {
   const { iterator } = state;
   const ckSize = iterator.getUint32Le();
-  chunk_n77gaszd_Log.trace(state.logLevel, `Skipping JUNK chunk of size ${ckSize}`);
+  chunk_gqesq3a3_Log.trace(state.logLevel, `Skipping JUNK chunk of size ${ckSize}`);
   iterator.discard(ckSize);
   return Promise.resolve(null);
 };
-var chunk_n77gaszd_parseList = ({
+var chunk_gqesq3a3_parseList = ({
   state
 }) => {
   const { iterator } = state;
@@ -68967,7 +68987,7 @@ var chunk_n77gaszd_parseList = ({
   box2.expectNoMoreBytes();
   return Promise.resolve(null);
 };
-var chunk_n77gaszd_parseMediaSection2 = async ({
+var chunk_gqesq3a3_parseMediaSection2 = async ({
   state
 }) => {
   const { iterator } = state;
@@ -68980,11 +69000,11 @@ var chunk_n77gaszd_parseMediaSection2 = async ({
   if (!fmtBox) {
     throw new Error("Expected fmt box");
   }
-  const toRead = Math.min(maxRead, fmtBox.sampleRate * fmtBox.blockAlign / chunk_n77gaszd_WAVE_SAMPLES_PER_SECOND);
+  const toRead = Math.min(maxRead, fmtBox.sampleRate * fmtBox.blockAlign / chunk_gqesq3a3_WAVE_SAMPLES_PER_SECOND);
   const duration2 = toRead / (fmtBox.sampleRate * fmtBox.blockAlign);
   const timestamp = (offset - videoSection.start) / (fmtBox.sampleRate * fmtBox.blockAlign);
   const data = iterator.getSlice(toRead);
-  const audioSample = chunk_n77gaszd_convertAudioOrVideoSampleToWebCodecsTimestamps({
+  const audioSample = chunk_gqesq3a3_convertAudioOrVideoSampleToWebCodecsTimestamps({
     sample: {
       decodingTimestamp: timestamp,
       data,
@@ -69001,41 +69021,41 @@ var chunk_n77gaszd_parseMediaSection2 = async ({
   });
   return null;
 };
-var chunk_n77gaszd_parseWav = (state) => {
+var chunk_gqesq3a3_parseWav = (state) => {
   const { iterator } = state;
   const insideMediaSection = state.mediaSection.isCurrentByteInMediaSection(iterator);
   if (insideMediaSection === "in-section") {
-    return chunk_n77gaszd_parseMediaSection2({ state });
+    return chunk_gqesq3a3_parseMediaSection2({ state });
   }
   const type = iterator.getByteString(4, false).toLowerCase();
-  chunk_n77gaszd_Log.trace(state.logLevel, `Processing box type ${type}`);
+  chunk_gqesq3a3_Log.trace(state.logLevel, `Processing box type ${type}`);
   if (type === "riff") {
-    return chunk_n77gaszd_parseHeader({ state });
+    return chunk_gqesq3a3_parseHeader({ state });
   }
   if (type === "fmt") {
-    return chunk_n77gaszd_parseFmt({ state });
+    return chunk_gqesq3a3_parseFmt({ state });
   }
   if (type === "data") {
-    return chunk_n77gaszd_parseData({ state });
+    return chunk_gqesq3a3_parseData({ state });
   }
   if (type === "list") {
-    return chunk_n77gaszd_parseList({ state });
+    return chunk_gqesq3a3_parseList({ state });
   }
   if (type === "id3") {
-    return chunk_n77gaszd_parseId32({ state });
+    return chunk_gqesq3a3_parseId32({ state });
   }
   if (type === "junk" || type === "fllr") {
-    return chunk_n77gaszd_parseJunk({ state });
+    return chunk_gqesq3a3_parseJunk({ state });
   }
   if (type === "fact") {
-    return chunk_n77gaszd_parseFact({ state });
+    return chunk_gqesq3a3_parseFact({ state });
   }
   if (type === "\x00") {
     return Promise.resolve(null);
   }
   throw new Error(`Unknown WAV box type ${type}`);
 };
-var chunk_n77gaszd_getByteForSeek = ({
+var chunk_gqesq3a3_getByteForSeek = ({
   seekHeadSegment,
   offset
 }) => {
@@ -69044,7 +69064,7 @@ var chunk_n77gaszd_getByteForSeek = ({
       return null;
     }
     const seekId2 = v.value.find((_v) => {
-      return _v.type === "SeekID" && _v.value === chunk_n77gaszd_matroskaElements.Cues;
+      return _v.type === "SeekID" && _v.value === chunk_gqesq3a3_matroskaElements.Cues;
     });
     if (!seekId2) {
       return null;
@@ -69056,13 +69076,13 @@ var chunk_n77gaszd_getByteForSeek = ({
       return false;
     }
     return seekPosition2.value;
-  }).filter(chunk_n77gaszd_truthy);
+  }).filter(chunk_gqesq3a3_truthy);
   if (value.length === 0) {
     return null;
   }
   return value[0].value + offset;
 };
-var chunk_n77gaszd_expectSegment = async ({
+var chunk_gqesq3a3_expectSegment = async ({
   statesForProcessing,
   isInsideSegment,
   iterator,
@@ -69087,8 +69107,8 @@ var chunk_n77gaszd_expectSegment = async ({
     return null;
   }
   const bytesRemainingNow = iterator.bytesRemaining();
-  chunk_n77gaszd_Log.trace(logLevel, "Segment ID:", chunk_n77gaszd_ebmlMap[segmentId]?.name, "Size:" + size4, bytesRemainingNow);
-  if (segmentId === chunk_n77gaszd_matroskaElements.Segment) {
+  chunk_gqesq3a3_Log.trace(logLevel, "Segment ID:", chunk_gqesq3a3_ebmlMap[segmentId]?.name, "Size:" + size4, bytesRemainingNow);
+  if (segmentId === chunk_gqesq3a3_matroskaElements.Segment) {
     if (!statesForProcessing) {
       throw new Error("States for processing are required");
     }
@@ -69103,7 +69123,7 @@ var chunk_n77gaszd_expectSegment = async ({
     };
     return newSegment;
   }
-  if (segmentId === chunk_n77gaszd_matroskaElements.Cluster) {
+  if (segmentId === chunk_gqesq3a3_matroskaElements.Cluster) {
     if (isInsideSegment === null) {
       throw new Error("Expected to be inside segment");
     }
@@ -69132,7 +69152,7 @@ var chunk_n77gaszd_expectSegment = async ({
     returnToCheckpoint();
     return null;
   }
-  const segment = await chunk_n77gaszd_parseSegment({
+  const segment = await chunk_gqesq3a3_parseSegment({
     segmentId,
     length: size4,
     headerReadSoFar: iterator.counter.getOffset() - offset,
@@ -69142,7 +69162,7 @@ var chunk_n77gaszd_expectSegment = async ({
   });
   return segment;
 };
-var chunk_n77gaszd_parseSegment = async ({
+var chunk_gqesq3a3_parseSegment = async ({
   segmentId,
   length,
   iterator,
@@ -69155,21 +69175,21 @@ var chunk_n77gaszd_parseSegment = async ({
   }
   iterator.counter.decrement(headerReadSoFar);
   const offset = iterator.counter.getOffset();
-  const ebml = await chunk_n77gaszd_parseEbml(iterator, statesForProcessing, logLevel);
+  const ebml = await chunk_gqesq3a3_parseEbml(iterator, statesForProcessing, logLevel);
   if (ebml === null) {
     return null;
   }
   if (!statesForProcessing) {
     return ebml;
   }
-  const remapped = await chunk_n77gaszd_postprocessEbml({
+  const remapped = await chunk_gqesq3a3_postprocessEbml({
     offset,
     ebml,
     statesForProcessing
   });
   return remapped;
 };
-var chunk_n77gaszd_selectStatesForProcessing = ({
+var chunk_gqesq3a3_selectStatesForProcessing = ({
   callbacks,
   logLevel,
   onAudioTrack,
@@ -69188,21 +69208,21 @@ var chunk_n77gaszd_selectStatesForProcessing = ({
     avcState: avc
   };
 };
-var chunk_n77gaszd_parseWebm = async (state) => {
+var chunk_gqesq3a3_parseWebm = async (state) => {
   const structure = state.structure.getMatroskaStructure();
   const { iterator } = state;
   const offset = iterator.counter.getOffset();
   const isInsideSegment = state.webm.isInsideSegment(iterator);
   const isInsideCluster = state.webm.isInsideCluster(offset);
-  const results = await chunk_n77gaszd_expectSegment({
+  const results = await chunk_gqesq3a3_expectSegment({
     iterator,
     logLevel: state.logLevel,
-    statesForProcessing: chunk_n77gaszd_selectStatesForProcessing(state),
+    statesForProcessing: chunk_gqesq3a3_selectStatesForProcessing(state),
     isInsideSegment,
     mediaSectionState: state.mediaSection
   });
   if (results?.type === "SeekHead") {
-    const position = chunk_n77gaszd_getByteForSeek({ seekHeadSegment: results, offset });
+    const position = chunk_gqesq3a3_getByteForSeek({ seekHeadSegment: results, offset });
     if (position !== null) {
       state.webm.cues.triggerLoad(position, offset);
     }
@@ -69211,8 +69231,8 @@ var chunk_n77gaszd_parseWebm = async (state) => {
     return null;
   }
   if (isInsideCluster) {
-    if (chunk_n77gaszd_maySkipVideoData({ state })) {
-      return chunk_n77gaszd_makeSkip(Math.min(state.contentLength, isInsideCluster.size + isInsideCluster.start));
+    if (chunk_gqesq3a3_maySkipVideoData({ state })) {
+      return chunk_gqesq3a3_makeSkip(Math.min(state.contentLength, isInsideCluster.size + isInsideCluster.start));
     }
     const segments = structure.boxes.filter((box2) => box2.type === "Segment");
     const segment = segments[isInsideCluster.segment];
@@ -69238,11 +69258,11 @@ var chunk_n77gaszd_parseWebm = async (state) => {
   }
   return null;
 };
-var chunk_n77gaszd_initVideo = async ({ state }) => {
+var chunk_gqesq3a3_initVideo = async ({ state }) => {
   const fileType = state.iterator.detectFileType();
   const { mimeType, name, contentLength } = state;
   if (fileType.type === "riff") {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Detected RIFF container");
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Detected RIFF container");
     state.structure.setStructure({
       type: "riff",
       boxes: []
@@ -69250,14 +69270,14 @@ var chunk_n77gaszd_initVideo = async ({ state }) => {
     return;
   }
   if (state.m3uPlaylistContext?.mp4HeaderSegment) {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Detected ISO Base Media segment");
-    const moovAtom = chunk_n77gaszd_getMoovFromFromIsoStructure(state.m3uPlaylistContext.mp4HeaderSegment);
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Detected ISO Base Media segment");
+    const moovAtom = chunk_gqesq3a3_getMoovFromFromIsoStructure(state.m3uPlaylistContext.mp4HeaderSegment);
     if (!moovAtom) {
       throw new Error("No moov box found");
     }
-    const tracks2 = chunk_n77gaszd_getTracksFromMoovBox(moovAtom);
+    const tracks2 = chunk_gqesq3a3_getTracksFromMoovBox(moovAtom);
     for (const track of tracks2.filter((t) => t.type === "video")) {
-      await chunk_n77gaszd_registerVideoTrack({
+      await chunk_gqesq3a3_registerVideoTrack({
         track,
         container: "mp4",
         logLevel: state.logLevel,
@@ -69267,7 +69287,7 @@ var chunk_n77gaszd_initVideo = async ({ state }) => {
       });
     }
     for (const track of tracks2.filter((t) => t.type === "audio")) {
-      await chunk_n77gaszd_registerAudioTrack({
+      await chunk_gqesq3a3_registerAudioTrack({
         track,
         container: "mp4",
         registerAudioSampleCallback: state.callbacks.registerAudioSampleCallback,
@@ -69284,7 +69304,7 @@ var chunk_n77gaszd_initVideo = async ({ state }) => {
     return;
   }
   if (fileType.type === "iso-base-media") {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Detected ISO Base Media container");
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Detected ISO Base Media container");
     state.structure.setStructure({
       type: "iso-base-media",
       boxes: []
@@ -69292,7 +69312,7 @@ var chunk_n77gaszd_initVideo = async ({ state }) => {
     return;
   }
   if (fileType.type === "webm") {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Detected Matroska container");
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Detected Matroska container");
     state.structure.setStructure({
       boxes: [],
       type: "matroska"
@@ -69300,7 +69320,7 @@ var chunk_n77gaszd_initVideo = async ({ state }) => {
     return;
   }
   if (fileType.type === "transport-stream") {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Detected MPEG-2 Transport Stream");
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Detected MPEG-2 Transport Stream");
     state.mediaSection.addMediaSection({
       start: 0,
       size: contentLength
@@ -69312,7 +69332,7 @@ var chunk_n77gaszd_initVideo = async ({ state }) => {
     return;
   }
   if (fileType.type === "mp3") {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Detected MP3");
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Detected MP3");
     const structure = {
       boxes: [],
       type: "mp3"
@@ -69321,7 +69341,7 @@ var chunk_n77gaszd_initVideo = async ({ state }) => {
     return;
   }
   if (fileType.type === "wav") {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Detected WAV");
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Detected WAV");
     const structure = {
       boxes: [],
       type: "wav"
@@ -69330,7 +69350,7 @@ var chunk_n77gaszd_initVideo = async ({ state }) => {
     return;
   }
   if (fileType.type === "flac") {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Detected FLAC");
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Detected FLAC");
     const structure = {
       boxes: [],
       type: "flac"
@@ -69339,7 +69359,7 @@ var chunk_n77gaszd_initVideo = async ({ state }) => {
     return;
   }
   if (fileType.type === "aac") {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Detected AAC");
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Detected AAC");
     state.structure.setStructure({
       type: "aac",
       boxes: []
@@ -69347,7 +69367,7 @@ var chunk_n77gaszd_initVideo = async ({ state }) => {
     return;
   }
   if (fileType.type === "m3u") {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Detected M3U");
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Detected M3U");
     state.structure.setStructure({
       type: "m3u",
       boxes: []
@@ -69355,7 +69375,7 @@ var chunk_n77gaszd_initVideo = async ({ state }) => {
     return;
   }
   if (fileType.type === "pdf") {
-    return Promise.reject(new chunk_n77gaszd_IsAPdfError({
+    return Promise.reject(new chunk_gqesq3a3_IsAPdfError({
       message: "GIF files are not supported",
       mimeType,
       sizeInBytes: contentLength,
@@ -69363,7 +69383,7 @@ var chunk_n77gaszd_initVideo = async ({ state }) => {
     }));
   }
   if (fileType.type === "bmp" || fileType.type === "jpeg" || fileType.type === "png" || fileType.type === "webp" || fileType.type === "gif") {
-    return Promise.reject(new chunk_n77gaszd_IsAnImageError({
+    return Promise.reject(new chunk_gqesq3a3_IsAnImageError({
       message: "Image files are not supported",
       imageType: fileType.type,
       dimensions: fileType.dimensions,
@@ -69373,7 +69393,7 @@ var chunk_n77gaszd_initVideo = async ({ state }) => {
     }));
   }
   if (fileType.type === "unknown") {
-    return Promise.reject(new chunk_n77gaszd_IsAnUnsupportedFileTypeError({
+    return Promise.reject(new chunk_gqesq3a3_IsAnUnsupportedFileTypeError({
       message: "Unknown file format",
       mimeType,
       sizeInBytes: contentLength,
@@ -69382,46 +69402,46 @@ var chunk_n77gaszd_initVideo = async ({ state }) => {
   }
   return Promise.reject(new Error("Unknown video format " + fileType));
 };
-var chunk_n77gaszd_runParseIteration = async ({
+var chunk_gqesq3a3_runParseIteration = async ({
   state
 }) => {
   const structure = state.structure.getStructureOrNull();
   if (structure && structure.type === "m3u") {
-    return chunk_n77gaszd_parseM3u({ state });
+    return chunk_gqesq3a3_parseM3u({ state });
   }
   if (structure === null) {
-    await chunk_n77gaszd_initVideo({
+    await chunk_gqesq3a3_initVideo({
       state
     });
     return null;
   }
   if (structure.type === "riff") {
-    return chunk_n77gaszd_parseRiff(state);
+    return chunk_gqesq3a3_parseRiff(state);
   }
   if (structure.type === "mp3") {
-    return chunk_n77gaszd_parseMp3(state);
+    return chunk_gqesq3a3_parseMp3(state);
   }
   if (structure.type === "iso-base-media") {
-    return chunk_n77gaszd_parseIsoBaseMedia(state);
+    return chunk_gqesq3a3_parseIsoBaseMedia(state);
   }
   if (structure.type === "matroska") {
-    return chunk_n77gaszd_parseWebm(state);
+    return chunk_gqesq3a3_parseWebm(state);
   }
   if (structure.type === "transport-stream") {
-    return chunk_n77gaszd_parseTransportStream(state);
+    return chunk_gqesq3a3_parseTransportStream(state);
   }
   if (structure.type === "wav") {
-    return chunk_n77gaszd_parseWav(state);
+    return chunk_gqesq3a3_parseWav(state);
   }
   if (structure.type === "aac") {
-    return chunk_n77gaszd_parseAac(state);
+    return chunk_gqesq3a3_parseAac(state);
   }
   if (structure.type === "flac") {
-    return chunk_n77gaszd_parseFlac({ state, iterator: state.iterator });
+    return chunk_gqesq3a3_parseFlac({ state, iterator: state.iterator });
   }
   return Promise.reject(new Error("Unknown video format " + structure));
 };
-var chunk_n77gaszd_fetchMoreData = async (state) => {
+var chunk_gqesq3a3_fetchMoreData = async (state) => {
   await state.controller._internals.checkForAbortAndPause();
   const result = await state.currentReader.getCurrent().reader.read();
   if (result.value) {
@@ -69429,44 +69449,44 @@ var chunk_n77gaszd_fetchMoreData = async (state) => {
   }
   return result.done;
 };
-var chunk_n77gaszd_parseLoop = async ({
+var chunk_gqesq3a3_parseLoop = async ({
   state,
   throttledState,
   onError
 }) => {
   let iterationWithThisOffset = 0;
-  while (!await chunk_n77gaszd_checkIfDone(state)) {
+  while (!await chunk_gqesq3a3_checkIfDone(state)) {
     await state.controller._internals.checkForAbortAndPause();
-    await chunk_n77gaszd_workOnSeekRequest(chunk_n77gaszd_getWorkOnSeekRequestOptions(state));
+    await chunk_gqesq3a3_workOnSeekRequest(chunk_gqesq3a3_getWorkOnSeekRequestOptions(state));
     const offsetBefore = state.iterator.counter.getOffset();
     const readStart = Date.now();
     while (state.iterator.bytesRemaining() < 0) {
-      const done = await chunk_n77gaszd_fetchMoreData(state);
+      const done = await chunk_gqesq3a3_fetchMoreData(state);
       if (done) {
         break;
       }
     }
     if (iterationWithThisOffset > 0 || state.iterator.bytesRemaining() <= 1e5) {
-      await chunk_n77gaszd_fetchMoreData(state);
+      await chunk_gqesq3a3_fetchMoreData(state);
     }
     state.timings.timeReadingData += Date.now() - readStart;
-    throttledState.update?.(() => chunk_n77gaszd_makeProgressObject(state));
+    throttledState.update?.(() => chunk_gqesq3a3_makeProgressObject(state));
     if (!state.errored) {
-      chunk_n77gaszd_Log.trace(state.logLevel, `Continuing parsing of file, currently at position ${state.iterator.counter.getOffset()}/${state.contentLength} (0x${state.iterator.counter.getOffset().toString(16)})`);
+      chunk_gqesq3a3_Log.trace(state.logLevel, `Continuing parsing of file, currently at position ${state.iterator.counter.getOffset()}/${state.contentLength} (0x${state.iterator.counter.getOffset().toString(16)})`);
       if (iterationWithThisOffset > 300 && state.structure.getStructure().type !== "m3u") {
         throw new Error("Infinite loop detected. The parser is not progressing. This is likely a bug in the parser. You can report this at https://remotion.dev/report and we will fix it as soon as possible.");
       }
       try {
-        await chunk_n77gaszd_triggerInfoEmit(state);
+        await chunk_gqesq3a3_triggerInfoEmit(state);
         await state.controller._internals.checkForAbortAndPause();
-        const result = await chunk_n77gaszd_runParseIteration({
+        const result = await chunk_gqesq3a3_runParseIteration({
           state
         });
         if (result !== null && result.action === "fetch-more-data") {
-          chunk_n77gaszd_Log.verbose(state.logLevel, `Need to fetch ${result.bytesNeeded} more bytes before we can continue`);
+          chunk_gqesq3a3_Log.verbose(state.logLevel, `Need to fetch ${result.bytesNeeded} more bytes before we can continue`);
           const startBytesRemaining = state.iterator.bytesRemaining();
           while (true) {
-            const done = await chunk_n77gaszd_fetchMoreData(state);
+            const done = await chunk_gqesq3a3_fetchMoreData(state);
             if (done) {
               break;
             }
@@ -69480,11 +69500,11 @@ var chunk_n77gaszd_parseLoop = async ({
           state.increaseSkippedBytes(result.skipTo - state.iterator.counter.getOffset());
           if (result.skipTo === state.contentLength) {
             state.iterator.discard(result.skipTo - state.iterator.counter.getOffset());
-            chunk_n77gaszd_Log.verbose(state.logLevel, "Skipped to end of file, not fetching.");
+            chunk_gqesq3a3_Log.verbose(state.logLevel, "Skipped to end of file, not fetching.");
             break;
           }
           const seekStart = Date.now();
-          await chunk_n77gaszd_performSeek({
+          await chunk_gqesq3a3_performSeek({
             seekTo: result.skipTo,
             userInitiated: false,
             controller: state.controller,
@@ -69513,7 +69533,7 @@ var chunk_n77gaszd_parseLoop = async ({
         }
         if (err.action === "download") {
           state.errored = e;
-          chunk_n77gaszd_Log.verbose(state.logLevel, "Error was handled by onError and deciding to continue.");
+          chunk_gqesq3a3_Log.verbose(state.logLevel, "Error was handled by onError and deciding to continue.");
         }
       }
     }
@@ -69530,27 +69550,27 @@ var chunk_n77gaszd_parseLoop = async ({
   state.samplesObserved.setLastSampleObserved();
   await state.callbacks.callTracksDoneCallback();
   if (state.controller._internals.seekSignal.getSeek() !== null) {
-    chunk_n77gaszd_Log.verbose(state.logLevel, "Reached end of samples, but there is a pending seek. Trying to seek...");
-    await chunk_n77gaszd_workOnSeekRequest(chunk_n77gaszd_getWorkOnSeekRequestOptions(state));
+    chunk_gqesq3a3_Log.verbose(state.logLevel, "Reached end of samples, but there is a pending seek. Trying to seek...");
+    await chunk_gqesq3a3_workOnSeekRequest(chunk_gqesq3a3_getWorkOnSeekRequestOptions(state));
     if (state.controller._internals.seekSignal.getSeek() !== null) {
       throw new Error("Reached the end of the file even though a seek was requested. This is likely a bug in the parser. You can report this at https://remotion.dev/report and we will fix it as soon as possible.");
     }
-    await chunk_n77gaszd_parseLoop({
+    await chunk_gqesq3a3_parseLoop({
       onError,
       throttledState,
       state
     });
   }
 };
-var chunk_n77gaszd_printTimings = (state) => {
-  chunk_n77gaszd_Log.verbose(state.logLevel, `Time iterating over file: ${state.timings.timeIterating}ms`);
-  chunk_n77gaszd_Log.verbose(state.logLevel, `Time fetching data: ${state.timings.timeReadingData}ms`);
-  chunk_n77gaszd_Log.verbose(state.logLevel, `Time seeking: ${state.timings.timeSeeking}ms`);
-  chunk_n77gaszd_Log.verbose(state.logLevel, `Time checking if done: ${state.timings.timeCheckingIfDone}ms`);
-  chunk_n77gaszd_Log.verbose(state.logLevel, `Time freeing data: ${state.timings.timeFreeingData}ms`);
+var chunk_gqesq3a3_printTimings = (state) => {
+  chunk_gqesq3a3_Log.verbose(state.logLevel, `Time iterating over file: ${state.timings.timeIterating}ms`);
+  chunk_gqesq3a3_Log.verbose(state.logLevel, `Time fetching data: ${state.timings.timeReadingData}ms`);
+  chunk_gqesq3a3_Log.verbose(state.logLevel, `Time seeking: ${state.timings.timeSeeking}ms`);
+  chunk_gqesq3a3_Log.verbose(state.logLevel, `Time checking if done: ${state.timings.timeCheckingIfDone}ms`);
+  chunk_gqesq3a3_Log.verbose(state.logLevel, `Time freeing data: ${state.timings.timeFreeingData}ms`);
 };
-var chunk_n77gaszd_warningShown = false;
-var chunk_n77gaszd_warnIfRemotionLicenseNotAcknowledged = ({
+var chunk_gqesq3a3_warningShown = false;
+var chunk_gqesq3a3_warnIfRemotionLicenseNotAcknowledged = ({
   acknowledgeRemotionLicense,
   logLevel,
   apiName
@@ -69558,47 +69578,47 @@ var chunk_n77gaszd_warnIfRemotionLicenseNotAcknowledged = ({
   if (acknowledgeRemotionLicense) {
     return;
   }
-  if (chunk_n77gaszd_warningShown) {
+  if (chunk_gqesq3a3_warningShown) {
     return;
   }
-  chunk_n77gaszd_warningShown = true;
-  chunk_n77gaszd_Log.warn(logLevel, `Note: Some companies are required to obtain a license to use @remotion/media-parser. See: https://remotion.dev/license
+  chunk_gqesq3a3_warningShown = true;
+  chunk_gqesq3a3_Log.warn(logLevel, `Note: Some companies are required to obtain a license to use @remotion/media-parser. See: https://remotion.dev/license
 Pass \`acknowledgeRemotionLicense: true\` to \`${apiName}\` function to make this message disappear.`);
 };
-var chunk_n77gaszd_setSeekingHints = ({
+var chunk_gqesq3a3_setSeekingHints = ({
   hints,
   state
 }) => {
   if (hints.type === "iso-base-media-seeking-hints") {
-    chunk_n77gaszd_setSeekingHintsForMp4({ hints, state });
+    chunk_gqesq3a3_setSeekingHintsForMp4({ hints, state });
     return;
   }
   if (hints.type === "wav-seeking-hints") {
-    chunk_n77gaszd_setSeekingHintsForWav({ hints, state });
+    chunk_gqesq3a3_setSeekingHintsForWav({ hints, state });
     return;
   }
   if (hints.type === "transport-stream-seeking-hints") {
-    chunk_n77gaszd_setSeekingHintsForTransportStream({ hints, state });
+    chunk_gqesq3a3_setSeekingHintsForTransportStream({ hints, state });
     return;
   }
   if (hints.type === "webm-seeking-hints") {
-    chunk_n77gaszd_setSeekingHintsForWebm({ hints, state });
+    chunk_gqesq3a3_setSeekingHintsForWebm({ hints, state });
     return;
   }
   if (hints.type === "flac-seeking-hints") {
-    chunk_n77gaszd_setSeekingHintsForFlac({ hints, state });
+    chunk_gqesq3a3_setSeekingHintsForFlac({ hints, state });
     return;
   }
   if (hints.type === "riff-seeking-hints") {
-    chunk_n77gaszd_setSeekingHintsForRiff({ hints, state });
+    chunk_gqesq3a3_setSeekingHintsForRiff({ hints, state });
     return;
   }
   if (hints.type === "mp3-seeking-hints") {
-    chunk_n77gaszd_setSeekingHintsForMp3({ hints, state });
+    chunk_gqesq3a3_setSeekingHintsForMp3({ hints, state });
     return;
   }
   if (hints.type === "aac-seeking-hints") {
-    chunk_n77gaszd_setSeekingHintsForAac();
+    chunk_gqesq3a3_setSeekingHintsForAac();
     return;
   }
   if (hints.type === "m3u8-seeking-hints") {
@@ -69606,7 +69626,7 @@ var chunk_n77gaszd_setSeekingHints = ({
   }
   throw new Error(`Unknown seeking hints type: ${hints}`);
 };
-var chunk_n77gaszd_getFieldsFromCallback = ({
+var chunk_gqesq3a3_getFieldsFromCallback = ({
   fields,
   callbacks
 }) => {
@@ -69643,7 +69663,7 @@ var chunk_n77gaszd_getFieldsFromCallback = ({
   };
   return newFields;
 };
-var chunk_n77gaszd_audioSampleMapState = () => {
+var chunk_gqesq3a3_audioSampleMapState = () => {
   let map = [];
   const addSample = (audioSampleOffset) => {
     if (map.find((m) => m.offset === audioSampleOffset.offset)) {
@@ -69659,9 +69679,9 @@ var chunk_n77gaszd_audioSampleMapState = () => {
     }
   };
 };
-var chunk_n77gaszd_aacState = () => {
+var chunk_gqesq3a3_aacState = () => {
   const samples = [];
-  const audioSamples = chunk_n77gaszd_audioSampleMapState();
+  const audioSamples = chunk_gqesq3a3_audioSampleMapState();
   return {
     addSample: ({ offset, size: size4 }) => {
       const index = samples.findIndex((s) => s.offset === offset);
@@ -69675,7 +69695,7 @@ var chunk_n77gaszd_aacState = () => {
     audioSamples
   };
 };
-var chunk_n77gaszd_maxMacroblocksByLevel = {
+var chunk_gqesq3a3_maxMacroblocksByLevel = {
   10: 396,
   11: 900,
   12: 2376,
@@ -69696,19 +69716,19 @@ var chunk_n77gaszd_maxMacroblocksByLevel = {
   61: 696320,
   62: 696320
 };
-var chunk_n77gaszd_macroBlocksPerFrame = (sps) => {
+var chunk_gqesq3a3_macroBlocksPerFrame = (sps) => {
   const { pic_width_in_mbs_minus1, pic_height_in_map_units_minus1 } = sps;
   return (pic_width_in_mbs_minus1 + 1) * (pic_height_in_map_units_minus1 + 1);
 };
-var chunk_n77gaszd_maxMacroblockBufferSize = (sps) => {
+var chunk_gqesq3a3_maxMacroblockBufferSize = (sps) => {
   const { level } = sps;
-  const maxMacroblocks = chunk_n77gaszd_maxMacroblocksByLevel[level];
+  const maxMacroblocks = chunk_gqesq3a3_maxMacroblocksByLevel[level];
   if (maxMacroblocks === undefined) {
     throw new Error(`Unsupported level: ${level.toString(16)}`);
   }
   return maxMacroblocks;
 };
-var chunk_n77gaszd_avcState = () => {
+var chunk_gqesq3a3_avcState = () => {
   let prevPicOrderCntLsb = 0;
   let prevPicOrderCntMsb = 0;
   let sps = null;
@@ -69727,8 +69747,8 @@ var chunk_n77gaszd_avcState = () => {
       prevPicOrderCntMsb = value;
     },
     setSps(value) {
-      const macroblockBufferSize = chunk_n77gaszd_macroBlocksPerFrame(value);
-      const maxBufferSize = chunk_n77gaszd_maxMacroblockBufferSize(value);
+      const macroblockBufferSize = chunk_gqesq3a3_macroBlocksPerFrame(value);
+      const maxBufferSize = chunk_gqesq3a3_maxMacroblockBufferSize(value);
       const maxFrames = Math.min(16, Math.floor(maxBufferSize / macroblockBufferSize));
       maxFramesInBuffer = maxFrames;
       sps = value;
@@ -69747,7 +69767,7 @@ var chunk_n77gaszd_avcState = () => {
     }
   };
 };
-var chunk_n77gaszd_currentReader = (initialReader) => {
+var chunk_gqesq3a3_currentReader = (initialReader) => {
   let current = initialReader;
   return {
     getCurrent: () => current,
@@ -69756,7 +69776,7 @@ var chunk_n77gaszd_currentReader = (initialReader) => {
     }
   };
 };
-var chunk_n77gaszd_emittedState = () => {
+var chunk_gqesq3a3_emittedState = () => {
   const emittedFields = {
     audioCodec: false,
     container: false,
@@ -69789,9 +69809,9 @@ var chunk_n77gaszd_emittedState = () => {
   };
   return emittedFields;
 };
-var chunk_n77gaszd_flacState = () => {
+var chunk_gqesq3a3_flacState = () => {
   let blockingBitStrategy;
-  const audioSamples = chunk_n77gaszd_audioSampleMapState();
+  const audioSamples = chunk_gqesq3a3_audioSampleMapState();
   return {
     setBlockingBitStrategy: (strategy) => {
       blockingBitStrategy = strategy;
@@ -69800,7 +69820,7 @@ var chunk_n77gaszd_flacState = () => {
     audioSamples
   };
 };
-var chunk_n77gaszd_imagesState = () => {
+var chunk_gqesq3a3_imagesState = () => {
   const images = [];
   const addImage = (image) => {
     images.push(image);
@@ -69810,7 +69830,7 @@ var chunk_n77gaszd_imagesState = () => {
     addImage
   };
 };
-var chunk_n77gaszd_getMfraAtom = async ({
+var chunk_gqesq3a3_getMfraAtom = async ({
   src,
   contentLength,
   readerInterface,
@@ -69826,7 +69846,7 @@ var chunk_n77gaszd_getMfraAtom = async ({
     logLevel,
     prefetchCache
   });
-  const iterator = chunk_n77gaszd_getArrayBufferIterator({
+  const iterator = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: new Uint8Array,
     maxBytes: parentSize,
     logLevel: "error"
@@ -69842,7 +69862,7 @@ var chunk_n77gaszd_getMfraAtom = async ({
   }
   return iterator;
 };
-var chunk_n77gaszd_getMfroAtom = async ({
+var chunk_gqesq3a3_getMfroAtom = async ({
   src,
   contentLength,
   readerInterface,
@@ -69862,7 +69882,7 @@ var chunk_n77gaszd_getMfroAtom = async ({
     return null;
   }
   result.reader.abort();
-  const iterator = chunk_n77gaszd_getArrayBufferIterator({
+  const iterator = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: value,
     maxBytes: value.length,
     logLevel: "error"
@@ -69887,7 +69907,7 @@ var chunk_n77gaszd_getMfroAtom = async ({
   iterator.destroy();
   return parentSize;
 };
-var chunk_n77gaszd_getMfraSeekingBox = async ({
+var chunk_gqesq3a3_getMfraSeekingBox = async ({
   contentLength,
   controller,
   readerInterface,
@@ -69895,7 +69915,7 @@ var chunk_n77gaszd_getMfraSeekingBox = async ({
   logLevel,
   prefetchCache
 }) => {
-  const parentSize = await chunk_n77gaszd_getMfroAtom({
+  const parentSize = await chunk_gqesq3a3_getMfroAtom({
     contentLength,
     controller,
     readerInterface,
@@ -69906,7 +69926,7 @@ var chunk_n77gaszd_getMfraSeekingBox = async ({
   if (!parentSize) {
     return null;
   }
-  const mfraAtom = await chunk_n77gaszd_getMfraAtom({
+  const mfraAtom = await chunk_gqesq3a3_getMfraAtom({
     contentLength,
     controller,
     readerInterface,
@@ -69916,7 +69936,7 @@ var chunk_n77gaszd_getMfraSeekingBox = async ({
     prefetchCache
   });
   mfraAtom.discard(8);
-  return chunk_n77gaszd_getIsoBaseMediaChildren({
+  return chunk_gqesq3a3_getIsoBaseMediaChildren({
     iterator: mfraAtom,
     logLevel,
     size: parentSize - 8,
@@ -69924,7 +69944,7 @@ var chunk_n77gaszd_getMfraSeekingBox = async ({
     contentLength
   });
 };
-var chunk_n77gaszd_lazyMfraLoad = ({
+var chunk_gqesq3a3_lazyMfraLoad = ({
   contentLength,
   controller,
   readerInterface,
@@ -69938,8 +69958,8 @@ var chunk_n77gaszd_lazyMfraLoad = ({
     if (prom) {
       return prom;
     }
-    chunk_n77gaszd_Log.verbose(logLevel, "Moof box found, trying to lazy load mfra");
-    prom = chunk_n77gaszd_getMfraSeekingBox({
+    chunk_gqesq3a3_Log.verbose(logLevel, "Moof box found, trying to lazy load mfra");
+    prom = chunk_gqesq3a3_getMfraSeekingBox({
       contentLength,
       controller,
       readerInterface,
@@ -69947,7 +69967,7 @@ var chunk_n77gaszd_lazyMfraLoad = ({
       logLevel,
       prefetchCache
     }).then((boxes) => {
-      chunk_n77gaszd_Log.verbose(logLevel, boxes ? "Lazily found mfra atom." : "No mfra atom found.");
+      chunk_gqesq3a3_Log.verbose(logLevel, boxes ? "Lazily found mfra atom." : "No mfra atom found.");
       result = boxes;
       return boxes;
     });
@@ -69968,7 +69988,7 @@ var chunk_n77gaszd_lazyMfraLoad = ({
     setFromSeekingHints
   };
 };
-var chunk_n77gaszd_moovState = () => {
+var chunk_gqesq3a3_moovState = () => {
   let moovBox = null;
   return {
     setMoovBox: (moov) => {
@@ -69977,7 +69997,7 @@ var chunk_n77gaszd_moovState = () => {
     getMoovBoxAndPrecomputed: () => moovBox
   };
 };
-var chunk_n77gaszd_movieTimeScaleState = () => {
+var chunk_gqesq3a3_movieTimeScaleState = () => {
   let trackTimescale = null;
   return {
     getTrackTimescale: () => trackTimescale,
@@ -69986,7 +70006,7 @@ var chunk_n77gaszd_movieTimeScaleState = () => {
     }
   };
 };
-var chunk_n77gaszd_isoBaseMediaState = ({
+var chunk_gqesq3a3_isoBaseMediaState = ({
   contentLength,
   controller,
   readerInterface,
@@ -69995,9 +70015,9 @@ var chunk_n77gaszd_isoBaseMediaState = ({
   prefetchCache
 }) => {
   return {
-    flatSamples: chunk_n77gaszd_cachedSamplePositionsState(),
-    moov: chunk_n77gaszd_moovState(),
-    mfra: chunk_n77gaszd_lazyMfraLoad({
+    flatSamples: chunk_gqesq3a3_cachedSamplePositionsState(),
+    moov: chunk_gqesq3a3_moovState(),
+    mfra: chunk_gqesq3a3_lazyMfraLoad({
       contentLength,
       controller,
       readerInterface,
@@ -70005,12 +70025,12 @@ var chunk_n77gaszd_isoBaseMediaState = ({
       logLevel,
       prefetchCache
     }),
-    moof: chunk_n77gaszd_precomputedMoofState(),
-    tfra: chunk_n77gaszd_precomputedTfraState(),
-    movieTimeScale: chunk_n77gaszd_movieTimeScaleState()
+    moof: chunk_gqesq3a3_precomputedMoofState(),
+    tfra: chunk_gqesq3a3_precomputedTfraState(),
+    movieTimeScale: chunk_gqesq3a3_movieTimeScaleState()
   };
 };
-var chunk_n77gaszd_keyframesState = () => {
+var chunk_gqesq3a3_keyframesState = () => {
   const keyframes = [];
   const addKeyframe = (keyframe) => {
     if (keyframes.find((k) => k.positionInBytes === keyframe.positionInBytes)) {
@@ -70033,7 +70053,7 @@ var chunk_n77gaszd_keyframesState = () => {
     setFromSeekingHints
   };
 };
-var chunk_n77gaszd_sampleSorter = ({
+var chunk_gqesq3a3_sampleSorter = ({
   logLevel,
   getAllChunksProcessedForPlaylist
 }) => {
@@ -70082,7 +70102,7 @@ var chunk_n77gaszd_sampleSorter = ({
           continue;
         }
         if (!streamsWithTracks.includes(stream)) {
-          chunk_n77gaszd_Log.trace(logLevel, `Did not yet detect track of ${stream}, working on that`);
+          chunk_gqesq3a3_Log.trace(logLevel, `Did not yet detect track of ${stream}, working on that`);
           return stream;
         }
       }
@@ -70100,7 +70120,7 @@ var chunk_n77gaszd_sampleSorter = ({
           continue;
         }
         if ((latestSample[stream] ?? 0) === smallestDts) {
-          chunk_n77gaszd_Log.trace(logLevel, `Working on ${stream} because it has the smallest DTS`);
+          chunk_gqesq3a3_Log.trace(logLevel, `Working on ${stream} because it has the smallest DTS`);
           return stream;
         }
       }
@@ -70108,7 +70128,7 @@ var chunk_n77gaszd_sampleSorter = ({
     }
   };
 };
-var chunk_n77gaszd_m3uState = (logLevel) => {
+var chunk_gqesq3a3_m3uState = (logLevel) => {
   let selectedMainPlaylist = null;
   let associatedPlaylists = null;
   const hasEmittedVideoTrack = {};
@@ -70221,7 +70241,7 @@ var chunk_n77gaszd_m3uState = (logLevel) => {
       if (values.length === 0) {
         return;
       }
-      chunk_n77gaszd_Log.trace(logLevel, `Aborting ${values.length} M3U stream runs`);
+      chunk_gqesq3a3_Log.trace(logLevel, `Aborting ${values.length} M3U stream runs`);
       values.forEach((run) => {
         run.abort();
       });
@@ -70231,7 +70251,7 @@ var chunk_n77gaszd_m3uState = (logLevel) => {
     },
     getAssociatedPlaylists: () => associatedPlaylists,
     getSelectedPlaylists,
-    sampleSorter: chunk_n77gaszd_sampleSorter({ logLevel, getAllChunksProcessedForPlaylist }),
+    sampleSorter: chunk_gqesq3a3_sampleSorter({ logLevel, getAllChunksProcessedForPlaylist }),
     setMp4HeaderSegment,
     getMp4HeaderSegment,
     setSeekToSecondsToProcess: (playlistUrl, m3uSeek) => {
@@ -70244,7 +70264,7 @@ var chunk_n77gaszd_m3uState = (logLevel) => {
     getNextSeekShouldSubtractChunks: (playlistUrl) => nextSeekShouldSubtractChunks[playlistUrl] ?? 0
   };
 };
-var chunk_n77gaszd_formatCues = (cues) => {
+var chunk_gqesq3a3_formatCues = (cues) => {
   const matroskaCues = [];
   for (const cue of cues) {
     if (cue.type === "Crc32") {
@@ -70281,7 +70301,7 @@ var chunk_n77gaszd_formatCues = (cues) => {
   }
   return matroskaCues;
 };
-var chunk_n77gaszd_fetchWebmCues = async ({
+var chunk_gqesq3a3_fetchWebmCues = async ({
   src,
   readerInterface,
   controller,
@@ -70301,12 +70321,12 @@ var chunk_n77gaszd_fetchWebmCues = async ({
     return null;
   }
   result.reader.abort();
-  const iterator = chunk_n77gaszd_getArrayBufferIterator({
+  const iterator = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: value,
     maxBytes: value.length,
     logLevel: "error"
   });
-  const segment = await chunk_n77gaszd_expectSegment({
+  const segment = await chunk_gqesq3a3_expectSegment({
     iterator,
     logLevel,
     statesForProcessing: null,
@@ -70317,9 +70337,9 @@ var chunk_n77gaszd_fetchWebmCues = async ({
   if (!segment?.value) {
     return null;
   }
-  return chunk_n77gaszd_formatCues(segment.value);
+  return chunk_gqesq3a3_formatCues(segment.value);
 };
-var chunk_n77gaszd_lazyCuesFetch = ({
+var chunk_gqesq3a3_lazyCuesFetch = ({
   controller,
   logLevel,
   readerInterface,
@@ -70340,8 +70360,8 @@ var chunk_n77gaszd_lazyCuesFetch = ({
       throw new Error("Segment offset mismatch");
     }
     sOffset = segmentOffset;
-    chunk_n77gaszd_Log.verbose(logLevel, "Cues box found, trying to lazy load cues");
-    prom = chunk_n77gaszd_fetchWebmCues({
+    chunk_gqesq3a3_Log.verbose(logLevel, "Cues box found, trying to lazy load cues");
+    prom = chunk_gqesq3a3_fetchWebmCues({
       controller,
       logLevel,
       position,
@@ -70349,7 +70369,7 @@ var chunk_n77gaszd_lazyCuesFetch = ({
       src,
       prefetchCache
     }).then((cues) => {
-      chunk_n77gaszd_Log.verbose(logLevel, "Cues loaded");
+      chunk_gqesq3a3_Log.verbose(logLevel, "Cues loaded");
       result = cues;
       return cues;
     });
@@ -70403,7 +70423,7 @@ var chunk_n77gaszd_lazyCuesFetch = ({
     setFromSeekingHints
   };
 };
-var chunk_n77gaszd_webmState = ({
+var chunk_gqesq3a3_webmState = ({
   controller,
   logLevel,
   readerInterface,
@@ -70412,18 +70432,18 @@ var chunk_n77gaszd_webmState = ({
 }) => {
   const trackEntries = {};
   const onTrackEntrySegment = (trackEntry2) => {
-    const trackId = chunk_n77gaszd_getTrackId(trackEntry2);
+    const trackId = chunk_gqesq3a3_getTrackId(trackEntry2);
     if (!trackId) {
       throw new Error("Expected track id");
     }
     if (trackEntries[trackId]) {
       return;
     }
-    const codec = chunk_n77gaszd_getTrackCodec(trackEntry2);
+    const codec = chunk_gqesq3a3_getTrackCodec(trackEntry2);
     if (!codec) {
       throw new Error("Expected codec");
     }
-    const trackTimescale = chunk_n77gaszd_getTrackTimestampScale(trackEntry2);
+    const trackTimescale = chunk_gqesq3a3_getTrackTimestampScale(trackEntry2);
     trackEntries[trackId] = {
       codec: codec.value,
       trackTimescale: trackTimescale?.value ?? null
@@ -70465,7 +70485,7 @@ var chunk_n77gaszd_webmState = ({
   const getAvcProfileForTrackNumber = (trackNumber2) => {
     return avcProfilesMap[trackNumber2] ?? null;
   };
-  const cues = chunk_n77gaszd_lazyCuesFetch({
+  const cues = chunk_gqesq3a3_lazyCuesFetch({
     controller,
     logLevel,
     readerInterface,
@@ -70526,10 +70546,10 @@ var chunk_n77gaszd_webmState = ({
     getAvcProfileForTrackNumber
   };
 };
-var chunk_n77gaszd_makeMp3State = () => {
+var chunk_gqesq3a3_makeMp3State = () => {
   let mp3Info = null;
   let bitrateInfo = null;
-  const audioSamples = chunk_n77gaszd_audioSampleMapState();
+  const audioSamples = chunk_gqesq3a3_audioSampleMapState();
   return {
     getMp3Info: () => mp3Info,
     setMp3Info: (info) => {
@@ -70542,7 +70562,7 @@ var chunk_n77gaszd_makeMp3State = () => {
     audioSamples
   };
 };
-var chunk_n77gaszd_fetchIdx1 = async ({
+var chunk_gqesq3a3_fetchIdx1 = async ({
   src,
   readerInterface,
   controller,
@@ -70551,7 +70571,7 @@ var chunk_n77gaszd_fetchIdx1 = async ({
   prefetchCache,
   contentLength
 }) => {
-  chunk_n77gaszd_Log.verbose(logLevel, "Making request to fetch idx1 from ", src, "position", position);
+  chunk_gqesq3a3_Log.verbose(logLevel, "Making request to fetch idx1 from ", src, "position", position);
   const result = await readerInterface.read({
     controller,
     range: position,
@@ -70562,7 +70582,7 @@ var chunk_n77gaszd_fetchIdx1 = async ({
   if (result.contentLength === null) {
     throw new Error("Content length is null");
   }
-  const iterator = chunk_n77gaszd_getArrayBufferIterator({
+  const iterator = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: new Uint8Array,
     maxBytes: contentLength - position + 1,
     logLevel: "error"
@@ -70576,7 +70596,7 @@ var chunk_n77gaszd_fetchIdx1 = async ({
       break;
     }
   }
-  const box2 = await chunk_n77gaszd_expectRiffBox({
+  const box2 = await chunk_gqesq3a3_expectRiffBox({
     iterator,
     stateIfExpectingSideEffects: null
   });
@@ -70589,7 +70609,7 @@ var chunk_n77gaszd_fetchIdx1 = async ({
     videoTrackIndex: box2.videoTrackIndex
   };
 };
-var chunk_n77gaszd_lazyIdx1Fetch = ({
+var chunk_gqesq3a3_lazyIdx1Fetch = ({
   controller,
   logLevel,
   readerInterface,
@@ -70606,7 +70626,7 @@ var chunk_n77gaszd_lazyIdx1Fetch = ({
     if (prom) {
       return prom;
     }
-    prom = chunk_n77gaszd_fetchIdx1({
+    prom = chunk_gqesq3a3_fetchIdx1({
       controller,
       logLevel,
       position,
@@ -70656,7 +70676,7 @@ var chunk_n77gaszd_lazyIdx1Fetch = ({
     waitForLoaded
   };
 };
-var chunk_n77gaszd_queuedBFramesState = () => {
+var chunk_gqesq3a3_queuedBFramesState = () => {
   const queuedFrames = [];
   const releasedFrames = [];
   const flush = () => {
@@ -70696,7 +70716,7 @@ var chunk_n77gaszd_queuedBFramesState = () => {
     }
   };
 };
-var chunk_n77gaszd_riffKeyframesState = () => {
+var chunk_gqesq3a3_riffKeyframesState = () => {
   const keyframes = [];
   const addKeyframe = (keyframe) => {
     if (keyframes.find((k) => k.positionInBytes === keyframe.positionInBytes)) {
@@ -70719,10 +70739,10 @@ var chunk_n77gaszd_riffKeyframesState = () => {
     setFromSeekingHints
   };
 };
-var chunk_n77gaszd_riffSampleCounter = () => {
+var chunk_gqesq3a3_riffSampleCounter = () => {
   const samplesForTrack = {};
   const pocsAtKeyframeOffset = {};
-  const riffKeys = chunk_n77gaszd_riffKeyframesState();
+  const riffKeys = chunk_gqesq3a3_riffKeyframesState();
   const onAudioSample = (trackId, audioSample) => {
     if (typeof samplesForTrack[trackId] === "undefined") {
       samplesForTrack[trackId] = 0;
@@ -70742,9 +70762,9 @@ var chunk_n77gaszd_riffSampleCounter = () => {
     if (videoSample.type === "key") {
       riffKeys.addKeyframe({
         trackId,
-        decodingTimeInSeconds: videoSample.decodingTimestamp / chunk_n77gaszd_WEBCODECS_TIMESCALE,
+        decodingTimeInSeconds: videoSample.decodingTimestamp / chunk_gqesq3a3_WEBCODECS_TIMESCALE,
         positionInBytes: videoSample.offset,
-        presentationTimeInSeconds: videoSample.timestamp / chunk_n77gaszd_WEBCODECS_TIMESCALE,
+        presentationTimeInSeconds: videoSample.timestamp / chunk_gqesq3a3_WEBCODECS_TIMESCALE,
         sizeInBytes: videoSample.data.length,
         sampleCounts: { ...samplesForTrack }
       });
@@ -70796,7 +70816,7 @@ var chunk_n77gaszd_riffSampleCounter = () => {
     getKeyframeAtOffset
   };
 };
-var chunk_n77gaszd_riffSpecificState = ({
+var chunk_gqesq3a3_riffSpecificState = ({
   controller,
   logLevel,
   readerInterface,
@@ -70817,7 +70837,7 @@ var chunk_n77gaszd_riffSpecificState = ({
     }
     profileCallbacks.length = 0;
   };
-  const lazyIdx1 = chunk_n77gaszd_lazyIdx1Fetch({
+  const lazyIdx1 = chunk_gqesq3a3_lazyIdx1Fetch({
     controller,
     logLevel,
     readerInterface,
@@ -70825,8 +70845,8 @@ var chunk_n77gaszd_riffSpecificState = ({
     prefetchCache,
     contentLength
   });
-  const sampleCounter = chunk_n77gaszd_riffSampleCounter();
-  const queuedBFrames = chunk_n77gaszd_queuedBFramesState();
+  const sampleCounter = chunk_gqesq3a3_riffSampleCounter();
+  const queuedBFrames = chunk_gqesq3a3_queuedBFramesState();
   return {
     getAvcProfile: () => {
       return avcProfile;
@@ -70844,7 +70864,7 @@ var chunk_n77gaszd_riffSpecificState = ({
     sampleCounter
   };
 };
-var chunk_n77gaszd_callbacksState = ({
+var chunk_gqesq3a3_callbacksState = ({
   controller,
   hasAudioTrackHandlers,
   hasVideoTrackHandlers,
@@ -70862,13 +70882,13 @@ var chunk_n77gaszd_callbacksState = ({
   const onTrackDoneCallback = {};
   const queuedAudioSamples = {};
   const queuedVideoSamples = {};
-  const canSkipTracksState = chunk_n77gaszd_makeCanSkipTracksState({
+  const canSkipTracksState = chunk_gqesq3a3_makeCanSkipTracksState({
     hasAudioTrackHandlers,
     fields,
     hasVideoTrackHandlers,
     structure
   });
-  const tracksState = chunk_n77gaszd_makeTracksSectionState(canSkipTracksState, src);
+  const tracksState = chunk_gqesq3a3_makeTracksSectionState(canSkipTracksState, src);
   return {
     registerVideoSampleCallback: async (id, callback) => {
       if (callback === null) {
@@ -70892,14 +70912,14 @@ var chunk_n77gaszd_callbacksState = ({
       if (audioSample.data.length > 0) {
         if (callback) {
           if (seekSignal.getSeek() !== null) {
-            chunk_n77gaszd_Log.trace(logLevel, "Not emitting sample because seek is processing");
+            chunk_gqesq3a3_Log.trace(logLevel, "Not emitting sample because seek is processing");
           } else {
             const trackDoneCallback = await callback(audioSample);
             onTrackDoneCallback[trackId] = trackDoneCallback ?? null;
           }
         }
       }
-      if (chunk_n77gaszd_needsToIterateOverSamples({ emittedFields, fields })) {
+      if (chunk_gqesq3a3_needsToIterateOverSamples({ emittedFields, fields })) {
         samplesObserved.addAudioSample(audioSample);
       }
     },
@@ -70914,7 +70934,7 @@ var chunk_n77gaszd_callbacksState = ({
         const callback = videoSampleCallbacks[trackId];
         if (callback) {
           if (seekSignal.getSeek() !== null) {
-            chunk_n77gaszd_Log.trace(logLevel, "Not emitting sample because seek is processing");
+            chunk_gqesq3a3_Log.trace(logLevel, "Not emitting sample because seek is processing");
           } else {
             const trackDoneCallback = await callback(videoSample);
             onTrackDoneCallback[trackId] = trackDoneCallback ?? null;
@@ -70924,13 +70944,13 @@ var chunk_n77gaszd_callbacksState = ({
       if (videoSample.type === "key") {
         keyframes.addKeyframe({
           trackId,
-          decodingTimeInSeconds: videoSample.decodingTimestamp / chunk_n77gaszd_WEBCODECS_TIMESCALE,
+          decodingTimeInSeconds: videoSample.decodingTimestamp / chunk_gqesq3a3_WEBCODECS_TIMESCALE,
           positionInBytes: videoSample.offset,
-          presentationTimeInSeconds: videoSample.timestamp / chunk_n77gaszd_WEBCODECS_TIMESCALE,
+          presentationTimeInSeconds: videoSample.timestamp / chunk_gqesq3a3_WEBCODECS_TIMESCALE,
           sizeInBytes: videoSample.data.length
         });
       }
-      if (chunk_n77gaszd_needsToIterateOverSamples({
+      if (chunk_gqesq3a3_needsToIterateOverSamples({
         fields,
         emittedFields
       })) {
@@ -70963,7 +70983,7 @@ var chunk_n77gaszd_callbacksState = ({
     }
   };
 };
-var chunk_n77gaszd_samplesObservedState = () => {
+var chunk_gqesq3a3_samplesObservedState = () => {
   let smallestVideoSample;
   let largestVideoSample;
   let smallestAudioSample;
@@ -70987,8 +71007,8 @@ var chunk_n77gaszd_samplesObservedState = () => {
   };
   const addVideoSample = (videoSample) => {
     videoSamples.set(videoSample.timestamp, videoSample.data.byteLength);
-    const presentationTimeInSeconds = videoSample.timestamp / chunk_n77gaszd_WEBCODECS_TIMESCALE;
-    const duration2 = (videoSample.duration ?? 0) / chunk_n77gaszd_WEBCODECS_TIMESCALE;
+    const presentationTimeInSeconds = videoSample.timestamp / chunk_gqesq3a3_WEBCODECS_TIMESCALE;
+    const duration2 = (videoSample.duration ?? 0) / chunk_gqesq3a3_WEBCODECS_TIMESCALE;
     if (largestVideoSample === undefined || presentationTimeInSeconds > largestVideoSample) {
       largestVideoSample = presentationTimeInSeconds + duration2;
     }
@@ -70998,8 +71018,8 @@ var chunk_n77gaszd_samplesObservedState = () => {
   };
   const addAudioSample = (audioSample) => {
     audioSamples.set(audioSample.timestamp, audioSample.data.byteLength);
-    const presentationTimeInSeconds = audioSample.timestamp / chunk_n77gaszd_WEBCODECS_TIMESCALE;
-    const duration2 = (audioSample.duration ?? 0) / chunk_n77gaszd_WEBCODECS_TIMESCALE;
+    const presentationTimeInSeconds = audioSample.timestamp / chunk_gqesq3a3_WEBCODECS_TIMESCALE;
+    const duration2 = (audioSample.duration ?? 0) / chunk_gqesq3a3_WEBCODECS_TIMESCALE;
     if (largestAudioSample === undefined || presentationTimeInSeconds > largestAudioSample) {
       largestAudioSample = presentationTimeInSeconds + duration2;
     }
@@ -71048,7 +71068,7 @@ var chunk_n77gaszd_samplesObservedState = () => {
     getAmountOfSamplesObserved: () => videoSamples.size + audioSamples.size
   };
 };
-var chunk_n77gaszd_seekInfiniteLoopDetectionState = () => {
+var chunk_gqesq3a3_seekInfiniteLoopDetectionState = () => {
   let lastSeek = null;
   let firstSeekTime = null;
   return {
@@ -71074,7 +71094,7 @@ var chunk_n77gaszd_seekInfiniteLoopDetectionState = () => {
     }
   };
 };
-var chunk_n77gaszd_timingsState = () => {
+var chunk_gqesq3a3_timingsState = () => {
   return {
     timeIterating: 0,
     timeReadingData: 0,
@@ -71083,7 +71103,7 @@ var chunk_n77gaszd_timingsState = () => {
     timeFreeingData: 0
   };
 };
-var chunk_n77gaszd_lastEmittedSampleState = () => {
+var chunk_gqesq3a3_lastEmittedSampleState = () => {
   let lastEmittedSample = null;
   return {
     setLastEmittedSample: (sample) => {
@@ -71095,7 +71115,7 @@ var chunk_n77gaszd_lastEmittedSampleState = () => {
     }
   };
 };
-var chunk_n77gaszd_makeNextPesHeaderStore = () => {
+var chunk_gqesq3a3_makeNextPesHeaderStore = () => {
   let nextPesHeader = null;
   return {
     setNextPesHeader: (pesHeader) => {
@@ -71109,7 +71129,7 @@ var chunk_n77gaszd_makeNextPesHeaderStore = () => {
     }
   };
 };
-var chunk_n77gaszd_ptsStartOffsetStore = () => {
+var chunk_gqesq3a3_ptsStartOffsetStore = () => {
   const offsets = {};
   return {
     getOffset: (trackId) => offsets[trackId] || 0,
@@ -71118,24 +71138,24 @@ var chunk_n77gaszd_ptsStartOffsetStore = () => {
     }
   };
 };
-var chunk_n77gaszd_transportStreamState = () => {
+var chunk_gqesq3a3_transportStreamState = () => {
   const streamBuffers = new Map;
-  const startOffset = chunk_n77gaszd_ptsStartOffsetStore();
-  const lastEmittedSample = chunk_n77gaszd_lastEmittedSampleState();
+  const startOffset = chunk_gqesq3a3_ptsStartOffsetStore();
+  const lastEmittedSample = chunk_gqesq3a3_lastEmittedSampleState();
   const state = {
-    nextPesHeaderStore: chunk_n77gaszd_makeNextPesHeaderStore(),
-    observedPesHeaders: chunk_n77gaszd_makeObservedPesHeader(),
+    nextPesHeaderStore: chunk_gqesq3a3_makeNextPesHeaderStore(),
+    observedPesHeaders: chunk_gqesq3a3_makeObservedPesHeader(),
     streamBuffers,
     startOffset,
     resetBeforeSeek: () => {
       state.streamBuffers.clear();
-      state.nextPesHeaderStore = chunk_n77gaszd_makeNextPesHeaderStore();
+      state.nextPesHeaderStore = chunk_gqesq3a3_makeNextPesHeaderStore();
     },
     lastEmittedSample
   };
   return state;
 };
-var chunk_n77gaszd_makeParserState = ({
+var chunk_gqesq3a3_makeParserState = ({
   hasAudioTrackHandlers,
   hasVideoTrackHandlers,
   controller,
@@ -71161,7 +71181,7 @@ var chunk_n77gaszd_makeParserState = ({
 }) => {
   let skippedBytes = 0;
   const returnValue = {};
-  const iterator = chunk_n77gaszd_getArrayBufferIterator({
+  const iterator = chunk_gqesq3a3_getArrayBufferIterator({
     initialData: new Uint8Array([]),
     maxBytes: contentLength,
     logLevel
@@ -71169,33 +71189,33 @@ var chunk_n77gaszd_makeParserState = ({
   const increaseSkippedBytes = (bytes) => {
     skippedBytes += bytes;
   };
-  const structure = chunk_n77gaszd_structureState();
-  const keyframes = chunk_n77gaszd_keyframesState();
-  const emittedFields = chunk_n77gaszd_emittedState();
-  const samplesObserved = chunk_n77gaszd_samplesObservedState();
-  const mp3 = chunk_n77gaszd_makeMp3State();
-  const images = chunk_n77gaszd_imagesState();
-  const timings = chunk_n77gaszd_timingsState();
-  const seekInfiniteLoop = chunk_n77gaszd_seekInfiniteLoopDetectionState();
-  const currentReaderState = chunk_n77gaszd_currentReader(initialReaderInstance);
-  const avc = chunk_n77gaszd_avcState();
+  const structure = chunk_gqesq3a3_structureState();
+  const keyframes = chunk_gqesq3a3_keyframesState();
+  const emittedFields = chunk_gqesq3a3_emittedState();
+  const samplesObserved = chunk_gqesq3a3_samplesObservedState();
+  const mp3 = chunk_gqesq3a3_makeMp3State();
+  const images = chunk_gqesq3a3_imagesState();
+  const timings = chunk_gqesq3a3_timingsState();
+  const seekInfiniteLoop = chunk_gqesq3a3_seekInfiniteLoopDetectionState();
+  const currentReaderState = chunk_gqesq3a3_currentReader(initialReaderInstance);
+  const avc = chunk_gqesq3a3_avcState();
   const errored = null;
   const discardReadBytes = async (force) => {
     const { bytesRemoved, removedData } = iterator.removeBytesRead(force, mode);
     if (bytesRemoved) {
-      chunk_n77gaszd_Log.verbose(logLevel, `Freed ${bytesRemoved} bytes`);
+      chunk_gqesq3a3_Log.verbose(logLevel, `Freed ${bytesRemoved} bytes`);
     }
     if (removedData && onDiscardedData) {
       await onDiscardedData(removedData);
     }
   };
-  const fields = chunk_n77gaszd_getFieldsFromCallback({
+  const fields = chunk_gqesq3a3_getFieldsFromCallback({
     fields: fieldsInReturnValue,
     callbacks
   });
-  const mediaSection = chunk_n77gaszd_mediaSectionState();
+  const mediaSection = chunk_gqesq3a3_mediaSectionState();
   return {
-    riff: chunk_n77gaszd_riffSpecificState({
+    riff: chunk_gqesq3a3_riffSpecificState({
       controller,
       logLevel,
       readerInterface,
@@ -71203,15 +71223,15 @@ var chunk_n77gaszd_makeParserState = ({
       prefetchCache,
       contentLength
     }),
-    transportStream: chunk_n77gaszd_transportStreamState(),
-    webm: chunk_n77gaszd_webmState({
+    transportStream: chunk_gqesq3a3_transportStreamState(),
+    webm: chunk_gqesq3a3_webmState({
       controller,
       logLevel,
       readerInterface,
       src,
       prefetchCache
     }),
-    iso: chunk_n77gaszd_isoBaseMediaState({
+    iso: chunk_gqesq3a3_isoBaseMediaState({
       contentLength,
       controller,
       readerInterface,
@@ -71220,11 +71240,11 @@ var chunk_n77gaszd_makeParserState = ({
       prefetchCache
     }),
     mp3,
-    aac: chunk_n77gaszd_aacState(),
-    flac: chunk_n77gaszd_flacState(),
-    m3u: chunk_n77gaszd_m3uState(logLevel),
+    aac: chunk_gqesq3a3_aacState(),
+    flac: chunk_gqesq3a3_flacState(),
+    m3u: chunk_gqesq3a3_m3uState(logLevel),
     timings,
-    callbacks: chunk_n77gaszd_callbacksState({
+    callbacks: chunk_gqesq3a3_callbacksState({
       controller,
       hasAudioTrackHandlers,
       hasVideoTrackHandlers,
@@ -71277,7 +71297,7 @@ var chunk_n77gaszd_makeParserState = ({
     avc
   };
 };
-var chunk_n77gaszd_throttledStateUpdate = ({
+var chunk_gqesq3a3_throttledStateUpdate = ({
   updateFn,
   everyMilliseconds,
   controller
@@ -71332,13 +71352,13 @@ var chunk_n77gaszd_throttledStateUpdate = ({
     }
   };
 };
-var chunk_n77gaszd_internalParseMedia = async function({
+var chunk_gqesq3a3_internalParseMedia = async function({
   src,
   fields: _fieldsInReturnValue,
   reader: readerInterface,
   onAudioTrack,
   onVideoTrack,
-  controller = chunk_n77gaszd_mediaParserController(),
+  controller = chunk_gqesq3a3_mediaParserController(),
   logLevel,
   onParseProgress: onParseProgressDoNotCallDirectly,
   progressIntervalInMs,
@@ -71358,12 +71378,12 @@ var chunk_n77gaszd_internalParseMedia = async function({
     throw new Error('No "src" provided');
   }
   controller._internals.markAsReadyToEmitEvents();
-  chunk_n77gaszd_warnIfRemotionLicenseNotAcknowledged({
+  chunk_gqesq3a3_warnIfRemotionLicenseNotAcknowledged({
     acknowledgeRemotionLicense,
     logLevel,
     apiName
   });
-  chunk_n77gaszd_Log.verbose(logLevel, `Reading ${typeof src === "string" ? src : src instanceof URL ? src.toString() : src instanceof File ? src.name : src.toString()}`);
+  chunk_gqesq3a3_Log.verbose(logLevel, `Reading ${typeof src === "string" ? src : src instanceof URL ? src.toString() : src instanceof File ? src.name : src.toString()}`);
   const prefetchCache = new Map;
   const {
     reader: readerInstance,
@@ -71387,7 +71407,7 @@ var chunk_n77gaszd_internalParseMedia = async function({
   }
   const hasAudioTrackHandlers = Boolean(onAudioTrack);
   const hasVideoTrackHandlers = Boolean(onVideoTrack);
-  const state = chunk_n77gaszd_makeParserState({
+  const state = chunk_gqesq3a3_makeParserState({
     hasAudioTrackHandlers,
     hasVideoTrackHandlers,
     controller,
@@ -71412,9 +71432,9 @@ var chunk_n77gaszd_internalParseMedia = async function({
     prefetchCache
   });
   if (seekingHints) {
-    chunk_n77gaszd_setSeekingHints({ hints: seekingHints, state });
+    chunk_gqesq3a3_setSeekingHints({ hints: seekingHints, state });
   }
-  controller._internals.attachSeekingHintResolution(() => Promise.resolve(chunk_n77gaszd_getSeekingHints({
+  controller._internals.attachSeekingHintResolution(() => Promise.resolve(chunk_gqesq3a3_getSeekingHints({
     tracksState: state.callbacks.tracks,
     keyframesState: state.keyframes,
     webmState: state.webm,
@@ -71447,8 +71467,8 @@ var chunk_n77gaszd_internalParseMedia = async function({
       tracksState,
       transportStream,
       webmState: webmState2
-    } = chunk_n77gaszd_getWorkOnSeekRequestOptions(state);
-    return chunk_n77gaszd_turnSeekIntoByte({
+    } = chunk_gqesq3a3_getWorkOnSeekRequestOptions(state);
+    return chunk_gqesq3a3_turnSeekIntoByte({
       aacState: aacState2,
       seek: seek2,
       avcState: avcState2,
@@ -71471,19 +71491,19 @@ var chunk_n77gaszd_internalParseMedia = async function({
     });
   });
   if (!hasAudioTrackHandlers && !hasVideoTrackHandlers && Object.values(state.fields).every((v) => !v) && mode === "query") {
-    chunk_n77gaszd_Log.warn(logLevel, new Error("Warning - No `fields` and no `on*` callbacks were passed to `parseMedia()`. Specify the data you would like to retrieve."));
+    chunk_gqesq3a3_Log.warn(logLevel, new Error("Warning - No `fields` and no `on*` callbacks were passed to `parseMedia()`. Specify the data you would like to retrieve."));
   }
-  const throttledState = chunk_n77gaszd_throttledStateUpdate({
+  const throttledState = chunk_gqesq3a3_throttledStateUpdate({
     updateFn: onParseProgressDoNotCallDirectly ?? null,
     everyMilliseconds: progressIntervalInMs ?? 100,
     controller,
     totalBytes: contentLength
   });
-  await chunk_n77gaszd_triggerInfoEmit(state);
-  await chunk_n77gaszd_parseLoop({ state, throttledState, onError });
-  chunk_n77gaszd_Log.verbose(logLevel, "Finished parsing file");
-  await chunk_n77gaszd_emitAllInfo(state);
-  chunk_n77gaszd_printTimings(state);
+  await chunk_gqesq3a3_triggerInfoEmit(state);
+  await chunk_gqesq3a3_parseLoop({ state, throttledState, onError });
+  chunk_gqesq3a3_Log.verbose(logLevel, "Finished parsing file");
+  await chunk_gqesq3a3_emitAllInfo(state);
+  chunk_gqesq3a3_printTimings(state);
   state.currentReader.getCurrent().abort();
   state.iterator?.destroy();
   state.callbacks.tracks.ensureHasTracksAtEnd(state.fields);
@@ -71518,8 +71538,8 @@ var useMaxMediaDuration = (s, fps) => {
     if (!src) {
       return;
     }
-    const controller = chunk_n77gaszd_mediaParserController();
-    chunk_n77gaszd_parseMedia({
+    const controller = chunk_gqesq3a3_mediaParserController();
+    chunk_gqesq3a3_parseMedia({
       src,
       controller,
       acknowledgeRemotionLicense: true,
@@ -71529,7 +71549,7 @@ var useMaxMediaDuration = (s, fps) => {
         setMaxMediaDuration(Math.floor(durationOrInfinity * fps));
       }
     }).catch((e) => {
-      if (chunk_n77gaszd_hasBeenAborted(e)) {
+      if (chunk_gqesq3a3_hasBeenAborted(e)) {
         return;
       }
       (0,dist.getVideoMetadata)(src).then((metadata) => {
@@ -71852,7 +71872,7 @@ var clearOldFrames = () => {
 // src/components/Timeline/TimelineVideoInfo.tsx
 
 var HEIGHT = getTimelineLayerHeight("video") - 2;
-var chunk_n77gaszd_containerStyle2 = {
+var chunk_gqesq3a3_containerStyle2 = {
   height: HEIGHT,
   width: "100%",
   backgroundColor: "rgba(0, 0, 0, 0.3)",
@@ -71862,14 +71882,14 @@ var chunk_n77gaszd_containerStyle2 = {
   fontSize: 10,
   fontFamily: "Arial, Helvetica"
 };
-var MAX_TIME_DEVIATION = chunk_n77gaszd_WEBCODECS_TIMESCALE * 0.05;
+var MAX_TIME_DEVIATION = chunk_gqesq3a3_WEBCODECS_TIMESCALE * 0.05;
 var getDurationOfOneFrame = ({
   visualizationWidth,
   aspectRatio,
   segmentDuration
 }) => {
   const framesFitInWidthUnrounded = visualizationWidth / (HEIGHT * aspectRatio);
-  return segmentDuration / framesFitInWidthUnrounded * chunk_n77gaszd_WEBCODECS_TIMESCALE;
+  return segmentDuration / framesFitInWidthUnrounded * chunk_gqesq3a3_WEBCODECS_TIMESCALE;
 };
 var fixRounding = (value) => {
   if (value % 1 >= 0.49999999) {
@@ -71892,7 +71912,7 @@ var calculateTimestampSlots = ({
   });
   const timestampTargets = [];
   for (let i = 0;i < framesFitInWidth + 1; i++) {
-    const target = fromSeconds * chunk_n77gaszd_WEBCODECS_TIMESCALE + durationOfOneFrame * (i + 0.5);
+    const target = fromSeconds * chunk_gqesq3a3_WEBCODECS_TIMESCALE + durationOfOneFrame * (i + 0.5);
     const snappedToDuration = (Math.round(fixRounding(target / durationOfOneFrame)) - 1) * durationOfOneFrame;
     timestampTargets.push(snappedToDuration);
   }
@@ -71932,7 +71952,7 @@ var drawSlot = ({
     aspectRatio: frame2.displayWidth / frame2.displayHeight,
     segmentDuration
   });
-  const relativeTimestamp = timestamp - fromSeconds * chunk_n77gaszd_WEBCODECS_TIMESCALE;
+  const relativeTimestamp = timestamp - fromSeconds * chunk_gqesq3a3_WEBCODECS_TIMESCALE;
   const frameIndex = relativeTimestamp / durationOfOneFrame;
   const left3 = Math.floor(frameIndex * frame2.displayWidth / window.devicePixelRatio);
   ctx.drawImage(frame2, left3, 0, frame2.displayWidth / window.devicePixelRatio, frame2.displayHeight / window.devicePixelRatio);
@@ -72072,7 +72092,7 @@ var TimelineVideoInfo = ({ src, visualizationWidth, startFrom, durationInFrames 
           visualizationWidth,
           aspectRatio: aspectRatio.current
         });
-        return Array.from(filledSlots.keys()).map((timestamp) => timestamp / chunk_n77gaszd_WEBCODECS_TIMESCALE);
+        return Array.from(filledSlots.keys()).map((timestamp) => timestamp / chunk_gqesq3a3_WEBCODECS_TIMESCALE);
       },
       src,
       onFrame: (frame2) => {
@@ -72128,7 +72148,7 @@ var TimelineVideoInfo = ({ src, visualizationWidth, startFrom, durationInFrames 
         fromSeconds
       });
     }).catch((e) => {
-      if (chunk_n77gaszd_hasBeenAborted(e)) {
+      if (chunk_gqesq3a3_hasBeenAborted(e)) {
         return;
       }
       setError(e);
@@ -72142,7 +72162,7 @@ var TimelineVideoInfo = ({ src, visualizationWidth, startFrom, durationInFrames 
   }, [durationInFrames, error, fps, src, startFrom, visualizationWidth]);
   return /* @__PURE__ */ (0,jsx_runtime.jsx)("div", {
     ref,
-    style: chunk_n77gaszd_containerStyle2
+    style: chunk_gqesq3a3_containerStyle2
   });
 };
 
@@ -74473,12 +74493,12 @@ var KeyboardShortcutsExplainer = () => {
 
 // src/components/QuickSwitcher/AlgoliaCredit.tsx
 
-var chunk_n77gaszd_link = {
+var chunk_gqesq3a3_link = {
   display: "inline-flex"
 };
 var AlgoliaCredit = () => {
   return /* @__PURE__ */ (0,jsx_runtime.jsx)("a", {
-    style: chunk_n77gaszd_link,
+    style: chunk_gqesq3a3_link,
     href: "https://www.algolia.com/ref/docsearch/?utm_source=www.remotion.dev&utm_medium=referral&utm_content=powered_by&utm_campaign=docsearch",
     target: "_blank",
     rel: "noopener noreferrer",
@@ -75989,7 +76009,7 @@ var RenderModalAdvanced = ({
         label: option === "default" ? "Default" : option,
         onClick: () => setOpenGlOption(option),
         key: option,
-        leftItem: openGlOption === option ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+        leftItem: openGlOption === option ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
         id: option,
         keyHint: null,
         quickSwitcherLabel: null,
@@ -76005,7 +76025,7 @@ var RenderModalAdvanced = ({
         label: option,
         onClick: () => setChromeModeOption(option),
         key: option,
-        leftItem: chromeModeOption === option ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+        leftItem: chromeModeOption === option ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
         id: option,
         keyHint: null,
         quickSwitcherLabel: null,
@@ -76024,7 +76044,7 @@ var RenderModalAdvanced = ({
         type: "item",
         id: option,
         keyHint: null,
-        leftItem: x264Preset === option ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+        leftItem: x264Preset === option ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
         quickSwitcherLabel: null,
         subMenu: null,
         value: option
@@ -76036,7 +76056,7 @@ var RenderModalAdvanced = ({
       return {
         label: option,
         onClick: () => setHardwareAcceleration(option),
-        leftItem: hardwareAcceleration === option ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+        leftItem: hardwareAcceleration === option ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
         subMenu: null,
         quickSwitcherLabel: null,
         type: "item",
@@ -76383,7 +76403,7 @@ var RenderModalAdvanced = ({
             style: rightRow,
             children: /* @__PURE__ */ (0,jsx_runtime.jsx)("div", {
               children: /* @__PURE__ */ (0,jsx_runtime.jsx)(RemotionInput, {
-                style: chunk_n77gaszd_input,
+                style: chunk_gqesq3a3_input,
                 value: userAgent,
                 onChange: onUserAgentChanged,
                 status: "ok",
@@ -76677,7 +76697,7 @@ var SeparateAudioOptionInput = ({ separateAudioTo, setSeparateAudioTo, audioCode
   }, [audioCodec, separateAudioTo]);
   return /* @__PURE__ */ (0,jsx_runtime.jsx)(RenderModalOutputName, {
     existence,
-    inputStyle: chunk_n77gaszd_input,
+    inputStyle: chunk_gqesq3a3_input,
     onValueChange,
     outName: separateAudioTo,
     label: "Separate audio to",
@@ -76786,7 +76806,7 @@ var RenderModalAudio = ({
         label: humanReadableAudioCodec(audioCodecOption),
         onClick: () => setAudioCodec(audioCodecOption),
         key: audioCodecOption,
-        leftItem: codec === audioCodecOption ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+        leftItem: codec === audioCodecOption ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
         id: audioCodecOption,
         keyHint: null,
         quickSwitcherLabel: null,
@@ -76911,7 +76931,7 @@ var RenderModalAudio = ({
             style: rightRow,
             children: /* @__PURE__ */ (0,jsx_runtime.jsx)("div", {
               children: /* @__PURE__ */ (0,jsx_runtime.jsx)(RemotionInput, {
-                style: chunk_n77gaszd_input,
+                style: chunk_gqesq3a3_input,
                 value: customTargetAudioBitrate,
                 onChange: onTargetAudioBitrateChanged,
                 status: "ok",
@@ -77178,7 +77198,7 @@ var RenderModalBasic = ({
         label: humanReadableCodec(codecOption),
         onClick: () => setCodec(codecOption),
         key: codecOption,
-        leftItem: codec === codecOption ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+        leftItem: codec === codecOption ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
         id: codecOption,
         keyHint: null,
         quickSwitcherLabel: null,
@@ -77318,7 +77338,7 @@ var RenderModalBasic = ({
       }),
       /* @__PURE__ */ (0,jsx_runtime.jsx)(RenderModalOutputName, {
         existence,
-        inputStyle: chunk_n77gaszd_input,
+        inputStyle: chunk_gqesq3a3_input,
         outName,
         onValueChange,
         validationMessage,
@@ -77572,7 +77592,7 @@ var RenderModalPicture = ({
         key: option,
         id: option,
         keyHint: null,
-        leftItem: colorSpace === option ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+        leftItem: colorSpace === option ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
         quickSwitcherLabel: null,
         subMenu: null,
         type: "item",
@@ -77676,7 +77696,7 @@ var RenderModalPicture = ({
             style: rightRow,
             children: /* @__PURE__ */ (0,jsx_runtime.jsx)("div", {
               children: /* @__PURE__ */ (0,jsx_runtime.jsx)(RemotionInput, {
-                style: chunk_n77gaszd_input,
+                style: chunk_gqesq3a3_input,
                 value: customTargetVideoBitrate,
                 onChange: onTargetVideoBitrateChanged,
                 status: "ok",
@@ -77724,7 +77744,7 @@ var RenderModalPicture = ({
                 style: rightRow,
                 children: /* @__PURE__ */ (0,jsx_runtime.jsx)("div", {
                   children: /* @__PURE__ */ (0,jsx_runtime.jsx)(RemotionInput, {
-                    style: chunk_n77gaszd_input,
+                    style: chunk_gqesq3a3_input,
                     value: encodingBufferSize,
                     onChange: onEncodingBufferSizeChanged,
                     status: "ok",
@@ -77770,7 +77790,7 @@ var RenderModalPicture = ({
                 style: rightRow,
                 children: /* @__PURE__ */ (0,jsx_runtime.jsx)("div", {
                   children: /* @__PURE__ */ (0,jsx_runtime.jsx)(RemotionInput, {
-                    style: chunk_n77gaszd_input,
+                    style: chunk_gqesq3a3_input,
                     value: encodingMaxRate,
                     onChange: onEncodingMaxRateChanged,
                     status: "ok",
@@ -78761,7 +78781,7 @@ var RenderModal = ({
         key: option,
         id: option,
         keyHint: null,
-        leftItem: pixelFormat === option ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_n77gaszd_Checkmark, {}) : null,
+        leftItem: pixelFormat === option ? /* @__PURE__ */ (0,jsx_runtime.jsx)(chunk_gqesq3a3_Checkmark, {}) : null,
         quickSwitcherLabel: null,
         subMenu: null,
         type: "item",
@@ -80379,7 +80399,7 @@ var StudioInternals = {
 
 /***/ }),
 
-/***/ 6889:
+/***/ 735:
 /***/ ((__unused_webpack_module, exports) => {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -80486,7 +80506,7 @@ exports.C = ArraySet;
 
 /***/ }),
 
-/***/ 9414:
+/***/ 7092:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -80526,7 +80546,7 @@ exports.C = ArraySet;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-const base64 = __webpack_require__(538);
+const base64 = __webpack_require__(2364);
 
 // A single base 64 digit can contain 6 bits of data. For the base 64 variable
 // length quantities we use in the source map spec, the first bit is the sign,
@@ -80604,7 +80624,7 @@ exports.encode = function base64VLQ_encode(aValue) {
 
 /***/ }),
 
-/***/ 538:
+/***/ 2364:
 /***/ ((__unused_webpack_module, exports) => {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -80629,7 +80649,7 @@ exports.encode = function(number) {
 
 /***/ }),
 
-/***/ 6929:
+/***/ 1163:
 /***/ ((__unused_webpack_module, exports) => {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -80743,7 +80763,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
 
 /***/ }),
 
-/***/ 5364:
+/***/ 3302:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -80753,7 +80773,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-const util = __webpack_require__(6429);
+const util = __webpack_require__(251);
 
 /**
  * Determine whether mappingB is after mappingA with respect to generated
@@ -80830,7 +80850,7 @@ exports.P = MappingList;
 
 /***/ }),
 
-/***/ 9018:
+/***/ 6576:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var __dirname = "/";
@@ -80878,7 +80898,7 @@ if (typeof fetch === "function") {
 
 /***/ }),
 
-/***/ 3592:
+/***/ 7446:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 var __webpack_unused_export__;
@@ -80889,12 +80909,12 @@ var __webpack_unused_export__;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-const util = __webpack_require__(6429);
-const binarySearch = __webpack_require__(6929);
-const ArraySet = (__webpack_require__(6889)/* .ArraySet */ .C);
-const base64VLQ = __webpack_require__(9414); // eslint-disable-line no-unused-vars
-const readWasm = __webpack_require__(9018);
-const wasm = __webpack_require__(7361);
+const util = __webpack_require__(251);
+const binarySearch = __webpack_require__(1163);
+const ArraySet = (__webpack_require__(735)/* .ArraySet */ .C);
+const base64VLQ = __webpack_require__(7092); // eslint-disable-line no-unused-vars
+const readWasm = __webpack_require__(6576);
+const wasm = __webpack_require__(8991);
 
 const INTERNAL = Symbol("smcInternal");
 
@@ -82140,7 +82160,7 @@ function _factoryBSM(aSourceMap, aSourceMapURL) {
 
 /***/ }),
 
-/***/ 7879:
+/***/ 4041:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -82150,10 +82170,10 @@ function _factoryBSM(aSourceMap, aSourceMapURL) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-const base64VLQ = __webpack_require__(9414);
-const util = __webpack_require__(6429);
-const ArraySet = (__webpack_require__(6889)/* .ArraySet */ .C);
-const MappingList = (__webpack_require__(5364)/* .MappingList */ .P);
+const base64VLQ = __webpack_require__(7092);
+const util = __webpack_require__(251);
+const ArraySet = (__webpack_require__(735)/* .ArraySet */ .C);
+const MappingList = (__webpack_require__(3302)/* .MappingList */ .P);
 
 /**
  * An instance of the SourceMapGenerator represents a source map which is
@@ -82560,7 +82580,7 @@ exports.x = SourceMapGenerator;
 
 /***/ }),
 
-/***/ 4497:
+/***/ 1683:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 var __webpack_unused_export__;
@@ -82571,8 +82591,8 @@ var __webpack_unused_export__;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-const SourceMapGenerator = (__webpack_require__(7879)/* .SourceMapGenerator */ .x);
-const util = __webpack_require__(6429);
+const SourceMapGenerator = (__webpack_require__(4041)/* .SourceMapGenerator */ .x);
+const util = __webpack_require__(251);
 
 // Matches a Windows-style `\r\n` newline or a `\n` newline used by all other
 // operating systems these days (capturing the result).
@@ -82972,7 +82992,7 @@ __webpack_unused_export__ = SourceNode;
 
 /***/ }),
 
-/***/ 6429:
+/***/ 251:
 /***/ ((__unused_webpack_module, exports) => {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -83525,10 +83545,10 @@ exports.computeSourceURL = computeSourceURL;
 
 /***/ }),
 
-/***/ 7361:
+/***/ 8991:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const readWasm = __webpack_require__(9018);
+const readWasm = __webpack_require__(6576);
 
 /**
  * Provide the JIT with a nice shape / hidden class.
@@ -83639,7 +83659,7 @@ module.exports = function wasm() {
 
 /***/ }),
 
-/***/ 4531:
+/***/ 9665:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 /*
@@ -83647,12 +83667,12 @@ module.exports = function wasm() {
  * Licensed under the New BSD license. See LICENSE.txt or:
  * http://opensource.org/licenses/BSD-3-Clause
  */
-/* unused reexport */ __webpack_require__(7879)/* .SourceMapGenerator */ .x;
-exports.SourceMapConsumer = __webpack_require__(3592).SourceMapConsumer;
-/* unused reexport */ __webpack_require__(4497);
+/* unused reexport */ __webpack_require__(4041)/* .SourceMapGenerator */ .x;
+exports.SourceMapConsumer = __webpack_require__(7446).SourceMapConsumer;
+/* unused reexport */ __webpack_require__(1683);
 
 
 /***/ })
 
 }]);
-//# sourceMappingURL=569.bundle.js.map
+//# sourceMappingURL=423.bundle.js.map

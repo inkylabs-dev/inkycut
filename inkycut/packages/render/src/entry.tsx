@@ -1,5 +1,5 @@
 import { registerRoot, Composition } from 'remotion';
-import { VideoComposition } from './Composition';
+import { MainComposition } from '@inkycut/editor';
 import React from 'react';
 
 const defaultCompositionData = {
@@ -22,14 +22,16 @@ const Root = () => {
   return (
     <>
       <Composition
-        id="VideoComposition"
-        component={VideoComposition}
+        id="MainComposition"
+        component={MainComposition}
         durationInFrames={300} // Default duration, will be overridden by input props
         fps={30}
         width={1920}
         height={1080}
         defaultProps={{
-          data: defaultCompositionData,
+          data: {
+            "composition": defaultCompositionData,
+          }
           // Remove currentPageIndex to enable multi-page rendering
         }}
         calculateMetadata={({ props }) => {

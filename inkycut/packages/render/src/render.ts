@@ -219,18 +219,20 @@ export async function renderVideo(projectData: any, options: RenderOptions): Pro
     console.log(chalk.gray(`Using bundle: ${bundleUrl}`));
   }
   
-  // Set up the input props to match renderUtils structure
+  // Set up the input props to match MainComposition structure
+  // const inputProps = {
+  //   data: {
+  //     pages: projectData.composition?.pages || projectData.pages || [],
+  //     fps: projectData.composition?.fps || projectData.fps || 30,
+  //     width: projectData.composition?.width || projectData.width || 1920,
+  //     height: projectData.composition?.height || projectData.height || 1080,
+  //   },
+  //   files: projectData.files || [],
+  // };
   const inputProps = {
-    data: {
-      pages: projectData.composition?.pages || [],
-      fps: projectData.composition?.fps || 30,
-      width: projectData.composition?.width || 1920,
-      height: projectData.composition?.height || 1080,
-      files: projectData.files || [],
-      
-    }
+    data: projectData,
   };
-  
+
   if (options.verbose) {
     console.log(chalk.gray('Selecting composition...'));
   }
@@ -238,7 +240,7 @@ export async function renderVideo(projectData: any, options: RenderOptions): Pro
   // Select the composition using the correct ID
   const composition = await selectComposition({
     serveUrl: bundleUrl,
-    id: 'VideoComposition', // Match the ID from renderUtils
+    id: 'MainComposition', // Match the ID from entrypoint
     inputProps,
   });
   

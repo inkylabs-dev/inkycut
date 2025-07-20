@@ -5,6 +5,14 @@ import chalk from 'chalk';
 import { renderFromUrl, renderFromFile } from './render';
 import { version } from '../package.json';
 import { existsSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Get absolute path to the bundle directory
+const defaultBundlePath = resolve(__dirname, './bundle/');
 
 const program = new Command();
 
@@ -18,7 +26,7 @@ program
   .option('-o, --output <path>', 'Output file path', './output.mp4')
   .option('-q, --quality <quality>', 'Video quality (1080p, 720p, 480p)', '1080p')
   .option('-f, --format <format>', 'Output format (mp4, webm)', 'mp4')
-  .option('-b, --bundle <url>', 'Remotion bundle URL', 'https://inkycut.com/remotion-bundle/')
+  .option('-b, --bundle <url>', 'Remotion bundle URL', defaultBundlePath)
   .option('--verbose', 'Enable verbose logging')
   .action(async (input, options) => {
     try {
