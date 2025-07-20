@@ -7,7 +7,8 @@ import {
   HeartIcon,
   ArrowPathIcon,
   CogIcon,
-  ArrowDownTrayIcon
+  ArrowDownTrayIcon,
+  ArrowUpTrayIcon
 } from '@heroicons/react/24/outline';
 // import { useAuth } from 'wasp/client/auth';
 // import { routes } from 'wasp/client/router';
@@ -19,6 +20,7 @@ import ElementPreview from './ElementPreview';
 import FileListItem from './FileListItem';
 import SettingsDialog from './SettingsDialog';
 import ImportDialog from './ImportDialog';
+import ExportDialog from './ExportDialog';
 import { createFileResolver } from './utils/fileResolver';
 
 interface LeftPanelProps {
@@ -37,6 +39,7 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   // const { data: user } = useAuth();
   const [localFiles] = useAtom(filesAtom);
@@ -138,6 +141,17 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
                   >
                     <ArrowDownTrayIcon className="mr-2 h-5 w-5 text-gray-500" />
                     Import Project
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setShowExportDialog(true);
+                      setShowMenu(false);
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                  >
+                    <ArrowUpTrayIcon className="mr-2 h-5 w-5 text-gray-500" />
+                    Export Project
                   </button>
                   
                   <button
@@ -332,6 +346,12 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
       <ImportDialog
         isOpen={showImportDialog}
         onClose={() => setShowImportDialog(false)}
+      />
+
+      {/* Export Dialog */}
+      <ExportDialog
+        isOpen={showExportDialog}
+        onClose={() => setShowExportDialog(false)}
       />
     </div>
   );
