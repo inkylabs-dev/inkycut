@@ -36,7 +36,7 @@ export const landingCompositionData: CompositionData = {
           "fontSize": 60,
           "color": "red",
           "textAlign": "center",
-          "text": "Vibe Filming",
+          "text": "Vibe Editor",
           "zIndex": 2,
           "animation": {
             "props": {
@@ -61,7 +61,7 @@ export const landingCompositionData: CompositionData = {
 }
 
 export const landingPageNavigationItems: NavigationItem[] = [
-  { name: 'Vibe Filming', to: '/vibe' },
+  { name: 'Vibe Editor', to: '/vibe' },
   { name: 'Features', to: '#features' },
   // { name: 'Pricing', to: routes.PricingPageRoute.to },
   { name: 'Documentation', to: DocsUrl },
@@ -69,7 +69,7 @@ export const landingPageNavigationItems: NavigationItem[] = [
 ];
 export const features = [
   {
-    name: 'Vibe Filming',
+    name: 'Vibe Editor',
     description: 'Like vibe coding, you describe what you want and let AI do the rest. No video editing skills required, just chat with our AI assistant.',
     icon: '🎬',
     href: DocsUrl,
@@ -133,7 +133,7 @@ export const faqs = [
   {
     id: 3,
     question: 'Do I need to pay?',
-    answer: 'No, InkyCut Vibe Filming editor is free forever. We believe in free and open-source software. Premium features will be available in the future but the core functionality will always be free.',
+    answer: 'No, InkyCut Vibe Editor is free forever. We believe in free and open-source software. Premium features will be available but the core functionality will always be free.',
     href: '',
   },
   {

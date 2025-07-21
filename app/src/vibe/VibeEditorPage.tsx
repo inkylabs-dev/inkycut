@@ -24,7 +24,7 @@ import {
 } from '../packages/editor';
 import { processVideoAIPrompt } from 'wasp/client/operations';
 
-export default function VibeVideoCutPage() {
+export default function VibeEditorPage () {
   const navigate = useNavigate();
   
   // Jotai state atoms

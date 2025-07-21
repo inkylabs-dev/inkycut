@@ -222,15 +222,15 @@ job dailyStatsJob {
 }
 //#endregion
 
-//#region Vibe Video Cut
-route VibeVideoCutRoute { path: "/vibe", to: VibeVideoCutPage }
-page VibeVideoCutPage {
+//#region Vibe Editor
+route VibeEditorRoute { path: "/vibe", to: VibeEditorPage }
+page VibeEditorPage {
   authRequired: false,
-  component: import VibeVideoCutPage from "@src/vibe-video-cut/VibeVideoCutPage"
+  component: import VibeEditorPage from "@src/vibe/VibeEditorPage"
 }
 
 action processVideoAIPrompt {
-  fn: import { processVideoAIPrompt } from "@src/vibe-video-cut/operations",
+  fn: import { processVideoAIPrompt } from "@src/vibe/operations",
   entities: [User]
 }
 

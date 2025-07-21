@@ -11,7 +11,7 @@ export function NotFoundPage() {
         <h1 className='text-6xl font-bold  mb-4'>404</h1>
         <p className='text-lg text-bodydark mb-8'>Oops! The page you're looking for doesn't exist.</p>
         <WaspRouterLink
-          to={user ? routes.VibeVideoCutRoute.to : routes.LandingPageRoute.to}
+          to={user ? routes.VibeEditorRoute.to : routes.LandingPageRoute.to}
           className='inline-block px-8 py-3 text-white font-semibold bg-yellow-500 rounded-lg hover:bg-yellow-400 transition duration-300'
         >
           Go Back Home
