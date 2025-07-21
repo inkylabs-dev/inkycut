@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "animejs": "^4.0.2",
-    "remotion": "4.0.324",
-    "@remotion/player": "^4.0.324",
+    "remotion": "4.0.325",
+    "@remotion/player": "^4.0.325",
     "jotai": "^2.12.5",
     "@heroicons/react": "^2.2.0",
     "react-markdown": "^10.1.0",

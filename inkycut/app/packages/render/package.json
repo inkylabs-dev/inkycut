@@ -15,8 +15,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@remotion/cli": "4.0.324",
-    "@remotion/renderer": "^4.0.324",
+    "@remotion/cli": "4.0.325",
+    "@remotion/renderer": "^4.0.325",
     "@inkycut/editor": "file:../editor",
     "chalk": "^5.3.0",
     "commander": "^9.4.1",
