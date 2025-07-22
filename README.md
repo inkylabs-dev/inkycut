@@ -6,7 +6,7 @@
 
 🚧 Still early — your feedback shapes the next version. 
 
-You don't need to pay to use the [Vibe Filming] currently, but an OpenAI API key is required before first use.
+You don't need to pay to use the InkyCut, but an OpenAI API key is required before first use. You can click the "Settings" button in the top right corner to add your OpenAI API key.
 
 **Want more features? Starting using it and submit an issue on GitHub!**
 
@@ -83,7 +83,7 @@ The AI understands your creative intent and automatically applies the appropriat
 1. Clone the repository:
    ```bash
    git clone git@github.com:inkylabsio/inkycut.git
-   cd inkycut/inkycut/app
+   cd inkycut/app
    ```
 
 2. Install dependencies:
@@ -102,15 +102,29 @@ The AI understands your creative intent and automatically applies the appropriat
 
 5. Run database migrations:
    ```bash
-   wasp db migrate-dev
+   npm run db:migrate-dev
    ```
 
 6. Start the development server:
    ```bash
-   wasp start
+   npm run start
    ```
 
 The application will be available at `http://localhost:3000`.
+
+## Render a video
+
+You need to build app first:
+
+```bash
+npm run build
+```
+
+Then you can render a video using the following command:
+
+```bash
+npm run render -- -i /path/to/exportedProject.json
+```
 
 ## Development
 
@@ -125,7 +139,7 @@ npm test
 ### Building for Production
 
 ```bash
-wasp build
+npm run build
 ```
 
 ### Database Management
@@ -147,6 +161,10 @@ The project is configured for deployment on Fly.io with separate client and serv
 
 - `fly-client.toml` - Frontend deployment configuration
 - `fly-server.toml` - Backend deployment configuration
+
+```bash
+$ npm run deploy
+```
 
 ## Contributing
 
