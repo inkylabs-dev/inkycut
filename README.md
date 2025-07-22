@@ -2,7 +2,7 @@
 
 > Create videos with just a chat. No timeline, no tools. Just vibe..
 
-✨ Try our [AI Vibe Filming Prototype](https://inkycut.com): Just type what you want, and we’ll build a short video.
+✨ Try our [AI Vibe Editor Prototype](https://inkycut.com): Just type what you want, and we’ll build a short video.
 
 🚧 Still early — your feedback shapes the next version. 
 
