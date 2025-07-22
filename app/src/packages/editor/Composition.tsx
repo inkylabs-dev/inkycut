@@ -38,9 +38,9 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
   const currentTimeInSeconds = frame / fps;
   
   // Check if element should be visible at current time
-  const startTime = elementWithId.startTime || 0;
-  const endTime = elementWithId.endTime || Infinity;
-  const isVisible = currentTimeInSeconds >= startTime && currentTimeInSeconds <= endTime;
+  const delayMs = elementWithId.delay || 0;
+  const delayInSeconds = delayMs / 1000;
+  const isVisible = currentTimeInSeconds >= delayInSeconds;
   
   // Handle animation execution - only in Player context
   const scopeRef = isPlayerContext ? useAnimeTimeline(() => {
@@ -114,7 +114,7 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
             id={elementWithId.id}
             src={resolvedSrc}
             style={{ width: '100%', height: '100%' }}
-            startFrom={Math.floor((currentTimeInSeconds - startTime) * fps)}
+            startFrom={Math.floor((currentTimeInSeconds - delayInSeconds) * fps)}
           />
         </div>
       ) : null;
@@ -261,7 +261,8 @@ export const MainComposition: React.FC<{
     );
   }
 
-  const pageDurations = data.pages.map(page => page.duration || 0);
+  // Convert page durations from milliseconds to frames
+  const pageDurations = data.pages.map(page => Math.round(((page.duration || 0) / 1000) * fps));
   let cumulativeFrames = 0;
   
   

@@ -99,7 +99,8 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect }: Middl
   }, [compositionData, viewMode, jsonString, userEditedJson, project]);
   
   // Calculate total duration and current time
-  const totalFrames = compositionData.pages.reduce((sum, page) => sum + page.duration, 0);
+  // Convert page durations from milliseconds to frames
+  const totalFrames = compositionData.pages.reduce((sum, page) => sum + Math.round((page.duration / 1000) * compositionData.fps), 0);
   const totalDuration = totalFrames / compositionData.fps;
   const currentTime = currentFrame / compositionData.fps;
 
@@ -176,10 +177,11 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect }: Middl
   const getCurrentPage = () => {
     let cumulativeFrames = 0;
     for (let i = 0; i < compositionData.pages.length; i++) {
-      if (currentFrame < cumulativeFrames + compositionData.pages[i].duration) {
+      const pageDurationInFrames = Math.round((compositionData.pages[i].duration / 1000) * compositionData.fps);
+      if (currentFrame < cumulativeFrames + pageDurationInFrames) {
         return { pageIndex: i, frameOffset: currentFrame - cumulativeFrames };
       }
-      cumulativeFrames += compositionData.pages[i].duration;
+      cumulativeFrames += pageDurationInFrames;
     }
     return { pageIndex: compositionData.pages.length - 1, frameOffset: 0 };
   };
@@ -490,8 +492,8 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect }: Middl
                     {compositionData.pages.map((page, index) => {
                       const startTime = compositionData.pages
                         .slice(0, index)
-                        .reduce((sum, p) => sum + p.duration, 0) / compositionData.fps;
-                      const pagesDuration = page.duration / compositionData.fps;
+                        .reduce((sum, p) => sum + (p.duration / 1000), 0); // Convert ms to seconds
+                      const pagesDuration = page.duration / 1000; // Convert ms to seconds
                       const pageColors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
                       
                       return (

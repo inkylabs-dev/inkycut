@@ -22,10 +22,8 @@ export interface CompositionElement {
   opacity?: number;
   /** Stack order - higher values appear above lower values */
   zIndex?: number;
-  /** Time when element appears in the composition (in seconds) */
-  startTime?: number;
-  /** Time when element disappears (in seconds) */
-  endTime?: number;
+  /** Delay before element appears in the composition (in milliseconds) */
+  delay?: number;
   
   // Video/Image specific properties
   /** Source URL for video or image elements */
@@ -93,7 +91,7 @@ export interface CompositionPage {
   id: string;
   /** User-friendly name for the page */
   name: string;
-  /** Duration of the page in frames */
+  /** Duration of the page in milliseconds */
   duration: number;
   /** Background color of the page (CSS color value) */
   backgroundColor?: string;
@@ -222,7 +220,7 @@ export const defaultCompositionData: CompositionData = {
     {
       id: 'page1',
       name: 'Intro',
-      duration: 150, // 5 seconds at 30fps
+      duration: 5000, // 5 seconds in milliseconds
       backgroundColor: '#1e3a8a',
       elements: [
         {
@@ -237,8 +235,7 @@ export const defaultCompositionData: CompositionData = {
           color: '#ffffff',
           fontWeight: 'bold',
           textAlign: 'center',
-          startTime: 0,
-          endTime: 5,
+          delay: 0,
         },
         {
           id: 'text2',
@@ -251,15 +248,14 @@ export const defaultCompositionData: CompositionData = {
           fontSize: 24,
           color: '#e5e7eb',
           textAlign: 'center',
-          startTime: 1,
-          endTime: 5,
+          delay: 1000,
         }
       ]
     },
     {
       id: 'page2',
       name: 'Content',
-      duration: 180, // 6 seconds at 30fps
+      duration: 6000, // 6 seconds in milliseconds
       backgroundColor: '#059669',
       elements: [
         {
@@ -273,8 +269,7 @@ export const defaultCompositionData: CompositionData = {
           fontSize: 36,
           color: '#ffffff',
           fontWeight: 'bold',
-          startTime: 0,
-          endTime: 6,
+          delay: 0,
         },
         {
           id: 'text4',
@@ -286,15 +281,14 @@ export const defaultCompositionData: CompositionData = {
           text: 'This is where your main content goes. You can add images, videos, and text elements to create engaging stories.',
           fontSize: 20,
           color: '#f3f4f6',
-          startTime: 1,
-          endTime: 6,
+          delay: 1000,
         }
       ]
     },
     {
       id: 'page3',
       name: 'Outro',
-      duration: 120, // 4 seconds at 30fps
+      duration: 4000, // 4 seconds in milliseconds
       backgroundColor: '#7c3aed',
       elements: [
         {
@@ -309,8 +303,7 @@ export const defaultCompositionData: CompositionData = {
           color: '#ffffff',
           fontWeight: 'bold',
           textAlign: 'center',
-          startTime: 0,
-          endTime: 4,
+          delay: 0,
         }
       ]
     }

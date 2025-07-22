@@ -290,7 +290,8 @@ function calculateDurationInFrames(projectData: any): number {
         if (durationInSeconds > 100) {
           durationInSeconds = durationInSeconds / 30; // Convert frames to seconds
         }
-        const endTime = (element.startTime || 0) + durationInSeconds;
+        const delayInSeconds = (element.delay || 0) / 1000;
+        const endTime = delayInSeconds + durationInSeconds;
         maxEndTime = Math.max(maxEndTime, endTime);
       });
     }

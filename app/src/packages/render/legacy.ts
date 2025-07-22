@@ -91,7 +91,8 @@ function calculateDurationInFrames(project: any): number {
   project.pages.forEach((page: any) => {
     if (page.elements) {
       page.elements.forEach((element: any) => {
-        const endTime = (element.startTime || 0) + (element.duration || 5);
+        const delayInSeconds = (element.delay || 0) / 1000;
+        const endTime = delayInSeconds + (element.duration || 5);
         maxEndTime = Math.max(maxEndTime, endTime);
       });
     }

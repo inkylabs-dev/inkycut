@@ -15,15 +15,13 @@ export const Layer: React.FC<LayerProps> = (props) => {
     return <>{children}</>;
   }
   
-  // Calculate from and durationInFrames based on startTime and endTime (which are in seconds)
-  const startTime = element.startTime || 0;
-  const endTime = element.endTime || Infinity;
+  // Calculate from and durationInFrames based on delay (which is in milliseconds)
+  const delayMs = element.delay || 0;
   
-  // Convert seconds to frames
-  const fromFrame = Math.round(startTime * fps);
-  const durationInFrames = endTime !== Infinity 
-    ? Math.round((endTime - startTime) * fps) 
-    : undefined;
+  // Convert milliseconds to frames
+  const fromFrame = Math.round((delayMs / 1000) * fps);
+  // For now, use a default duration if not specified - this will be improved when we add element duration
+  const durationInFrames = undefined; // Let Remotion handle default duration
   
   return (
     <Sequence

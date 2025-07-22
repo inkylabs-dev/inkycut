@@ -311,9 +311,9 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
                         </div>
                         <div className="text-xs text-gray-500 capitalize flex items-center">
                           <span className="mr-2">{element.type}</span>
-                          {element.startTime !== undefined && element.endTime !== undefined && (
+                          {element.delay !== undefined && (
                             <span className="text-xs bg-gray-100 px-1 rounded">
-                              {element.startTime}s - {element.endTime}s
+                              delay: {element.delay}ms
                             </span>
                           )}
                         </div>

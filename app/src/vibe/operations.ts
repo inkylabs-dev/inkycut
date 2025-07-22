@@ -209,7 +209,7 @@ async function generateVideoEditSuggestions(prompt: string, project: any, userAp
             '- CompositionPage: { id: string, name: string, duration: number, backgroundColor?: string, elements: CompositionElement[] }\n' +
             '- CompositionElement: {\n' +
             '  id: string, type: "video"|"image"|"text", left: number, top: number, width: number, height: number,\n' +
-            '  rotation?: number, opacity?: number, zIndex?: number, startTime?: number, endTime?: number,\n' +
+            '  rotation?: number, opacity?: number, zIndex?: number, delay?: number (in milliseconds),\n' +
             '  src?: string (for video/image), text?: string, fontSize?: number, fontFamily?: string, color?: string,\n' +
             '  fontWeight?: string, textAlign?: "left"|"center"|"right", isDragging?: boolean,\n' +
             '  animation?: {\n' +

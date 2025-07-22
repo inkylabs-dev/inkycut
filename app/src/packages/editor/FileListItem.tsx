@@ -58,8 +58,7 @@ export default function FileListItem({ file }: FileListItemProps) {
         opacity: 1,
         zIndex: 1,
         rotation: 0,
-        startTime: 0,
-        endTime: 5,
+        delay: 0,
       };
       
       // Add to the current page

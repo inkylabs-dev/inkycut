@@ -23,8 +23,7 @@ export const landingCompositionData: CompositionData = {
           "opacity": 1,
           "zIndex": 1,
           "rotation": 0,
-          "startTime": 0,
-          "endTime": 5
+          "delay": 0
         },
         {
           "id": "element-1752613971289",
