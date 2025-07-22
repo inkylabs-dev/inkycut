@@ -75,8 +75,6 @@ export const processVideoAIPrompt = async (
   }
 
   try {
-    console.log('Processing video AI prompt:', prompt);
-
     // Get current project data from memory store or use provided data
     const project = projectData;
 
@@ -301,8 +299,6 @@ async function generateVideoEditSuggestions(prompt: string, project: any, userAp
       tool_choice: { type: "function", function: { name: "changeVideoSchema" } },
       temperature: 1,
     });
-    console.log(JSON.stringify(completion, null, 2));
-
     const aiResponse = completion?.choices[0]?.message?.tool_calls?.[0]?.function
       ?.arguments;
     const result = aiResponse ? JSON.parse(aiResponse) : null;
