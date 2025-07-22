@@ -10,11 +10,11 @@ You don't need to pay to use the InkyCut, but an OpenAI API key is required befo
 
 **Want more features? Starting using it and submit an issue on GitHub!**
 
-## 🎬 Vibe Filming: AI-Powered Video Editing
+## 🎬 Vibe Editor: AI-Powered Video Editing
 
 **Talk to your editor, don't wrestle with timelines.**
 
-Vibe Filming brings the power of conversational AI to video editing. Instead of spending hours learning complex editing software, you can:
+Vibe Editor brings the power of conversational AI to video editing. Instead of spending hours learning complex editing software, you can:
 
 - **Describe your vision**: "Make this scene more dramatic with slow motion and dark filters"
 - **Request specific edits**: "Add a zoom transition between these two clips"
@@ -30,7 +30,7 @@ The AI understands your creative intent and automatically applies the appropriat
 
 ### How It Works
 
-1. **Upload your footage** to the [Vibe Filming](https://inkycut.com/vibe).
+1. **Upload your footage** to the [Vibe Editor](https://inkycut.com/vibe).
 2. **Describe your edit** in natural language
 3. **Review the AI's work** with real-time preview
 4. **Refine with conversation** - ask for adjustments
@@ -42,7 +42,7 @@ The AI understands your creative intent and automatically applies the appropriat
 
 ### 🚀 Core Features
 
-- [x] **🎬 Vibe Filming**: Revolutionary conversational video editing - talk to AI, get professional edits
+- [x] **🎬 Vibe Editor**: Revolutionary conversational video editing - talk to AI, get professional edits
 - [x] **🎥 Multi-Media Support**: Work with images, videos, and audio files seamlessly
 - [x] **⚡ Real-time Preview**: See your changes instantly with live preview functionality
 - [ ] **🤖 AI-Powered Story Generation**: Create compelling narratives with advanced AI assistance
