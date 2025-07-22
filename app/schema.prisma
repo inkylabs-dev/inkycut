@@ -110,3 +110,10 @@ model ContactFormMessage {
   isRead                    Boolean         @default(false)
   repliedAt                 DateTime?
 }
+
+model SharedProject {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+  
+  s3Key                     String          @unique
+}

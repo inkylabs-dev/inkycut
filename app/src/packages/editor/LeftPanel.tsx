@@ -8,7 +8,9 @@ import {
   ArrowPathIcon,
   CogIcon,
   ArrowDownTrayIcon,
-  ArrowUpTrayIcon
+  ArrowUpTrayIcon,
+  ShareIcon,
+  DocumentDuplicateIcon
 } from '@heroicons/react/24/outline';
 // import { useAuth } from 'wasp/client/auth';
 // import { routes } from 'wasp/client/router';
@@ -21,13 +23,46 @@ import FileListItem from './FileListItem';
 import SettingsDialog from './SettingsDialog';
 import ImportDialog from './ImportDialog';
 import ExportDialog from './ExportDialog';
+import ShareDialog from './ShareDialog';
 import { createFileResolver } from './utils/fileResolver';
+
+interface MenuConfig {
+  showImport?: boolean;
+  showExport?: boolean;
+  showShare?: boolean;
+  showForkAndEdit?: boolean;
+  showReset?: boolean;
+  showSettings?: boolean;
+  showHome?: boolean;
+  showFollow?: boolean;
+  showGitHub?: boolean;
+}
 
 interface LeftPanelProps {
   onElementUpdate?: (elementId: string, updatedData: Partial<CompositionElement> | any) => void;
+  isReadOnly?: boolean;
+  disableFileUpload?: boolean;
+  menuConfig?: MenuConfig;
+  onForkAndEdit?: () => void;
 }
 
-export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
+export default function LeftPanel({ 
+  onElementUpdate, 
+  isReadOnly = false,
+  disableFileUpload = false,
+  menuConfig = {
+    showImport: true,
+    showExport: true,
+    showShare: true,
+    showForkAndEdit: false,
+    showReset: true,
+    showSettings: true,
+    showHome: true,
+    showFollow: true,
+    showGitHub: true,
+  },
+  onForkAndEdit 
+}: LeftPanelProps) {
   // Use Jotai atoms instead of props
   const [project, setProject] = useAtom(projectAtom);
   const [selectedElement] = useAtom(selectedElementAtom);
@@ -40,6 +75,7 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   // const { data: user } = useAuth();
   const [localFiles] = useAtom(filesAtom);
@@ -118,13 +154,14 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
     <div className="h-full flex flex-col">
       <div className="p-4 border-b border-gray-200 bg-white">
         <div className="flex items-center mb-4">
-          <div className="relative">
-            <button 
-              className="text-gray-700 hover:text-gray-900 focus:outline-none" 
-              onClick={() => setShowMenu(!showMenu)}
-            >
-              <Bars3Icon className="h-6 w-6" />
-            </button>
+          {!isReadOnly && (
+            <div className="relative">
+              <button 
+                className="text-gray-700 hover:text-gray-900 focus:outline-none" 
+                onClick={() => setShowMenu(!showMenu)}
+              >
+                <Bars3Icon className="h-6 w-6" />
+              </button>
             
             {showMenu && (
               <div 
@@ -132,80 +169,123 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
                 className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
               >
                 <div className="py-1">
-                  <button
-                    onClick={() => {
-                      setShowImportDialog(true);
-                      setShowMenu(false);
-                    }}
-                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                  >
-                    <ArrowDownTrayIcon className="mr-2 h-5 w-5 text-gray-500" />
-                    Import Project
-                  </button>
+                  {menuConfig.showForkAndEdit && (
+                    <button
+                      onClick={() => {
+                        if (onForkAndEdit) {
+                          onForkAndEdit();
+                        }
+                        setShowMenu(false);
+                      }}
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                    >
+                      <DocumentDuplicateIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      Fork and Edit
+                    </button>
+                  )}
                   
-                  <button
-                    onClick={() => {
-                      setShowExportDialog(true);
-                      setShowMenu(false);
-                    }}
-                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                  >
-                    <ArrowUpTrayIcon className="mr-2 h-5 w-5 text-gray-500" />
-                    Export Project
-                  </button>
+                  {menuConfig.showImport && (
+                    <button
+                      onClick={() => {
+                        setShowImportDialog(true);
+                        setShowMenu(false);
+                      }}
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                    >
+                      <ArrowDownTrayIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      Import Project
+                    </button>
+                  )}
                   
-                  <button
-                    onClick={handleResetProject}
-                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                  >
-                    <ArrowPathIcon className="mr-2 h-5 w-5 text-gray-500" />
-                    Reset Project
-                  </button>
+                  {menuConfig.showExport && (
+                    <button
+                      onClick={() => {
+                        setShowExportDialog(true);
+                        setShowMenu(false);
+                      }}
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                    >
+                      <ArrowUpTrayIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      Export Project
+                    </button>
+                  )}
                   
-                  <button
-                    onClick={() => {
-                      setShowSettings(true);
-                      setShowMenu(false);
-                    }}
-                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                  >
-                    <CogIcon className="mr-2 h-5 w-5 text-gray-500" />
-                    Settings...
-                  </button>
+                  {menuConfig.showShare && (
+                    <button
+                      onClick={() => {
+                        setShowShareDialog(true);
+                        setShowMenu(false);
+                      }}
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                    >
+                      <ShareIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      Share...
+                    </button>
+                  )}
                   
-                  <Link 
-                    to="/"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    <HomeIcon className="mr-2 h-5 w-5 text-gray-500" />
-                    Home Page
-                  </Link>
+                  {menuConfig.showReset && (
+                    <button
+                      onClick={handleResetProject}
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                    >
+                      <ArrowPathIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      Reset Project
+                    </button>
+                  )}
                   
-                  <a 
-                    href="https://twitter.com/inkycut" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    <HeartIcon className="mr-2 h-5 w-5 text-gray-500" />
-                    Follow Us
-                  </a>
+                  {menuConfig.showSettings && (
+                    <button
+                      onClick={() => {
+                        setShowSettings(true);
+                        setShowMenu(false);
+                      }}
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                    >
+                      <CogIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      Settings...
+                    </button>
+                  )}
                   
-                  <a 
-                    href="https://github.com/inkylabs-dev/inkycut" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    <svg className="mr-2 h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-                    </svg>
-                    GitHub
-                  </a>
+                  {menuConfig.showHome && (
+                    <Link 
+                      to="/"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <HomeIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      Home Page
+                    </Link>
+                  )}
+                  
+                  {menuConfig.showFollow && (
+                    <a 
+                      href="https://twitter.com/inkycut" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <HeartIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      Follow Us
+                    </a>
+                  )}
+                  
+                  {menuConfig.showGitHub && (
+                    <a 
+                      href="https://github.com/inkylabs-dev/inkycut" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <svg className="mr-2 h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+                      </svg>
+                      GitHub
+                    </a>
+                  )}
                 </div>
               </div>
             )}
-          </div>
+            </div>
+          )}
         </div>
         <div className="text-gray-500 text-sm">
           {/* Creator information can be shown here if available */}
@@ -244,16 +324,18 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
               <h3 className="text-sm font-semibold text-gray-900">Project Assets</h3>
             </div>
             
-            {/* File Upload Section */}
-            <div className="mb-6">
-              <h4 className="text-xs font-medium text-gray-700 mb-2">Add Local Files</h4>
-              <LocalFileUpload
-                onUploadComplete={handleUploadComplete}
-                onUploadError={handleUploadError}
-                buttonText="Add to Project"
-                className="mb-4"
-              />
-            </div>
+            {/* File Upload Section - disabled based on prop */}
+            {!disableFileUpload && (
+              <div className="mb-6">
+                <h4 className="text-xs font-medium text-gray-700 mb-2">Add Local Files</h4>
+                <LocalFileUpload
+                  onUploadComplete={handleUploadComplete}
+                  onUploadError={handleUploadError}
+                  buttonText="Add to Project"
+                  className="mb-4"
+                />
+              </div>
+            )}
             {/* Local Files Section */}
             <div>
               <h4 className="text-xs font-medium text-gray-700 mb-2">Project Files</h4>
@@ -352,6 +434,12 @@ export default function LeftPanel({ onElementUpdate }: LeftPanelProps) {
       <ExportDialog
         isOpen={showExportDialog}
         onClose={() => setShowExportDialog(false)}
+      />
+
+      {/* Share Dialog */}
+      <ShareDialog
+        isOpen={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
       />
     </div>
   );

@@ -16,9 +16,10 @@ interface MiddlePanelProps {
   onTimelineUpdate: (timeline: any[]) => void;
   onCompositionUpdate?: (composition: CompositionData) => void;
   onPageSelect?: (page: any) => void;
+  isReadOnly?: boolean;
 }
 
-export default function MiddlePanel({ onCompositionUpdate, onPageSelect }: MiddlePanelProps) {
+export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadOnly = false }: MiddlePanelProps) {
   // Use Jotai atoms instead of props
   const [project] = useAtom(projectAtom);
   const [files] = useAtom(filesAtom);
@@ -26,7 +27,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect }: Middl
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(0);
   const [showTimeline, ] = useState(true);
-  const [viewMode, setViewMode] = useState<'player' | 'code'>('player');
+  const [viewMode, setViewMode] = useState<'player' | 'code'>('player'); // Always start with player
   const [compositionData, setCompositionData] = useState<CompositionData>(defaultCompositionData);
   const [jsonString, setJsonString] = useState<string>('');
   const [jsonError, setJsonError] = useState<string | null>(null);
@@ -368,8 +369,8 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect }: Middl
               }`}
             >
               <CodeBracketIcon className="h-4 w-4" />
-              <span>Code</span>
-              {userEditedJson && viewMode !== 'code' && (
+              <span>Code {isReadOnly ? '(Read-Only)' : ''}</span>
+              {userEditedJson && viewMode !== 'code' && !isReadOnly && (
                 <span className="inline-block w-2 h-2 bg-green-400 rounded-full ml-1"></span>
               )}
             </button>
@@ -543,46 +544,56 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect }: Middl
           </div>
           <textarea
             value={jsonString}
-            onChange={(e) => handleJsonChange(e.target.value)}
-            className="flex-1 bg-gray-50 text-gray-800 p-4 rounded-lg font-mono text-sm resize-none border border-gray-300 focus:border-blue-500 focus:outline-none"
-            placeholder="Edit your composition JSON here..."
+            onChange={isReadOnly ? undefined : (e) => handleJsonChange(e.target.value)}
+            readOnly={isReadOnly}
+            className={`flex-1 p-4 rounded-lg font-mono text-sm resize-none border focus:outline-none ${
+              isReadOnly 
+                ? 'bg-gray-100 text-gray-700 border-gray-200 cursor-not-allowed'
+                : 'bg-gray-50 text-gray-800 border-gray-300 focus:border-blue-500'
+            }`}
+            placeholder={isReadOnly ? "Project JSON (Read-Only)" : "Edit your composition JSON here..."}
             style={{ minHeight: '400px' }}
           />
           <div className="flex justify-between items-center mt-4">
             <div className="text-gray-600 text-xs">
-              💡 Tip: Edit the JSON directly to modify pages, elements, timing, and styling. Changes are applied in real-time.
+              {isReadOnly 
+                ? '🔒 This project is shared in read-only mode. You can view the JSON structure but cannot make changes.'
+                : '💡 Tip: Edit the JSON directly to modify pages, elements, timing, and styling. Changes are applied in real-time.'
+              }
             </div>
-            <button 
-              onClick={() => {
-                if (project?.composition && userEditedJson) {
-                  // Reset to the project's composition data
-                  setCompositionData(project.composition);
-                  setJsonString(JSON.stringify(project.composition, null, 2));
-                  setUserEditedJson(false);
-                  
-                  // Clear the stored edited version
-                  lastEditedComposition.current = null;
-                  
-                  // Update parent component
-                  if (onCompositionUpdate) {
-                    onCompositionUpdate(project.composition);
+            {!isReadOnly && (
+              <button 
+                onClick={() => {
+                  if (project?.composition && userEditedJson) {
+                    // Reset to the project's composition data
+                    setCompositionData(project.composition);
+                    setJsonString(JSON.stringify(project.composition, null, 2));
+                    setUserEditedJson(false);
+                    
+                    // Clear the stored edited version
+                    lastEditedComposition.current = null;
+                    
+                    // Update parent component
+                    if (onCompositionUpdate) {
+                      onCompositionUpdate(project.composition);
+                    }
+                    
+                    // In offline mode, update the localStorage as well
+                    if (project?.id) {
+                      localStorage.setItem(`vibe-project-composition-${project.id}`, JSON.stringify(project.composition));
+                    }
                   }
-                  
-                  // In offline mode, update the localStorage as well
-                  if (project?.id) {
-                    localStorage.setItem(`vibe-project-composition-${project.id}`, JSON.stringify(project.composition));
-                  }
-                }
-              }}
-              className={`px-3 py-1 rounded text-xs ${
-                userEditedJson 
-                  ? 'bg-gray-300 text-gray-800 hover:bg-gray-400'
-                  : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-              }`}
-              disabled={!userEditedJson}
-            >
-              Reset Changes
-            </button>
+                }}
+                className={`px-3 py-1 rounded text-xs ${
+                  userEditedJson 
+                    ? 'bg-gray-300 text-gray-800 hover:bg-gray-400'
+                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                }`}
+                disabled={!userEditedJson}
+              >
+                Reset Changes
+              </button>
+            )}
           </div>
         </div>
       )}

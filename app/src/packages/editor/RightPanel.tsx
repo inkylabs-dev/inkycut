@@ -25,9 +25,16 @@ import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom } 
 interface RightPanelProps {
   onSendMessage: (message: string) => void;
   onHandleMessage?: (message: string) => Promise<{ message: string; updatedProject?: any }>;
+  isReadOnly?: boolean;
+  readOnlyMessage?: string;
 }
 
-export default function RightPanel({ onSendMessage, onHandleMessage }: RightPanelProps) {
+export default function RightPanel({ 
+  onSendMessage, 
+  onHandleMessage, 
+  isReadOnly = false, 
+  readOnlyMessage = "Chat is disabled for shared projects" 
+}: RightPanelProps) {
   const [inputMessage, setInputMessage] = useState('');
   const [messages] = useAtom(chatMessagesAtom);
   const [isTyping, setIsTyping] = useState(false);
@@ -148,6 +155,37 @@ export default function RightPanel({ onSendMessage, onHandleMessage }: RightPane
     '⚡ Generate transitions',
     '🔄 Trim clips automatically'
   ];
+
+  // If in read-only mode, show a simplified read-only interface
+  if (isReadOnly) {
+    return (
+      <div className="h-full flex flex-col bg-gray-50 overflow-hidden">
+        {/* Read-only header */}
+        <div className="p-4 border-b border-gray-200 flex-shrink-0">
+          <div className="flex items-center space-x-2">
+            <div className="h-6 w-6 rounded-full bg-gray-300 flex items-center justify-center">
+              <XMarkIcon className="h-4 w-4 text-gray-500" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-500">Read-Only Mode</h3>
+              <p className="text-xs text-gray-400">Chat disabled for shared projects</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Read-only content */}
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="text-center">
+            <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-4">
+              <CpuChipIcon className="h-8 w-8 text-gray-400" />
+            </div>
+            <h4 className="text-sm font-medium text-gray-500 mb-2">AI Chat Disabled</h4>
+            <p className="text-xs text-gray-400 mb-4">{readOnlyMessage}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col bg-white overflow-hidden">

@@ -16,7 +16,7 @@ app OpenSaaS {
     "<meta property='og:title' content='InkyCut' />",
     "<meta property='og:site_name' content='InkyCut' />",
     "<meta property='og:url' content='https://inkycut.com' />",
-    "<meta property='og:description' content='Remix stunning visuals with your brilliant stories. Create, tweak, and bring AI-generated tales to life.' />",
+    "<meta property='og:description' content='Create stunning videos with just a chat.' />",
     "<meta property='og:image' content='https://inkycut.com/public-banner.webp' />",
     "<meta name='twitter:image' content='https://inkycut.com/public-banner.webp' />",
     "<meta name='twitter:image:width' content='800' />",
@@ -229,9 +229,25 @@ page VibeEditorPage {
   component: import VibeEditorPage from "@src/vibe/VibeEditorPage"
 }
 
+route SharedProjectRoute { path: "/shared/:shareId", to: SharedProjectPage }
+page SharedProjectPage {
+  authRequired: false,
+  component: import SharedProjectPage from "@src/vibe/SharedProjectPage"
+}
+
 action processVideoAIPrompt {
   fn: import { processVideoAIPrompt } from "@src/vibe/operations",
   entities: [User]
+}
+
+action shareProject {
+  fn: import { shareProject } from "@src/vibe/shareOperations",
+  entities: [SharedProject]
+}
+
+query getSharedProject {
+  fn: import { getSharedProject } from "@src/vibe/shareOperations",
+  entities: [SharedProject]
 }
 
 

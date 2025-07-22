@@ -28,7 +28,7 @@ export default function App() {
   }, [location]);
 
   const isVibeVideoCut = useMemo(() => {
-    return location.pathname.startsWith('/vibe');
+    return location.pathname.startsWith('/vibe') || location.pathname.startsWith('/shared');
   }, [location]);
 
   useEffect(() => {
