@@ -401,7 +401,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect }: Middl
                   borderRadius: '8px',
                   position: 'relative', // Ensure proper positioning
                 }}
-                controls={true}
+                controls={false}
                 loop={false}
                 autoPlay={false}
                 showVolumeControls={false}
