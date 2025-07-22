@@ -25,7 +25,7 @@ export default function Hero() {
                 sequence={[
                   'with just a chat',
                   2000,
-                  'with vibe filming.',
+                  'using a vibe editor.',
                   2000,
                   'using InkyCut.',
                   2000,
