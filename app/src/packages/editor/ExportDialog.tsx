@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAtom } from 'jotai';
+import Markdown from 'react-markdown';
 import { XMarkIcon, DocumentArrowDownIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
 import { projectAtom } from './atoms';
 
@@ -192,7 +193,18 @@ export default function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
                   <strong>Coming Soon!</strong> Video export will be available in a future update.
                 </p>
                 <p className="text-xs text-blue-500 mt-1">
-                  For now, you can use: <code className="bg-blue-100 px-1 rounded">npx @inkycut/render /path/to/project.json</code>
+                  
+                  <Markdown>
+                    {`
+For now, you can follow the below instruction to render a video:
+
+    $ git clone git@github.com:inkylabs-dev/inkycut.git
+    $ cd inkycut/app
+    $ npm install
+    $ npm run build
+    $ npm run render -- -i /path/to/project.json
+                    `}
+                  </Markdown>                    
                 </p>
               </div>
             )}
