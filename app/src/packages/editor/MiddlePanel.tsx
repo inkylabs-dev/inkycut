@@ -279,6 +279,56 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
     }
   };
 
+  const handleTimelineClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const timelineWidth = rect.width;
+    const relativePosition = clickX / timelineWidth; // 0 to 1
+    
+    const targetFrame = Math.floor(relativePosition * totalFrames);
+    handleSeek(targetFrame);
+  };
+
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handlePlayheadMouseDown = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!isDragging) return;
+      
+      // Find the timeline ruler element
+      const timelineRuler = document.querySelector('.timeline-ruler') as HTMLElement;
+      if (!timelineRuler) return;
+      
+      const rect = timelineRuler.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const timelineWidth = rect.width;
+      const relativePosition = Math.max(0, Math.min(1, mouseX / timelineWidth));
+      
+      const targetFrame = Math.floor(relativePosition * totalFrames);
+      handleSeek(targetFrame);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, totalFrames, handleSeek]);
+
   const handleJsonChange = (newJson: string) => {
     setJsonString(newJson);
     try {
@@ -483,7 +533,10 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
             <div className="bg-gray-100 p-4 border-t border-gray-200 max-h-64 overflow-y-auto">
               <div className="mb-4">
                 {/* Time ruler */}
-                <div className="relative h-6 bg-gray-200 rounded mb-2">
+                <div 
+                  className="relative h-6 bg-gray-200 rounded mb-2 cursor-pointer timeline-ruler"
+                  onClick={handleTimelineClick}
+                >
                   {Array.from({ length: Math.ceil(totalDuration / 5) }, (_, i) => (
                     <div
                       key={`time-marker-${i}`}
@@ -499,7 +552,10 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                     className="absolute top-0 w-0.5 h-full bg-red-500 z-10 transition-all duration-100"
                     style={{ left: `${totalFrames > 0 ? (currentFrame / totalFrames) * 100 : 0}%` }}
                   >
-                    <div className="absolute -top-1 -left-1 w-2 h-2 bg-red-500 rounded-full" />
+                    <div 
+                      className="absolute -top-1 -left-1 w-2 h-2 bg-red-500 rounded-full cursor-grab active:cursor-grabbing hover:scale-125 transition-transform" 
+                      onMouseDown={handlePlayheadMouseDown}
+                    />
                   </div>
                 </div>
 
