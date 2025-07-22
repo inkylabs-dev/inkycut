@@ -250,12 +250,28 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
     }
   }, [totalFrames, playerReady]);
 
-  const handlePageClick = (pageIndex: number) => {
+  const handlePageClick = (pageIndex: number, event: React.MouseEvent<HTMLDivElement>) => {
+    // Calculate the start frame of the clicked page
     let cumulativeFrames = 0;
     for (let i = 0; i < pageIndex; i++) {
-      cumulativeFrames += compositionData.pages[i].duration;
+      const pageDurationMs = compositionData.pages[i].duration;
+      const pageDurationFrames = Math.round((pageDurationMs / 1000) * compositionData.fps);
+      cumulativeFrames += pageDurationFrames;
     }
-    handleSeek(cumulativeFrames);
+    
+    // Calculate the relative position within the clicked block
+    const rect = event.currentTarget.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const blockWidth = rect.width;
+    const relativePosition = clickX / blockWidth; // 0 to 1
+    
+    // Calculate the frame position within the page
+    const pageDurationMs = compositionData.pages[pageIndex].duration;
+    const pageDurationFrames = Math.round((pageDurationMs / 1000) * compositionData.fps);
+    const relativeFrames = Math.floor(relativePosition * pageDurationFrames);
+    const targetFrame = cumulativeFrames + relativeFrames;
+    
+    handleSeek(targetFrame);
     
     // Call onPageSelect with the selected page
     if (onPageSelect && compositionData.pages[pageIndex]) {
@@ -507,7 +523,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                             backgroundColor: pageColors[index % pageColors.length],
                             minWidth: '60px', // Ensure minimum readable width
                           }}
-                          onClick={() => handlePageClick(index)}
+                          onClick={(event) => handlePageClick(index, event)}
                           title={`${page.name} (${formatTime(pagesDuration)})`}
                         >
                           <div className="text-center px-2">
