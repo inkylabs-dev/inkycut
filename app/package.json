@@ -9,7 +9,7 @@
     "render": "tsx .wasp/build/src/packages/render/cli.ts",
     "dev": "wasp start",
     "db:migrate-dev": "wasp db migrate-dev",
-    "deploy": "REACT_APP_API_URL=https://api.inkycut.com WASP_SERVER_URL=https://api.inkycut.com WASP_WEB_CLIENT_URL=https://inkycut.com wasp deploy fly deploy"
+    "deploy": "REACT_APP_API_URL=https://api.inkycut.com WASP_SERVER_URL=https://api.inkycut.com WASP_WEB_CLIENT_URL=https://inkycut.com REACT_APP_GOOGLE_ANALYTICS_ID=G-WC0VHS6FPY wasp deploy fly deploy"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.523.0",

@@ -9,7 +9,7 @@ export const landingCompositionData: CompositionData = {
     {
       "id": "page-1752612414825",
       "name": "Page 1",
-      "duration": 150,
+      "duration": 5000,
       "backgroundColor": "white",
       "elements": [
         {
@@ -136,7 +136,7 @@ export const faqs = [
     href: '',
   },
   {
-    id: 3,
+    id: 4,
     question: 'Why do I need an OpenAI API Key?',
     answer: 'We are in an early stage of development and using OpenAI to power the AI features. Your API key is used only for your account and is only stored on our local browser. We will not ask for user to provide an OpenAI key for premium users.',
     href: '',

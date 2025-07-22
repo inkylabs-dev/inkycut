@@ -76,7 +76,6 @@ export const shareProject = async (
       data: {
         id: shareId,
         s3Key: s3Key,
-        encryptedData: null, // Don't store backup in DB, only in S3
       },
     });
 
