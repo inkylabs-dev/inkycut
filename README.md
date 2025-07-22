@@ -10,6 +10,8 @@ You don't need to pay to use the InkyCut, but an OpenAI API key is required befo
 
 **Want more features? Starting using it and submit an issue on GitHub!**
 
+![Screenshot](./app/public/editor-screenshot.png)
+
 ## 🎬 Vibe Editor: AI-Powered Video Editing
 
 **Talk to your editor, don't wrestle with timelines.**
