@@ -1,2 +1,2 @@
-export const DocsUrl = 'https://inkycut.com/docs';
-export const BlogUrl = 'https://inkycut.com/blog';
+export const DocsUrl = 'https://docs.inkycut.com/';
+export const BlogUrl = 'https://docs.inkycut.com/blog/';
