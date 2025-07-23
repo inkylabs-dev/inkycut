@@ -159,16 +159,16 @@ export default function RightPanel({
   // If in read-only mode, show a simplified read-only interface
   if (isReadOnly) {
     return (
-      <div className="h-full flex flex-col bg-gray-50 overflow-hidden">
+      <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-800 overflow-hidden">
         {/* Read-only header */}
-        <div className="p-4 border-b border-gray-200 flex-shrink-0">
+        <div className="p-4 border-b border-gray-200 dark:border-strokedark flex-shrink-0">
           <div className="flex items-center space-x-2">
-            <div className="h-6 w-6 rounded-full bg-gray-300 flex items-center justify-center">
-              <XMarkIcon className="h-4 w-4 text-gray-500" />
+            <div className="h-6 w-6 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+              <XMarkIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-500">Read-Only Mode</h3>
-              <p className="text-xs text-gray-400">Chat disabled for shared projects</p>
+              <h3 className="font-semibold text-gray-500 dark:text-gray-400">Read-Only Mode</h3>
+              <p className="text-xs text-gray-400 dark:text-gray-500">Chat disabled for shared projects</p>
             </div>
           </div>
         </div>
@@ -176,11 +176,11 @@ export default function RightPanel({
         {/* Read-only content */}
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="text-center">
-            <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-4">
-              <CpuChipIcon className="h-8 w-8 text-gray-400" />
+            <div className="h-16 w-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
+              <CpuChipIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
             </div>
-            <h4 className="text-sm font-medium text-gray-500 mb-2">AI Chat Disabled</h4>
-            <p className="text-xs text-gray-400 mb-4">{readOnlyMessage}</p>
+            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">AI Chat Disabled</h4>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">{readOnlyMessage}</p>
           </div>
         </div>
       </div>
@@ -188,19 +188,19 @@ export default function RightPanel({
   }
 
   return (
-    <div className="h-full flex flex-col bg-white overflow-hidden">
+    <div className="h-full flex flex-col bg-white dark:bg-boxdark overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 flex-shrink-0">
+      <div className="p-4 border-b border-gray-200 dark:border-strokedark flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <CpuChipIcon className="h-6 w-6 text-blue-500" />
             <div>
-              <h3 className="font-semibold text-gray-900">AI Assistant</h3>
-              <p className="text-xs text-gray-500">Online • Ready to help</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">AI Assistant</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Online • Ready to help</p>
             </div>
           </div>
           {localStorage.getItem('openai-api-key') && (
-            <div className="flex items-center space-x-1 text-xs text-green-600">
+            <div className="flex items-center space-x-1 text-xs text-green-600 dark:text-green-400">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <span>Using your API key</span>
             </div>
