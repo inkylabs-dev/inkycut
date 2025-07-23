@@ -65,11 +65,11 @@ export default function ShareDialog({ isOpen, onClose }: ShareDialogProps) {
       const keyBase64 = await exportKey(key);
       const shareableKey = generateShareableKey(keyBase64);
 
-      // Prepare project data for sharing (remove sensitive client-side data)
+      // Prepare project data for sharing (include files in encrypted data)
       const projectToShare = {
         ...project,
-        // Remove local files and appState for security
-        files: [],
+        // Include files in encrypted data for full project sharing
+        files: project.files || [],
         appState: {
           selectedElementId: null,
           selectedPageId: project.composition?.pages?.[0]?.id || null,
