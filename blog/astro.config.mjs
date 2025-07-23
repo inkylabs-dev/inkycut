@@ -37,7 +37,7 @@ export default defineConfig({
         },
       ],
       editLink: {
-        baseUrl: 'https://github.com/inkylabs-dev/inkycut/blog',
+        baseUrl: 'https://github.com/inkylabs-dev/inkycut/blob/main/blog',
       },
       components: {
         SiteTitle: './src/components/MyHeader.astro',
