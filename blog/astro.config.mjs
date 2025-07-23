@@ -69,6 +69,15 @@ export default defineConfig({
             },
           ],
         },
+        {
+          label: 'API',
+          items: [
+            {
+              label: 'API Specification',
+              link: '/api/spec/',
+            },
+          ],
+        },
       ],
       plugins: [
         starlightBlog({

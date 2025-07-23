@@ -3,8 +3,6 @@ title: Project Schema
 description: Complete reference for InkyCut's project data structure and JSON schema
 ---
 
-# Project Schema
-
 InkyCut projects are represented as JSON objects that contain all the data needed to recreate and render video compositions. This schema is designed to be simple, extensible, and compatible with open-source rendering engines.
 
 ## Project Structure

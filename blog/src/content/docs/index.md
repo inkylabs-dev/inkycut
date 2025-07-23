@@ -3,8 +3,6 @@ title: Welcome to InkyCut
 description: The future of video creation is here - AI-powered, conversation-driven, and completely free
 ---
 
-# Welcome to InkyCut
-
 **Create stunning videos through conversation, not complexity.**
 
 InkyCut revolutionizes video creation by eliminating the traditional barriers between your creative vision and the final product. No more wrestling with timelines, learning complex interfaces, or spending hours on technical details that get in the way of your creativity.

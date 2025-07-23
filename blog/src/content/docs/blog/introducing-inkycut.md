@@ -11,8 +11,6 @@ tags:
   - video-editing
 ---
 
-# Introducing InkyCut
-
 I'm sure you've been there: import footage, drag to timeline, adjust cuts, add transitions, sync audio, add fancy stickers, render preview, realize it's not perfect, start over. 
 
 Sound familiar? If you've ever tried to edit a video, you know the pain. The learning curve is steep, the interfaces are cluttered, and what should be creative ends up feeling like fighting with software.
