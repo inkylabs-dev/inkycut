@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { XMarkIcon, KeyIcon, EyeIcon, EyeSlashIcon, SwatchIcon } from '@heroicons/react/24/outline';
-import useColorMode, { ThemeMode } from './hooks/useColorMode';
+import useColorMode from './hooks/useColorMode';
+import { ThemeMode } from './atoms';
 
 interface SettingsDialogProps {
   isOpen: boolean;

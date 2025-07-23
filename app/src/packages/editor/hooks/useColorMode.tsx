@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import useLocalStorage from './useLocalStorage';
-
-export type ThemeMode = 'light' | 'dark' | 'system';
+import { useAtom } from 'jotai';
+import { themeAtom, ThemeMode } from '../atoms';
 
 export default function useColorMode() {
-  const [colorMode, setColorMode] = useLocalStorage<ThemeMode>('color-theme', 'light');
+  const [colorMode, setColorMode] = useAtom(themeAtom);
   const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {

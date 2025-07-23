@@ -2,8 +2,8 @@ import { cn } from '../cn';
 import useColorMode from '../hooks/useColorMode';
 
 const DarkModeSwitcher = () => {
-  const [colorMode, setColorMode, effectiveTheme] = useColorMode();
-  const isInLightMode = effectiveTheme === 'light';
+  const [colorMode, setColorMode] = useColorMode();
+  const isInLightMode = colorMode === 'light';
 
   return (
     <div>
