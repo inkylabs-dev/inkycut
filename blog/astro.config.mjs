@@ -6,23 +6,23 @@ import tailwind from '@astrojs/tailwind';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://your-site.com',
+  site: 'https://inkycut.com',
   trailingSlash: 'always',
   integrations: [
     starlight({
-      title: 'Your SaaS',
+      title: 'InkyCut',
       customCss: ['./src/styles/tailwind.css'],
-      description: 'Documentation for your SaaS.',
+      description: 'InkyCut Documentation',
       logo: {
-        src: '/src/assets/logo.webp',
-        alt: 'Your SaaS',
+        src: '/src/assets/logo.png',
+        alt: 'InkyCut',
       },
       head: [
         // Add your script tags here. Below is an example for Google analytics, etc.
         {
           tag: 'script',
           attrs: {
-            src: 'https://www.googletagmanager.com/gtag/js?id=<YOUR-GOOGLE-ANALYTICS-ID>',
+            src: 'https://www.googletagmanager.com/gtag/js?id=G-WC0VHS6FPY',
           },
         },
         {
@@ -32,12 +32,12 @@ export default defineConfig({
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
         
-          gtag('config', '<YOUR-GOOGLE-ANALYTICS-ID>');
+          gtag('config', 'G-WC0VHS6FPY');
           `,
         },
       ],
       editLink: {
-        baseUrl: 'https://github.com/<your-repo>',
+        baseUrl: 'https://github.com/inkylabs-dev/inkycut/blog',
       },
       components: {
         SiteTitle: './src/components/MyHeader.astro',
@@ -46,9 +46,9 @@ export default defineConfig({
         PageTitle: './src/components/TitleWithBannerImage.astro',
       },
       social: {
-        github: 'https://github.com/wasp-lang/open-saas',
-        twitter: 'https://twitter.com/wasplang',
-        discord: 'https://discord.gg/aCamt5wCpS',
+        github: 'https://github.com/inkylabs-dev/inkycut',
+        twitter: 'https://twitter.com/inkycut',
+        discord: 'https://discord.gg/S2BQU89W',
       },
       sidebar: [
         {
@@ -77,9 +77,9 @@ export default defineConfig({
           authors: {
             Dev: {
               name: 'Dev',
-              title: 'Dev @ Your SaaS',
+              title: 'Dev @ InkyCut',
               picture: '/CRAIG_ROCK.png', // Images in the `public` directory are supported.
-              url: 'https://your-site.com',
+              url: 'https://inkycut.com',
             },
           },
         }),
