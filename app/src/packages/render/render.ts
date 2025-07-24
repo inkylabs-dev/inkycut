@@ -118,6 +118,7 @@ async function fetchProjectData(shareUrl: string, shareId: string, verbose?: boo
 async function processProjectData(projectData: any, verbose?: boolean): Promise<any> {
   if (verbose) {
     console.log(chalk.gray('Processing project data...'));
+    console.log(chalk.gray(`Project has ${projectData.files ? projectData.files.length : 'no'} files`));
   }
 
   // Process the project to replace media sources with data URIs if needed
@@ -140,25 +141,40 @@ async function replaceMediaSourcesWithDataURIs(project: any, verbose?: boolean):
     return processedProject;
   }
   
+  if (verbose) {
+    console.log(chalk.gray(`Found ${processedProject.files.length} files for data URI conversion`));
+  }
+  
   // Create a map of file references for easy lookup
   const fileMap = new Map();
   processedProject.files.forEach((file: any) => {
     if (file.name && file.dataUrl) {
       fileMap.set(file.name, file.dataUrl);
+      if (verbose) {
+        console.log(chalk.gray(`Mapped file: ${file.name}`));
+      }
     }
   });
   
-  // Process media elements if they exist
-  if (processedProject.pages) {
-    await Promise.all(processedProject.pages.map(async (track: any) => {
+  // Process media elements if they exist in composition or at root level
+  const pages = processedProject.composition?.pages || processedProject.pages;
+  if (pages) {
+    await Promise.all(pages.map(async (track: any) => {
       if (track.elements) {
         await Promise.all(track.elements.map(async (clip: any) => {
           try {
             // Process image elements
             if (clip.type === 'image' && clip.src && !clip.src.startsWith('data:')) {
-              if (fileMap.has(clip.src)) {
+                if (fileMap.has(clip.src)) {
+                const originalSrc = clip.src;
                 clip.src = fileMap.get(clip.src);
+                if (verbose) {
+                  console.log(chalk.gray(`Replaced file reference: ${originalSrc} -> data URI`));
+                }
               } else {
+                if (verbose) {
+                  console.log(chalk.gray(`File ${clip.src} not found in fileMap, attempting URL conversion`));
+                }
                 clip.src = await convertUrlToDataURI(clip.src, verbose);
               }
             }
@@ -220,17 +236,9 @@ export async function renderVideo(projectData: any, options: RenderOptions): Pro
   }
   
   // Set up the input props to match MainComposition structure
-  // const inputProps = {
-  //   data: {
-  //     pages: projectData.composition?.pages || projectData.pages || [],
-  //     fps: projectData.composition?.fps || projectData.fps || 30,
-  //     width: projectData.composition?.width || projectData.width || 1920,
-  //     height: projectData.composition?.height || projectData.height || 1080,
-  //   },
-  //   files: projectData.files || [],
-  // };
   const inputProps = {
     data: projectData.composition,
+    files: projectData.files || [],
   };
 
   if (options.verbose) {

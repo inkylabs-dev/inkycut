@@ -30,6 +30,7 @@ const Root = () => {
         height={1080}
         defaultProps={{
           data: defaultCompositionData,
+          files: [],
           // Remove currentPageIndex to enable multi-page rendering
         }}
         calculateMetadata={({ props }) => {

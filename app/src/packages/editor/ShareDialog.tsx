@@ -9,17 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { projectAtom } from './atoms';
 import { generateKey, exportKey, encryptData, generateShareableKey } from './utils/encryptionUtils';
-interface ShareDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onShare: (args: { encryptedData: string; projectName: string }) => Promise<{ shareId: string }>;
-}
-
-interface ShareState {
-  status: 'initial' | 'generating' | 'success' | 'error';
-  shareableLink: string;
-  error: string | null;
-}
+import type { ShareDialogProps, ShareState } from './types';
 
 export default function ShareDialog({ isOpen, onClose, onShare }: ShareDialogProps) {
   const [project] = useAtom(projectAtom);

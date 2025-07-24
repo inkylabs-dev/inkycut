@@ -208,6 +208,18 @@ export interface ChatMessage {
   timestamp: Date | string;
 }
 
+export interface ShareDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onShare: (args: { encryptedData: string; projectName: string }) => Promise<{ shareId: string }>;
+}
+
+export interface ShareState {
+  status: 'initial' | 'generating' | 'success' | 'error';
+  shareableLink: string;
+  error: string | null;
+}
+
 /**
  * Default composition data for testing and creating new projects
  * Provides a sample three-page project with intro, content, and outro sections
