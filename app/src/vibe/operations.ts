@@ -31,6 +31,7 @@ const processVideoAIPromptSchema = z.object({
   prompt: z.string().nonempty(),
   projectData: z.any(),
   apiKey: z.string().optional(), // Optional user-provided API key
+  chatMode: z.enum(['edit', 'ask']).optional().default('edit'), // Chat mode: edit (modify project) or ask (information only)
 });
 
 type ProcessVideoAIPromptInput = z.infer<typeof processVideoAIPromptSchema>;
@@ -65,7 +66,7 @@ export const processVideoAIPrompt = async (
     throw new HttpError(401, 'Only authenticated users can access AI features');
   }
 
-  const { projectId, prompt, projectData, apiKey } = ensureArgsSchemaOrThrowHttpError(
+  const { projectId, prompt, projectData, apiKey, chatMode } = ensureArgsSchemaOrThrowHttpError(
     processVideoAIPromptSchema,
     rawArgs
   );
@@ -101,7 +102,7 @@ export const processVideoAIPrompt = async (
     }
     
     // If not a slash command, proceed with normal AI processing
-    const aiResponse = await generateVideoEditSuggestions(prompt, project, apiKey);
+    const aiResponse = await generateVideoEditSuggestions(prompt, project, apiKey, chatMode);
 
     if (!aiResponse) {
       throw new HttpError(500, 'Failed to generate AI response');
@@ -141,7 +142,7 @@ export const processVideoAIPrompt = async (
 
     return {
       message: aiResponse.message,
-      updatedProject: aiResponse.updatedProject,
+      updatedProject: chatMode === 'edit' ? aiResponse.updatedProject : undefined,
       changes: aiResponse.changes,
     };
   } catch (error: unknown) {
@@ -157,9 +158,10 @@ export const processVideoAIPrompt = async (
  * @param prompt User's prompt about video editing
  * @param project Current project data
  * @param userApiKey Optional user-provided API key
+ * @param chatMode Chat mode: 'edit' for modifications or 'ask' for information only
  * @returns AI response with message and suggested project updates
  */
-async function generateVideoEditSuggestions(prompt: string, project: any, userApiKey?: string) {
+async function generateVideoEditSuggestions(prompt: string, project: any, userApiKey?: string, chatMode: 'edit' | 'ask' = 'edit') {
   try {
     // Use user's API key if provided, otherwise fall back to server's API key
     const apiKeyToUse = userApiKey || process.env.OPENAI_API_KEY;
@@ -177,51 +179,25 @@ async function generateVideoEditSuggestions(prompt: string, project: any, userAp
     // Use full original project data except for appState and files (to avoid sending large base64 data)
     const { appState, files, ...simplifiedProject } = project;
 
-    const functionDef = {
-      name: "edit_json",
-      description: "Edit the JSON object based on user instructions",
-      parameters: {
-        type: "object",
-        properties: {
-          edited_json: {
-            type: "object",
-            description: "The updated version of the input JSON"
-          }
-        },
-        required: ["edited_json"]
-      }
-    };
+    // Create different system prompts and tools based on chat mode
+    const systemPrompt = chatMode === 'ask' 
+      ? getAskModeSystemPrompt()
+      : getEditModeSystemPrompt();
+
+    const tools = chatMode === 'ask'
+      ? getAskModeTools()
+      : getEditModeTools();
+
+    const toolChoice = chatMode === 'ask'
+      ? { type: "function" as const, function: { name: "analyzeVideoProject" } }
+      : { type: "function" as const, function: { name: "changeVideoSchema" } };
+
     const completion = await openAiClient.chat.completions.create({
       model: 'gpt-4-0613', // Use a more capable model for creative tasks
       messages: [
         {
           role: 'system',
-          content:
-            'You are an expert video editor AI assistant. Your job is to help users edit their video projects by suggesting changes and improvements. ' +
-            'You will be given the current state of a video project and a request from the user. ' +
-            'Provide clear, specific advice and modifications to the project based on the user\'s request. ' +
-            'Your suggestions should be actionable and technically feasible within the constraints of the project.\n\n' +
-            'COMPOSITION SCHEMA:\n' +
-            'A video project consists of:\n' +
-            '- composition: { pages: CompositionPage[], fps: number, width: number, height: number }\n' +
-            '- CompositionPage: { id: string, name: string, duration: number, backgroundColor?: string, elements: CompositionElement[] }\n' +
-            '- CompositionElement: {\n' +
-            '  id: string, type: "video"|"image"|"text", left: number, top: number, width: number, height: number,\n' +
-            '  rotation?: number, opacity?: number, zIndex?: number, delay?: number (in milliseconds),\n' +
-            '  src?: string (for video/image), text?: string, fontSize?: number, fontFamily?: string, color?: string,\n' +
-            '  fontWeight?: string, textAlign?: "left"|"center"|"right", isDragging?: boolean,\n' +
-            '  animation?: {\n' +
-            '    props?: Record<string, any>, duration?: number, ease?: string,\n' +
-            '    delay?: number, alternate?: boolean, loop?: boolean|number, autoplay?: boolean\n' +
-            '  }\n' +
-            '}\n\n' +
-            'ANIMATION EXAMPLES:\n' +
-            '- Fade in: { duration: 1000, props: { opacity: [0, 1] } }\n' +
-            '- Slide from left: { duration: 1000, props: { translateX: [-100, 0] } }\n' +
-            '- Scale up: { duration: 1000, props: { scale: [0.5, 1] } }\n' +
-            '- Rotate: { duration: 2000, props: { rotate: "1turn" } }\n' +
-            '- Bounce: { duration: 1000, ease: "easeOutBounce", props: { translateY: [-50, 0] } }\n\n' +
-            'You should call changeVideoSchema tool to apply changes.',
+          content: systemPrompt,
         },
         {
           role: 'user',
@@ -230,74 +206,9 @@ async function generateVideoEditSuggestions(prompt: string, project: any, userAp
           )}. My request: ${prompt}`,
         },
       ],
-      tools: [
-        {
-          type: 'function',
-          function: {
-            name: 'changeVideoSchema',
-            description:
-              'Process video editing suggestions and return modified project',
-            parameters: {
-              type: 'object',
-              properties: {
-                message: {
-                  type: 'string',
-                  description:
-                    'A helpful response to the user explaining the suggested changes',
-                },
-                updatedProject: {
-                  type: 'object',
-                  description: 'Updated project data with suggested changes',
-                  properties: {
-                    composition: {
-                      type: 'object',
-                      properties: {
-                        pages: {
-                          type: 'array',
-                          description:
-                            'Array of composition pages with updated elements',
-                          items: {
-                            type: 'object',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-                changes: {
-                  type: 'array',
-                  description: 'List of changes made to the project',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      type: {
-                        type: 'string',
-                        enum: ['add', 'modify', 'delete'],
-                        description: 'Type of change made',
-                      },
-                      elementType: {
-                        type: 'string',
-                        description: 'Type of element affected (text, image, video, etc.)',
-                      },
-                      elementId: {
-                        type: 'string',
-                        description: 'ID of the element that was changed',
-                      },
-                      description: {
-                        type: 'string',
-                        description: 'Human-readable description of the change',
-                      },
-                    },
-                  },
-                },
-              },
-              required: ['message', 'changes'],
-            },
-          },
-        },
-      ],
-      tool_choice: { type: "function", function: { name: "changeVideoSchema" } },
-      temperature: 1,
+      tools,
+      tool_choice: toolChoice,
+      temperature: chatMode === 'ask' ? 0.3 : 1, // Lower temperature for Ask mode for more focused answers
     });
     const aiResponse = completion?.choices[0]?.message?.tool_calls?.[0]?.function
       ?.arguments;
@@ -307,6 +218,190 @@ async function generateVideoEditSuggestions(prompt: string, project: any, userAp
     console.error('Error generating video edit suggestions:', error);
     throw error;
   }
+}
+
+/**
+ * Get system prompt optimized for Edit mode (project modification)
+ */
+function getEditModeSystemPrompt(): string {
+  return 'You are an expert video editor AI assistant. Your job is to help users edit their video projects by suggesting changes and improvements. ' +
+    'You will be given the current state of a video project and a request from the user. ' +
+    'Provide clear, specific advice and modifications to the project based on the user\'s request. ' +
+    'Your suggestions should be actionable and technically feasible within the constraints of the project.\n\n' +
+    'COMPOSITION SCHEMA:\n' +
+    'A video project consists of:\n' +
+    '- composition: { pages: CompositionPage[], fps: number, width: number, height: number }\n' +
+    '- CompositionPage: { id: string, name: string, duration: number, backgroundColor?: string, elements: CompositionElement[] }\n' +
+    '- CompositionElement: {\n' +
+    '  id: string, type: "video"|"image"|"text", left: number, top: number, width: number, height: number,\n' +
+    '  rotation?: number, opacity?: number, zIndex?: number, delay?: number (in milliseconds),\n' +
+    '  src?: string (for video/image), text?: string, fontSize?: number, fontFamily?: string, color?: string,\n' +
+    '  fontWeight?: string, textAlign?: "left"|"center"|"right", isDragging?: boolean,\n' +
+    '  animation?: {\n' +
+    '    props?: Record<string, any>, duration?: number, ease?: string,\n' +
+    '    delay?: number, alternate?: boolean, loop?: boolean|number, autoplay?: boolean\n' +
+    '  }\n' +
+    '}\n\n' +
+    'ANIMATION EXAMPLES:\n' +
+    '- Fade in: { duration: 1000, props: { opacity: [0, 1] } }\n' +
+    '- Slide from left: { duration: 1000, props: { translateX: [-100, 0] } }\n' +
+    '- Scale up: { duration: 1000, props: { scale: [0.5, 1] } }\n' +
+    '- Rotate: { duration: 2000, props: { rotate: "1turn" } }\n' +
+    '- Bounce: { duration: 1000, ease: "easeOutBounce", props: { translateY: [-50, 0] } }\n\n' +
+    'You should call changeVideoSchema tool to apply changes.';
+}
+
+/**
+ * Get system prompt optimized for Ask mode (information and analysis only)
+ */
+function getAskModeSystemPrompt(): string {
+  return 'You are an expert video editing consultant and analyzer. Your role is to provide detailed information, analysis, and insights about video projects without making any modifications. ' +
+    'You will be given a video project and questions about it. Provide comprehensive, helpful answers that explain:\n' +
+    '- Project structure and composition\n' +
+    '- Element properties and configurations\n' +
+    '- Animation details and timing\n' +
+    '- Technical specifications\n' +
+    '- Best practices and recommendations\n' +
+    '- Potential improvements (as suggestions, not implementations)\n\n' +
+    'COMPOSITION SCHEMA (for reference):\n' +
+    'A video project consists of:\n' +
+    '- composition: { pages: CompositionPage[], fps: number, width: number, height: number }\n' +
+    '- CompositionPage: { id: string, name: string, duration: number, backgroundColor?, elements: CompositionElement[] }\n' +
+    '- CompositionElement: {\n' +
+    '  id, type: "video"|"image"|"text", left, top, width, height,\n' +
+    '  rotation?, opacity?, zIndex?, delay? (milliseconds),\n' +
+    '  src? (for video/image), text?, fontSize?, fontFamily?, color?,\n' +
+    '  fontWeight?, textAlign?: "left"|"center"|"right",\n' +
+    '  animation?: { props?, duration?, ease?, delay?, alternate?, loop?, autoplay? }\n' +
+    '}\n\n' +
+    'Focus on being informative, analytical, and educational. Do NOT suggest modifications - only provide insights and information.';
+}
+
+/**
+ * Get tools for Edit mode (project modification)
+ */
+function getEditModeTools() {
+  return [
+    {
+      type: 'function' as const,
+      function: {
+        name: 'changeVideoSchema',
+        description: 'Process video editing suggestions and return modified project',
+        parameters: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              description: 'A helpful response to the user explaining the suggested changes',
+            },
+            updatedProject: {
+              type: 'object',
+              description: 'Updated project data with suggested changes',
+              properties: {
+                composition: {
+                  type: 'object',
+                  properties: {
+                    pages: {
+                      type: 'array',
+                      description: 'Array of composition pages with updated elements',
+                      items: {
+                        type: 'object',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            changes: {
+              type: 'array',
+              description: 'List of changes made to the project',
+              items: {
+                type: 'object',
+                properties: {
+                  type: {
+                    type: 'string',
+                    enum: ['add', 'modify', 'delete'],
+                    description: 'Type of change made',
+                  },
+                  elementType: {
+                    type: 'string',
+                    description: 'Type of element affected (text, image, video, etc.)',
+                  },
+                  elementId: {
+                    type: 'string',
+                    description: 'ID of the element that was changed',
+                  },
+                  description: {
+                    type: 'string',
+                    description: 'Human-readable description of the change',
+                  },
+                },
+              },
+            },
+          },
+          required: ['message', 'changes'],
+        },
+      },
+    },
+  ];
+}
+
+/**
+ * Get tools for Ask mode (information and analysis only)
+ */
+function getAskModeTools() {
+  return [
+    {
+      type: 'function' as const,
+      function: {
+        name: 'analyzeVideoProject',
+        description: 'Analyze video project and provide detailed information without making modifications',
+        parameters: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              description: 'Comprehensive analysis and information about the project, answering the user\'s question in detail',
+            },
+            analysis: {
+              type: 'object',
+              description: 'Structured analysis of the project',
+              properties: {
+                projectStats: {
+                  type: 'object',
+                  description: 'Project statistics and overview',
+                  properties: {
+                    totalPages: { type: 'number' },
+                    totalElements: { type: 'number' },
+                    elementTypes: { type: 'object' },
+                    totalDuration: { type: 'number' },
+                    resolution: { type: 'string' },
+                    fps: { type: 'number' }
+                  }
+                },
+                insights: {
+                  type: 'array',
+                  description: 'Key insights about the project',
+                  items: { type: 'string' }
+                },
+                recommendations: {
+                  type: 'array',
+                  description: 'Suggestions for improvement (informational only)',
+                  items: { type: 'string' }
+                }
+              }
+            },
+            changes: {
+              type: 'array',
+              description: 'Empty array for Ask mode (no changes made)',
+              items: { type: 'object' }
+            }
+          },
+          required: ['message', 'changes'],
+        },
+      },
+    },
+  ];
 }
 
 //#endregion

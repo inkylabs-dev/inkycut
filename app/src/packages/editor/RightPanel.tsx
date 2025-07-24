@@ -13,7 +13,8 @@ import {
   UserIcon,
   CpuChipIcon,
   EllipsisHorizontalIcon,
-  XMarkIcon
+  XMarkIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline';
 import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom } from './atoms';
 // import { processVideoAIPrompt } from 'wasp/client/operations';
@@ -22,9 +23,11 @@ import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom } 
 // Define types for AI operations following OpenSaaS pattern
 
 
+type ChatMode = 'edit' | 'ask';
+
 interface RightPanelProps {
-  onSendMessage: (message: string) => void;
-  onHandleMessage?: (message: string) => Promise<{ message: string; updatedProject?: any }>;
+  onSendMessage: (message: string, chatMode?: ChatMode) => void;
+  onHandleMessage?: (message: string, chatMode?: ChatMode) => Promise<{ message: string; updatedProject?: any }>;
   isReadOnly?: boolean;
   readOnlyMessage?: string;
 }
@@ -45,6 +48,8 @@ export default function RightPanel({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [chatMode, setChatMode] = useState<ChatMode>('edit');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const isQuickActionsEnabled = false; // Toggle for quick actions visibility
 
   // Auto-scroll to bottom when new messages are added
@@ -55,6 +60,17 @@ export default function RightPanel({
     }
   }, [messages]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isDropdownOpen && !event.target) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isDropdownOpen]);
+
   const handleSendMessage = async () => {
     if (inputMessage.trim()) {
       setIsTyping(true);
@@ -62,7 +78,7 @@ export default function RightPanel({
       
       // Pass the message to the parent component to add the USER message
       // The parent component handles adding the user message to the chat
-      onSendMessage(userMessage);
+      onSendMessage(userMessage, chatMode);
       setInputMessage('');
       
       // Only process with AI if we have a project
@@ -73,14 +89,15 @@ export default function RightPanel({
           
           // Use onHandleMessage if provided, otherwise use default behavior
           const result = onHandleMessage 
-            ? await onHandleMessage(userMessage)
+            ? await onHandleMessage(userMessage, chatMode)
             : {
                 message: "AI functionality not available in standalone mode. Please integrate with wasp for AI features.",
                 updatedProject: null
               };
           
           // Update the project with AI changes if we got an updated project back
-          if (result.updatedProject && project) {
+          // Only update project in 'edit' mode, not in 'ask' mode
+          if (result.updatedProject && project && chatMode === 'edit') {
             setUpdateProject({
               ...project,
               ...(result.updatedProject || {}),
@@ -334,7 +351,7 @@ export default function RightPanel({
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask me anything about video editing..."
+            placeholder={chatMode === 'edit' ? "Tell me how to modify your project..." : "Ask me anything about your project..."}
             className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             rows={2}
             disabled={isTyping}
@@ -347,9 +364,51 @@ export default function RightPanel({
             <PaperAirplaneIcon className="h-4 w-4" />
           </button>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-          Press Enter to send, Shift+Enter for new line
-        </p>
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Press Enter to send, Shift+Enter for new line
+          </p>
+          
+          {/* Chat Mode Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded border border-gray-300 dark:border-gray-600 transition-colors"
+            >
+              <span>{chatMode === 'edit' ? 'Edit' : 'Ask'}</span>
+              <ChevronDownIcon className="h-3 w-3" />
+            </button>
+            
+            {isDropdownOpen && (
+              <div className="absolute right-0 bottom-full mb-1 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg z-10">
+                <button
+                  onClick={() => {
+                    setChatMode('edit');
+                    setIsDropdownOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                    chatMode === 'edit' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  Edit
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Modify project</div>
+                </button>
+                <button
+                  onClick={() => {
+                    setChatMode('ask');
+                    setIsDropdownOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                    chatMode === 'ask' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  Ask
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Get information</div>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
