@@ -139,15 +139,15 @@ export default function ShareDialog({ isOpen, onClose }: ShareDialogProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-600">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center">
             <ShareIcon className="h-5 w-5 mr-2" />
             Share Project
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
@@ -158,18 +158,18 @@ export default function ShareDialog({ isOpen, onClose }: ShareDialogProps) {
           {shareState.status === 'initial' && (
             <div className="text-center">
               <div className="mb-4">
-                <ShareIcon className="h-16 w-16 mx-auto text-gray-300" />
+                <ShareIcon className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-500" />
               </div>
-              <h4 className="text-lg font-medium text-gray-900 mb-2">
+              <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                 Share Your Project
               </h4>
-              <p className="text-sm text-gray-600 mb-6">
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
                 Create a secure shareable link for your project. The upload will be secured 
                 with end-to-end encryption.
               </p>
               <button
                 onClick={handleShare}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
               >
                 <ShareIcon className="h-4 w-4 mr-2" />
                 Generate Share Link
@@ -181,12 +181,12 @@ export default function ShareDialog({ isOpen, onClose }: ShareDialogProps) {
           {shareState.status === 'generating' && (
             <div className="text-center">
               <div className="mb-4">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 dark:border-blue-400 mx-auto"></div>
               </div>
-              <h4 className="text-lg font-medium text-gray-900 mb-2">
+              <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                 Generating...
               </h4>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Encrypting and uploading your project securely...
               </p>
             </div>
@@ -196,17 +196,17 @@ export default function ShareDialog({ isOpen, onClose }: ShareDialogProps) {
           {shareState.status === 'success' && (
             <div>
               <div className="mb-4 text-center">
-                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
-                  <CheckIcon className="h-8 w-8 text-green-600" />
+                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 mb-4">
+                  <CheckIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
                 </div>
-                <h4 className="text-lg font-medium text-gray-900 mb-2">
+                <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                   Share Link Generated!
                 </h4>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Shareable Link
                   </label>
                   <div className="flex">
@@ -214,15 +214,15 @@ export default function ShareDialog({ isOpen, onClose }: ShareDialogProps) {
                       type="text"
                       value={shareState.shareableLink}
                       readOnly
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md text-sm bg-gray-50 text-gray-600"
+                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md text-sm bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
                     />
                     <button
                       onClick={handleCopyLink}
-                      className="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-white hover:bg-gray-50 text-sm font-medium text-gray-700"
+                      className="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-md bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {copied ? (
                         <>
-                          <CheckIcon className="h-4 w-4 mr-1 text-green-600" />
+                          <CheckIcon className="h-4 w-4 mr-1 text-green-600 dark:text-green-400" />
                           Copied!
                         </>
                       ) : (
@@ -235,13 +235,13 @@ export default function ShareDialog({ isOpen, onClose }: ShareDialogProps) {
                   </div>
                 </div>
 
-                <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-3">
                   <div className="flex items-start">
                     <div className="flex-shrink-0">
-                      <ExclamationTriangleIcon className="h-5 w-5 text-blue-600" />
+                      <ExclamationTriangleIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div className="ml-3">
-                      <p className="text-sm text-blue-600">
+                      <p className="text-sm text-blue-600 dark:text-blue-300">
                         <strong>End-to-End Encryption:</strong> The upload has been secured 
                         with end-to-end encryption, which means that InkyCut server and 
                         third parties can't read the content.
@@ -257,19 +257,19 @@ export default function ShareDialog({ isOpen, onClose }: ShareDialogProps) {
           {shareState.status === 'error' && (
             <div className="text-center">
               <div className="mb-4">
-                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
-                  <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
+                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900 mb-4">
+                  <ExclamationTriangleIcon className="h-8 w-8 text-red-600 dark:text-red-400" />
                 </div>
-                <h4 className="text-lg font-medium text-gray-900 mb-2">
+                <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                   Share Failed
                 </h4>
-                <p className="text-sm text-red-600 mb-4">
+                <p className="text-sm text-red-600 dark:text-red-400 mb-4">
                   {shareState.error}
                 </p>
               </div>
               <button
                 onClick={handleShare}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
               >
                 Try Again
               </button>
@@ -277,10 +277,10 @@ export default function ShareDialog({ isOpen, onClose }: ShareDialogProps) {
           )}
         </div>
         
-        <div className="flex justify-end space-x-3 p-4 border-t border-gray-200">
+        <div className="flex justify-end space-x-3 p-4 border-t border-gray-200 dark:border-gray-600">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
           >
             {shareState.status === 'success' ? 'Done' : 'Cancel'}
           </button>

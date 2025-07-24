@@ -109,21 +109,21 @@ export default function LocalFileUpload({
       <div
         onDrop={handleDrop}
         onDragOver={handleDragOver}
-        className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors"
+        className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
       >
         <div className="flex flex-col items-center space-y-2">
-          <ArrowUpTrayIcon className="h-8 w-8 text-gray-400" />
-          <div className="text-sm text-gray-600">
+          <ArrowUpTrayIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+          <div className="text-sm text-gray-600 dark:text-gray-300">
             <button
               onClick={handleButtonClick}
               disabled={isUploading}
-              className="text-blue-600 hover:text-blue-500 font-medium disabled:opacity-50"
+              className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 font-medium disabled:opacity-50"
             >
               {isUploading ? 'Adding files...' : buttonText}
             </button>
             <span> or drag and drop</span>
           </div>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
             Images, videos up to 50MB
           </div>
         </div>

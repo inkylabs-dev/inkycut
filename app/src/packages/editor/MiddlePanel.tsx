@@ -410,9 +410,9 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   }), [compositionData, currentFrame, files]);
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
       {/* Top Toggle Bar */}
-      <div className="bg-gray-50 p-2 border-b border-gray-200">
+      <div className="bg-gray-50 dark:bg-gray-800 p-2 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <button
@@ -420,7 +420,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
               className={`flex items-center space-x-2 px-3 py-1 rounded text-sm font-medium transition-colors ${
                 viewMode === 'player' 
                   ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
               }`}
             >
               <VideoCameraIcon className="h-4 w-4" />
@@ -431,7 +431,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
               className={`flex items-center space-x-2 px-3 py-1 rounded text-sm font-medium transition-colors ${
                 viewMode === 'code' 
                   ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
               }`}
             >
               <CodeBracketIcon className="h-4 w-4" />
@@ -441,10 +441,10 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
               )}
             </button>
           </div>
-          <div className="text-gray-800 text-sm flex items-center">
+          <div className="text-gray-800 dark:text-gray-200 text-sm flex items-center">
             {project?.name || 'Untitled Project'}
             {userEditedJson && (
-              <span className="ml-2 text-xs text-green-600">(Edited)</span>
+              <span className="ml-2 text-xs text-green-600 dark:text-green-400">(Edited)</span>
             )}
           </div>
         </div>
@@ -454,7 +454,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
       {viewMode === 'player' ? (
         <>
           {/* Remotion Player Area */}
-          <div className="flex-1 bg-gray-100 flex items-center justify-center relative">
+          <div className="flex-1 bg-gray-100 dark:bg-gray-800 flex items-center justify-center relative">
             <div className="w-full max-w-4xl aspect-video">
               <Player
                 ref={playerRef}
@@ -487,7 +487,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
           </div>
 
           {/* Control Bar */}
-          <div className="bg-gray-100 p-4 border-t border-gray-200">
+          <div className="bg-gray-100 dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <button
@@ -495,7 +495,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                   disabled={!playerReady}
                   className={`p-2 rounded-full transition-all ${
                     !playerReady 
-                      ? 'bg-gray-300 cursor-not-allowed text-gray-500' 
+                      ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed text-gray-500 dark:text-gray-400' 
                       : 'bg-blue-600 hover:bg-blue-700 text-white'
                   }`}
                 >
@@ -510,17 +510,17 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                   disabled={!playerReady}
                   className={`p-2 rounded-full transition-all ${
                     !playerReady 
-                      ? 'bg-gray-300 cursor-not-allowed text-gray-500' 
-                      : 'bg-gray-400 hover:bg-gray-500 text-white'
+                      ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed text-gray-500 dark:text-gray-400' 
+                      : 'bg-gray-400 hover:bg-gray-500 dark:bg-gray-600 dark:hover:bg-gray-500 text-white'
                   }`}
                 >
                   <StopIcon className="h-5 w-5" />
                 </button>
-                <div className="text-gray-700 text-sm">
+                <div className="text-gray-700 dark:text-gray-300 text-sm">
                   {formatTime(currentTime)} / {formatTime(totalDuration)}
                 </div>
                 {!playerReady && (
-                  <div className="text-yellow-600 text-sm">
+                  <div className="text-yellow-600 dark:text-yellow-400 text-sm">
                     Initializing player...
                   </div>
                 )}
@@ -530,20 +530,20 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
 
           {/* Page-based Timeline */}
           {showTimeline && (
-            <div className="bg-gray-100 p-4 border-t border-gray-200 max-h-64 overflow-y-auto">
+            <div className="bg-gray-100 dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700 max-h-64 overflow-y-auto">
               <div className="mb-4">
                 {/* Time ruler */}
                 <div 
-                  className="relative h-6 bg-gray-200 rounded mb-2 cursor-pointer timeline-ruler"
+                  className="relative h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2 cursor-pointer timeline-ruler"
                   onClick={handleTimelineClick}
                 >
                   {Array.from({ length: Math.ceil(totalDuration / 5) }, (_, i) => (
                     <div
                       key={`time-marker-${i}`}
-                      className="absolute top-0 h-full border-l border-gray-400"
+                      className="absolute top-0 h-full border-l border-gray-400 dark:border-gray-500"
                       style={{ left: `${(i * 5 / totalDuration) * 100}%` }}
                     >
-                      <span className="text-xs text-gray-600 ml-1">{i * 5}s</span>
+                      <span className="text-xs text-gray-600 dark:text-gray-400 ml-1">{i * 5}s</span>
                     </div>
                   ))}
                   
@@ -561,7 +561,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
 
                 {/* Pages Track */}
                 <div className="overflow-x-auto">
-                  <div className="relative h-12 bg-gray-200 rounded" style={{ minWidth: '100%' }}>
+                  <div className="relative h-12 bg-gray-200 dark:bg-gray-700 rounded" style={{ minWidth: '100%' }}>
                     {compositionData.pages.map((page, index) => {
                       const startTime = compositionData.pages
                         .slice(0, index)
@@ -572,7 +572,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                       return (
                         <div
                           key={`page-${page.id}`}
-                          className="absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center cursor-pointer hover:opacity-80 border border-gray-300"
+                          className="absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center cursor-pointer hover:opacity-80 border border-gray-300 dark:border-gray-600"
                           style={{
                             left: `${(startTime / totalDuration) * 100}%`,
                             width: `${(pagesDuration / totalDuration) * 100}%`,
@@ -597,18 +597,18 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
         </>
       ) : (
         /* Code Editor Area */
-        <div className="flex-1 flex flex-col bg-white p-4">
+        <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 p-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-gray-800 text-lg font-semibold">Composition JSON</h3>
+            <h3 className="text-gray-800 dark:text-gray-200 text-lg font-semibold">Composition JSON</h3>
             <div className="flex items-center gap-3">
               {userEditedJson && (
-                <div className="text-green-600 text-sm flex items-center">
-                  <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                <div className="text-green-600 dark:text-green-400 text-sm flex items-center">
+                  <span className="inline-block w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full mr-1"></span>
                   Changes applied
                 </div>
               )}
               {jsonError && (
-                <div className="text-red-600 text-sm">
+                <div className="text-red-600 dark:text-red-400 text-sm">
                   Error: {jsonError}
                 </div>
               )}
@@ -620,14 +620,14 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
             readOnly={isReadOnly}
             className={`flex-1 p-4 rounded-lg font-mono text-sm resize-none border focus:outline-none ${
               isReadOnly 
-                ? 'bg-gray-100 text-gray-700 border-gray-200 cursor-not-allowed'
-                : 'bg-gray-50 text-gray-800 border-gray-300 focus:border-blue-500'
+                ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 cursor-not-allowed'
+                : 'bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400'
             }`}
             placeholder={isReadOnly ? "Project JSON (Read-Only)" : "Edit your composition JSON here..."}
             style={{ minHeight: '400px' }}
           />
           <div className="flex justify-between items-center mt-4">
-            <div className="text-gray-600 text-xs">
+            <div className="text-gray-600 dark:text-gray-400 text-xs">
               {isReadOnly 
                 ? '🔒 This project is shared in read-only mode. You can view the JSON structure but cannot make changes.'
                 : '💡 Tip: Edit the JSON directly to modify pages, elements, timing, and styling. Changes are applied in real-time.'
@@ -658,8 +658,8 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                 }}
                 className={`px-3 py-1 rounded text-xs ${
                   userEditedJson 
-                    ? 'bg-gray-300 text-gray-800 hover:bg-gray-400'
-                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    ? 'bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                 }`}
                 disabled={!userEditedJson}
               >

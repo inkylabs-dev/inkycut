@@ -2,12 +2,21 @@ import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage, AppState, LocalFile } from './types';
 
+export type ThemeMode = 'light' | 'dark' | 'system';
+
 /**
  * Primary atom to store the project data with persistence
  * Uses atomWithStorage to automatically save/load project from localStorage
  * @type {Project | null} - The current project or null if no project exists
  */
 export const projectAtom = atomWithStorage<Project | null>('vibe-project', null);
+
+/**
+ * Persistent storage for theme mode using atomWithStorage
+ * Stores the theme preference in localStorage
+ * @type {ThemeMode} - The current theme mode: 'light', 'dark', or 'system'
+ */
+export const themeAtom = atomWithStorage<ThemeMode>('color-theme', 'light');
 
 /**
  * Write-only atom for updating the project
