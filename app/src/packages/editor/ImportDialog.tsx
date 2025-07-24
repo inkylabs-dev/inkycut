@@ -116,12 +116,12 @@ export default function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Import Project</h3>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-600">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Import Project</h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
@@ -131,19 +131,19 @@ export default function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
               isDragOver
-                ? 'border-blue-400 bg-blue-50'
-                : 'border-gray-300 hover:border-gray-400'
+                ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
             }`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onClick={handleDropAreaClick}
           >
-            <DocumentArrowUpIcon className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <p className="text-lg font-medium text-gray-900 mb-2">
+            <DocumentArrowUpIcon className="h-12 w-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
+            <p className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
               {isImporting ? 'Importing...' : 'Select JSON file to import'}
             </p>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               Drag and drop a project JSON file here, or click to browse
             </p>
             
@@ -159,27 +159,27 @@ export default function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
             <button
               onClick={handleChooseFile}
               disabled={isImporting}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Choose File
             </button>
           </div>
           
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             </div>
           )}
           
-          <div className="mt-4 text-xs text-gray-500">
+          <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
             <p>⚠️ Importing will replace your current project. Make sure to export your current work first if needed.</p>
           </div>
         </div>
         
-        <div className="flex justify-end space-x-3 p-4 border-t border-gray-200">
+        <div className="flex justify-end space-x-3 p-4 border-t border-gray-200 dark:border-gray-600">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
           >
             Cancel
           </button>
