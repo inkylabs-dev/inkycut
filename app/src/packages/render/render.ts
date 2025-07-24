@@ -256,6 +256,9 @@ export async function renderVideo(projectData: any, options: RenderOptions): Pro
     console.log(chalk.gray('Rendering...'));
   }
   
+  // Track rendering start time for progress estimation
+  const startTime = Date.now();
+  
   // Render using Remotion with the selected composition
   await renderMedia({
     composition,
@@ -267,16 +270,34 @@ export async function renderVideo(projectData: any, options: RenderOptions): Pro
     pixelFormat: 'yuv420p',
     overwrite: true,
     timeoutInMilliseconds: 300000, // 5 minutes timeout
-    onProgress: (progress) => {
+    onProgress: ({progress}) => {
       if (options.verbose && typeof progress === 'number') {
         const percentage = Math.round(progress * 100);
-        console.log(chalk.blue(`Rendering progress: ${percentage}%`));
+        const barLength = 20;
+        const filledLength = Math.round((percentage / 100) * barLength);
+        const emptyLength = barLength - filledLength;
+        const progressBar = '█'.repeat(filledLength) + '░'.repeat(emptyLength);
+        
+        // Calculate time estimates
+        const elapsed = Date.now() - startTime;
+        const elapsedSeconds = Math.floor(elapsed / 1000);
+        const estimatedTotal = progress > 0 ? Math.floor(elapsed / progress) : 0;
+        const estimatedTotalSeconds = Math.floor(estimatedTotal / 1000);
+        const remainingSeconds = Math.max(0, estimatedTotalSeconds - elapsedSeconds);
+        
+        const formatTime = (seconds: number) => {
+          const mins = Math.floor(seconds / 60);
+          const secs = seconds % 60;
+          return `${mins}:${secs.toString().padStart(2, '0')}`;
+        };
+        
+        process.stdout.write(`\r${chalk.blue('Rendering:')} [${progressBar}] ${percentage}% Left ${formatTime(remainingSeconds)} / Total ${formatTime(estimatedTotalSeconds)}`);
       }
     },
   });
   
   if (options.verbose) {
-    console.log(chalk.gray('Video rendered successfully'));
+    console.log('\n' + chalk.gray('Video rendered successfully'));
   }
 }
 
