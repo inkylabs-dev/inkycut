@@ -125,12 +125,14 @@ Represents a distinct section/scene in the composition. Each page contains its o
 
 ### CompositionElement
 
-Represents a visual element in the composition. Elements can be videos, images, or text that are positioned and styled within the composition timeline.
+Represents a visual element in the composition. Elements can be videos, images, text, or groups that are positioned and styled within the composition timeline.
+
+**Note for Group Elements**: Child elements within a group use absolute positioning relative to the group container. The group automatically calculates its scale based on the natural bounds of its children versus the allocated group dimensions. Child elements maintain their original left/top/width/height values, and the entire group is scaled to fit within the specified group boundaries.
 
 | Property | Type | Description | Required |
 |----------|------|-------------|----------|
 | `id` | `string` | Unique identifier for the element | ✓ |
-| `type` | `'video' \| 'image' \| 'text'` | Type of element | ✓ |
+| `type` | `'video' \| 'image' \| 'text' \| 'group'` | Type of element | ✓ |
 | `left` | `number` | X position from left edge (in pixels) | ✓ |
 | `top` | `number` | Y position from top edge (in pixels) | ✓ |
 | `width` | `number` | Element width in pixels | ✓ |
@@ -140,6 +142,7 @@ Represents a visual element in the composition. Elements can be videos, images, 
 | `zIndex` | `number` | Stack order - higher values appear above lower values | |
 | `delay` | `number` | Delay before element appears (in milliseconds) | |
 | `src` | `string` | Source URL for video or image elements | |
+| `elements` | [`CompositionElement[]`](#compositionelement) | Child elements for group elements (positioned absolutely within group container, auto-scaled to fit) | |
 | `text` | `string` | Content of a text element | |
 | `fontSize` | `number` | Font size in pixels | |
 | `fontFamily` | `string` | Font family name | |
@@ -234,6 +237,52 @@ Represents a file stored locally in the project. Files are stored as data URLs (
   }
 }
 ```
+
+### Creating a Group Element with Child Elements
+
+```json
+{
+  "id": "title-card",
+  "type": "group",
+  "left": 100,
+  "top": 100,
+  "width": 600,
+  "height": 200,
+  "elements": [
+    {
+      "id": "title-text",
+      "type": "text",
+      "left": 50,
+      "top": 20,
+      "width": 400,
+      "height": 60,
+      "text": "Welcome",
+      "fontSize": 48,
+      "color": "#ffffff",
+      "fontWeight": "bold"
+    },
+    {
+      "id": "subtitle-text",
+      "type": "text",
+      "left": 50,
+      "top": 100,
+      "width": 350,
+      "height": 40,
+      "text": "to InkyCut",
+      "fontSize": 32,
+      "color": "#cccccc"
+    }
+  ],
+  "animation": {
+    "props": { "opacity": [0, 1] },
+    "duration": 1000,
+    "ease": "easeInOut",
+    "autoplay": true
+  }
+}
+```
+
+*Note: In this example, the child elements have a natural width of 450px (50 + 400) and height of 140px (100 + 40). The group will automatically scale these elements to fit within the 600×200 group boundaries.*
 
 ## Rendering Compatibility
 

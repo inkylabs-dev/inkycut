@@ -6,8 +6,8 @@
 export interface CompositionElement {
   /** Unique identifier for the element */
   id: string; 
-  /** Type of element: video, image, or text */
-  type: 'video' | 'image' | 'text';
+  /** Type of element: video, image, text, or group */
+  type: 'video' | 'image' | 'text' | 'group';
   /** X position from left edge (in pixels) */
   left: number;
   /** Y position from top edge (in pixels) */
@@ -28,6 +28,10 @@ export interface CompositionElement {
   // Video/Image specific properties
   /** Source URL for video or image elements */
   src?: string;
+  
+  // Group specific properties
+  /** Child elements for group elements (positioned relative to group) */
+  elements?: CompositionElement[];
   
   // Text specific properties
   /** Content of a text element */
@@ -67,6 +71,12 @@ export interface CompositionElement {
     /** Auto-play animation */
     autoplay?: boolean;
   };
+  
+  // Methods for dynamic dimension calculation
+  /** Get the effective width of the element (may differ from width property for groups) */
+  getWidth?(): number;
+  /** Get the effective height of the element (may differ from height property for groups) */
+  getHeight?(): number;
 }
 
 /**

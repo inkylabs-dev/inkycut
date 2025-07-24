@@ -233,15 +233,24 @@ function getEditModeSystemPrompt(): string {
     '- composition: { pages: CompositionPage[], fps: number, width: number, height: number }\n' +
     '- CompositionPage: { id: string, name: string, duration: number, backgroundColor?: string, elements: CompositionElement[] }\n' +
     '- CompositionElement: {\n' +
-    '  id: string, type: "video"|"image"|"text", left: number, top: number, width: number, height: number,\n' +
+    '  id: string, type: "video"|"image"|"text"|"group", left: number, top: number, width: number, height: number,\n' +
     '  rotation?: number, opacity?: number, zIndex?: number, delay?: number (in milliseconds),\n' +
-    '  src?: string (for video/image), text?: string, fontSize?: number, fontFamily?: string, color?: string,\n' +
+    '  src?: string (for video/image), elements?: CompositionElement[] (for group - child elements with absolute positioning),\n' +
+    '  text?: string, fontSize?: number, fontFamily?: string, color?: string,\n' +
     '  fontWeight?: string, textAlign?: "left"|"center"|"right", isDragging?: boolean,\n' +
     '  animation?: {\n' +
     '    props?: Record<string, any>, duration?: number, ease?: string,\n' +
     '    delay?: number, alternate?: boolean, loop?: boolean|number, autoplay?: boolean\n' +
     '  }\n' +
     '}\n\n' +
+    'GROUP ELEMENT NOTES:\n' +
+    '- Group elements contain child elements in the "elements" property\n' +
+    '- Child elements use absolute positioning with their original left/top/width/height values\n' +
+    '- The group automatically calculates scale based on child bounds vs group dimensions\n' +
+    '- Natural group bounds = max(childLeft + childWidth), max(childTop + childHeight)\n' +
+    '- Scale = min(groupWidth/naturalWidth, groupHeight/naturalHeight)\n' +
+    '- Groups can contain any element type, including other groups (nesting supported)\n' +
+    '- Groups act as containers that clip and scale their children to fit\n\n' +
     'ANIMATION EXAMPLES:\n' +
     '- Fade in: { duration: 1000, props: { opacity: [0, 1] } }\n' +
     '- Slide from left: { duration: 1000, props: { translateX: [-100, 0] } }\n' +
@@ -268,12 +277,13 @@ function getAskModeSystemPrompt(): string {
     '- composition: { pages: CompositionPage[], fps: number, width: number, height: number }\n' +
     '- CompositionPage: { id: string, name: string, duration: number, backgroundColor?, elements: CompositionElement[] }\n' +
     '- CompositionElement: {\n' +
-    '  id, type: "video"|"image"|"text", left, top, width, height,\n' +
+    '  id, type: "video"|"image"|"text"|"group", left, top, width, height,\n' +
     '  rotation?, opacity?, zIndex?, delay? (milliseconds),\n' +
-    '  src? (for video/image), text?, fontSize?, fontFamily?, color?,\n' +
-    '  fontWeight?, textAlign?: "left"|"center"|"right",\n' +
+    '  src? (for video/image), elements? (for group - child elements with absolute positioning, auto-scaled),\n' +
+    '  text?, fontSize?, fontFamily?, color?, fontWeight?, textAlign?: "left"|"center"|"right",\n' +
     '  animation?: { props?, duration?, ease?, delay?, alternate?, loop?, autoplay? }\n' +
     '}\n\n' +
+    'GROUP ELEMENTS: Groups contain child elements positioned absolutely. The group auto-scales to fit children within allocated bounds.\n\n' +
     'Focus on being informative, analytical, and educational. Do NOT suggest modifications - only provide insights and information.';
 }
 
@@ -325,7 +335,7 @@ function getEditModeTools() {
                   },
                   elementType: {
                     type: 'string',
-                    description: 'Type of element affected (text, image, video, etc.)',
+                    description: 'Type of element affected (text, image, video, group, etc.)',
                   },
                   elementId: {
                     type: 'string',

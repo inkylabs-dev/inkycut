@@ -10,7 +10,7 @@
 // Basic composition component
 import React, { useRef } from 'react';
 import { AbsoluteFill, useCurrentFrame, Img, Video, Sequence } from 'remotion';
-import { CompositionData, ElementRendererProps, LocalFile } from './types';
+import { CompositionData, CompositionElement, ElementRendererProps, LocalFile } from './types';
 import { Layer } from './Layer';
 import { FileResolver, createFileResolver } from './utils/fileResolver';
 import { useAnimeTimeline } from './useAnimeTimeline';
@@ -19,6 +19,21 @@ import { createTimeline } from "animejs";
 // Utility function to generate unique IDs
 const generateUniqueId = (): string => {
   return `el-${Math.random().toString(36).substring(2, 9)}-${Date.now().toString(36)}`;
+};
+
+// Helper functions to get element dimensions
+const getElementWidth = (element: CompositionElement): number => {
+  if (element.getWidth) {
+    return element.getWidth();
+  }
+  return element.width || 0;
+};
+
+const getElementHeight = (element: CompositionElement): number => {
+  if (element.getHeight) {
+    return element.getHeight();
+  }
+  return element.height || 0;
 };
 
 // Individual element renderer
@@ -85,8 +100,8 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
     position: 'absolute',
     left: elementWithId.left,
     top: elementWithId.top,
-    width: elementWithId.width,
-    height: elementWithId.height,
+    width: getElementWidth(elementWithId),
+    height: getElementHeight(elementWithId),
     transform: `rotate(${elementWithId.rotation || 0}deg)`,
     opacity: calculatedOpacity,
     zIndex: elementWithId.zIndex || 0,
@@ -143,6 +158,76 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
           <div id={elementWithId.id}>
             {elementWithId.text || 'Sample Text'}
           </div>
+        </div>
+      );
+
+    case 'group':
+      // Calculate the natural bounds of all child elements
+      const childElements = elementWithId.elements || [];
+      let maxWidth = 0;
+      let maxHeight = 0;
+      
+      childElements.forEach(child => {
+        const childLeft = child.left || 0;
+        const childTop = child.top || 0;
+        const childWidth = getElementWidth(child);
+        const childHeight = getElementHeight(child);
+        const childRight = childLeft + childWidth;
+        const childBottom = childTop + childHeight;
+        maxWidth = Math.max(maxWidth, childRight);
+        maxHeight = Math.max(maxHeight, childBottom);
+      });
+
+      // Create group element with dynamic getWidth/getHeight methods
+      const groupElementWithMethods = {
+        ...elementWithId,
+        getWidth: () => elementWithId.width || maxWidth,
+        getHeight: () => elementWithId.height || maxHeight,
+      };
+
+      // Use the dynamic methods to get group dimensions
+      const groupWidth = getElementWidth(groupElementWithMethods);
+      const groupHeight = getElementHeight(groupElementWithMethods);
+      
+      // Calculate scale based on group dimensions vs content bounds
+      const scaleX = maxWidth > 0 ? groupWidth / maxWidth : 1;
+      const scaleY = maxHeight > 0 ? groupHeight / maxHeight : 1;
+      const scale = Math.min(scaleX, scaleY); // Use the smaller scale to fit within bounds
+      
+      return (
+        <div
+          ref={elementRef}
+          id={scopeRef}
+          style={{
+            ...style,
+            width: groupWidth,
+            height: groupHeight,
+            overflow: 'hidden',
+          }}
+        >
+          {childElements.map((childElement) => {
+            // Scale child element dimensions and position
+            const scaledChild = {
+              ...childElement,
+              left: (childElement.left || 0) * scale,
+              top: (childElement.top || 0) * scale,
+              width: getElementWidth(childElement) * scale,
+              height: getElementHeight(childElement) * scale,
+              // Ensure child has unique ID
+              id: childElement.id || generateUniqueId(),
+            };
+
+            return (
+              <ElementRenderer
+                key={`group-child-${scaledChild.id}`}
+                element={scaledChild}
+                frame={frame}
+                fps={fps}
+                fileResolver={fileResolver}
+                isPlayerContext={isPlayerContext}
+              />
+            );
+          })}
         </div>
       );
 
