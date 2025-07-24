@@ -119,7 +119,7 @@ Represents a distinct section/scene in the composition. Each page contains its o
 |----------|------|-------------|----------|
 | `id` | `string` | Unique identifier for the page | ✓ |
 | `name` | `string` | User-friendly name for the page | ✓ |
-| `duration` | `number` | Duration of the page in milliseconds | ✓ |
+| `duration` | `number` | Duration of the page in milliseconds (defaults to 5000ms if not provided) | |
 | `backgroundColor` | `string` | Background color of the page (CSS color value) | |
 | `elements` | [`CompositionElement[]`](#compositionelement) | Array of elements that appear on this page | ✓ |
 

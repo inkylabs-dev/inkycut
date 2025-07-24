@@ -218,7 +218,7 @@ export const createDefaultPage = (): CompositionPage => {
   return {
     id: `page-${Date.now()}`,
     name: 'Page 1',
-    duration: 5 * 30, // 5 seconds at 30fps
+    duration: 5000, // 5 seconds in milliseconds
     backgroundColor: 'white',
     elements: []
   };
@@ -382,6 +382,7 @@ export const ensureCompositionIDs = (composition: CompositionData): CompositionD
       return {
         ...page,
         id: pageId,
+        duration: page.duration ?? 5000, // Default to 5000ms if duration is missing
         elements: page.elements.map((element, elementIndex) => {
           // Ensure element has an ID
           const elementId = element.id || `element-${Date.now()}-${pageIndex}-${elementIndex}`;
