@@ -222,9 +222,9 @@ export default function VibeEditorPage () {
   // Show loading indicator
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-        <div className="ml-4 text-gray-700">Loading project...</div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-boxdark-2">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 dark:border-white"></div>
+        <div className="ml-4 text-gray-700 dark:text-gray-300">Loading project...</div>
       </div>
     );
   }
@@ -232,8 +232,8 @@ export default function VibeEditorPage () {
   // Show error message
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-500 text-xl">Error loading project: {error.message}</div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-boxdark-2">
+        <div className="text-red-500 dark:text-red-400 text-xl">Error loading project: {error.message}</div>
       </div>
     );
   }
@@ -241,18 +241,18 @@ export default function VibeEditorPage () {
   // Show message if no project is loaded
   if (!project) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500 text-xl">Project not found</div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-boxdark-2">
+        <div className="text-gray-500 dark:text-gray-400 text-xl">Project not found</div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-gray-100">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-gray-100 dark:bg-boxdark-2">
       {/* Main content area without top banner */}
       <div className="flex w-full h-full overflow-hidden">
         {/* Left Panel - Files / Elements */}
-        <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0 overflow-hidden">
+        <div className="w-80 bg-white dark:bg-boxdark border-r border-gray-200 dark:border-strokedark flex-shrink-0 overflow-hidden">
           <LeftPanel 
             onElementUpdate={handleElementUpdate}
             onShare={shareProject}
@@ -269,7 +269,7 @@ export default function VibeEditorPage () {
         </div>
 
         {/* Right Panel - Chat UI only */}
-        <div className="w-80 bg-white border-l border-gray-200 flex-shrink-0 overflow-hidden">
+        <div className="w-80 bg-white dark:bg-boxdark border-l border-gray-200 dark:border-strokedark flex-shrink-0 overflow-hidden">
           <RightPanel
             onSendMessage={handleChatMessage}
             onHandleMessage={async (message: string) => {

@@ -154,12 +154,12 @@ export default function LeftPanel({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-4 border-b border-gray-200 bg-white">
+      <div className="p-4 border-b border-gray-200 dark:border-strokedark bg-white dark:bg-boxdark">
         <div className="flex items-center mb-4">
           {!isReadOnly && (
             <div className="relative">
               <button 
-                className="text-gray-700 hover:text-gray-900 focus:outline-none" 
+                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none" 
                 onClick={() => setShowMenu(!showMenu)}
               >
                 <Bars3Icon className="h-6 w-6" />
@@ -168,7 +168,7 @@ export default function LeftPanel({
             {showMenu && (
               <div 
                 ref={menuRef}
-                className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
+                className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-boxdark ring-1 ring-black dark:ring-strokedark ring-opacity-5 z-10"
               >
                 <div className="py-1">
                   {menuConfig.showForkAndEdit && (
@@ -179,9 +179,9 @@ export default function LeftPanel({
                         }
                         setShowMenu(false);
                       }}
-                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
                     >
-                      <DocumentDuplicateIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      <DocumentDuplicateIcon className="mr-2 h-5 w-5 text-gray-500 dark:text-gray-400" />
                       Fork and Edit
                     </button>
                   )}
@@ -192,9 +192,9 @@ export default function LeftPanel({
                         setShowImportDialog(true);
                         setShowMenu(false);
                       }}
-                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
                     >
-                      <ArrowDownTrayIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      <ArrowDownTrayIcon className="mr-2 h-5 w-5 text-gray-500 dark:text-gray-400" />
                       Import Project
                     </button>
                   )}
@@ -205,9 +205,9 @@ export default function LeftPanel({
                         setShowExportDialog(true);
                         setShowMenu(false);
                       }}
-                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
                     >
-                      <ArrowUpTrayIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      <ArrowUpTrayIcon className="mr-2 h-5 w-5 text-gray-500 dark:text-gray-400" />
                       Export Project
                     </button>
                   )}
@@ -218,9 +218,9 @@ export default function LeftPanel({
                         setShowShareDialog(true);
                         setShowMenu(false);
                       }}
-                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
                     >
-                      <ShareIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      <ShareIcon className="mr-2 h-5 w-5 text-gray-500 dark:text-gray-400" />
                       Share...
                     </button>
                   )}
@@ -228,9 +228,9 @@ export default function LeftPanel({
                   {menuConfig.showReset && (
                     <button
                       onClick={handleResetProject}
-                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
                     >
-                      <ArrowPathIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      <ArrowPathIcon className="mr-2 h-5 w-5 text-gray-500 dark:text-gray-400" />
                       Reset Project
                     </button>
                   )}
@@ -241,9 +241,9 @@ export default function LeftPanel({
                         setShowSettings(true);
                         setShowMenu(false);
                       }}
-                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
                     >
-                      <CogIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      <CogIcon className="mr-2 h-5 w-5 text-gray-500 dark:text-gray-400" />
                       Settings...
                     </button>
                   )}
@@ -251,9 +251,9 @@ export default function LeftPanel({
                   {menuConfig.showHome && (
                     <Link 
                       to="/"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
-                      <HomeIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      <HomeIcon className="mr-2 h-5 w-5 text-gray-500 dark:text-gray-400" />
                       Home Page
                     </Link>
                   )}
@@ -263,9 +263,9 @@ export default function LeftPanel({
                       href="https://twitter.com/inkycut" 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
-                      <HeartIcon className="mr-2 h-5 w-5 text-gray-500" />
+                      <HeartIcon className="mr-2 h-5 w-5 text-gray-500 dark:text-gray-400" />
                       Follow Us
                     </a>
                   )}
@@ -275,9 +275,9 @@ export default function LeftPanel({
                       href="https://github.com/inkylabs-dev/inkycut" 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
-                      <svg className="mr-2 h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <svg className="mr-2 h-5 w-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
                       </svg>
                       GitHub
@@ -295,13 +295,13 @@ export default function LeftPanel({
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-gray-200 dark:border-strokedark">
         <button
           onClick={() => setActiveTab('files')}
           className={`flex-1 px-4 py-2 text-sm font-medium ${
             activeTab === 'files'
-              ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-500'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-b-2 border-blue-500'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
         >
           Files
@@ -310,8 +310,8 @@ export default function LeftPanel({
           onClick={() => setActiveTab('elements')}
           className={`flex-1 px-4 py-2 text-sm font-medium ${
             activeTab === 'elements'
-              ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-500'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-b-2 border-blue-500'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
         >
           Elements
@@ -323,13 +323,13 @@ export default function LeftPanel({
         {activeTab === 'files' && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-900">Project Assets</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Project Assets</h3>
             </div>
             
             {/* File Upload Section - disabled based on prop */}
             {!disableFileUpload && (
               <div className="mb-6">
-                <h4 className="text-xs font-medium text-gray-700 mb-2">Add Local Files</h4>
+                <h4 className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Add Local Files</h4>
                 <LocalFileUpload
                   onUploadComplete={handleUploadComplete}
                   onUploadError={handleUploadError}
@@ -340,7 +340,7 @@ export default function LeftPanel({
             )}
             {/* Local Files Section */}
             <div>
-              <h4 className="text-xs font-medium text-gray-700 mb-2">Project Files</h4>
+              <h4 className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Project Files</h4>
               <div className="space-y-2">
                 {localFiles.length > 0 ? (
                   localFiles.map((file: LocalFile) => (
@@ -351,7 +351,7 @@ export default function LeftPanel({
                     />
                   ))
                 ) : (
-                  <div className="text-xs text-gray-500 py-2">No files added yet</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 py-2">No files added yet</div>
                 )}
               </div>
             </div>
@@ -362,7 +362,7 @@ export default function LeftPanel({
         {activeTab === 'elements' && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-900">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 {selectedPage ? `${selectedPage.name} Elements` : 'Page Elements'}
               </h3>
             </div>
@@ -374,15 +374,15 @@ export default function LeftPanel({
                     key={element.id}
                     className={`p-3 rounded cursor-pointer border ${
                       selectedElement?.id === element.id
-                        ? 'bg-blue-50 border-blue-200'
-                        : 'bg-white border-gray-200 hover:bg-gray-50'
+                        ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700'
+                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                     onClick={() => setSelectedElement(element)}
                   >
                     <div className="flex items-center">
                       <ElementPreview element={element} className="w-12 h-12 mr-3" fileResolver={fileResolver} />
                       <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           {element.type === 'text' ? 
                             (element.text ? 
                               (element.text.length > 20 ? `${element.text.substring(0, 20)}...` : element.text) 
@@ -393,10 +393,10 @@ export default function LeftPanel({
                               : `${element.type} Element`)
                           }
                         </div>
-                        <div className="text-xs text-gray-500 capitalize flex items-center">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 capitalize flex items-center">
                           <span className="mr-2">{element.type}</span>
                           {element.delay !== undefined && (
-                            <span className="text-xs bg-gray-100 px-1 rounded">
+                            <span className="text-xs bg-gray-100 dark:bg-gray-700 px-1 rounded">
                               delay: {element.delay}ms
                             </span>
                           )}
@@ -407,9 +407,9 @@ export default function LeftPanel({
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 <div className="mb-2">
-                  <DocumentIcon className="h-12 w-12 mx-auto text-gray-300" />
+                  <DocumentIcon className="h-12 w-12 mx-auto text-gray-300 dark:text-gray-600" />
                 </div>
                 <p className="text-sm">
                   {selectedPage ? 'No elements in this page' : 'Click on a page block to view its elements'}

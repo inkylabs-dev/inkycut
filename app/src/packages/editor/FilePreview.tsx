@@ -64,18 +64,18 @@ const FilePreview: React.FC<FilePreviewProps> = ({ type, className = "w-10 h-10"
   const getFileIcon = (type: string) => {
     switch (type) {
       case 'video':
-        return <VideoCameraIcon className="h-5 w-5 text-blue-500" />;
+        return <VideoCameraIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />;
       case 'audio':
-        return <MusicalNoteIcon className="h-5 w-5 text-green-500" />;
+        return <MusicalNoteIcon className="h-5 w-5 text-green-500 dark:text-green-400" />;
       case 'image':
-        return <PhotoIcon className="h-5 w-5 text-purple-500" />;
+        return <PhotoIcon className="h-5 w-5 text-purple-500 dark:text-purple-400" />;
       default:
-        return <DocumentIcon className="h-5 w-5 text-gray-500" />;
+        return <DocumentIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />;
     }
   };
 
   return (
-    <div className={`${className} bg-gray-100 rounded border border-gray-200 flex items-center justify-center`}>
+    <div className={`${className} bg-gray-100 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center`}>
       {getFileIcon(type)}
     </div>
   );

@@ -94,17 +94,17 @@ export default function FileListItem({ file }: FileListItemProps) {
 
   return (
     <div
-      className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer border border-gray-200 group"
+      className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer border border-gray-200 dark:border-gray-600 group"
       onClick={handleFileClick}
     >
       <div className="mr-3">
         <LocalFilePreviewItem file={file} />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium text-gray-900 truncate" title={file.name}>
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate" title={file.name}>
           {file.name}
         </div>
-        <div className="text-xs text-gray-500 truncate">
+        <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
           {file.type} • {(file.size / 1024 / 1024).toFixed(1)}MB
         </div>
       </div>
@@ -114,10 +114,10 @@ export default function FileListItem({ file }: FileListItemProps) {
           disabled={isAddingToPage || !selectedPage}
           className={`opacity-0 group-hover:opacity-100 p-1 transition-opacity text-xs ${
             isAddingToPage 
-              ? 'text-gray-400 cursor-not-allowed'
+              ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
               : selectedPage
-                ? 'text-blue-500 hover:text-blue-700'
-                : 'text-gray-400 cursor-not-allowed'
+                ? 'text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
+                : 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
           }`}
           title={selectedPage ? "Add to current page" : "Select a page first"}
         >
@@ -125,7 +125,7 @@ export default function FileListItem({ file }: FileListItemProps) {
         </button>
         <button
           onClick={handleRemoveFile}
-          className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 p-1 transition-opacity"
+          className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 transition-opacity"
           title="Remove file"
         >
           ×
@@ -143,7 +143,7 @@ function LocalFilePreviewItem({ file }: { file: LocalFile }) {
   const isVideo = file.type.startsWith('video/');
 
   if (hasError || (!isImage && !isVideo)) {
-    return getFileIcon(file.type, 'w-8 h-8 text-gray-400 flex-shrink-0');
+    return getFileIcon(file.type, 'w-8 h-8 text-gray-400 dark:text-gray-500 flex-shrink-0');
   }
 
   if (isImage) {
@@ -151,7 +151,7 @@ function LocalFilePreviewItem({ file }: { file: LocalFile }) {
       <img 
         src={file.dataUrl} 
         alt={file.name}
-        className="w-8 h-8 object-cover rounded flex-shrink-0 border border-gray-200"
+        className="w-8 h-8 object-cover rounded flex-shrink-0 border border-gray-200 dark:border-gray-600"
         onError={() => setHasError(true)}
       />
     );
@@ -161,7 +161,7 @@ function LocalFilePreviewItem({ file }: { file: LocalFile }) {
     return (
       <video 
         src={file.dataUrl}
-        className="w-8 h-8 object-cover rounded flex-shrink-0 border border-gray-200"
+        className="w-8 h-8 object-cover rounded flex-shrink-0 border border-gray-200 dark:border-gray-600"
         muted
         preload="metadata"
         onError={() => setHasError(true)}
@@ -170,5 +170,5 @@ function LocalFilePreviewItem({ file }: { file: LocalFile }) {
   }
 
   // Fallback to document icon
-  return getFileIcon(file.type, 'w-8 h-8 text-gray-400 flex-shrink-0');
+  return getFileIcon(file.type, 'w-8 h-8 text-gray-400 dark:text-gray-500 flex-shrink-0');
 }

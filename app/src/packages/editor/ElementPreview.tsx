@@ -49,7 +49,7 @@ const ElementPreview: React.FC<ElementPreviewProps> = ({ element, className = "w
         <img 
           src={previewUrl} 
           alt={element.text || 'Image'}
-          className={`${className} object-cover rounded border border-gray-200`}
+          className={`${className} object-cover rounded border border-gray-200 dark:border-gray-600`}
           onError={() => setHasError(true)}
         />
         {isResolved && (
@@ -65,7 +65,7 @@ const ElementPreview: React.FC<ElementPreviewProps> = ({ element, className = "w
       <div className="relative">
         <video 
           src={previewUrl} 
-          className={`${className} object-cover rounded border border-gray-200`}
+          className={`${className} object-cover rounded border border-gray-200 dark:border-gray-600`}
           muted
           preload="metadata"
           onError={() => setHasError(true)}
@@ -91,8 +91,8 @@ const ElementPreview: React.FC<ElementPreviewProps> = ({ element, className = "w
 
   if (element.type === 'text') {
     return (
-      <div className={`${className} bg-gray-100 rounded border border-gray-200 flex items-center justify-center p-2`}>
-        <DocumentTextIcon className="h-5 w-5 text-gray-600" />
+      <div className={`${className} bg-gray-100 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center p-2`}>
+        <DocumentTextIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
       </div>
     );
   }
@@ -101,18 +101,18 @@ const ElementPreview: React.FC<ElementPreviewProps> = ({ element, className = "w
   const getElementIcon = (type: string) => {
     switch (type) {
       case 'video':
-        return <VideoCameraIcon className="h-5 w-5 text-blue-500" />;
+        return <VideoCameraIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />;
       case 'image':
-        return <PhotoIcon className="h-5 w-5 text-purple-500" />;
+        return <PhotoIcon className="h-5 w-5 text-purple-500 dark:text-purple-400" />;
       case 'text':
-        return <DocumentTextIcon className="h-5 w-5 text-gray-600" />;
+        return <DocumentTextIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />;
       default:
-        return <DocumentIcon className="h-5 w-5 text-gray-500" />;
+        return <DocumentIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />;
     }
   };
 
   return (
-    <div className={`${className} bg-gray-100 rounded border border-gray-200 flex items-center justify-center`}>
+    <div className={`${className} bg-gray-100 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center`}>
       {getElementIcon(element.type)}
     </div>
   );
