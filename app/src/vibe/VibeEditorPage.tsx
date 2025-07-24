@@ -22,7 +22,7 @@ import {
   ensureCompositionIDs,
   createServerSafeProject
 } from '../packages/editor';
-import { processVideoAIPrompt } from 'wasp/client/operations';
+import { processVideoAIPrompt, shareProject } from 'wasp/client/operations';
 
 export default function VibeEditorPage () {
   const navigate = useNavigate();
@@ -255,6 +255,7 @@ export default function VibeEditorPage () {
         <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0 overflow-hidden">
           <LeftPanel 
             onElementUpdate={handleElementUpdate}
+            onShare={shareProject}
           />
         </div>
 

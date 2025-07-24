@@ -1,6 +1,5 @@
 {
   "name": "inkycut",
-  "type": "module",
   "scripts": {
     "start": "wasp start",
     "build": "npm run build:app && npm run build:bundle",

@@ -9,11 +9,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { projectAtom } from './atoms';
 import { generateKey, exportKey, encryptData, generateShareableKey } from './utils/encryptionUtils';
-import { shareProject } from 'wasp/client/operations';
-
 interface ShareDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  onShare: (args: { encryptedData: string; projectName: string }) => Promise<{ shareId: string }>;
 }
 
 interface ShareState {
@@ -22,7 +21,7 @@ interface ShareState {
   error: string | null;
 }
 
-export default function ShareDialog({ isOpen, onClose }: ShareDialogProps) {
+export default function ShareDialog({ isOpen, onClose, onShare }: ShareDialogProps) {
   const [project] = useAtom(projectAtom);
   const [shareState, setShareState] = useState<ShareState>({
     status: 'initial',
@@ -90,7 +89,7 @@ export default function ShareDialog({ isOpen, onClose }: ShareDialogProps) {
       const encryptedPayload = JSON.stringify({ encrypted, iv });
 
       // Call backend API to upload to S3 and get share ID
-      const shareResponse = await shareProject({
+      const shareResponse = await onShare({
         encryptedData: encryptedPayload,
         projectName: project.name || 'Untitled Project'
       });

@@ -44,6 +44,7 @@ interface LeftPanelProps {
   disableFileUpload?: boolean;
   menuConfig?: MenuConfig;
   onForkAndEdit?: () => void;
+  onShare?: (args: { encryptedData: string; projectName: string }) => Promise<{ shareId: string }>;
 }
 
 export default function LeftPanel({ 
@@ -61,7 +62,8 @@ export default function LeftPanel({
     showFollow: true,
     showGitHub: true,
   },
-  onForkAndEdit 
+  onForkAndEdit,
+  onShare
 }: LeftPanelProps) {
   // Use Jotai atoms instead of props
   const [project, setProject] = useAtom(projectAtom);
@@ -437,10 +439,13 @@ export default function LeftPanel({
       />
 
       {/* Share Dialog */}
-      <ShareDialog
-        isOpen={showShareDialog}
-        onClose={() => setShowShareDialog(false)}
-      />
+      {onShare && (
+        <ShareDialog
+          isOpen={showShareDialog}
+          onClose={() => setShowShareDialog(false)}
+          onShare={onShare}
+        />
+      )}
     </div>
   );
 }
