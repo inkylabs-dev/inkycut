@@ -34,14 +34,17 @@ const Root = () => {
           // Remove currentPageIndex to enable multi-page rendering
         }}
         calculateMetadata={({ props }) => {
-          // Calculate total duration from all pages
+          // Calculate total duration from all pages, converting milliseconds to frames
+          const fps = props.data?.fps || 30;
+
           const totalDuration = props.data?.pages?.reduce((total: number, page: any) => {
-            return total + (page.duration || 0);
+            const durationInFrames = Math.round(((page.duration || 0) / 1000) * fps);
+            return total + durationInFrames;
           }, 0) || 300;
           
           return {
             durationInFrames: totalDuration,
-            fps: props.data?.fps || 30,
+            fps: fps,
             width: props.data?.width || 1920,
             height: props.data?.height || 1080,
           };
