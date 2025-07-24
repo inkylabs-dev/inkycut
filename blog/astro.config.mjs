@@ -78,6 +78,15 @@ export default defineConfig({
             },
           ],
         },
+        {
+          label: 'Contributing',
+          items: [
+            {
+              label: 'Contribution Guide',
+              link: '/contribution/',
+            },
+          ],
+        },
       ],
       plugins: [
         starlightBlog({
