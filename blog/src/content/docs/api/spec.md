@@ -282,7 +282,10 @@ Represents a file stored locally in the project. Files are stored as data URLs (
 }
 ```
 
-*Note: In this example, the child elements have a natural width of 450px (50 + 400) and height of 140px (100 + 40). The group will automatically scale these elements to fit within the 600×200 group boundaries.*
+
+In this example, the child elements have a natural width of 450px (400 + 50) and height of 140px (100 + 40). The group will automatically scale these elements to fit within the 600×200 group boundaries.*
+
+See the example project [here](https://inkycut.com/shared/590368c0-013b-428e-b109-16026c242b85#key=NDDwhk6acgSO3zo8gWOiW_YUKysVDA7ZMFOq8Wpj6rI).
 
 ## Rendering Compatibility
 
