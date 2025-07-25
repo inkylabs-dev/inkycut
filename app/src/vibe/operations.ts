@@ -31,7 +31,7 @@ const processVideoAIPromptSchema = z.object({
   prompt: z.string().nonempty(),
   projectData: z.any(),
   apiKey: z.string().optional(), // Optional user-provided API key
-  chatMode: z.enum(['edit', 'ask']).optional().default('edit'), // Chat mode: edit (modify project) or ask (information only)
+  chatMode: z.enum(['edit', 'ask', 'agent']).optional().default('edit'), // Chat mode: edit (modify project), ask (information only), or agent (multi-step execution)
 });
 
 type ProcessVideoAIPromptInput = z.infer<typeof processVideoAIPromptSchema>;
@@ -52,10 +52,14 @@ function isEligibleForAIFeatures(user: User, apiKey?: string): boolean {
 
 /**
  * Process video editing AI prompt or slash command and return suggested edits or command results
+ * Supports three modes:
+ * - edit: Single-step project modification
+ * - ask: Information and analysis only (no modifications)
+ * - agent: Multi-step execution until goal is achieved
  *
  * @param args The input data including projectId, prompt, and current project data
  * @param context The operation context containing user authentication data
- * @returns Updated project data with AI-suggested changes or command results
+ * @returns Updated project data with AI-suggested changes, command results, or agent execution results
  * @throws HttpError if user is not authenticated or not eligible for AI features
  */
 export const processVideoAIPrompt = async (
@@ -102,7 +106,15 @@ export const processVideoAIPrompt = async (
     }
     
     // If not a slash command, proceed with normal AI processing
-    const aiResponse = await generateVideoEditSuggestions(prompt, project, apiKey, chatMode);
+    let aiResponse;
+    
+    if (chatMode === 'agent') {
+      // Agent mode: Run a sequence of operations until goal is met
+      aiResponse = await runAgentMode(prompt, project, apiKey, context.user);
+    } else {
+      // Regular edit or ask mode
+      aiResponse = await generateVideoEditSuggestions(prompt, project, apiKey, chatMode);
+    }
 
     if (!aiResponse) {
       throw new HttpError(500, 'Failed to generate AI response');
@@ -113,11 +125,16 @@ export const processVideoAIPrompt = async (
     try {
       // Only decrement credits if user is not using their own API key
       if (!apiKey || apiKey.trim() === '') {
+        // For agent mode, deduct credits based on number of steps taken
+        const creditsToDeduct = chatMode === 'agent' && aiResponse.agentSteps 
+          ? Math.min(aiResponse.agentSteps.length, 5) // Cap at 5 credits max
+          : 1; // Regular mode uses 1 credit
+          
         await context.entities.User.update({
           where: { id: context.user.id },
           data: {
             credits: {
-              decrement: 1,
+              decrement: creditsToDeduct,
             },
           },
         });
@@ -142,8 +159,10 @@ export const processVideoAIPrompt = async (
 
     return {
       message: aiResponse.message,
-      updatedProject: chatMode === 'edit' ? aiResponse.updatedProject : undefined,
+      updatedProject: (chatMode === 'edit' || chatMode === 'agent') ? aiResponse.updatedProject : undefined,
       changes: aiResponse.changes,
+      agentSteps: aiResponse.agentSteps, // Include agent steps if available
+      goalComplete: aiResponse.goalComplete, // Include goal completion status
     };
   } catch (error: unknown) {
     console.error('Error in processVideoAIPrompt:', error);
@@ -151,6 +170,246 @@ export const processVideoAIPrompt = async (
     throw new HttpError(500, `AI processing failed: ${errorMessage}`);
   }
 };
+
+/**
+ * Run Agent mode: Execute a sequence of operations until the user's goal is met
+ * 
+ * @param prompt User's goal/request
+ * @param project Current project data
+ * @param userApiKey Optional user-provided API key
+ * @param user User context for credit management
+ * @returns Final AI response with all changes made
+ */
+async function runAgentMode(prompt: string, project: any, userApiKey?: string, user?: User) {
+  const maxSteps = 5; // Prevent infinite loops
+  const steps: any[] = [];
+  let currentProject = { ...project };
+  let allChanges: any[] = [];
+  let stepCount = 0;
+  
+  try {
+    // Use user's API key if provided, otherwise fall back to server's API key
+    const apiKeyToUse = userApiKey || process.env.OPENAI_API_KEY;
+    
+    if (!apiKeyToUse) {
+      throw new Error('No OpenAI API key available. Please provide your API key in Settings.');
+    }
+
+    // Create OpenAI client with the appropriate API key
+    const openAiClient = new OpenAI({
+      apiKey: apiKeyToUse,
+      baseURL: process.env.OPENAI_BASE_URL || undefined
+    });
+
+    while (stepCount < maxSteps) {
+      stepCount++;
+      
+      // Use full original project data except for appState and files
+      const { appState, files, ...simplifiedProject } = currentProject;
+
+      const completion = await openAiClient.chat.completions.create({
+        model: 'gpt-4-0613',
+        messages: [
+          {
+            role: 'system',
+            content: getAgentModeSystemPrompt(),
+          },
+          {
+            role: 'user',
+            content: `My video project: ${JSON.stringify(simplifiedProject)}
+            
+Original goal: ${prompt}
+
+Steps completed so far: ${JSON.stringify(steps)}
+
+Current step: ${stepCount}/${maxSteps}
+
+What should I do next to achieve the goal? If the goal is complete, respond with "GOAL_COMPLETE".`,
+          },
+        ],
+        tools: getAgentModeTools(),
+        tool_choice: { type: "function" as const, function: { name: "agentStep" } },
+        temperature: 0.7,
+      });
+
+      const aiResponse = completion?.choices[0]?.message?.tool_calls?.[0]?.function?.arguments;
+      const result = aiResponse ? JSON.parse(aiResponse) : null;
+      
+      if (!result) {
+        throw new Error('Failed to get valid response from AI agent');
+      }
+
+      // Check if goal is complete
+      if (result.goalComplete || result.action === 'GOAL_COMPLETE') {
+        return {
+          message: `Goal achieved! ${result.message}\n\nSteps completed:\n${steps.map((step, i) => `${i + 1}. ${step.description}`).join('\n')}`,
+          updatedProject: currentProject,
+          changes: allChanges,
+          agentSteps: steps,
+          goalComplete: true
+        };
+      }
+
+      // Record this step
+      steps.push({
+        step: stepCount,
+        action: result.action,
+        description: result.description,
+        reasoning: result.reasoning
+      });
+
+      // Apply changes if any
+      if (result.updatedProject) {
+        currentProject = result.updatedProject;
+      }
+      
+      if (result.changes && result.changes.length > 0) {
+        allChanges = [...allChanges, ...result.changes];
+      }
+
+      // Check if agent decided to stop
+      if (result.shouldStop) {
+        break;
+      }
+    }
+
+    // If we've reached max steps without completion
+    return {
+      message: `Made significant progress towards your goal, but reached the step limit (${maxSteps} steps). Here's what was accomplished:\n\n${steps.map((step, i) => `${i + 1}. ${step.description}`).join('\n')}\n\nYou can continue by making another request.`,
+      updatedProject: currentProject,
+      changes: allChanges,
+      agentSteps: steps,
+      goalComplete: false
+    };
+
+  } catch (error) {
+    console.error('Error in agent mode:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get system prompt for Agent mode
+ */
+function getAgentModeSystemPrompt(): string {
+  return 'You are an AI video editing agent that executes a sequence of operations to achieve user goals. ' +
+    'Your job is to break down complex requests into actionable steps and execute them one by one until the goal is met.\n\n' +
+    'AGENT WORKFLOW:\n' +
+    '1. Analyze the user\'s goal and current project state\n' +
+    '2. Determine the next logical step needed\n' +
+    '3. Execute that step by modifying the project\n' +
+    '4. Evaluate if the goal is complete or if more steps are needed\n' +
+    '5. Continue until goal is achieved or maximum steps reached\n\n' +
+    'COMPOSITION SCHEMA:\n' +
+    'A video project consists of:\n' +
+    '- composition: { pages: CompositionPage[], fps: number, width: number, height: number }\n' +
+    '- CompositionPage: { id: string, name: string, duration: number, backgroundColor?: string, elements: CompositionElement[] }\n' +
+    '- CompositionElement: {\n' +
+    '  id: string, type: "video"|"image"|"text"|"group", left: number, top: number, width: number, height: number,\n' +
+    '  rotation?: number, opacity?: number, zIndex?: number, delay?: number (in milliseconds),\n' +
+    '  src?: string (for video/image), elements?: CompositionElement[] (for group),\n' +
+    '  text?: string, fontSize?: number, fontFamily?: string, color?: string,\n' +
+    '  fontWeight?: string, textAlign?: "left"|"center"|"right",\n' +
+    '  animation?: { props?, duration?, ease?, delay?, alternate?, loop?, autoplay? }\n' +
+    '}\n\n' +
+    'AGENT DECISION MAKING:\n' +
+    '- Be methodical and logical in your approach\n' +
+    '- Make one meaningful change per step\n' +
+    '- Explain your reasoning for each step\n' +
+    '- Check if the goal is complete after each step\n' +
+    '- Stop when the user\'s goal is fully achieved\n\n' +
+    'EXAMPLE MULTI-STEP GOALS:\n' +
+    '- "Create a title sequence": 1) Add title text, 2) Position it, 3) Add fade-in animation, 4) Add background\n' +
+    '- "Make it more engaging": 1) Analyze current content, 2) Add animations, 3) Improve timing, 4) Add effects\n' +
+    '- "Fix the layout": 1) Identify layout issues, 2) Reposition elements, 3) Adjust sizing, 4) Improve alignment';
+}
+
+/**
+ * Get tools for Agent mode
+ */
+function getAgentModeTools() {
+  return [
+    {
+      type: 'function' as const,
+      function: {
+        name: 'agentStep',
+        description: 'Execute one step in the agent workflow towards achieving the user\'s goal',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: {
+              type: 'string',
+              description: 'The action being taken in this step (e.g., "add_title", "adjust_timing", "GOAL_COMPLETE")',
+            },
+            description: {
+              type: 'string',
+              description: 'Human-readable description of what this step accomplishes',
+            },
+            reasoning: {
+              type: 'string',
+              description: 'Explanation of why this step is necessary to achieve the goal',
+            },
+            message: {
+              type: 'string',
+              description: 'Message to the user about this step or completion',
+            },
+            updatedProject: {
+              type: 'object',
+              description: 'Updated project data after this step (if changes were made)',
+              properties: {
+                composition: {
+                  type: 'object',
+                  properties: {
+                    pages: {
+                      type: 'array',
+                      description: 'Array of composition pages with updated elements',
+                      items: { type: 'object' },
+                    },
+                  },
+                },
+              },
+            },
+            changes: {
+              type: 'array',
+              description: 'List of changes made in this step',
+              items: {
+                type: 'object',
+                properties: {
+                  type: {
+                    type: 'string',
+                    enum: ['add', 'modify', 'delete'],
+                    description: 'Type of change made',
+                  },
+                  elementType: {
+                    type: 'string',
+                    description: 'Type of element affected',
+                  },
+                  elementId: {
+                    type: 'string',
+                    description: 'ID of the element that was changed',
+                  },
+                  description: {
+                    type: 'string',
+                    description: 'Description of the change',
+                  },
+                },
+              },
+            },
+            goalComplete: {
+              type: 'boolean',
+              description: 'Whether the user\'s goal has been fully achieved',
+            },
+            shouldStop: {
+              type: 'boolean',
+              description: 'Whether the agent should stop (goal complete or requires user input)',
+            },
+          },
+          required: ['action', 'description', 'reasoning', 'message', 'goalComplete', 'shouldStop'],
+        },
+      },
+    },
+  ];
+}
 
 /**
  * Generate video editing suggestions using OpenAI
@@ -161,7 +420,7 @@ export const processVideoAIPrompt = async (
  * @param chatMode Chat mode: 'edit' for modifications or 'ask' for information only
  * @returns AI response with message and suggested project updates
  */
-async function generateVideoEditSuggestions(prompt: string, project: any, userApiKey?: string, chatMode: 'edit' | 'ask' = 'edit') {
+async function generateVideoEditSuggestions(prompt: string, project: any, userApiKey?: string, chatMode: 'edit' | 'ask' | 'agent' = 'edit') {
   try {
     // Use user's API key if provided, otherwise fall back to server's API key
     const apiKeyToUse = userApiKey || process.env.OPENAI_API_KEY;

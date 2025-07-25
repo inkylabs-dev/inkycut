@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom, useSetAtom } from 'jotai';
 import { LeftPanel, MiddlePanel, RightPanel } from '../packages/editor';
+type ChatMode = 'edit' | 'ask' | 'agent';
 import { 
   projectAtom,
   updateProjectAtom,
@@ -189,7 +190,7 @@ export default function VibeEditorPage () {
     }
   };
 
-  const handleChatMessage = (message: string, chatMode?: 'edit' | 'ask') => {
+  const handleChatMessage = (message: string, chatMode?: ChatMode) => {
     // Add the user message to chat using the atom
     setAddChatMessage({
       id: Date.now(),
@@ -272,7 +273,15 @@ export default function VibeEditorPage () {
         <div className="w-80 bg-white dark:bg-boxdark border-l border-gray-200 dark:border-strokedark flex-shrink-0 overflow-hidden">
           <RightPanel
             onSendMessage={handleChatMessage}
-            onHandleMessage={async (message: string, chatMode?: 'edit' | 'ask') => {
+            onHandleMessage={async (message: string, chatMode?: ChatMode) => {
+              // Skip server processing for agent mode (handled client-side)
+              if (chatMode === 'agent') {
+                return {
+                  message: "Agent mode is handled client-side.",
+                  updatedProject: null
+                };
+              }
+              
               // Process the AI prompt using the wasp operation
               if (project) {
                 // Create a server-safe version of the project (without files and appState)
@@ -283,7 +292,7 @@ export default function VibeEditorPage () {
                   prompt: message,
                   projectData: serverSafeProject,
                   apiKey: localStorage.getItem('openai-api-key') || '',
-                  chatMode: chatMode || 'edit',
+                  chatMode: (chatMode as 'edit' | 'ask' | 'agent') || 'edit',
                 });
                 
                 // Update the project with AI changes if provided (only in edit mode)

@@ -2,6 +2,7 @@
   "name": "inkycut",
   "scripts": {
     "start": "wasp start",
+    "typecheck": "tsc --noEmit",
     "build": "npm run build:app && npm run build:bundle",
     "build:app": "wasp build",
     "build:bundle": "node .wasp/build/src/packages/render/bundle.mjs",

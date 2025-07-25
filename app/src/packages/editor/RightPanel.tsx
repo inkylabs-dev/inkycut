@@ -14,16 +14,18 @@ import {
   CpuChipIcon,
   EllipsisHorizontalIcon,
   XMarkIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  BoltIcon
 } from '@heroicons/react/24/outline';
 import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom } from './atoms';
+import { clientAI, StreamingResponse } from './utils/clientAI';
 // import { processVideoAIPrompt } from 'wasp/client/operations';
 // import { estimateProjectSize } from './utils/projectUtils';
 
 // Define types for AI operations following OpenSaaS pattern
 
 
-type ChatMode = 'edit' | 'ask';
+type ChatMode = 'edit' | 'ask' | 'agent';
 
 interface RightPanelProps {
   onSendMessage: (message: string, chatMode?: ChatMode) => void;
@@ -51,6 +53,11 @@ export default function RightPanel({
   const [chatMode, setChatMode] = useState<ChatMode>('edit');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const isQuickActionsEnabled = false; // Toggle for quick actions visibility
+  
+  // Agent mode specific state
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamingContent, setStreamingContent] = useState('');
+  const [agentInitialized, setAgentInitialized] = useState(false);
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
@@ -71,6 +78,86 @@ export default function RightPanel({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isDropdownOpen]);
 
+  // Initialize agent when switching to agent mode
+  useEffect(() => {
+    if (chatMode === 'agent') {
+      const apiKey = localStorage.getItem('openai-api-key');
+      if (apiKey) {
+        const initialized = clientAI.initialize(apiKey);
+        setAgentInitialized(initialized);
+        if (!initialized) {
+          setError('Failed to initialize Agent mode. Please check your OpenAI API key in Settings.');
+        }
+      } else {
+        setAgentInitialized(false);
+        setError('Agent mode requires an OpenAI API key. Please add one in Settings.');
+      }
+    }
+  }, [chatMode]);
+
+  // Handle Agent mode streaming messages
+  const handleAgentMessage = async (message: string) => {
+    if (!project) return;
+    
+    setIsStreaming(true);
+    setStreamingContent('');
+    
+    try {
+      const context = {
+        project,
+        updateProject: (updatedProject: any) => {
+          setUpdateProject(updatedProject);
+          // Also update the local project reference for the context
+          context.project = updatedProject;
+        },
+        addMessage: (msg: string) => {
+          setAddChatMessage({
+            id: Date.now(),
+            role: 'assistant',
+            content: msg,
+            timestamp: new Date().toISOString()
+          });
+        },
+        setIsStreaming
+      };
+
+      const stream = clientAI.streamAgentResponse(message, context);
+      let finalContent = '';
+
+      for await (const response of stream) {
+        finalContent = response.content;
+        setStreamingContent(response.content);
+        
+        // Auto-scroll during streaming
+        if (messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        }
+        
+        if (response.isComplete) {
+          // Add final message to chat history
+          setAddChatMessage({
+            id: Date.now(),
+            role: 'assistant',
+            content: response.content,
+            timestamp: new Date().toISOString()
+          });
+          break;
+        }
+      }
+    } catch (error) {
+      console.error('Agent error:', error);
+      setAddChatMessage({
+        id: Date.now(),
+        role: 'assistant',
+        content: `❌ **Agent Error**\n\n${error instanceof Error ? error.message : 'Unknown error occurred during agent processing.'}`,
+        timestamp: new Date().toISOString()
+      });
+    } finally {
+      setIsStreaming(false);
+      setStreamingContent('');
+    }
+  };
+
   const handleSendMessage = async () => {
     if (inputMessage.trim()) {
       setIsTyping(true);
@@ -87,32 +174,37 @@ export default function RightPanel({
           setIsProcessing(true);
           setError(null);
           
-          // Use onHandleMessage if provided, otherwise use default behavior
-          const result = onHandleMessage 
-            ? await onHandleMessage(userMessage, chatMode)
-            : {
-                message: "AI functionality not available in standalone mode. Please integrate with wasp for AI features.",
-                updatedProject: null
-              };
-          
-          // Update the project with AI changes if we got an updated project back
-          // Only update project in 'edit' mode, not in 'ask' mode
-          if (result.updatedProject && project && chatMode === 'edit') {
-            setUpdateProject({
-              ...project,
-              ...(result.updatedProject || {}),
-              updatedAt: new Date().toISOString()
+          // Handle Agent mode differently
+          if (chatMode === 'agent' && agentInitialized) {
+            await handleAgentMessage(userMessage);
+          } else {
+            // Use onHandleMessage if provided, otherwise use default behavior
+            const result = onHandleMessage 
+              ? await onHandleMessage(userMessage, chatMode)
+              : {
+                  message: "AI functionality not available in standalone mode. Please integrate with wasp for AI features.",
+                  updatedProject: null
+                };
+            
+            // Update the project with AI changes if we got an updated project back
+            // Only update project in 'edit' mode, not in 'ask' mode
+            if (result.updatedProject && project && chatMode === 'edit') {
+              setUpdateProject({
+                ...project,
+                ...(result.updatedProject || {}),
+                updatedAt: new Date().toISOString()
+              });
+            }
+            
+            // Add ONLY the AI response to chat
+            // The user message was already added by the parent component
+            setAddChatMessage({
+              id: Date.now(),
+              role: 'assistant',
+              content: result.message,
+              timestamp: new Date().toISOString() // Store as ISO string for localStorage compatibility
             });
           }
-          
-          // Add ONLY the AI response to chat
-          // The user message was already added by the parent component
-          setAddChatMessage({
-            id: Date.now(),
-            role: 'assistant',
-            content: result.message,
-            timestamp: new Date().toISOString() // Store as ISO string for localStorage compatibility
-          });
         } catch (error) {
           console.error('Error processing AI prompt:', error);
           setError(
@@ -210,10 +302,21 @@ export default function RightPanel({
       <div className="p-4 border-b border-gray-200 dark:border-strokedark flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <CpuChipIcon className="h-6 w-6 text-blue-500" />
+            {chatMode === 'agent' ? (
+              <BoltIcon className="h-6 w-6 text-blue-500" />
+            ) : (
+              <CpuChipIcon className="h-6 w-6 text-blue-500" />
+            )}
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">AI Assistant</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Online • Ready to help</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                {chatMode === 'agent' ? 'AI Agent' : 'AI Assistant'}
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {chatMode === 'agent' 
+                  ? (agentInitialized ? 'Ready with tools' : 'Initializing...') 
+                  : 'Online • Ready to help'
+                }
+              </p>
             </div>
           </div>
           {localStorage.getItem('openai-api-key') && (
@@ -267,8 +370,25 @@ export default function RightPanel({
           </div>
         ))}
 
+        {/* Streaming indicator for Agent mode */}
+        {isStreaming && streamingContent && (
+          <div className="flex justify-start">
+            <div className="flex space-x-2 max-w-[80%]">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                <BoltIcon className="h-4 w-4 text-blue-600 dark:text-blue-400 animate-pulse" />
+              </div>
+              <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
+                <div className="text-sm whitespace-pre-wrap">
+                  <Markdown rehypePlugins={[rehypeRaw]}>{streamingContent}</Markdown>
+                  <div className="inline-block w-2 h-4 bg-blue-500 animate-pulse ml-1"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Typing indicator */}
-        {isTyping && (
+        {isTyping && !isStreaming && (
           <div className="flex justify-start">
             <div className="flex space-x-2 max-w-[80%]">
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
@@ -351,14 +471,18 @@ export default function RightPanel({
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={chatMode === 'edit' ? "Tell me how to modify your project..." : "Ask me anything about your project..."}
+            placeholder={
+              chatMode === 'edit' ? "Tell me how to modify your project..." : 
+              chatMode === 'ask' ? "Ask me anything about your project..." :
+              "I'm an AI agent. Tell me what you want to achieve..."
+            }
             className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             rows={2}
             disabled={isTyping}
           />
           <button
             onClick={handleSendMessage}
-            disabled={!inputMessage.trim() || isTyping}
+            disabled={!inputMessage.trim() || isTyping || isStreaming}
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white p-3 rounded-lg transition-colors"
           >
             <PaperAirplaneIcon className="h-4 w-4" />
@@ -375,12 +499,15 @@ export default function RightPanel({
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded border border-gray-300 dark:border-gray-600 transition-colors"
             >
-              <span>{chatMode === 'edit' ? 'Edit' : 'Ask'}</span>
+              <span>
+                {chatMode === 'edit' ? 'Edit' : 
+                 chatMode === 'ask' ? 'Ask' : 'Agent'}
+              </span>
               <ChevronDownIcon className="h-3 w-3" />
             </button>
             
             {isDropdownOpen && (
-              <div className="absolute right-0 bottom-full mb-1 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg z-10">
+              <div className="absolute right-0 bottom-full mb-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg z-10">
                 <button
                   onClick={() => {
                     setChatMode('edit');
@@ -404,6 +531,21 @@ export default function RightPanel({
                 >
                   Ask
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Get information</div>
+                </button>
+                <button
+                  onClick={() => {
+                    setChatMode('agent');
+                    setIsDropdownOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                    chatMode === 'agent' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center space-x-1">
+                    <BoltIcon className="h-3 w-3" />
+                    <span>Agent</span>
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">AI with tools</div>
                 </button>
               </div>
             )}

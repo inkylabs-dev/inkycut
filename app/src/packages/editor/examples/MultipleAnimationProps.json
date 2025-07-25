@@ -1,0 +1,107 @@
+{
+  "pages": [
+    {
+      "id": "page-1752525733144",
+      "name": "Page 1",
+      "duration": 3000,
+      "backgroundColor": "white",
+      "elements": [
+        {
+          "id": "element-1752534920980",
+          "type": "text",
+          "text": "Hello, World!",
+          "fontSize": 90,
+          "left": 800,
+          "top": 200,
+          "width": 301,
+          "height": 301,
+          "opacity": 1,
+          "zIndex": 1,
+          "rotation": 180,
+          "animation": {
+            "props": {
+              "y": [
+                {
+                  "to": "-2.75rem",
+                  "ease": "outExpo",
+                  "duration": 600
+                },
+                {
+                  "to": 0,
+                  "ease": "outBounce",
+                  "duration": 800,
+                  "delay": 100
+                }
+              ],
+              "rotate": {
+                "from": "-1turn",
+                "delay": 0
+              }
+            },
+            "ease": "inOutCirc",
+            "loopDelay": 1000,
+            "loop": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "page-1752227619677",
+      "name": "Page 2",
+      "duration": 3000,
+      "backgroundColor": "white",
+      "elements": [
+        {
+          "type": "image",
+          "src": "https://cdn.midjourney.com/daea8e55-aa03-4922-ac7c-cf41fbfab923/0_0.png",
+          "left": 0,
+          "right": 0,
+          "width": 1920,
+          "height": 1080,
+          "id": "element-1753047035112-0-0"
+        },
+        {
+          "id": "element-1753222356018",
+          "type": "image",
+          "left": 800,
+          "top": 500,
+          "width": 400,
+          "height": 400,
+          "src": "VectorHand.png",
+          "opacity": 1,
+          "zIndex": 1,
+          "rotation": 0,
+          "animation": {
+            "duration": 2000,
+            "props": {
+              "transformOrigin": "0 0",
+              "keyframes": {
+                "0%": {
+                  "rotate": "0deg"
+                },
+                "25%": {
+                  "rotate": "-10deg"
+                },
+                "50%": {
+                  "rotate": "0deg"
+                },
+                "75%": {
+                  "rotate": "10deg"
+                },
+                "100%": {
+                  "rotate": "0deg"
+                }
+              }
+            },
+            "ease": "linear",
+            "loop": true
+          },
+          "delay": 0
+        }
+      ]
+    }
+  ],
+  "fps": 30,
+  "width": 1920,
+  "height": 1080
+}
