@@ -101,7 +101,7 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
     left: elementWithId.left,
     top: elementWithId.top,
     width: getElementWidth(elementWithId),
-    height: getElementHeight(elementWithId),
+    height: elementWithId.type === 'text' ? 'auto' : getElementHeight(elementWithId),
     transform: `rotate(${elementWithId.rotation || 0}deg)`,
     opacity: calculatedOpacity,
     zIndex: elementWithId.zIndex || 0,
@@ -146,13 +146,11 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
             color: elementWithId.color || '#000000',
             fontWeight: elementWithId.fontWeight || 'normal',
             textAlign: elementWithId.textAlign || 'left',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: elementWithId.textAlign === 'center' ? 'center' : 
-                           elementWithId.textAlign === 'right' ? 'flex-end' : 'flex-start',
+            display: 'block',
             padding: '8px',
             wordWrap: 'break-word',
-            overflow: 'hidden',
+            whiteSpace: 'pre-wrap',
+            boxSizing: 'border-box',
           }}
         >
           <div id={elementWithId.id}>
@@ -171,7 +169,10 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
         const childLeft = child.left || 0;
         const childTop = child.top || 0;
         const childWidth = getElementWidth(child);
-        const childHeight = getElementHeight(child);
+        // For text elements, estimate height based on fontSize since actual height is auto
+        const childHeight = child.type === 'text' 
+          ? (child.fontSize || 24) * 1.5 // Rough estimate: fontSize * line height
+          : getElementHeight(child);
         const childRight = childLeft + childWidth;
         const childBottom = childTop + childHeight;
         maxWidth = Math.max(maxWidth, childRight);
@@ -212,7 +213,11 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
               left: (childElement.left || 0) * scale,
               top: (childElement.top || 0) * scale,
               width: getElementWidth(childElement) * scale,
-              height: getElementHeight(childElement) * scale,
+              // For text elements, scale fontSize instead of height (height is auto)
+              ...(childElement.type === 'text' 
+                ? { fontSize: (childElement.fontSize || 24) * scale }
+                : { height: getElementHeight(childElement) * scale }
+              ),
               // Ensure child has unique ID
               id: childElement.id || generateUniqueId(),
             };

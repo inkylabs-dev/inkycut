@@ -129,6 +129,8 @@ Represents a visual element in the composition. Elements can be videos, images, 
 
 **Note for Group Elements**: Child elements within a group use absolute positioning relative to the group container. The group automatically calculates its scale based on the natural bounds of its children versus the allocated group dimensions. Child elements maintain their original left/top/width/height values, and the entire group is scaled to fit within the specified group boundaries.
 
+**Note for Text Elements**: For `type: "text"` elements, the actual rendered height is determined by the `fontSize` and `width` properties. When text wraps to multiple lines based on the available width, the height automatically adjusts accordingly. While the `height` property can be set in the element structure, it has no effect on the actual text rendering - the text will render at its natural height based on content and styling.
+
 | Property | Type | Description | Required |
 |----------|------|-------------|----------|
 | `id` | `string` | Unique identifier for the element | ✓ |
