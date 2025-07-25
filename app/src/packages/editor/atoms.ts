@@ -19,6 +19,28 @@ export const projectAtom = atomWithStorage<Project | null>('vibe-project', null)
 export const themeAtom = atomWithStorage<ThemeMode>('color-theme', 'light');
 
 /**
+ * Chat mode type definition
+ */
+export type ChatMode = 'edit' | 'ask' | 'agent';
+
+/**
+ * Persistent storage for chat mode using atomWithStorage
+ * Stores the user's preferred chat mode in localStorage
+ * @type {ChatMode} - The current chat mode: 'edit', 'ask', or 'agent'
+ */
+export const chatModeAtom = atomWithStorage<ChatMode>('chat-mode', 'edit');
+
+/**
+ * Persistent storage for agent settings using atomWithStorage
+ * Stores agent configuration in localStorage
+ */
+export const agentSettingsAtom = atomWithStorage('agent-settings', {
+  maxSteps: 8,
+  temperature: 0.7,
+  model: 'gpt-4o'
+});
+
+/**
  * Write-only atom for updating the project
  * Updates the project's timestamp before storing
  * @param {Project | null} updatedProject - The project to update or null to clear

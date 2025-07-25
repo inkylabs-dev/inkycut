@@ -17,7 +17,7 @@ import {
   ChevronDownIcon,
   BoltIcon
 } from '@heroicons/react/24/outline';
-import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom } from './atoms';
+import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom, chatModeAtom, agentSettingsAtom, type ChatMode } from './atoms';
 import { clientAI, StreamingResponse } from './utils/clientAI';
 // import { processVideoAIPrompt } from 'wasp/client/operations';
 // import { estimateProjectSize } from './utils/projectUtils';
@@ -25,7 +25,7 @@ import { clientAI, StreamingResponse } from './utils/clientAI';
 // Define types for AI operations following OpenSaaS pattern
 
 
-type ChatMode = 'edit' | 'ask' | 'agent';
+// ChatMode is now imported from atoms
 
 interface RightPanelProps {
   onSendMessage: (message: string, chatMode?: ChatMode) => void;
@@ -50,7 +50,8 @@ export default function RightPanel({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [chatMode, setChatMode] = useState<ChatMode>('edit');
+  const [chatMode, setChatMode] = useAtom(chatModeAtom);
+  const [agentSettings] = useAtom(agentSettingsAtom);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const isQuickActionsEnabled = false; // Toggle for quick actions visibility
   
@@ -118,7 +119,8 @@ export default function RightPanel({
             timestamp: new Date().toISOString()
           });
         },
-        setIsStreaming
+        setIsStreaming,
+        agentSettings
       };
 
       const stream = clientAI.streamAgentResponse(message, context);

@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom, useSetAtom } from 'jotai';
-import { LeftPanel, MiddlePanel, RightPanel } from '../packages/editor';
-type ChatMode = 'edit' | 'ask' | 'agent';
+import { LeftPanel, MiddlePanel, RightPanel, type ChatMode } from '../packages/editor';
 import { 
   projectAtom,
   updateProjectAtom,

@@ -22,6 +22,11 @@ export interface ToolExecutionContext {
   updateProject: (project: Project) => void;
   addMessage: (message: string) => void;
   setIsStreaming?: (streaming: boolean) => void;
+  agentSettings?: {
+    maxSteps: number;
+    temperature: number;
+    model: string;
+  };
 }
 
 export interface StreamingResponse {
@@ -106,7 +111,7 @@ export class ClientAI {
       throw new Error('OpenAI client not initialized. Please provide your API key in Settings.');
     }
 
-    const maxSteps = 5; // Prevent infinite loops
+    const maxSteps = context.agentSettings?.maxSteps || 8; // Configurable via settings
     const steps: Array<{ step: number; action: string; description: string; reasoning: string }> = [];
     let currentProject = { ...context.project };
     let stepCount = 0;
@@ -144,12 +149,12 @@ What should I do next to achieve the goal? Use tools to make progress or indicat
         ];
 
         const stream = await this.client.chat.completions.create({
-          model: 'gpt-4o',
+          model: context.agentSettings?.model || 'gpt-4o',
           messages,
           tools: this.getOpenAITools(),
           tool_choice: 'auto',
           stream: true,
-          temperature: 0.7
+          temperature: context.agentSettings?.temperature || 0.7
         });
 
         let stepContent = '';
