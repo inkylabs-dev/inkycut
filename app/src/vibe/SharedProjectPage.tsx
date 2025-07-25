@@ -158,11 +158,11 @@ export default function SharedProjectPage() {
 
   if (loadingState === 'loading') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-boxdark-2">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Shared Project</h2>
-          <p className="text-gray-600">Fetching encrypted project data...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 dark:border-white mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Loading Shared Project</h2>
+          <p className="text-gray-600 dark:text-gray-300">Fetching encrypted project data...</p>
         </div>
       </div>
     );
@@ -170,11 +170,11 @@ export default function SharedProjectPage() {
 
   if (loadingState === 'decrypting') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-boxdark-2">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Decrypting Project</h2>
-          <p className="text-gray-600">Decrypting project data with end-to-end encryption...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 dark:border-white mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Decrypting Project</h2>
+          <p className="text-gray-600 dark:text-gray-300">Decrypting project data with end-to-end encryption...</p>
         </div>
       </div>
     );
@@ -182,25 +182,25 @@ export default function SharedProjectPage() {
 
   if (loadingState === 'error' || loadingState === 'missing-key') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-boxdark-2">
         <div className="text-center max-w-md mx-4">
-          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
-            <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/20 mb-4">
+            <ExclamationTriangleIcon className="h-8 w-8 text-red-600 dark:text-red-400" />
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             {loadingState === 'missing-key' ? 'Invalid Share Link' : 'Error Loading Project'}
           </h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">{error}</p>
           <div className="space-y-2">
             <button
               onClick={() => window.location.reload()}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 mr-2"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 mr-2"
             >
               Try Again
             </button>
             <button
               onClick={handleGoToEditor}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-strokedark text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-boxdark hover:bg-gray-50 dark:hover:bg-boxdark-2"
             >
               <ArrowLeftIcon className="h-4 w-4 mr-2" />
               Go to Editor
@@ -213,11 +213,11 @@ export default function SharedProjectPage() {
 
   // Success state - show the editor in view mode (no navbar, like VibeEditorPage)
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-gray-100">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-gray-100 dark:bg-boxdark-2">
       {/* Main content area - no top banner/navbar */}
       <div className="flex w-full h-full overflow-hidden">
         {/* Left Panel - Files / Elements (read-only) */}
-        <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0 overflow-hidden">
+        <div className="w-80 bg-white dark:bg-boxdark border-r border-gray-200 dark:border-strokedark flex-shrink-0 overflow-hidden">
           <LeftPanel 
             isReadOnly={false} // Allow menu to be shown
             disableFileUpload={true} // Disable file uploads on shared projects
@@ -247,7 +247,7 @@ export default function SharedProjectPage() {
         </div>
 
         {/* Right Panel - Read-only mode with frozen code editor */}
-        <div className="w-80 bg-gray-50 border-l border-gray-200 flex-shrink-0 overflow-hidden">
+        <div className="w-80 bg-gray-50 dark:bg-boxdark border-l border-gray-200 dark:border-strokedark flex-shrink-0 overflow-hidden">
           <RightPanel 
             onSendMessage={() => {}} 
             isReadOnly={true}
