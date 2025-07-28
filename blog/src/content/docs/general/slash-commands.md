@@ -57,6 +57,36 @@ Opens the Import Dialog to import a project from a JSON file, equivalent to clic
 - Error: "❌ **Import Failed** - Failed to open import dialog. Please try using the Import button in the menu."
 - Unavailable: "❌ **Import Unavailable** - Import functionality is not available in this context."
 
+### `/export`
+
+Exports the project or opens the Export Dialog with optional format selection and auto-export capability.
+
+**Usage:** `/export [--format|-f json|mp4|webm] [--yes|-y]`
+
+**Options:**
+- `--format`, `-f`: Pre-select export format (json, mp4, webm). Default: json
+- `--yes`, `-y`: Skip dialog and export directly (only works with JSON format currently)
+
+**Behavior:**
+- Without options: Opens Export Dialog with JSON format selected
+- With `--format`: Opens Export Dialog with specified format pre-selected
+- With `--yes` (JSON only): Performs direct export and download, bypassing dialog
+- With `--yes` (MP4/WebM): Shows error message (direct video export not yet supported)
+
+**Examples:**
+- `/export` - Opens export dialog
+- `/export --format mp4` - Opens dialog with MP4 pre-selected
+- `/export -f json --yes` - Directly exports JSON file
+- `/export -y` - Directly exports JSON file (default format)
+
+**Response Messages:**
+- Success (dialog): Silent or format confirmation message
+- Success (direct export): "✅ **Export Complete** - Project exported as JSON file and downloaded successfully."
+- Error (unsupported direct format): "❌ **Format Not Supported** - MP4/WebM direct export not yet supported."
+- Error (invalid format): "❌ **Invalid Format** - Unsupported format 'xyz'. Supported: json, mp4, webm"
+- Error (unknown option): "❌ **Unknown Option** - Unknown option '--xyz'"
+- Unavailable: "❌ **Export Unavailable** - Export functionality is not available in this context."
+
 ## Architecture
 
 ### Core Components
@@ -90,6 +120,9 @@ interface SlashCommandContext {
   setSelectedElement?: (element: any) => void; // Update selected element
   setIsSharedProject?: (isShared: boolean) => void; // Toggle project mode
   setShowImportDialog?: (show: boolean) => void; // Show/hide import dialog
+  setShowExportDialog?: (show: boolean) => void; // Show/hide export dialog
+  setExportFormat?: (format: 'json' | 'mp4' | 'webm') => void; // Set export format
+  fileStorage?: any; // File storage for direct JSON export
 }
 ```
 
@@ -169,6 +202,7 @@ const myCommand: SlashCommand = {
 const commandRegistry: Map<string, SlashCommand> = new Map([
   ['reset', resetCommand],
   ['import', importCommand],
+  ['export', exportCommand],
   ['mycommand', myCommand], // Add your command here
 ]);
 ```

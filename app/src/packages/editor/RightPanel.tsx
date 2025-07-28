@@ -40,6 +40,9 @@ interface RightPanelProps {
   setSelectedElement?: (element: any) => void;
   setIsSharedProject?: (isShared: boolean) => void;
   setShowImportDialog?: (show: boolean) => void;
+  setShowExportDialog?: (show: boolean) => void;
+  setExportFormat?: (format: 'json' | 'mp4' | 'webm') => void;
+  fileStorage?: any;
 }
 
 export default function RightPanel({ 
@@ -52,7 +55,10 @@ export default function RightPanel({
   setSelectedPage,
   setSelectedElement,
   setIsSharedProject,
-  setShowImportDialog
+  setShowImportDialog,
+  setShowExportDialog,
+  setExportFormat,
+  fileStorage
 }: RightPanelProps) {
   const [inputMessage, setInputMessage] = useState('');
   const [messages] = useAtom(chatMessagesAtom);
@@ -203,7 +209,10 @@ export default function RightPanel({
             setSelectedPage,
             setSelectedElement,
             setIsSharedProject,
-            setShowImportDialog
+            setShowImportDialog,
+            setShowExportDialog,
+            setExportFormat,
+            fileStorage
           };
           
           // Add user command to chat

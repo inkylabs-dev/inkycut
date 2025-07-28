@@ -8,6 +8,79 @@
 
 import { createDefaultProject } from '../atoms';
 
+/**
+ * Helper function to perform JSON export directly
+ */
+async function performJSONExport(project: any, fileStorage: any): Promise<void> {
+  if (!project) {
+    throw new Error('No project to export');
+  }
+
+  try {
+    // Get files from current storage to include in export
+    const filesFromStorage = await fileStorage.getAllFiles();
+    
+    // Ensure the project has all required fields before export
+    const completeProject = {
+      ...project,
+      // Ensure required fields are present
+      id: project.id || `project-${Date.now()}`,
+      name: project.name || 'Untitled Project',
+      createdAt: project.createdAt || new Date().toISOString(),
+      updatedAt: project.updatedAt || new Date().toISOString(),
+      propertiesEnabled: project.propertiesEnabled ?? true,
+      // Ensure composition has all required fields
+      composition: project.composition ? {
+        pages: project.composition.pages || [],
+        fps: project.composition.fps || 30,
+        width: project.composition.width || 1920,
+        height: project.composition.height || 1080
+      } : {
+        pages: [],
+        fps: 30,
+        width: 1920,
+        height: 1080
+      },
+      // Ensure appState exists
+      appState: project.appState || {
+        selectedElementId: null,
+        selectedPageId: null,
+        viewMode: 'edit' as const,
+        zoomLevel: 1,
+        showGrid: false,
+        isLoading: false,
+        error: null,
+        history: { past: [], future: [] }
+      },
+      // Include files from IndexedDB in the exported JSON
+      files: filesFromStorage,
+      // Preserve metadata
+      metadata: project.metadata || {}
+    };
+
+    // Create JSON blob
+    const jsonData = JSON.stringify(completeProject, null, 2);
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    
+    // Create download link
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${completeProject.name}.json`;
+    
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Cleanup
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Export failed:', error);
+    throw new Error('Failed to export project');
+  }
+}
+
 export interface SlashCommandContext {
   project: any;
   updateProject: (project: any) => void;
@@ -18,6 +91,11 @@ export interface SlashCommandContext {
   setSelectedElement?: (element: any) => void;
   setIsSharedProject?: (isShared: boolean) => void;
   setShowImportDialog?: (show: boolean) => void;
+  setShowExportDialog?: (show: boolean) => void;
+  setExportFormat?: (format: 'json' | 'mp4' | 'webm') => void;
+  triggerExport?: () => void;
+  fileStorage?: any;
+  args?: string[];
 }
 
 export interface SlashCommandResult {
@@ -141,11 +219,139 @@ const importCommand: SlashCommand = {
 };
 
 /**
+ * Export project command - opens ExportDialog or performs direct export
+ * Supports format options: --format/-f (json|mp4|webm)
+ * Supports auto-export: --yes/-y (skip dialog, export directly)
+ */
+const exportCommand: SlashCommand = {
+  name: 'export',
+  description: 'Export project as JSON, MP4, or WebM. Supports --format/-f and --yes/-y options',
+  usage: '/export [--format json|mp4|webm] [--yes]',
+  requiresConfirmation: false,
+  execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
+    try {
+      // Default format is json
+      let format: 'json' | 'mp4' | 'webm' = 'json';
+      let autoExport = false;
+      
+      // Parse command arguments
+      const args = context.args || [];
+      
+      for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        
+        // Handle format options
+        if ((arg === '--format' || arg === '-f') && i + 1 < args.length) {
+          const formatValue = args[i + 1].toLowerCase();
+          if (formatValue === 'json' || formatValue === 'mp4' || formatValue === 'webm') {
+            format = formatValue;
+          } else {
+            return {
+              success: false,
+              message: `❌ **Invalid Format**\n\nUnsupported format '${formatValue}'. Supported formats: json, mp4, webm`,
+              handled: true
+            };
+          }
+          i++; // Skip the format value
+        }
+        // Handle auto-export options
+        else if (arg === '--yes' || arg === '-y') {
+          autoExport = true;
+        }
+        // Handle unknown options
+        else if (arg.startsWith('-')) {
+          return {
+            success: false,
+            message: `❌ **Unknown Option**\n\nUnknown option '${arg}'. Usage: /export [--format json|mp4|webm] [--yes]`,
+            handled: true
+          };
+        }
+      }
+      
+      // If auto-export is requested
+      if (autoExport) {
+        if (format === 'json') {
+          // Perform direct JSON export
+          if (!context.fileStorage) {
+            return {
+              success: false,
+              message: '❌ **Export Failed**\n\nFile storage not available for direct export.',
+              handled: true
+            };
+          }
+          
+          try {
+            await performJSONExport(context.project, context.fileStorage);
+            return {
+              success: true,
+              message: `✅ **Export Complete**\n\nProject exported as ${format.toUpperCase()} file and downloaded successfully.`,
+              handled: true
+            };
+          } catch (error) {
+            return {
+              success: false,
+              message: `❌ **Export Failed**\n\n${error instanceof Error ? error.message : 'Failed to export project'}`,
+              handled: true
+            };
+          }
+        } else {
+          // Video formats not supported for direct export yet
+          return {
+            success: false,
+            message: `❌ **Format Not Supported**\n\n${format.toUpperCase()} direct export is not yet supported. Use \`/export --format ${format}\` to open the export dialog with this format pre-selected.`,
+            handled: true
+          };
+        }
+      }
+      
+      // Open export dialog with pre-selected format
+      if (context.setShowExportDialog) {
+        // Set the format if provided
+        if (context.setExportFormat) {
+          context.setExportFormat(format);
+        }
+        
+        context.setShowExportDialog(true);
+        
+        // Show message only if format was specified
+        if (format !== 'json' || args.length > 0) {
+          return {
+            success: true,
+            message: `📤 **Export Dialog Opened**\n\n${format.toUpperCase()} format pre-selected in export dialog.`,
+            handled: true
+          };
+        } else {
+          return {
+            success: true,
+            message: '',
+            handled: true
+          };
+        }
+      } else {
+        return {
+          success: false,
+          message: '❌ **Export Unavailable**\n\nExport functionality is not available in this context.',
+          handled: true
+        };
+      }
+    } catch (error) {
+      console.error('Failed to handle export command:', error);
+      return {
+        success: false,
+        message: '❌ **Export Failed**\n\nFailed to open export dialog. Please try using the Export button in the menu.',
+        handled: true
+      };
+    }
+  }
+};
+
+/**
  * Registry of available slash commands
  */
 const commandRegistry: Map<string, SlashCommand> = new Map([
   ['reset', resetCommand],
-  ['import', importCommand]
+  ['import', importCommand],
+  ['export', exportCommand]
 ]);
 
 /**
@@ -199,7 +405,10 @@ export async function executeSlashCommand(
     }
   }
   
-  return await command.execute(context);
+  // Add args to context for command execution
+  const contextWithArgs = { ...context, args };
+  
+  return await command.execute(contextWithArgs);
 }
 
 /**

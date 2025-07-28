@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import Markdown from 'react-markdown';
 import { XMarkIcon, DocumentArrowDownIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
@@ -7,15 +7,29 @@ import { projectAtom, fileStorageAtom } from './atoms';
 interface ExportDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  initialFormat?: ExportFormat;
+  onFormatChange?: (format: ExportFormat) => void;
 }
 
 type ExportFormat = 'json' | 'mp4' | 'webm';
 
-export default function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
-  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('json');
+export default function ExportDialog({ isOpen, onClose, initialFormat = 'json', onFormatChange }: ExportDialogProps) {
+  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>(initialFormat);
   const [isExporting, setIsExporting] = useState(false);
   const [project] = useAtom(projectAtom);
   const [fileStorage] = useAtom(fileStorageAtom);
+
+  // Sync with external format state
+  useEffect(() => {
+    setSelectedFormat(initialFormat);
+  }, [initialFormat]);
+
+  const handleFormatChange = (format: ExportFormat) => {
+    setSelectedFormat(format);
+    if (onFormatChange) {
+      onFormatChange(format);
+    }
+  };
 
   const handleExport = () => {
     if (selectedFormat === 'json') {
@@ -133,7 +147,7 @@ export default function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
                     name="format"
                     value="json"
                     checked={selectedFormat === 'json'}
-                    onChange={(e) => setSelectedFormat(e.target.value as ExportFormat)}
+                    onChange={(e) => handleFormatChange(e.target.value as ExportFormat)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700"
                   />
                   <div className="ml-3 flex items-center">
@@ -152,7 +166,7 @@ export default function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
                     name="format"
                     value="mp4"
                     checked={selectedFormat === 'mp4'}
-                    onChange={(e) => setSelectedFormat(e.target.value as ExportFormat)}
+                    onChange={(e) => handleFormatChange(e.target.value as ExportFormat)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700"
                   />
                   <div className="ml-3 flex items-center">
@@ -174,7 +188,7 @@ export default function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
                     name="format"
                     value="webm"
                     checked={selectedFormat === 'webm'}
-                    onChange={(e) => setSelectedFormat(e.target.value as ExportFormat)}
+                    onChange={(e) => handleFormatChange(e.target.value as ExportFormat)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700"
                   />
                   <div className="ml-3 flex items-center">

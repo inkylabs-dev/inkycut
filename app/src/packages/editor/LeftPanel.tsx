@@ -47,6 +47,10 @@ interface LeftPanelProps {
   onShare?: (args: { encryptedData: string; projectName: string }) => Promise<{ shareId: string }>;
   showImportDialog?: boolean;
   setShowImportDialog?: (show: boolean) => void;
+  showExportDialog?: boolean;
+  setShowExportDialog?: (show: boolean) => void;
+  exportFormat?: 'json' | 'mp4' | 'webm';
+  setExportFormat?: (format: 'json' | 'mp4' | 'webm') => void;
 }
 
 export default function LeftPanel({ 
@@ -67,7 +71,11 @@ export default function LeftPanel({
   onForkAndEdit,
   onShare,
   showImportDialog: propShowImportDialog,
-  setShowImportDialog: propSetShowImportDialog
+  setShowImportDialog: propSetShowImportDialog,
+  showExportDialog: propShowExportDialog,
+  setShowExportDialog: propSetShowExportDialog,
+  exportFormat: propExportFormat,
+  setExportFormat: propSetExportFormat
 }: LeftPanelProps) {
   // Use Jotai atoms instead of props
   const [project, setProject] = useAtom(projectAtom);
@@ -80,12 +88,16 @@ export default function LeftPanel({
   const [showMenu, setShowMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [internalShowImportDialog, setInternalShowImportDialog] = useState(false);
-  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [internalShowExportDialog, setInternalShowExportDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   
   // Use prop-based ImportDialog state when available, otherwise use internal state
   const showImportDialog = propShowImportDialog !== undefined ? propShowImportDialog : internalShowImportDialog;
   const setShowImportDialog = propSetShowImportDialog !== undefined ? propSetShowImportDialog : setInternalShowImportDialog;
+  
+  // Use prop-based ExportDialog state when available, otherwise use internal state
+  const showExportDialog = propShowExportDialog !== undefined ? propShowExportDialog : internalShowExportDialog;
+  const setShowExportDialog = propSetShowExportDialog !== undefined ? propSetShowExportDialog : setInternalShowExportDialog;
   const menuRef = useRef<HTMLDivElement>(null);
   // const { data: user } = useAuth();
   const [localFiles] = useAtom(filesAtom);
@@ -516,6 +528,8 @@ export default function LeftPanel({
       <ExportDialog
         isOpen={showExportDialog}
         onClose={() => setShowExportDialog(false)}
+        initialFormat={propExportFormat}
+        onFormatChange={propSetExportFormat}
       />
 
       {/* Share Dialog */}

@@ -23,7 +23,8 @@ import {
   createServerSafeProject,
   clearAllFilesAtom,
   setChatMessagesAtom,
-  isSharedProjectAtom
+  isSharedProjectAtom,
+  fileStorageAtom
 } from '../packages/editor';
 import { processVideoAIPrompt, shareProject } from 'wasp/client/operations';
 
@@ -47,12 +48,17 @@ export default function VibeEditorPage () {
   const clearAllFiles = useSetAtom(clearAllFilesAtom);
   const setChatMessages = useSetAtom(setChatMessagesAtom);
   const [isSharedProject, setIsSharedProject] = useAtom(isSharedProjectAtom);
+  const [fileStorage] = useAtom(fileStorageAtom);
   
   // Always allow direct JSON editing
   const propertiesEnabled = true;
   
   // Import dialog state
   const [showImportDialog, setShowImportDialog] = useState(false);
+  
+  // Export dialog state
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'json' | 'mp4' | 'webm'>('json');
   
   // Initialize the project if none exists, with proper localStorage handling
   useEffect(() => {
@@ -267,6 +273,10 @@ export default function VibeEditorPage () {
             onShare={shareProject}
             showImportDialog={showImportDialog}
             setShowImportDialog={setShowImportDialog}
+            showExportDialog={showExportDialog}
+            setShowExportDialog={setShowExportDialog}
+            exportFormat={exportFormat}
+            setExportFormat={setExportFormat}
           />
         </div>
 
@@ -289,6 +299,9 @@ export default function VibeEditorPage () {
             setSelectedElement={setSelectedElement}
             setIsSharedProject={setIsSharedProject}
             setShowImportDialog={setShowImportDialog}
+            setShowExportDialog={setShowExportDialog}
+            setExportFormat={setExportFormat}
+            fileStorage={fileStorage}
             onHandleMessage={async (message: string, chatMode?: ChatMode) => {
               // Skip server processing for agent mode (handled client-side)
               if (chatMode === 'agent') {
