@@ -13,6 +13,28 @@ Client-side slash commands are special messages that begin with a forward slash 
 - **Chat Integration**: Commands are entered in the chat interface and results appear in the chat
 - **Confirmation Support**: Destructive operations prompt for user confirmation
 - **Extensible Architecture**: New commands can be easily added through the command registry
+- **Autocomplete Support**: Type `/` to see available commands with fuzzy matching and keyboard navigation
+
+## Autocomplete Features
+
+When you type `/` in the chat input, an autocomplete dropdown appears with the following features:
+
+### Smart Matching
+- **Prefix matching**: `/res` matches `/reset`
+- **Fuzzy matching**: `/rst` matches `/reset` (highlights matching characters)
+- **Real-time filtering**: Results update as you type more characters
+
+### Keyboard Navigation
+- **Arrow Up/Down**: Navigate through command options
+- **Enter**: Select the highlighted command and insert it into input
+- **Escape**: Close the autocomplete dropdown
+- **Click**: Select a command by clicking on it
+
+### Visual Feedback
+- **Highlighted selection**: Currently selected command has blue background
+- **Character highlighting**: Matching characters are highlighted in yellow
+- **Command details**: Shows command name, description, and usage pattern
+- **Upward expansion**: Dropdown expands upward to avoid blocking input field
 
 ## Available Commands
 
@@ -257,10 +279,12 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
 To test new commands:
 
 1. **Development**: Start the development server and open the editor
-2. **Chat Interface**: Type your command in the chat interface
-3. **Verification**: Confirm the command executes correctly and shows appropriate messages
-4. **Error Cases**: Test error scenarios (invalid args, confirmation cancellation, etc.)
-5. **Integration**: Verify the command works with different project states (local/shared)
+2. **Autocomplete**: Type `/` to verify the command appears in autocomplete dropdown
+3. **Chat Interface**: Type your command in the chat interface or select from autocomplete
+4. **Verification**: Confirm the command executes correctly and shows appropriate messages
+5. **Error Cases**: Test error scenarios (invalid args, confirmation cancellation, etc.)
+6. **Integration**: Verify the command works with different project states (local/shared)
+7. **Fuzzy Matching**: Test that partial matches like `/rst` correctly suggest `/reset`
 
 ## Future Enhancements
 
@@ -296,5 +320,17 @@ Client-side execution ensures:
 - No API usage costs
 - Immediate user feedback
 - Offline functionality
+- Fast autocomplete with fuzzy matching
+- Responsive keyboard navigation
 
-This architecture provides a solid foundation for expanding the command system while maintaining consistency and reliability.
+### Autocomplete Implementation
+
+The autocomplete system includes:
+- **Fuzzy matching algorithm** that scores commands based on character matches
+- **Real-time filtering** that updates results as the user types
+- **Keyboard navigation** with arrow keys and enter selection
+- **Visual highlighting** of matching characters for better UX
+- **Click-to-select** functionality for mouse users
+- **Automatic positioning** above input to avoid layout issues
+
+This architecture provides a solid foundation for expanding the command system while maintaining consistency, reliability, and excellent user experience.

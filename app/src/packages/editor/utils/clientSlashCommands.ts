@@ -576,6 +576,70 @@ export function getAvailableCommands(): string[] {
 }
 
 /**
+ * Get command details for autocomplete
+ */
+export function getAvailableCommandDetails(): Array<{ name: string; description: string; usage: string }> {
+  return Array.from(commandRegistry.values()).map(cmd => ({
+    name: cmd.name,
+    description: cmd.description,
+    usage: cmd.usage
+  }));
+}
+
+/**
+ * Fuzzy match slash commands based on user input
+ */
+export function matchSlashCommands(input: string): Array<{ name: string; description: string; usage: string; score: number }> {
+  if (!input.startsWith('/')) {
+    return [];
+  }
+  
+  const query = input.slice(1).toLowerCase(); // Remove '/' and convert to lowercase
+  
+  if (query === '') {
+    // Return all commands if no query
+    return getAvailableCommandDetails().map(cmd => ({ ...cmd, score: 1 }));
+  }
+  
+  const results = getAvailableCommandDetails()
+    .map(cmd => {
+      const name = cmd.name.toLowerCase();
+      let score = 0;
+      
+      // Exact match gets highest score
+      if (name === query) {
+        score = 100;
+      }
+      // Starts with query gets high score
+      else if (name.startsWith(query)) {
+        score = 90 - (name.length - query.length); // Prefer shorter matches
+      }
+      // Contains query gets medium score
+      else if (name.includes(query)) {
+        score = 70 - name.indexOf(query); // Prefer earlier matches
+      }
+      // Fuzzy matching - check if all characters of query exist in order
+      else {
+        let queryIndex = 0;
+        for (let i = 0; i < name.length && queryIndex < query.length; i++) {
+          if (name[i] === query[queryIndex]) {
+            queryIndex++;
+          }
+        }
+        if (queryIndex === query.length) {
+          score = 50 - (name.length - query.length); // Prefer shorter matches
+        }
+      }
+      
+      return { ...cmd, score };
+    })
+    .filter(cmd => cmd.score > 0)
+    .sort((a, b) => b.score - a.score);
+  
+  return results;
+}
+
+/**
  * Register a new slash command
  */
 export function registerSlashCommand(command: SlashCommand): void {

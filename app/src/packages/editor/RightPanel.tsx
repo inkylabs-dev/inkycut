@@ -19,7 +19,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom, chatModeAtom, agentSettingsAtom, type ChatMode } from './atoms';
 import { clientAI, StreamingResponse } from './utils/clientAI';
-import { parseSlashCommand, executeSlashCommand, type SlashCommandContext } from './utils/clientSlashCommands';
+import { parseSlashCommand, executeSlashCommand, matchSlashCommands, type SlashCommandContext } from './utils/clientSlashCommands';
 // import { processVideoAIPrompt } from 'wasp/client/operations';
 // import { estimateProjectSize } from './utils/projectUtils';
 
@@ -68,6 +68,11 @@ export default function RightPanel({
   const [messages] = useAtom(chatMessagesAtom);
   const [isTyping, setIsTyping] = useState(false);
   const [project] = useAtom(projectAtom);
+  
+  // Autocomplete state
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [autocompleteOptions, setAutocompleteOptions] = useState<Array<{ name: string; description: string; usage: string; score: number }>>([]);
+  const [selectedOptionIndex, setSelectedOptionIndex] = useState(0);
   const [, setUpdateProject] = useAtom(updateProjectAtom);
   const [, setAddChatMessage] = useAtom(addChatMessageAtom);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -98,10 +103,118 @@ export default function RightPanel({
       if (isDropdownOpen && !event.target) {
         setIsDropdownOpen(false);
       }
+      
+      // Close autocomplete when clicking outside
+      if (showAutocomplete && event.target instanceof Element) {
+        const autocompleteContainer = event.target.closest('.autocomplete-container');
+        if (!autocompleteContainer) {
+          setShowAutocomplete(false);
+          setAutocompleteOptions([]);
+          setSelectedOptionIndex(0);
+        }
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isDropdownOpen]);
+  }, [isDropdownOpen, showAutocomplete]);
+
+  // Handle input changes and autocomplete
+  const handleInputChange = (value: string) => {
+    setInputMessage(value);
+    
+    // Show autocomplete if input starts with '/'
+    if (value.startsWith('/') && value.length > 0) {
+      const matches = matchSlashCommands(value);
+      setAutocompleteOptions(matches);
+      setShowAutocomplete(matches.length > 0);
+      setSelectedOptionIndex(0);
+    } else {
+      setShowAutocomplete(false);
+      setAutocompleteOptions([]);
+      setSelectedOptionIndex(0);
+    }
+  };
+
+  // Handle keyboard navigation in autocomplete
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (showAutocomplete && autocompleteOptions.length > 0) {
+      switch (e.key) {
+        case 'ArrowUp':
+          e.preventDefault();
+          setSelectedOptionIndex(prev => 
+            prev > 0 ? prev - 1 : autocompleteOptions.length - 1
+          );
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          setSelectedOptionIndex(prev => 
+            prev < autocompleteOptions.length - 1 ? prev + 1 : 0
+          );
+          break;
+        case 'Enter':
+          if (selectedOptionIndex >= 0 && selectedOptionIndex < autocompleteOptions.length) {
+            e.preventDefault();
+            const selectedCommand = autocompleteOptions[selectedOptionIndex];
+            setInputMessage(`/${selectedCommand.name} `);
+            setShowAutocomplete(false);
+            setAutocompleteOptions([]);
+            setSelectedOptionIndex(0);
+            return;
+          }
+          break;
+        case 'Escape':
+          e.preventDefault();
+          setShowAutocomplete(false);
+          setAutocompleteOptions([]);
+          setSelectedOptionIndex(0);
+          break;
+      }
+    }
+  };
+
+  // Highlight matching characters in command name
+  const highlightMatch = (text: string, query: string): React.ReactNode => {
+    if (!query || query === '') return text;
+    
+    const lowerText = text.toLowerCase();
+    const lowerQuery = query.toLowerCase();
+    
+    // For exact or prefix matches, highlight the matching part
+    if (lowerText.startsWith(lowerQuery)) {
+      return (
+        <>
+          <span className="bg-yellow-200 dark:bg-yellow-800 text-gray-900 dark:text-gray-100">
+            {text.substring(0, query.length)}
+          </span>
+          {text.substring(query.length)}
+        </>
+      );
+    }
+    
+    // For fuzzy matches, highlight individual matching characters
+    const result: React.ReactNode[] = [];
+    let queryIndex = 0;
+    
+    for (let i = 0; i < text.length && queryIndex < query.length; i++) {
+      if (lowerText[i] === lowerQuery[queryIndex]) {
+        result.push(
+          <span key={i} className="bg-yellow-200 dark:bg-yellow-800 text-gray-900 dark:text-gray-100">
+            {text[i]}
+          </span>
+        );
+        queryIndex++;
+      } else {
+        result.push(text[i]);
+      }
+    }
+    
+    // Add remaining characters
+    for (let i = result.length; i < text.length; i++) {
+      result.push(text[i]);
+    }
+    
+    return result;
+  };
 
   // Initialize agent when switching to agent mode
   useEffect(() => {
@@ -563,11 +676,46 @@ export default function RightPanel({
       )}
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-200 dark:border-strokedark flex-shrink-0">
+      <div className="p-4 border-t border-gray-200 dark:border-strokedark flex-shrink-0 relative autocomplete-container">
+        {/* Autocomplete dropdown */}
+        {showAutocomplete && autocompleteOptions.length > 0 && (
+          <div className="absolute bottom-full left-4 right-4 mb-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-64 overflow-y-auto z-50">
+            {autocompleteOptions.map((option, index) => (
+              <div
+                key={option.name}
+                className={`px-4 py-3 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 ${
+                  index === selectedOptionIndex
+                    ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
+                    : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+                onClick={() => {
+                  setInputMessage(`/${option.name} `);
+                  setShowAutocomplete(false);
+                  setAutocompleteOptions([]);
+                  setSelectedOptionIndex(0);
+                }}
+              >
+                <div className="flex flex-col space-y-1">
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    /{highlightMatch(option.name, inputMessage.slice(1))}
+                  </div>
+                  <div className="text-xs text-gray-400 dark:text-gray-500 font-mono">
+                    {option.usage}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                    {option.description}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
         <div className="flex space-x-2">
           <textarea
             value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
+            onChange={(e) => handleInputChange(e.target.value)}
+            onKeyDown={handleKeyDown}
             onKeyPress={handleKeyPress}
             placeholder={
               chatMode === 'edit' ? "Tell me how to modify your project..." : 
