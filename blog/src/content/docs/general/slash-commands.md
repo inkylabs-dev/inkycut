@@ -197,6 +197,37 @@ Deletes the selected page and optionally additional consecutive pages after it. 
 - Error (cancelled): "⏸️ **Command Cancelled** - The deletion was cancelled."
 - Error (unknown option): "❌ **Unknown Option** - Unknown option '--xyz'. Usage: /del-page [--num|-n n]"
 
+### `/zoom-tl`
+
+Sets the timeline zoom level to a specified percentage for better timeline navigation and precision editing.
+
+**Usage:** `/zoom-tl <percentage>`
+
+**Options:**
+- `<percentage>`: Zoom percentage (10-1000). Can be specified as `50%` or `50`. Default: 100%
+
+**Behavior:**
+- Sets the timeline zoom level to the specified percentage
+- Zoom range is automatically clamped between 10% and 1000% for usability
+- Higher zoom levels show more timeline detail and make page blocks larger
+- Lower zoom levels show more timeline content and make page blocks smaller
+- Timeline maintains horizontal scrolling when zoomed in beyond container width
+- Zoom level is persisted in project state and restored on reload
+
+**Examples:**
+- `/zoom-tl 50%` - Sets timeline zoom to 50%
+- `/zoom-tl 150` - Sets timeline zoom to 150%
+- `/zoom-tl 25` - Sets timeline zoom to 25%
+- `/zoom-tl 200%` - Sets timeline zoom to 200%
+
+**Response Messages:**
+- Success: "🔍 **Timeline Zoom Updated** - Timeline zoom set to N%."
+- Success (clamped): "🔍 **Timeline Zoom Updated** - Timeline zoom set to N%. ⚠️ *Zoom level was clamped from X% to N% (valid range: 10%-1000%)*"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (missing parameter): "❌ **Missing Parameter** - Please specify a zoom percentage. Usage: `/zoom-tl <percentage>` Example: `/zoom-tl 50%` or `/zoom-tl 150`"
+- Error (invalid percentage): "❌ **Invalid Percentage** - Invalid percentage value 'xyz'. Please provide a positive number. Example: `/zoom-tl 50%` or `/zoom-tl 150`"
+- Error (execution failed): "❌ **Zoom Failed** - Failed to set timeline zoom level. Please try again."
+
 ## Architecture
 
 ### Core Components
@@ -318,6 +349,7 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['share', shareCommand],
   ['new-page', newPageCommand],
   ['del-page', delPageCommand],
+  ['zoom-tl', zoomTimelineCommand],
   ['mycommand', myCommand], // Add your command here
 ]);
 ```

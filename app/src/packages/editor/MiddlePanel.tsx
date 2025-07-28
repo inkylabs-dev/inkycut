@@ -10,7 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { CompositionData, defaultCompositionData } from './types';
 import { MainComposition } from './Composition';
-import { projectAtom, ensureCompositionIDs, filesAtom } from './atoms';
+import { projectAtom, ensureCompositionIDs, filesAtom, appStateAtom, updateProjectAtom } from './atoms';
 
 interface MiddlePanelProps {
   onTimelineUpdate: (timeline: any[]) => void;
@@ -23,6 +23,8 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   // Use Jotai atoms instead of props
   const [project] = useAtom(projectAtom);
   const [files] = useAtom(filesAtom);
+  const [appState] = useAtom(appStateAtom);
+  const [, updateProject] = useAtom(updateProjectAtom);
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -283,13 +285,18 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
     const rect = event.currentTarget.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
     const timelineWidth = rect.width;
-    const relativePosition = clickX / timelineWidth; // 0 to 1
+    const scrollLeft = timelineContainerRef.current?.scrollLeft || 0;
+    const adjustedClickX = clickX + scrollLeft;
+    const scaledTimelineWidth = totalDuration * 100 * timelineZoom; // 100px per second
+    const relativePosition = adjustedClickX / scaledTimelineWidth;
     
     const targetFrame = Math.floor(relativePosition * totalFrames);
     handleSeek(targetFrame);
   };
 
   const [isDragging, setIsDragging] = useState(false);
+  const [timelineZoom, setTimelineZoom] = useState(appState.zoomLevel || 1);
+  const timelineContainerRef = useRef<HTMLDivElement>(null);
 
   const handlePlayheadMouseDown = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -307,8 +314,10 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
       
       const rect = timelineRuler.getBoundingClientRect();
       const mouseX = event.clientX - rect.left;
-      const timelineWidth = rect.width;
-      const relativePosition = Math.max(0, Math.min(1, mouseX / timelineWidth));
+      const scrollLeft = timelineContainerRef.current?.scrollLeft || 0;
+      const adjustedMouseX = mouseX + scrollLeft;
+      const scaledTimelineWidth = totalDuration * 100 * timelineZoom;
+      const relativePosition = Math.max(0, Math.min(1, adjustedMouseX / scaledTimelineWidth));
       
       const targetFrame = Math.floor(relativePosition * totalFrames);
       handleSeek(targetFrame);
@@ -328,6 +337,36 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, totalFrames, handleSeek]);
+
+
+  const updateZoomInAppState = (newZoom: number) => {
+    if (project) {
+      const updatedProject = {
+        ...project,
+        appState: {
+          ...project.appState,
+          zoomLevel: newZoom
+        }
+      };
+      updateProject(updatedProject);
+    }
+  };
+
+  const setTimelineZoomLevel = (zoomPercent: string) => {
+    const percent = parseFloat(zoomPercent.replace('%', ''));
+    if (!isNaN(percent) && percent > 0) {
+      const newZoom = percent / 100;
+      setTimelineZoom(newZoom);
+      updateZoomInAppState(newZoom);
+    }
+  };
+
+  // Initialize timeline zoom from app state
+  useEffect(() => {
+    if (appState.zoomLevel && appState.zoomLevel !== timelineZoom) {
+      setTimelineZoom(appState.zoomLevel);
+    }
+  }, [appState.zoomLevel]);
 
   const handleJsonChange = (newJson: string) => {
     setJsonString(newJson);
@@ -532,63 +571,78 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
           {showTimeline && (
             <div className="bg-gray-100 dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700 max-h-64 overflow-y-auto">
               <div className="mb-4">
-                {/* Time ruler */}
+                
+                {/* Scrollable Timeline Container */}
                 <div 
-                  className="relative h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2 cursor-pointer timeline-ruler"
-                  onClick={handleTimelineClick}
+                  ref={timelineContainerRef}
+                  className="overflow-x-auto overflow-y-hidden"
+                  style={{ maxWidth: '100%' }}
                 >
-                  {Array.from({ length: Math.ceil(totalDuration / 5) }, (_, i) => (
-                    <div
-                      key={`time-marker-${i}`}
-                      className="absolute top-0 h-full border-l border-gray-400 dark:border-gray-500"
-                      style={{ left: `${(i * 5 / totalDuration) * 100}%` }}
-                    >
-                      <span className="text-xs text-gray-600 dark:text-gray-400 ml-1">{i * 5}s</span>
-                    </div>
-                  ))}
-                  
-                  {/* Playhead */}
-                  <div
-                    className="absolute top-0 w-0.5 h-full bg-red-500 z-10 transition-all duration-100"
-                    style={{ left: `${totalFrames > 0 ? (currentFrame / totalFrames) * 100 : 0}%` }}
-                  >
+                  <div style={{ width: `${Math.max(totalDuration * 100 * timelineZoom, 800)}px` }}>
+                    {/* Time ruler */}
                     <div 
-                      className="absolute -top-1 -left-1 w-2 h-2 bg-red-500 rounded-full cursor-grab active:cursor-grabbing hover:scale-125 transition-transform" 
-                      onMouseDown={handlePlayheadMouseDown}
-                    />
-                  </div>
-                </div>
-
-                {/* Pages Track */}
-                <div className="overflow-x-auto">
-                  <div className="relative h-12 bg-gray-200 dark:bg-gray-700 rounded" style={{ minWidth: '100%' }}>
-                    {compositionData.pages.map((page, index) => {
-                      const startTime = compositionData.pages
-                        .slice(0, index)
-                        .reduce((sum, p) => sum + (p.duration / 1000), 0); // Convert ms to seconds
-                      const pagesDuration = page.duration / 1000; // Convert ms to seconds
-                      const pageColors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
-                      
-                      return (
-                        <div
-                          key={`page-${page.id}`}
-                          className="absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center cursor-pointer hover:opacity-80 border border-gray-300 dark:border-gray-600"
-                          style={{
-                            left: `${(startTime / totalDuration) * 100}%`,
-                            width: `${(pagesDuration / totalDuration) * 100}%`,
-                            backgroundColor: pageColors[index % pageColors.length],
-                            minWidth: '60px', // Ensure minimum readable width
-                          }}
-                          onClick={(event) => handlePageClick(index, event)}
-                          title={`${page.name} (${formatTime(pagesDuration)})`}
-                        >
-                          <div className="text-center px-2">
-                            <div className="font-medium truncate">{page.name}</div>
-                            <div className="text-xs opacity-75">{formatTime(pagesDuration)}</div>
+                      className="relative h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2 cursor-pointer timeline-ruler"
+                      onClick={handleTimelineClick}
+                      style={{ width: '100%' }}
+                    >
+                      {Array.from({ length: Math.ceil(totalDuration * timelineZoom / 5) * 5 }, (_, i) => {
+                        const timeInSeconds = i * 5 / timelineZoom;
+                        if (timeInSeconds > totalDuration) return null;
+                        return (
+                          <div
+                            key={`time-marker-${i}`}
+                            className="absolute top-0 h-full border-l border-gray-400 dark:border-gray-500"
+                            style={{ left: `${(timeInSeconds / totalDuration) * 100}%` }}
+                          >
+                            <span className="text-xs text-gray-600 dark:text-gray-400 ml-1">{Math.round(timeInSeconds)}s</span>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                      
+                      {/* Playhead */}
+                      <div
+                        className="absolute top-0 w-0.5 h-full bg-red-500 z-10 transition-all duration-100"
+                        style={{ left: `${totalFrames > 0 ? (currentFrame / totalFrames) * 100 : 0}%` }}
+                      >
+                        <div 
+                          className="absolute -top-1 -left-1 w-2 h-2 bg-red-500 rounded-full cursor-grab active:cursor-grabbing hover:scale-125 transition-transform" 
+                          onMouseDown={handlePlayheadMouseDown}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Pages Track */}
+                    <div className="relative h-12 bg-gray-200 dark:bg-gray-700 rounded" style={{ width: '100%' }}>
+                      {compositionData.pages.map((page, index) => {
+                        const startTime = compositionData.pages
+                          .slice(0, index)
+                          .reduce((sum, p) => sum + (p.duration / 1000), 0);
+                        const pageDuration = page.duration / 1000;
+                        const pageColors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
+                        
+                        // Fixed width for page blocks - 100px per second at 100% zoom
+                        const fixedWidth = Math.max(pageDuration * 100 * timelineZoom, 80);
+                        
+                        return (
+                          <div
+                            key={`page-${page.id}`}
+                            className="absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center cursor-pointer hover:opacity-80 border border-gray-300 dark:border-gray-600"
+                            style={{
+                              left: `${(startTime / totalDuration) * 100}%`,
+                              width: `${fixedWidth}px`,
+                              backgroundColor: pageColors[index % pageColors.length],
+                            }}
+                            onClick={(event) => handlePageClick(index, event)}
+                            title={`${page.name} (${formatTime(pageDuration)})`}
+                          >
+                            <div className="text-center px-2 overflow-hidden">
+                              <div className="font-medium truncate">{page.name}</div>
+                              <div className="text-xs opacity-75">{formatTime(pageDuration)}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
