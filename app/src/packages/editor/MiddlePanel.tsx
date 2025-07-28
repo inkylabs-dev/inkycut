@@ -667,9 +667,11 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                     <div className="relative h-12 bg-gray-200 dark:bg-gray-700 rounded" style={{ width: '100%' }}>
                       {(() => {
                         let cumulativePosition = 0;
+                        const currentPageIndex = getCurrentPage().pageIndex;
                         return compositionData.pages.map((page, index) => {
                           const pageDuration = page.duration / 1000;
                           const pageColors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
+                          const isSelected = index === currentPageIndex;
                           
                           // Calculate width in pixels - 100px per second at 100% zoom
                           const blockWidth = Math.max(pageDuration * 100 * timelineZoom, 80);
@@ -681,7 +683,11 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                           return (
                             <div
                               key={`page-${page.id}`}
-                              className="absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center cursor-pointer hover:opacity-80 border border-gray-300 dark:border-gray-600"
+                              className={`absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center cursor-pointer hover:opacity-80 border-2 ${
+                                isSelected 
+                                  ? 'border-blue-400 shadow-lg' 
+                                  : 'border-gray-300 dark:border-gray-600'
+                              }`}
                               style={{
                                 left: `${leftPosition}px`,
                                 width: `${blockWidth}px`,
