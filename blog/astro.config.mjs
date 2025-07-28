@@ -11,6 +11,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'InkyCut',
+      favicon: '/favicon.ico',
       customCss: ['./src/styles/tailwind.css'],
       description: 'InkyCut Documentation',
       logo: {

@@ -3,8 +3,6 @@ title: "IndexedDB File Storage Implementation"
 description: "Technical specification for implementing IndexedDB-based file storage in InkyCut video editor"
 ---
 
-# IndexedDB File Storage Implementation
-
 ## Overview
 
 This specification describes the behavior and implementation requirements for storing project files in IndexedDB instead of including them directly in the project JSON data structure. The implementation supports both local projects (persistent storage) and shared projects (in-memory storage).
