@@ -7,6 +7,7 @@
  */
 
 import { createDefaultProject } from '../atoms';
+import { generateKey, exportKey, encryptData, generateShareableKey } from './encryptionUtils';
 
 /**
  * Helper function to perform JSON export directly
@@ -81,6 +82,65 @@ async function performJSONExport(project: any, fileStorage: any): Promise<void> 
   }
 }
 
+/**
+ * Helper function to perform direct sharing
+ */
+async function performDirectShare(project: any, onShare: any): Promise<string> {
+  if (!project) {
+    throw new Error('No project to share');
+  }
+
+  if (!onShare) {
+    throw new Error('Share functionality not available');
+  }
+
+  try {
+    // Generate encryption key
+    const key = await generateKey();
+    const keyBase64 = await exportKey(key);
+    const shareableKey = generateShareableKey(keyBase64);
+
+    // Prepare project data for sharing (include files in encrypted data)
+    const projectToShare = {
+      ...project,
+      // Include files in encrypted data for full project sharing
+      files: project.files || [],
+      appState: {
+        selectedElementId: null,
+        selectedPageId: project.composition?.pages?.[0]?.id || null,
+        viewMode: 'view' as const,
+        zoomLevel: 1,
+        showGrid: false,
+        isLoading: false,
+        error: null,
+        history: { past: [], future: [] }
+      }
+    };
+
+    // Encrypt the project data
+    const projectJson = JSON.stringify(projectToShare);
+    const { encrypted, iv } = await encryptData(projectJson, key);
+
+    // Combine encrypted data and IV
+    const encryptedPayload = JSON.stringify({ encrypted, iv });
+
+    // Call backend API to upload to S3 and get share ID
+    const shareResponse = await onShare({
+      encryptedData: encryptedPayload,
+      projectName: project.name || 'Untitled Project'
+    });
+
+    const { shareId } = shareResponse;
+
+    // Generate and return the shareable link
+    const shareableLink = `${window.location.origin}/shared/${shareId}#key=${shareableKey}`;
+    return shareableLink;
+  } catch (error) {
+    console.error('Share failed:', error);
+    throw new Error(error instanceof Error ? error.message : 'Failed to share project');
+  }
+}
+
 export interface SlashCommandContext {
   project: any;
   updateProject: (project: any) => void;
@@ -95,6 +155,8 @@ export interface SlashCommandContext {
   setExportFormat?: (format: 'json' | 'mp4' | 'webm') => void;
   triggerExport?: () => void;
   fileStorage?: any;
+  setShowShareDialog?: (show: boolean) => void;
+  onShare?: (args: { encryptedData: string; projectName: string }) => Promise<{ shareId: string }>;
   args?: string[];
 }
 
@@ -346,12 +408,96 @@ const exportCommand: SlashCommand = {
 };
 
 /**
+ * Share project command - opens ShareDialog or performs direct sharing
+ * Supports auto-share: --yes/-y (skip dialog, share directly and return URL)
+ */
+const shareCommand: SlashCommand = {
+  name: 'share',
+  description: 'Share project with a secure link. Supports --yes/-y for direct sharing',
+  usage: '/share [--yes]',
+  requiresConfirmation: false,
+  execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
+    try {
+      let autoShare = false;
+      
+      // Parse command arguments
+      const args = context.args || [];
+      
+      for (const arg of args) {
+        // Handle auto-share options
+        if (arg === '--yes' || arg === '-y') {
+          autoShare = true;
+        }
+        // Handle unknown options
+        else if (arg.startsWith('-')) {
+          return {
+            success: false,
+            message: `❌ **Unknown Option**\n\nUnknown option '${arg}'. Usage: /share [--yes]`,
+            handled: true
+          };
+        }
+      }
+      
+      // If auto-share is requested
+      if (autoShare) {
+        if (!context.onShare) {
+          return {
+            success: false,
+            message: '❌ **Share Unavailable**\n\nShare functionality is not available in this context.',
+            handled: true
+          };
+        }
+        
+        try {
+          const shareableLink = await performDirectShare(context.project, context.onShare);
+          return {
+            success: true,
+            message: `🔗 **Project Shared Successfully**\n\nYour project has been shared with end-to-end encryption. Here's your secure shareable link:\n\n${shareableLink}\n\nAnyone with this link can view your project. The encryption key is embedded in the URL fragment for security.`,
+            handled: true
+          };
+        } catch (error) {
+          return {
+            success: false,
+            message: `❌ **Share Failed**\n\n${error instanceof Error ? error.message : 'Failed to share project'}`,
+            handled: true
+          };
+        }
+      }
+      
+      // Open share dialog
+      if (context.setShowShareDialog) {
+        context.setShowShareDialog(true);
+        return {
+          success: true,
+          message: '',
+          handled: true
+        };
+      } else {
+        return {
+          success: false,
+          message: '❌ **Share Unavailable**\n\nShare functionality is not available in this context.',
+          handled: true
+        };
+      }
+    } catch (error) {
+      console.error('Failed to handle share command:', error);
+      return {
+        success: false,
+        message: '❌ **Share Failed**\n\nFailed to open share dialog. Please try using the Share button in the menu.',
+        handled: true
+      };
+    }
+  }
+};
+
+/**
  * Registry of available slash commands
  */
 const commandRegistry: Map<string, SlashCommand> = new Map([
   ['reset', resetCommand],
   ['import', importCommand],
-  ['export', exportCommand]
+  ['export', exportCommand],
+  ['share', shareCommand]
 ]);
 
 /**

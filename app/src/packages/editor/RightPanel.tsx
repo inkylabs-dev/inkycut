@@ -43,6 +43,8 @@ interface RightPanelProps {
   setShowExportDialog?: (show: boolean) => void;
   setExportFormat?: (format: 'json' | 'mp4' | 'webm') => void;
   fileStorage?: any;
+  setShowShareDialog?: (show: boolean) => void;
+  onShare?: (args: { encryptedData: string; projectName: string }) => Promise<{ shareId: string }>;
 }
 
 export default function RightPanel({ 
@@ -58,7 +60,9 @@ export default function RightPanel({
   setShowImportDialog,
   setShowExportDialog,
   setExportFormat,
-  fileStorage
+  fileStorage,
+  setShowShareDialog,
+  onShare
 }: RightPanelProps) {
   const [inputMessage, setInputMessage] = useState('');
   const [messages] = useAtom(chatMessagesAtom);
@@ -212,7 +216,9 @@ export default function RightPanel({
             setShowImportDialog,
             setShowExportDialog,
             setExportFormat,
-            fileStorage
+            fileStorage,
+            setShowShareDialog,
+            onShare
           };
           
           // Add user command to chat
@@ -430,7 +436,7 @@ export default function RightPanel({
             key={message.id}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div className={`flex space-x-2 max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+            <div className={`flex space-x-2 max-w-[80%] min-w-0 ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
               <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
                 message.role === 'user' ? 'bg-blue-100 dark:bg-blue-900' : 'bg-gray-100 dark:bg-gray-700'
               }`}>
@@ -440,18 +446,18 @@ export default function RightPanel({
                   <CpuChipIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                 )}
               </div>
-              <div>
-                <div className={`p-3 rounded-lg ${
+              <div className="min-w-0 flex-1">
+                <div className={`p-3 rounded-lg min-w-0 ${
                   message.role === 'user'
                     ? 'bg-blue-600 dark:bg-blue-700 text-white'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                 }`}>
                   {message.role === 'assistant' ? (
-                    <div className="text-sm whitespace-pre-wrap">
+                    <div className="text-sm whitespace-pre-wrap break-words overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                       <Markdown rehypePlugins={[rehypeRaw]}>{message.content}</Markdown>
                     </div>
                   ) : (
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    <p className="text-sm whitespace-pre-wrap break-words overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{message.content}</p>
                   )}
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">

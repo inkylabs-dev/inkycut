@@ -60,6 +60,9 @@ export default function VibeEditorPage () {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [exportFormat, setExportFormat] = useState<'json' | 'mp4' | 'webm'>('json');
   
+  // Share dialog state
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  
   // Initialize the project if none exists, with proper localStorage handling
   useEffect(() => {
     let isMounted = true;
@@ -277,6 +280,8 @@ export default function VibeEditorPage () {
             setShowExportDialog={setShowExportDialog}
             exportFormat={exportFormat}
             setExportFormat={setExportFormat}
+            showShareDialog={showShareDialog}
+            setShowShareDialog={setShowShareDialog}
           />
         </div>
 
@@ -302,6 +307,8 @@ export default function VibeEditorPage () {
             setShowExportDialog={setShowExportDialog}
             setExportFormat={setExportFormat}
             fileStorage={fileStorage}
+            setShowShareDialog={setShowShareDialog}
+            onShare={shareProject}
             onHandleMessage={async (message: string, chatMode?: ChatMode) => {
               // Skip server processing for agent mode (handled client-side)
               if (chatMode === 'agent') {

@@ -51,6 +51,8 @@ interface LeftPanelProps {
   setShowExportDialog?: (show: boolean) => void;
   exportFormat?: 'json' | 'mp4' | 'webm';
   setExportFormat?: (format: 'json' | 'mp4' | 'webm') => void;
+  showShareDialog?: boolean;
+  setShowShareDialog?: (show: boolean) => void;
 }
 
 export default function LeftPanel({ 
@@ -75,7 +77,9 @@ export default function LeftPanel({
   showExportDialog: propShowExportDialog,
   setShowExportDialog: propSetShowExportDialog,
   exportFormat: propExportFormat,
-  setExportFormat: propSetExportFormat
+  setExportFormat: propSetExportFormat,
+  showShareDialog: propShowShareDialog,
+  setShowShareDialog: propSetShowShareDialog
 }: LeftPanelProps) {
   // Use Jotai atoms instead of props
   const [project, setProject] = useAtom(projectAtom);
@@ -89,7 +93,7 @@ export default function LeftPanel({
   const [showSettings, setShowSettings] = useState(false);
   const [internalShowImportDialog, setInternalShowImportDialog] = useState(false);
   const [internalShowExportDialog, setInternalShowExportDialog] = useState(false);
-  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [internalShowShareDialog, setInternalShowShareDialog] = useState(false);
   
   // Use prop-based ImportDialog state when available, otherwise use internal state
   const showImportDialog = propShowImportDialog !== undefined ? propShowImportDialog : internalShowImportDialog;
@@ -98,6 +102,10 @@ export default function LeftPanel({
   // Use prop-based ExportDialog state when available, otherwise use internal state
   const showExportDialog = propShowExportDialog !== undefined ? propShowExportDialog : internalShowExportDialog;
   const setShowExportDialog = propSetShowExportDialog !== undefined ? propSetShowExportDialog : setInternalShowExportDialog;
+  
+  // Use prop-based ShareDialog state when available, otherwise use internal state
+  const showShareDialog = propShowShareDialog !== undefined ? propShowShareDialog : internalShowShareDialog;
+  const setShowShareDialog = propSetShowShareDialog !== undefined ? propSetShowShareDialog : setInternalShowShareDialog;
   const menuRef = useRef<HTMLDivElement>(null);
   // const { data: user } = useAuth();
   const [localFiles] = useAtom(filesAtom);

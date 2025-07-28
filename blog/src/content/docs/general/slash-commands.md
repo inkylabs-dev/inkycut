@@ -87,6 +87,33 @@ Exports the project or opens the Export Dialog with optional format selection an
 - Error (unknown option): "❌ **Unknown Option** - Unknown option '--xyz'"
 - Unavailable: "❌ **Export Unavailable** - Export functionality is not available in this context."
 
+### `/share`
+
+Shares the project with a secure, encrypted link or opens the Share Dialog.
+
+**Usage:** `/share [--yes|-y]`
+
+**Options:**
+- `--yes`, `-y`: Skip dialog and share directly, returning the shareable URL in chat
+
+**Behavior:**
+- Without options: Opens Share Dialog for interactive sharing
+- With `--yes`: Performs direct sharing with end-to-end encryption and returns URL immediately
+- Creates encrypted shareable link with embedded decryption key in URL fragment
+- Uploads project data securely to server with end-to-end encryption
+
+**Examples:**
+- `/share` - Opens share dialog
+- `/share --yes` - Directly shares and returns URL
+- `/share -y` - Directly shares and returns URL (short form)
+
+**Response Messages:**
+- Success (dialog): Silent (dialog handles the sharing process)
+- Success (direct share): "🔗 **Project Shared Successfully** - Your project has been shared with end-to-end encryption. Here's your secure shareable link: [URL]"
+- Error: "❌ **Share Failed** - [Error details]"
+- Unavailable: "❌ **Share Unavailable** - Share functionality is not available in this context."
+- Unknown option: "❌ **Unknown Option** - Unknown option '--xyz'. Usage: /share [--yes]"
+
 ## Architecture
 
 ### Core Components
@@ -123,6 +150,8 @@ interface SlashCommandContext {
   setShowExportDialog?: (show: boolean) => void; // Show/hide export dialog
   setExportFormat?: (format: 'json' | 'mp4' | 'webm') => void; // Set export format
   fileStorage?: any; // File storage for direct JSON export
+  setShowShareDialog?: (show: boolean) => void; // Show/hide share dialog
+  onShare?: (args: { encryptedData: string; projectName: string }) => Promise<{ shareId: string }>; // Share function
 }
 ```
 
@@ -203,6 +232,7 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['reset', resetCommand],
   ['import', importCommand],
   ['export', exportCommand],
+  ['share', shareCommand],
   ['mycommand', myCommand], // Add your command here
 ]);
 ```
