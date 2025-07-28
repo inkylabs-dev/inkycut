@@ -284,7 +284,6 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   const handleTimelineClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
-    const timelineWidth = rect.width;
     const scrollLeft = timelineContainerRef.current?.scrollLeft || 0;
     const adjustedClickX = clickX + scrollLeft;
     const scaledTimelineWidth = totalDuration * 100 * timelineZoom; // 100px per second
@@ -367,6 +366,45 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
       setTimelineZoom(appState.zoomLevel);
     }
   }, [appState.zoomLevel]);
+
+  // Handle mouse wheel zoom in timeline area
+  useEffect(() => {
+    const handleWheelZoom = (event: WheelEvent) => {
+      // Check if the event target is within the timeline container
+      const timelineContainer = timelineContainerRef.current;
+      if (!timelineContainer) return;
+
+      const target = event.target as Element;
+      if (!timelineContainer.contains(target)) return;
+
+      // Check for modifier keys (Ctrl on Windows/Linux, Cmd on Mac)
+      const isZoomGesture = event.ctrlKey || event.metaKey;
+      if (!isZoomGesture) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      // Calculate zoom delta (negative deltaY means zoom in) - reduced sensitivity
+      const zoomDelta = event.deltaY > 0 ? 0.98 : 1.02;
+      const newZoom = Math.max(0.1, Math.min(10, timelineZoom * zoomDelta));
+      
+      setTimelineZoom(newZoom);
+      updateZoomInAppState(newZoom);
+    };
+
+    // Add event listener to the timeline container
+    const timelineContainer = timelineContainerRef.current;
+    if (timelineContainer) {
+      timelineContainer.addEventListener('wheel', handleWheelZoom, { passive: false });
+    }
+
+    // Cleanup
+    return () => {
+      if (timelineContainer) {
+        timelineContainer.removeEventListener('wheel', handleWheelZoom);
+      }
+    };
+  }, [timelineZoom, updateZoomInAppState]);
 
   const handleJsonChange = (newJson: string) => {
     setJsonString(newJson);
@@ -578,31 +616,45 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                   className="overflow-x-auto overflow-y-hidden"
                   style={{ maxWidth: '100%' }}
                 >
-                  <div style={{ width: `${Math.max(totalDuration * 100 * timelineZoom, 800)}px` }}>
+                  <div style={{ width: `${Math.max(compositionData.pages.reduce((sum, p) => sum + Math.max((p.duration / 1000) * 100 * timelineZoom, 80), 0), 800)}px` }}>
                     {/* Time ruler */}
                     <div 
                       className="relative h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2 cursor-pointer timeline-ruler"
                       onClick={handleTimelineClick}
                       style={{ width: '100%' }}
                     >
-                      {Array.from({ length: Math.ceil(totalDuration * timelineZoom / 5) * 5 }, (_, i) => {
-                        const timeInSeconds = i * 5 / timelineZoom;
-                        if (timeInSeconds > totalDuration) return null;
-                        return (
-                          <div
-                            key={`time-marker-${i}`}
-                            className="absolute top-0 h-full border-l border-gray-400 dark:border-gray-500"
-                            style={{ left: `${(timeInSeconds / totalDuration) * 100}%` }}
-                          >
-                            <span className="text-xs text-gray-600 dark:text-gray-400 ml-1">{Math.round(timeInSeconds)}s</span>
-                          </div>
-                        );
-                      })}
+                      {(() => {
+                        // Calculate appropriate time interval to show 4-5 markers in visible area
+                        const containerWidth = timelineContainerRef.current?.clientWidth || 800;
+                        const visibleDuration = containerWidth / (100 * timelineZoom); // visible seconds
+                        
+                        // Choose interval to show ~4-5 markers in visible area
+                        let interval = 1;
+                        if (visibleDuration > 20) interval = 10;
+                        else if (visibleDuration > 10) interval = 5;
+                        else if (visibleDuration > 5) interval = 2;
+                        else interval = 1;
+                        
+                        const markers: React.ReactElement[] = [];
+                        for (let time = 0; time <= totalDuration; time += interval) {
+                          const markerPosition = time * 100 * timelineZoom;
+                          markers.push(
+                            <div
+                              key={`time-marker-${time}`}
+                              className="absolute top-0 h-full border-l border-gray-400 dark:border-gray-500"
+                              style={{ left: `${markerPosition}px` }}
+                            >
+                              <span className="text-xs text-gray-600 dark:text-gray-400 ml-1">{time}s</span>
+                            </div>
+                          );
+                        }
+                        return markers;
+                      })()}
                       
                       {/* Playhead */}
                       <div
                         className="absolute top-0 w-0.5 h-full bg-red-500 z-10 transition-all duration-100"
-                        style={{ left: `${totalFrames > 0 ? (currentFrame / totalFrames) * 100 : 0}%` }}
+                        style={{ left: `${totalFrames > 0 ? (currentFrame / totalFrames) * totalDuration * 100 * timelineZoom : 0}px` }}
                       >
                         <div 
                           className="absolute -top-1 -left-1 w-2 h-2 bg-red-500 rounded-full cursor-grab active:cursor-grabbing hover:scale-125 transition-transform" 
@@ -613,35 +665,39 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
 
                     {/* Pages Track */}
                     <div className="relative h-12 bg-gray-200 dark:bg-gray-700 rounded" style={{ width: '100%' }}>
-                      {compositionData.pages.map((page, index) => {
-                        const startTime = compositionData.pages
-                          .slice(0, index)
-                          .reduce((sum, p) => sum + (p.duration / 1000), 0);
-                        const pageDuration = page.duration / 1000;
-                        const pageColors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
-                        
-                        // Fixed width for page blocks - 100px per second at 100% zoom
-                        const fixedWidth = Math.max(pageDuration * 100 * timelineZoom, 80);
-                        
-                        return (
-                          <div
-                            key={`page-${page.id}`}
-                            className="absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center cursor-pointer hover:opacity-80 border border-gray-300 dark:border-gray-600"
-                            style={{
-                              left: `${(startTime / totalDuration) * 100}%`,
-                              width: `${fixedWidth}px`,
-                              backgroundColor: pageColors[index % pageColors.length],
-                            }}
-                            onClick={(event) => handlePageClick(index, event)}
-                            title={`${page.name} (${formatTime(pageDuration)})`}
-                          >
-                            <div className="text-center px-2 overflow-hidden">
-                              <div className="font-medium truncate">{page.name}</div>
-                              <div className="text-xs opacity-75">{formatTime(pageDuration)}</div>
+                      {(() => {
+                        let cumulativePosition = 0;
+                        return compositionData.pages.map((page, index) => {
+                          const pageDuration = page.duration / 1000;
+                          const pageColors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
+                          
+                          // Calculate width in pixels - 100px per second at 100% zoom
+                          const blockWidth = Math.max(pageDuration * 100 * timelineZoom, 80);
+                          const leftPosition = cumulativePosition;
+                          
+                          // Update cumulative position for next block
+                          cumulativePosition += blockWidth;
+                          
+                          return (
+                            <div
+                              key={`page-${page.id}`}
+                              className="absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center cursor-pointer hover:opacity-80 border border-gray-300 dark:border-gray-600"
+                              style={{
+                                left: `${leftPosition}px`,
+                                width: `${blockWidth}px`,
+                                backgroundColor: pageColors[index % pageColors.length],
+                              }}
+                              onClick={(event) => handlePageClick(index, event)}
+                              title={`${page.name} (${formatTime(pageDuration)})`}
+                            >
+                              <div className="text-center px-2 overflow-hidden">
+                                <div className="font-medium truncate">{page.name}</div>
+                                <div className="text-xs opacity-75">{formatTime(pageDuration)}</div>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        });
+                      })()}
                     </div>
                   </div>
                 </div>

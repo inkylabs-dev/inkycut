@@ -213,6 +213,7 @@ Sets the timeline zoom level to a specified percentage for better timeline navig
 - Lower zoom levels show more timeline content and make page blocks smaller
 - Timeline maintains horizontal scrolling when zoomed in beyond container width
 - Zoom level is persisted in project state and restored on reload
+- Alternative: Use Ctrl+scroll (Windows/Linux) or Cmd+scroll (Mac) to zoom with mouse wheel in timeline area
 
 **Examples:**
 - `/zoom-tl 50%` - Sets timeline zoom to 50%
