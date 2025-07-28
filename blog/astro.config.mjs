@@ -85,6 +85,10 @@ export default defineConfig({
               label: 'IndexedDB File Storage',
               link: '/general/indexeddb-file-storage-implementation/',
             },
+            {
+              label: 'Slash Commands',
+              link: '/general/slash-commands/',
+            },
           ],
         },
         {
