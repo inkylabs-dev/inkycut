@@ -20,7 +20,10 @@ import {
   createDefaultProject,
   createDefaultPage,
   ensureCompositionIDs,
-  createServerSafeProject
+  createServerSafeProject,
+  clearAllFilesAtom,
+  setChatMessagesAtom,
+  isSharedProjectAtom
 } from '../packages/editor';
 import { processVideoAIPrompt, shareProject } from 'wasp/client/operations';
 
@@ -41,6 +44,9 @@ export default function VibeEditorPage () {
   const setUpdateProject = useSetAtom(updateProjectAtom);
   const setIsLoading = useSetAtom(setLoadingAtom);
   const setError = useSetAtom(setErrorAtom);
+  const clearAllFiles = useSetAtom(clearAllFilesAtom);
+  const setChatMessages = useSetAtom(setChatMessagesAtom);
+  const [isSharedProject, setIsSharedProject] = useAtom(isSharedProjectAtom);
   
   // Always allow direct JSON editing
   const propertiesEnabled = true;
@@ -272,6 +278,11 @@ export default function VibeEditorPage () {
         <div className="w-80 bg-white dark:bg-boxdark border-l border-gray-200 dark:border-strokedark flex-shrink-0 overflow-hidden">
           <RightPanel
             onSendMessage={handleChatMessage}
+            clearAllFiles={clearAllFiles}
+            setChatMessages={setChatMessages}
+            setSelectedPage={setSelectedPage}
+            setSelectedElement={setSelectedElement}
+            setIsSharedProject={setIsSharedProject}
             onHandleMessage={async (message: string, chatMode?: ChatMode) => {
               // Skip server processing for agent mode (handled client-side)
               if (chatMode === 'agent') {

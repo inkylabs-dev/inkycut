@@ -488,6 +488,17 @@ export const addChatMessageAtom = atom(
 );
 
 /**
+ * Write-only atom for setting the entire chat messages array
+ * Used when resetting chat history or loading new messages
+ */
+export const setChatMessagesAtom = atom(
+  null,
+  (_, set, newMessages: ChatMessage[]) => {
+    set(chatMessagesAtom, newMessages);
+  }
+);
+
+/**
  * Base atom for tracking file refresh trigger
  * Used to invalidate the files cache when files change
  */

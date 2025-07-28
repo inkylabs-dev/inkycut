@@ -19,6 +19,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom, chatModeAtom, agentSettingsAtom, type ChatMode } from './atoms';
 import { clientAI, StreamingResponse } from './utils/clientAI';
+import { parseSlashCommand, executeSlashCommand, type SlashCommandContext } from './utils/clientSlashCommands';
 // import { processVideoAIPrompt } from 'wasp/client/operations';
 // import { estimateProjectSize } from './utils/projectUtils';
 
@@ -32,13 +33,24 @@ interface RightPanelProps {
   onHandleMessage?: (message: string, chatMode?: ChatMode) => Promise<{ message: string; updatedProject?: any }>;
   isReadOnly?: boolean;
   readOnlyMessage?: string;
+  // Slash command context functions
+  clearAllFiles?: () => Promise<void>;
+  setChatMessages?: (messages: any[]) => void;
+  setSelectedPage?: (page: any) => void;
+  setSelectedElement?: (element: any) => void;
+  setIsSharedProject?: (isShared: boolean) => void;
 }
 
 export default function RightPanel({ 
   onSendMessage, 
   onHandleMessage, 
   isReadOnly = false, 
-  readOnlyMessage = "Chat is disabled for shared projects" 
+  readOnlyMessage = "Chat is disabled for shared projects",
+  clearAllFiles,
+  setChatMessages,
+  setSelectedPage,
+  setSelectedElement,
+  setIsSharedProject
 }: RightPanelProps) {
   const [inputMessage, setInputMessage] = useState('');
   const [messages] = useAtom(chatMessagesAtom);
@@ -164,6 +176,72 @@ export default function RightPanel({
     if (inputMessage.trim()) {
       setIsTyping(true);
       const userMessage = inputMessage.trim();
+      
+      // Check if this is a slash command
+      const slashCommand = parseSlashCommand(userMessage);
+      
+      if (slashCommand.isCommand && slashCommand.commandName) {
+        // Handle slash command locally - don't send to parent or AI
+        setInputMessage('');
+        
+        try {
+          const context: SlashCommandContext = {
+            project,
+            updateProject: (updatedProject: any) => setUpdateProject(updatedProject),
+            addMessage: (content: string) => {
+              setAddChatMessage({
+                id: Date.now(),
+                role: 'assistant',
+                content,
+                timestamp: new Date().toISOString()
+              });
+            },
+            clearAllFiles,
+            setChatMessages,
+            setSelectedPage,
+            setSelectedElement,
+            setIsSharedProject
+          };
+          
+          // Add user command to chat
+          setAddChatMessage({
+            id: Date.now(),
+            role: 'user',
+            content: userMessage,
+            timestamp: new Date().toISOString()
+          });
+          
+          // Execute the slash command
+          const result = await executeSlashCommand(
+            slashCommand.commandName, 
+            slashCommand.args || [], 
+            context
+          );
+          
+          // Add command result to chat (only if there's a message)
+          if (result.message.trim()) {
+            setAddChatMessage({
+              id: Date.now(),
+              role: 'assistant',
+              content: result.message,
+              timestamp: new Date().toISOString()
+            });
+          }
+          
+        } catch (error) {
+          console.error('Slash command error:', error);
+          setAddChatMessage({
+            id: Date.now(),
+            role: 'assistant',
+            content: `❌ **Command Error**\n\nAn error occurred while executing the command: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            timestamp: new Date().toISOString()
+          });
+        } finally {
+          setIsTyping(false);
+        }
+        
+        return; // Exit early for slash commands
+      }
       
       // Pass the message to the parent component to add the USER message
       // The parent component handles adding the user message to the chat
