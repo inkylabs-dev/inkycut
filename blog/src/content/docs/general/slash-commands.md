@@ -166,6 +166,37 @@ Adds blank page(s) after the currently selected page. If no page is selected, ad
 - Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
 - Error (unknown option): "❌ **Unknown Option** - Unknown option '--xyz'. Usage: /new-page [--num|-n n]"
 
+### `/del-page`
+
+Deletes the selected page and optionally additional consecutive pages after it. Requires user confirmation.
+
+**Usage:** `/del-page [--num|-n n]`
+
+**Options:**
+- `--num`, `-n`: Number of pages to delete starting from selected page (1-50). Default: 1
+
+**Behavior:**
+- Deletes the selected page and optionally consecutive pages after it
+- If no page is selected, defaults to deleting the first page
+- Always prompts for confirmation before deletion (destructive operation)
+- Prevents deletion of all pages (at least one page must remain)
+- Automatically selects the next logical page after deletion
+- Shows names of deleted pages in success message
+
+**Examples:**
+- `/del-page` - Deletes the selected page (with confirmation)
+- `/del-page --num 3` - Deletes selected page and 2 pages after it
+- `/del-page -n 2` - Deletes selected page and 1 page after it
+
+**Response Messages:**
+- Success: "✅ **N Page(s) Deleted** - Deleted pages: [Page Names]. [New Selected Page] is now selected."
+- Error (invalid number): "❌ **Invalid Number** - Number of pages to delete must be between 1 and 50. Got 'xyz'"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (no pages): "❌ **No Pages** - There are no pages to delete in this project."
+- Error (all pages): "❌ **Cannot Delete All Pages** - At least one page must remain in the project."
+- Error (cancelled): "⏸️ **Command Cancelled** - The deletion was cancelled."
+- Error (unknown option): "❌ **Unknown Option** - Unknown option '--xyz'. Usage: /del-page [--num|-n n]"
+
 ## Architecture
 
 ### Core Components
@@ -286,6 +317,7 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['export', exportCommand],
   ['share', shareCommand],
   ['new-page', newPageCommand],
+  ['del-page', delPageCommand],
   ['mycommand', myCommand], // Add your command here
 ]);
 ```
