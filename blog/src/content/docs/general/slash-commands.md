@@ -197,6 +197,62 @@ Deletes the selected page and optionally additional consecutive pages after it. 
 - Error (cancelled): "⏸️ **Command Cancelled** - The deletion was cancelled."
 - Error (unknown option): "❌ **Unknown Option** - Unknown option '--xyz'. Usage: /del-page [--num|-n n]"
 
+### `/set-page`
+
+Sets properties of a page including ID, name, duration, background color, and position within the composition.
+
+**Usage:** `/set-page [target_page_id] [--id|-i id] [--name|-n name] [--duration|-d duration] [--background-color|-bg color] [--after|-a id|+n] [--before|-b id|-n]`
+
+**Options:**
+- `target_page_id` (optional): ID of the page to modify. If not specified, uses currently selected page or first page
+- `--id`, `-i`: Set new page ID (must be unique across all pages)
+- `--name`, `-n`: Set page name/title
+- `--duration`, `-d`: Set page duration in milliseconds
+- `--background-color`, `-bg`: Set page background color (hex, RGB, or CSS color names)
+- `--after`, `-a`: Move page after specified page ID or relative position (+n)
+- `--before`, `-b`: Move page before specified page ID or relative position (-n)
+
+**Behavior:**
+- Modifies properties of the target page with comprehensive validation
+- Enforces ID uniqueness across all pages in the composition
+- Validates duration as positive number in milliseconds
+- Validates color format (hex, RGB, or CSS color names)
+- Supports both absolute positioning (by page ID) and relative positioning (+n/-n)
+- Shows detailed change summary after successful modification
+- Automatically updates project state and UI
+
+**Examples:**
+- `/set-page --name "Introduction" --duration 8000` - Set name and 8-second duration for current page
+- `/set-page page-1 --id "intro-page" --background-color "#ff0000"` - Update specific page ID and background
+- `/set-page --duration 3000 --after "+1"` - Set duration and move 1 position forward
+- `/set-page --name "Conclusion" --before "page-intro"` - Set name and move before specific page
+- `/set-page page-2 --after "page-1" --background-color "blue"` - Move page-2 after page-1 and set blue background
+
+**Response Messages:**
+- Success: "✅ **Page Updated** - Page '[name]' has been updated: • [list of changes]"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (missing parameters): "❌ **Missing Parameters** - Please specify at least one option to set."
+- Error (missing value): "❌ **Missing Value** - Option '--[option]' requires a value."
+- Error (invalid duration): "❌ **Invalid Duration** - Duration must be a positive number in milliseconds. Got: '[value]'"
+- Error (invalid color): "❌ **Invalid Color** - Invalid color format: '[value]'. Supported formats: hex, RGB, CSS names"
+- Error (duplicate ID): "❌ **Duplicate ID** - Page ID '[id]' already exists. Page IDs must be unique."
+- Error (page not found): "❌ **Page Not Found** - Page with ID '[id]' not found."
+- Error (invalid position): "❌ **Invalid Position** - Invalid relative position: '[value]'. Use format: +2 or -1"
+- Error (reference page not found): "❌ **Reference Page Not Found** - Page with ID '[id]' not found for positioning."
+
+**Type Validation:**
+- **ID**: String validation with uniqueness check across all pages
+- **Name**: String validation (any non-empty string accepted)
+- **Duration**: Integer validation (must be positive number in milliseconds)
+- **Background Color**: Regex validation for hex (#fff, #ffffff), RGB (rgb(r,g,b)), and CSS color names
+- **Position References**: Existence validation for page IDs, numeric validation for relative positions
+
+**Position Logic:**
+- **Absolute positioning**: `--after "page-id"` or `--before "page-id"` references specific pages
+- **Relative positioning**: `--after "+2"` moves 2 positions forward, `--before "-1"` moves 1 position back
+- **Boundary handling**: Positions are automatically clamped to valid range (0 to pages.length-1)
+- **Self-reference prevention**: Cannot position a page relative to itself
+
 ### `/zoom-tl`
 
 Sets the timeline zoom level to a specified percentage for better timeline navigation and precision editing.
@@ -228,6 +284,8 @@ Sets the timeline zoom level to a specified percentage for better timeline navig
 - Error (missing parameter): "❌ **Missing Parameter** - Please specify a zoom percentage. Usage: `/zoom-tl <percentage>` Example: `/zoom-tl 50%` or `/zoom-tl 150`"
 - Error (invalid percentage): "❌ **Invalid Percentage** - Invalid percentage value 'xyz'. Please provide a positive number. Example: `/zoom-tl 50%` or `/zoom-tl 150`"
 - Error (execution failed): "❌ **Zoom Failed** - Failed to set timeline zoom level. Please try again."
+
+
 
 ## Architecture
 
@@ -351,6 +409,7 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['new-page', newPageCommand],
   ['del-page', delPageCommand],
   ['zoom-tl', zoomTimelineCommand],
+  ['set-page', setPageCommand],
   ['mycommand', myCommand], // Add your command here
 ]);
 ```
