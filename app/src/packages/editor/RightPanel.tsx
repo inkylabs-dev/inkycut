@@ -39,6 +39,7 @@ interface RightPanelProps {
   setSelectedPage?: (page: any) => void;
   setSelectedElement?: (element: any) => void;
   setIsSharedProject?: (isShared: boolean) => void;
+  setShowImportDialog?: (show: boolean) => void;
 }
 
 export default function RightPanel({ 
@@ -50,7 +51,8 @@ export default function RightPanel({
   setChatMessages,
   setSelectedPage,
   setSelectedElement,
-  setIsSharedProject
+  setIsSharedProject,
+  setShowImportDialog
 }: RightPanelProps) {
   const [inputMessage, setInputMessage] = useState('');
   const [messages] = useAtom(chatMessagesAtom);
@@ -200,7 +202,8 @@ export default function RightPanel({
             setChatMessages,
             setSelectedPage,
             setSelectedElement,
-            setIsSharedProject
+            setIsSharedProject,
+            setShowImportDialog
           };
           
           // Add user command to chat

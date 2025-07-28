@@ -45,6 +45,8 @@ interface LeftPanelProps {
   menuConfig?: MenuConfig;
   onForkAndEdit?: () => void;
   onShare?: (args: { encryptedData: string; projectName: string }) => Promise<{ shareId: string }>;
+  showImportDialog?: boolean;
+  setShowImportDialog?: (show: boolean) => void;
 }
 
 export default function LeftPanel({ 
@@ -63,7 +65,9 @@ export default function LeftPanel({
     showGitHub: true,
   },
   onForkAndEdit,
-  onShare
+  onShare,
+  showImportDialog: propShowImportDialog,
+  setShowImportDialog: propSetShowImportDialog
 }: LeftPanelProps) {
   // Use Jotai atoms instead of props
   const [project, setProject] = useAtom(projectAtom);
@@ -75,9 +79,13 @@ export default function LeftPanel({
   const [activeTab, setActiveTab] = useState<'files' | 'elements'>('files');
   const [showMenu, setShowMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [internalShowImportDialog, setInternalShowImportDialog] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  
+  // Use prop-based ImportDialog state when available, otherwise use internal state
+  const showImportDialog = propShowImportDialog !== undefined ? propShowImportDialog : internalShowImportDialog;
+  const setShowImportDialog = propSetShowImportDialog !== undefined ? propSetShowImportDialog : setInternalShowImportDialog;
   const menuRef = useRef<HTMLDivElement>(null);
   // const { data: user } = useAuth();
   const [localFiles] = useAtom(filesAtom);

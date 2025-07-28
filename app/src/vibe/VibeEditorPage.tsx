@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom, useSetAtom } from 'jotai';
 import { LeftPanel, MiddlePanel, RightPanel, type ChatMode } from '../packages/editor';
@@ -50,6 +50,9 @@ export default function VibeEditorPage () {
   
   // Always allow direct JSON editing
   const propertiesEnabled = true;
+  
+  // Import dialog state
+  const [showImportDialog, setShowImportDialog] = useState(false);
   
   // Initialize the project if none exists, with proper localStorage handling
   useEffect(() => {
@@ -262,6 +265,8 @@ export default function VibeEditorPage () {
           <LeftPanel 
             onElementUpdate={handleElementUpdate}
             onShare={shareProject}
+            showImportDialog={showImportDialog}
+            setShowImportDialog={setShowImportDialog}
           />
         </div>
 
@@ -283,6 +288,7 @@ export default function VibeEditorPage () {
             setSelectedPage={setSelectedPage}
             setSelectedElement={setSelectedElement}
             setIsSharedProject={setIsSharedProject}
+            setShowImportDialog={setShowImportDialog}
             onHandleMessage={async (message: string, chatMode?: ChatMode) => {
               // Skip server processing for agent mode (handled client-side)
               if (chatMode === 'agent') {

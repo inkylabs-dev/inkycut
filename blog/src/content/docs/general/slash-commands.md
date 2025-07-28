@@ -33,8 +33,29 @@ Resets the project to its default state, equivalent to clicking "Reset Project" 
 - If cancelled: Shows "Command Cancelled" message
 
 **Response Messages:**
-- Success: "✅ **Project Reset Complete** - Your project has been reset to its default state. All files and chat history have been cleared."
+- Success: Silent (no message shown for clean reset experience)
 - Error: "❌ **Reset Failed** - Failed to reset project. Please try again or use the Reset Project button in the menu."
+
+### `/import`
+
+Opens the Import Dialog to import a project from a JSON file, equivalent to clicking "Import Project" in the menu.
+
+**Usage:** `/import`
+
+**Behavior:**
+- Opens the Import Dialog immediately
+- No confirmation required (file selection serves as confirmation)
+- Dialog allows drag-and-drop or file browser selection
+- Supports `.json` files containing project data
+- Validates project structure before importing
+- Automatically imports files to IndexedDB storage
+- Resets chat history with import success message
+- Sets project to local mode (not shared)
+
+**Response Messages:**
+- Success: Silent (dialog handles the import process and feedback)
+- Error: "❌ **Import Failed** - Failed to open import dialog. Please try using the Import button in the menu."
+- Unavailable: "❌ **Import Unavailable** - Import functionality is not available in this context."
 
 ## Architecture
 
@@ -68,6 +89,7 @@ interface SlashCommandContext {
   setSelectedPage?: (page: any) => void;  // Update selected page
   setSelectedElement?: (element: any) => void; // Update selected element
   setIsSharedProject?: (isShared: boolean) => void; // Toggle project mode
+  setShowImportDialog?: (show: boolean) => void; // Show/hide import dialog
 }
 ```
 
@@ -146,6 +168,7 @@ const myCommand: SlashCommand = {
 // Add to the commandRegistry Map in clientSlashCommands.ts
 const commandRegistry: Map<string, SlashCommand> = new Map([
   ['reset', resetCommand],
+  ['import', importCommand],
   ['mycommand', myCommand], // Add your command here
 ]);
 ```
@@ -181,7 +204,6 @@ The slash command system is designed to be extensible. Potential future commands
 
 - `/help` - Show available commands and usage
 - `/export [format]` - Export project in specified format
-- `/import` - Import project or assets
 - `/save` - Save current project
 - `/undo` - Undo last action
 - `/redo` - Redo last undone action

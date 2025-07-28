@@ -17,6 +17,7 @@ export interface SlashCommandContext {
   setSelectedPage?: (page: any) => void;
   setSelectedElement?: (element: any) => void;
   setIsSharedProject?: (isShared: boolean) => void;
+  setShowImportDialog?: (show: boolean) => void;
 }
 
 export interface SlashCommandResult {
@@ -105,10 +106,46 @@ const resetCommand: SlashCommand = {
 };
 
 /**
+ * Import project command - opens the ImportDialog
+ */
+const importCommand: SlashCommand = {
+  name: 'import',
+  description: 'Open the import dialog to import a project from JSON file',
+  usage: '/import',
+  requiresConfirmation: false,
+  execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
+    try {
+      if (context.setShowImportDialog) {
+        context.setShowImportDialog(true);
+        return {
+          success: true,
+          message: '',
+          handled: true
+        };
+      } else {
+        return {
+          success: false,
+          message: '❌ **Import Unavailable**\n\nImport functionality is not available in this context.',
+          handled: true
+        };
+      }
+    } catch (error) {
+      console.error('Failed to open import dialog:', error);
+      return {
+        success: false,
+        message: '❌ **Import Failed**\n\nFailed to open import dialog. Please try using the Import button in the menu.',
+        handled: true
+      };
+    }
+  }
+};
+
+/**
  * Registry of available slash commands
  */
 const commandRegistry: Map<string, SlashCommand> = new Map([
-  ['reset', resetCommand]
+  ['reset', resetCommand],
+  ['import', importCommand]
 ]);
 
 /**
