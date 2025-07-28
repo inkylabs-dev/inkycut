@@ -79,6 +79,15 @@ export default defineConfig({
           ],
         },
         {
+          label: 'General',
+          items: [
+            {
+              label: 'IndexedDB File Storage',
+              link: '/general/indexeddb-file-storage-implementation/',
+            },
+          ],
+        },
+        {
           label: 'Contributing',
           items: [
             {

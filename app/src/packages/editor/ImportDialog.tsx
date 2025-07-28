@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useSetAtom } from 'jotai';
 import { XMarkIcon, DocumentArrowUpIcon } from '@heroicons/react/24/outline';
-import { projectAtom, setSelectedElementAtom, setSelectedPageAtom, chatMessagesAtom } from './atoms';
+import { projectAtom, setSelectedElementAtom, setSelectedPageAtom, chatMessagesAtom, importFilesAtom, isSharedProjectAtom } from './atoms';
 
 interface ImportDialogProps {
   isOpen: boolean;
@@ -17,8 +17,10 @@ export default function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
   const setSelectedElement = useSetAtom(setSelectedElementAtom);
   const setSelectedPage = useSetAtom(setSelectedPageAtom);
   const setChatMessages = useSetAtom(chatMessagesAtom);
+  const importFiles = useSetAtom(importFilesAtom);
+  const setIsSharedProject = useSetAtom(isSharedProjectAtom);
 
-  const handleFileSelect = (file: File) => {
+  const handleFileSelect = async (file: File) => {
     if (file.type !== 'application/json') {
       setError('Please select a valid JSON file');
       return;
@@ -28,7 +30,7 @@ export default function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
     setError(null);
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const content = e.target?.result as string;
         const projectData = JSON.parse(content);
@@ -38,9 +40,23 @@ export default function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
           throw new Error('Invalid project format');
         }
 
+        // Set as local project (not shared)
+        setIsSharedProject(false);
+
+        // Import files to IndexedDB if they exist in the project data
+        if (projectData.files && Array.isArray(projectData.files)) {
+          await importFiles(projectData.files);
+        }
+
+        // Remove files from project data since they're now in IndexedDB
+        const projectWithoutFiles = {
+          ...projectData,
+          files: [] // Clear files array since files are now in IndexedDB
+        };
+
         // Import the project
-        console.log('Importing project:', projectData);
-        setProject(projectData);
+        console.log('Importing project:', projectWithoutFiles);
+        setProject(projectWithoutFiles);
         
         // Set selected page to first page if available
         if (projectData.composition?.pages?.length > 0) {
@@ -62,6 +78,7 @@ export default function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
         
         onClose();
       } catch (err) {
+        console.error('Import error:', err);
         setError('Failed to import project. Please check if the file contains valid project data.');
       } finally {
         setIsImporting(false);

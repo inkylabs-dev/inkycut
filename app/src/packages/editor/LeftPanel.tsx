@@ -16,7 +16,7 @@ import {
 // import { routes } from 'wasp/client/router';
 import { Link } from 'react-router-dom';
 import { CompositionElement, LocalFile } from './types';
-import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject, filesAtom, chatMessagesAtom } from './atoms';
+import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject, filesAtom, chatMessagesAtom, clearAllFilesAtom, forkProjectAtom, isSharedProjectAtom } from './atoms';
 import LocalFileUpload from './LocalFileUpload';
 import ElementPreview from './ElementPreview';
 import FileListItem from './FileListItem';
@@ -82,6 +82,9 @@ export default function LeftPanel({
   // const { data: user } = useAuth();
   const [localFiles] = useAtom(filesAtom);
   const [, setChatMessages] = useAtom(chatMessagesAtom);
+  const clearAllFiles = useSetAtom(clearAllFilesAtom);
+  const [isSharedProject, setIsSharedProject] = useAtom(isSharedProjectAtom);
+  const forkProject = useSetAtom(forkProjectAtom);
 
   // Create file resolver from local files
   const fileResolver = React.useMemo(() => {
@@ -97,39 +100,106 @@ export default function LeftPanel({
   };
   
   // Function to reset the project to its default state
-  const handleResetProject = () => {
-    if (window.confirm('Are you sure you want to reset the project? All unsaved changes will be lost.')) {
-      // Create a new project with default settings
-      const newProject = createDefaultProject('Untitled Project');
-      
-      // Keep the current project ID if available
-      if (project?.id) {
-        newProject.id = project.id;
+  const handleResetProject = async () => {
+    if (window.confirm('Are you sure you want to reset the project? All unsaved changes and files will be lost.')) {
+      try {
+        // Clear all files from current storage (only for local projects)
+        if (!isSharedProject) {
+          await clearAllFiles();
+        }
+        
+        // Create a new project with default settings
+        const newProject = createDefaultProject('Untitled Project');
+        
+        // Keep the current project ID if available
+        if (project?.id) {
+          newProject.id = project.id;
+        }
+        
+        // Reset to local project mode
+        setIsSharedProject(false);
+        
+        // Reset the project
+        setProject(newProject);
+        
+        // Update selected page to the first page of the new project
+        if (newProject.composition.pages.length > 0) {
+          setSelectedPage(newProject.composition.pages[0]);
+        }
+        
+        // Clear selected element
+        setSelectedElement(null);
+        
+        // Clear chat history and reset to welcome message
+        setChatMessages([
+          {
+            id: 1,
+            role: 'assistant',
+            content: 'Welcome to Vibe Video Cut! I\'m your AI assistant. How can I help you create amazing videos today?',
+            timestamp: new Date().toISOString()
+          }
+        ]);
+        
+        // Close menu after reset
+        setShowMenu(false);
+      } catch (error) {
+        console.error('Failed to reset project:', error);
+        alert('Failed to reset project. Please try again.');
       }
+    }
+  };
+
+  // Function to fork a shared project to local
+  const handleForkAndEdit = async () => {
+    if (!project) return;
+    
+    try {
+      // Fork the project (migrates files from memory to IndexedDB)
+      await forkProject();
       
-      // Reset the project
-      setProject(newProject);
+      // Create the forked project with new metadata
+      const forkedProject = {
+        ...project,
+        id: `forked-${Date.now()}`, // Generate new ID
+        name: `${project.name} (Forked)`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        // Reset appState for editing
+        appState: {
+          selectedElementId: null,
+          selectedPageId: project.composition?.pages?.[0]?.id || null,
+          viewMode: 'edit' as const,
+          zoomLevel: 1,
+          showGrid: false,
+          isLoading: false,
+          error: null,
+          history: { past: [], future: [] }
+        }
+      };
+
+      // Update the project
+      setProject(forkedProject);
       
-      // Update selected page to the first page of the new project
-      if (newProject.composition.pages.length > 0) {
-        setSelectedPage(newProject.composition.pages[0]);
-      }
-      
-      // Clear selected element
-      setSelectedElement(null);
-      
-      // Clear chat history and reset to welcome message
+      // Clear chat messages and reset to welcome message
       setChatMessages([
         {
           id: 1,
           role: 'assistant',
-          content: 'Welcome to Vibe Video Cut! I\'m your AI assistant. How can I help you create amazing videos today?',
+          content: 'Project forked successfully! I\'m your AI assistant. How can I help you edit your forked project?',
           timestamp: new Date().toISOString()
         }
       ]);
       
-      // Close menu after reset
+      // Close menu after fork
       setShowMenu(false);
+      
+      // Notify the caller if provided
+      if (onForkAndEdit) {
+        onForkAndEdit();
+      }
+    } catch (error) {
+      console.error('Failed to fork project:', error);
+      alert('Failed to fork project. Please try again.');
     }
   };
 
@@ -176,6 +246,8 @@ export default function LeftPanel({
                       onClick={() => {
                         if (onForkAndEdit) {
                           onForkAndEdit();
+                        } else {
+                          handleForkAndEdit();
                         }
                         setShowMenu(false);
                       }}

@@ -1,6 +1,12 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage, AppState, LocalFile } from './types';
+import { 
+  IFileStorage, 
+  createFileStorage, 
+  getStorageModeForProject, 
+  migrateFiles 
+} from './utils/fileStorage';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -10,6 +16,34 @@ export type ThemeMode = 'light' | 'dark' | 'system';
  * @type {Project | null} - The current project or null if no project exists
  */
 export const projectAtom = atomWithStorage<Project | null>('vibe-project', null);
+
+/**
+ * Atom to track if the current project is a shared project
+ * Shared projects use memory storage, local projects use IndexedDB
+ */
+export const isSharedProjectAtom = atom<boolean>(false);
+
+/**
+ * Derived atom for the current storage mode
+ * Automatically switches between IndexedDB and memory based on project type
+ */
+export const storageModeAtom = atom(
+  (get) => {
+    const isShared = get(isSharedProjectAtom);
+    return getStorageModeForProject(isShared);
+  }
+);
+
+/**
+ * Derived atom for the current file storage instance
+ * Creates appropriate storage based on current mode
+ */
+export const fileStorageAtom = atom(
+  (get) => {
+    const mode = get(storageModeAtom);
+    return createFileStorage(mode);
+  }
+);
 
 /**
  * Persistent storage for theme mode using atomWithStorage
@@ -454,72 +488,186 @@ export const addChatMessageAtom = atom(
 );
 
 /**
- * Derived atom providing the files array from the current project
- * @type {LocalFile[]} - Array of local files or empty array if no project
+ * Base atom for tracking file refresh trigger
+ * Used to invalidate the files cache when files change
  */
-export const filesAtom = atom(
-  (get) => get(projectAtom)?.files || []
-);
+const filesRefreshAtom = atom(0);
 
 /**
- * Write-only atom for adding a new local file to the project
- * Converts File object to LocalFile with data URL and stores it
- * @param {File} file - The File object to add to the project
+ * Derived atom providing the files array from current storage
+ * Files are stored in IndexedDB for local projects, memory for shared projects
+ * @type {LocalFile[]} - Array of local files from current storage
  */
-export const addFileAtom = atom(
-  null,
-  async (get, set, file: File) => {
-    const project = get(projectAtom);
-    if (!project) return;
-
-    // Convert file to data URL
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-
-    // Create LocalFile object
-    const localFile: LocalFile = {
-      id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      dataUrl,
-      createdAt: new Date().toISOString()
-    };
-
-    // Add file to project
-    const updatedProject = {
-      ...project,
-      files: [...project.files, localFile]
-    };
-
-    // Use updateProjectAtom to update the project in storage
-    set(updateProjectAtom, updatedProject);
-    
-    return localFile;
+export const filesAtom = atom(
+  async (get) => {
+    try {
+      // Depend on refresh trigger to invalidate cache
+      get(filesRefreshAtom);
+      const storage = get(fileStorageAtom);
+      return await storage.getAllFiles();
+    } catch (error) {
+      console.error('Failed to load files from storage:', error);
+      return [];
+    }
   }
 );
 
 /**
- * Write-only atom for removing a file from the project
+ * Helper atom to refresh the files list
+ * Increments the refresh counter to trigger filesAtom reload
+ */
+const refreshFilesAtom = atom(
+  null,
+  (get, set) => {
+    set(filesRefreshAtom, get(filesRefreshAtom) + 1);
+  }
+);
+
+/**
+ * Write-only atom for adding a new local file to current storage
+ * Converts File object to LocalFile with data URL and stores it
+ * @param {File} file - The File object to add to storage
+ */
+export const addFileAtom = atom(
+  null,
+  async (get, set, file: File) => {
+    try {
+      const storage = get(fileStorageAtom);
+      
+      // Convert file to data URL
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      // Create LocalFile object
+      const localFile: LocalFile = {
+        id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        dataUrl,
+        createdAt: new Date().toISOString()
+      };
+
+      // Store file in current storage
+      await storage.storeFile(localFile);
+      
+      // Trigger files atom refresh
+      set(refreshFilesAtom);
+      
+      return localFile;
+    } catch (error) {
+      console.error('Failed to add file to storage:', error);
+      throw error;
+    }
+  }
+);
+
+/**
+ * Write-only atom for removing a file from current storage
  * @param {string} fileId - The ID of the file to remove
  */
 export const removeFileAtom = atom(
   null,
-  (get, set, fileId: string) => {
-    const project = get(projectAtom);
-    if (!project) return;
+  async (get, set, fileId: string) => {
+    try {
+      const storage = get(fileStorageAtom);
+      
+      // Remove file from current storage
+      await storage.deleteFile(fileId);
+      
+      // Trigger files atom refresh
+      set(refreshFilesAtom);
+    } catch (error) {
+      console.error('Failed to remove file from storage:', error);
+      throw error;
+    }
+  }
+);
 
-    // Remove file from project
-    const updatedProject = {
-      ...project,
-      files: project.files.filter(file => file.id !== fileId)
-    };
+/**
+ * Write-only atom for clearing all files from current storage
+ * Used when clearing/resetting the project
+ */
+export const clearAllFilesAtom = atom(
+  null,
+  async (get, set) => {
+    try {
+      const storage = get(fileStorageAtom);
+      
+      // Clear all files from current storage
+      await storage.clearAllFiles();
+      
+      // Trigger files atom refresh
+      set(refreshFilesAtom);
+    } catch (error) {
+      console.error('Failed to clear files from storage:', error);
+      throw error;
+    }
+  }
+);
 
-    // Use updateProjectAtom to update the project in storage
-    set(updateProjectAtom, updatedProject);
+/**
+ * Write-only atom for importing files from JSON data
+ * Used when importing a project that contains files
+ * @param {LocalFile[]} files - Array of files to import
+ */
+export const importFilesAtom = atom(
+  null,
+  async (get, set, files: LocalFile[]) => {
+    try {
+      const storage = get(fileStorageAtom);
+      
+      // Clear existing files first (only from current storage)
+      await storage.clearAllFiles();
+      
+      // Store all imported files
+      if (files && files.length > 0) {
+        await storage.storeFiles(files);
+      }
+      
+      // Trigger files atom refresh
+      set(refreshFilesAtom);
+    } catch (error) {
+      console.error('Failed to import files to storage:', error);
+      throw error;
+    }
+  }
+);
+
+/**
+ * Write-only atom for forking a shared project to local
+ * Migrates files from memory to IndexedDB and switches to local mode
+ */
+export const forkProjectAtom = atom(
+  null,
+  async (get, set) => {
+    try {
+      const currentStorage = get(fileStorageAtom);
+      const isShared = get(isSharedProjectAtom);
+      
+      if (!isShared) {
+        // Already a local project, nothing to fork
+        return;
+      }
+      
+      // Create IndexedDB storage for the forked project
+      const indexedDBStorage = createFileStorage('indexeddb');
+      
+      // Migrate files from memory to IndexedDB
+      await migrateFiles(currentStorage, indexedDBStorage);
+      
+      // Switch to local project mode
+      set(isSharedProjectAtom, false);
+      
+      // Trigger files atom refresh
+      set(refreshFilesAtom);
+    } catch (error) {
+      console.error('Failed to fork project:', error);
+      throw error;
+    }
   }
 );

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAtom } from 'jotai';
 import Markdown from 'react-markdown';
 import { XMarkIcon, DocumentArrowDownIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
-import { projectAtom } from './atoms';
+import { projectAtom, fileStorageAtom } from './atoms';
 
 interface ExportDialogProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ export default function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('json');
   const [isExporting, setIsExporting] = useState(false);
   const [project] = useAtom(projectAtom);
+  const [fileStorage] = useAtom(fileStorageAtom);
 
   const handleExport = () => {
     if (selectedFormat === 'json') {
@@ -25,7 +26,7 @@ export default function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
     }
   };
 
-  const handleJSONExport = () => {
+  const handleJSONExport = async () => {
     if (!project) {
       alert('No project to export');
       return;
@@ -34,6 +35,9 @@ export default function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
     setIsExporting(true);
 
     try {
+      // Get files from current storage to include in export
+      const filesFromStorage = await fileStorage.getAllFiles();
+      
       // Ensure the project has all required fields before export
       const completeProject = {
         ...project,
@@ -66,8 +70,8 @@ export default function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
           error: null,
           history: { past: [], future: [] }
         },
-        // Ensure files array exists
-        files: project.files || [],
+        // Include files from IndexedDB in the exported JSON
+        files: filesFromStorage,
         // Preserve metadata
         metadata: project.metadata || {}
       };

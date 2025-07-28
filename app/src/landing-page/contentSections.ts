@@ -29,20 +29,22 @@ export const landingCompositionData: CompositionData = {
           "id": "element-1752613971289",
           "type": "text",
           "left": 0,
-          "top": 0,
+          "top": 500,
           "width": 1920,
           "height": 1080,
           "fontSize": 60,
           "color": "red",
           "textAlign": "center",
-          "text": "Vibe Editor",
+          "text": "InkyCut",
           "zIndex": 2,
           "animation": {
             "props": {
               "scale": [
                 1,
                 1.2
-              ]
+              ],
+              "rotate": '1turn',
+              "filter": 'blur(2px)',
             },
             "duration": 1000,
             "ease": "easeInOut",

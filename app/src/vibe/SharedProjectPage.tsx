@@ -19,6 +19,9 @@ import {
   setSelectedElementAtom,
   setSelectedPageAtom,
   ensureCompositionIDs,
+  isSharedProjectAtom,
+  importFilesAtom,
+  forkProjectAtom,
 } from '../packages/editor';
 import { getSharedProject } from 'wasp/client/operations';
 import { parseShareableKey, importKey, decryptData } from '../packages/editor/utils/encryptionUtils';
@@ -35,6 +38,9 @@ export default function SharedProjectPage() {
   const setGlobalError = useSetAtom(setErrorAtom);
   const setUpdateProject = useSetAtom(updateProjectAtom);
   const setChatMessages = useSetAtom(chatMessagesAtom);
+  const setIsSharedProject = useSetAtom(isSharedProjectAtom);
+  const importFiles = useSetAtom(importFilesAtom);
+  const forkProject = useSetAtom(forkProjectAtom);
 
   useEffect(() => {
     if (!shareId) {
@@ -83,9 +89,21 @@ export default function SharedProjectPage() {
         project.composition = ensureCompositionIDs(project.composition);
       }
 
-      // Set the project in read-only mode
+      // Extract files from project and store in memory
+      const projectFiles = project.files || [];
+      
+      // Set as shared project (this switches to memory storage)
+      setIsSharedProject(true);
+      
+      // Import files to memory storage
+      if (projectFiles.length > 0) {
+        await importFiles(projectFiles);
+      }
+
+      // Set the project in read-only mode without files
       const readOnlyProject = {
         ...project,
+        files: [], // Remove files from project data
         appState: {
           ...project.appState,
           viewMode: 'view' as const,
@@ -116,43 +134,51 @@ export default function SharedProjectPage() {
     navigate('/vibe');
   };
 
-  const handleForkAndEdit = () => {
+  const handleForkAndEdit = async () => {
     if (project) {
-      // Store the current project as a new project in localStorage
-      const forkedProject = {
-        ...project,
-        id: `forked-${Date.now()}`, // Generate new ID
-        name: `${project.name} (Forked)`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        // Reset appState for editing
-        appState: {
-          selectedElementId: null,
-          selectedPageId: project.composition?.pages?.[0]?.id || null,
-          viewMode: 'edit' as const,
-          zoomLevel: 1,
-          showGrid: false,
-          isLoading: false,
-          error: null,
-          history: { past: [], future: [] }
-        }
-      };
+      try {
+        // Fork the project (migrates files from memory to IndexedDB)
+        await forkProject();
+        
+        // Create the forked project with new metadata
+        const forkedProject = {
+          ...project,
+          id: `forked-${Date.now()}`, // Generate new ID
+          name: `${project.name} (Forked)`,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          // Reset appState for editing
+          appState: {
+            selectedElementId: null,
+            selectedPageId: project.composition?.pages?.[0]?.id || null,
+            viewMode: 'edit' as const,
+            zoomLevel: 1,
+            showGrid: false,
+            isLoading: false,
+            error: null,
+            history: { past: [], future: [] }
+          }
+        };
 
-      // Save to localStorage
-      localStorage.setItem('vibe-project', JSON.stringify(forkedProject));
-      
-      // Clear chat messages and reset to welcome message
-      setChatMessages([
-        {
-          id: 1,
-          role: 'assistant',
-          content: 'Welcome to Vibe Video Cut! I\'m your AI assistant. How can I help you create amazing videos today?',
-          timestamp: new Date().toISOString()
-        }
-      ]);
-      
-      // Navigate to the editor
-      navigate('/vibe');
+        // Update the project
+        setProject(forkedProject);
+        
+        // Clear chat messages and reset to welcome message
+        setChatMessages([
+          {
+            id: 1,
+            role: 'assistant',
+            content: 'Project forked successfully! I\'m your AI assistant. How can I help you edit your forked project?',
+            timestamp: new Date().toISOString()
+          }
+        ]);
+        
+        // Navigate to the editor
+        navigate('/vibe');
+      } catch (error) {
+        console.error('Failed to fork project:', error);
+        alert('Failed to fork project. Please try again.');
+      }
     }
   };
 
