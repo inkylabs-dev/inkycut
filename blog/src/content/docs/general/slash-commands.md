@@ -139,6 +139,33 @@ Shares the project with a secure, encrypted link or opens the Share Dialog.
 - Unavailable: "❌ **Share Unavailable** - Share functionality is not available in this context."
 - Unknown option: "❌ **Unknown Option** - Unknown option '--xyz'. Usage: /share [--yes]"
 
+### `/new-page`
+
+Adds blank page(s) after the currently selected page. If no page is selected, adds after page 1.
+
+**Usage:** `/new-page [--num|-n n]`
+
+**Options:**
+- `--num`, `-n`: Number of pages to add (1-20). Default: 1
+
+**Behavior:**
+- Adds blank page(s) after the selected page in the composition
+- If no page is selected, adds after the first page (or at beginning if no pages exist)
+- Automatically names new pages sequentially based on current total (if you have 3 pages, new pages will be Page 4, Page 5, etc.)
+- Selects the first newly created page after adding
+- Validates number input to prevent excessive page creation
+
+**Examples:**
+- `/new-page` - Adds 1 blank page after selected page
+- `/new-page --num 3` - Adds 3 blank pages after selected page
+- `/new-page -n 5` - Adds 5 blank pages after selected page
+
+**Response Messages:**
+- Success: "✅ **N New Page(s) Added** - N blank page(s) have been added after page X. The first new page is now selected."
+- Error (invalid number): "❌ **Invalid Number** - Number of pages must be between 1 and 20. Got 'xyz'"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (unknown option): "❌ **Unknown Option** - Unknown option '--xyz'. Usage: /new-page [--num|-n n]"
+
 ## Architecture
 
 ### Core Components
@@ -258,6 +285,7 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['import', importCommand],
   ['export', exportCommand],
   ['share', shareCommand],
+  ['new-page', newPageCommand],
   ['mycommand', myCommand], // Add your command here
 ]);
 ```
