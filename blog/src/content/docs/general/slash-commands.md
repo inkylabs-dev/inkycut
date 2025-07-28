@@ -3,8 +3,6 @@ title: Client-Side Slash Commands
 description: Complete guide to slash commands - keyboard shortcuts for InkyCut's chat interface with autocomplete and fuzzy matching
 ---
 
-# Client-Side Slash Commands
-
 This document defines the behavior and implementation of client-side slash commands in the InkyCut video editor. These commands execute locally without sending data to the server, providing immediate responses for common operations.
 
 ## Overview
