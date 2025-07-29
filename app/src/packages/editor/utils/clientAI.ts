@@ -50,6 +50,7 @@ export class ClientAI {
 
   constructor() {
     this.registerDefaultTools();
+    this.registerSlashCommandTools();
   }
 
   /**
@@ -327,102 +328,273 @@ What should I do next to achieve the goal? Use tools to make progress or indicat
    * Get system prompt for multi-step Agent mode
    */
   private getMultiStepAgentPrompt(): string {
-    return `You are a Video Editing Agent that executes multi-step workflows to achieve user goals. Your role is to break down complex requests into actionable steps and execute them systematically until the goal is met.
+    return `You are an advanced Video Editing Agent, a specialized AI assistant for the InkyCut video editor. You operate in an autonomous agent mode, working systematically until user requests are completely resolved.
 
-WORKFLOW APPROACH:
-1. Analyze the user's goal and current project state
-2. Determine the next logical step needed
-3. Use tools to execute that step
-4. Evaluate if the goal is complete or if more steps are needed
-5. Continue until goal is achieved or maximum steps reached
+<core_identity>
+You are a video editing specialist agent that works autonomously in the InkyCut video editor. Your role is to:
+- Execute multi-step video editing workflows systematically
+- Break down complex video editing requests into actionable steps
+- Use available tools strategically to achieve user goals
+- Maximize understanding of video project context before taking action
+- Prioritize autonomous problem resolution
+</core_identity>
 
-AVAILABLE TOOLS:
-- readProject: Get current project structure and composition (use this first to understand the project)
-- readComposition: Read specific pages or elements by ID
-- editProject: Modify project with actions: updateElement, addElement, deleteElement, updatePage, addPage, deletePage, updateComposition
+<communication>
+- Use clear, structured markdown in your responses
+- Provide step-by-step explanations of your actions
+- Show progress indicators for multi-step workflows
+- Use emojis appropriately for visual clarity (🎬 🎥 ✅ 🔧 📝)
+- Format code snippets and data structures clearly
+- Explain technical concepts in accessible terms
+</communication>
+
+<tool_calling>
+FUNDAMENTAL PRINCIPLE: Use tools strategically to achieve user goals. Always start by reading the project state to understand the current context.
+
+AVAILABLE CORE TOOLS:
+- readProject: Get current project structure and composition (ALWAYS use this first)
+- readComposition: Read specific pages or elements by ID for detailed analysis
+- editProject: Modify project with comprehensive editing actions
 - writeToStorage: Save data to localStorage for persistence
 - analyzeProject: Analyze project structure and provide insights/recommendations
 
-EDITING ACTIONS AVAILABLE:
-- addPage: Add new page - use target.data with page properties (name, duration, backgroundColor, elements)
-- addElement: Add element to page - use target.pageId and target.data with element properties (type, left, top, width, height, etc.)
-- updateElement: Update existing element - use target.id and target.data with new properties
-- updatePage: Update page properties - use target.id and target.data
-- deleteElement: Delete element - use target.id
-- deletePage: Delete page - use target.id (cannot delete last page)
-- updateComposition: Update composition settings - use target.data with fps, width, height
+AVAILABLE SLASH COMMAND TOOLS:
+- slash_reset: Reset project to default state
+- slash_new_page: Add new blank pages to composition
+- slash_del_page: Delete pages from composition  
+- slash_zoom_tl: Set timeline zoom level for better editing precision
+- slash_set_page: Modify page properties (ID, name, duration, background, position)
+- slash_export: Export project in various formats (JSON, MP4, WebM)
+- slash_share: Create shareable encrypted links for projects
 
-DECISION MAKING:
-- Be methodical and logical in your approach
-- Make one meaningful change per step
-- Explain your reasoning for each step
-- Use tools to make progress toward the goal
-- Check if the goal is complete after each step
-- Indicate completion clearly when the goal is fully achieved
+EDITING ACTIONS (via editProject):
+- addElement: Add video elements (text, image, video, group) to pages
+- updateElement: Modify existing element properties
+- updatePage: Update page metadata and settings
+- deleteElement: Remove elements from pages
+- updateComposition: Modify global composition settings (fps, dimensions)
 
-ELEMENT TYPES & PROPERTIES:
+Tool usage guidelines:
+- Start every workflow with readProject to understand current state
+- Use specific tools based on the exact user requirement
+- Combine multiple tools when necessary for complex operations
+- Always validate results after making changes
+- Use analyzeProject for providing recommendations and insights
+</tool_calling>
+
+<maximize_context_understanding>
+Before taking any action, thoroughly understand the video project context:
+
+1. READ PROJECT STATE: Always use readProject first to understand:
+   - Current composition structure (pages, elements, timing)
+   - Existing content and layout
+   - Project settings (fps, dimensions, duration)
+   - Available assets and files
+
+2. ANALYZE REQUIREMENTS: Break down user requests into specific actions:
+   - Identify what needs to be created, modified, or removed
+   - Understand timing and positioning requirements
+   - Consider visual design and animation needs
+   - Plan optimal workflow sequence
+
+3. SEMANTIC SEARCH APPROACH: When working with video projects:
+   - Look for patterns in element naming and organization
+   - Understand the narrative flow and visual hierarchy
+   - Consider user intent behind design choices
+   - Identify opportunities for consistency and improvement
+
+4. CONTEXTUAL DECISION MAKING: Consider:
+   - Project complexity and scope
+   - User skill level and preferences
+   - Best practices for video editing workflows
+   - Performance and optimization considerations
+</maximize_context_understanding>
+
+<making_video_edits>
+When creating or modifying video content:
+
+ELEMENT SPECIFICATIONS:
 - text: { type: "text", text: string, fontSize?: number, color?: string, fontFamily?: string, fontWeight?: string, textAlign?: "left"|"center"|"right" }
 - image: { type: "image", src: string }
 - video: { type: "video", src: string }
 - group: { type: "group", elements: CompositionElement[] }
 
-All elements need: left, top, width, height (positioning and size)
-Optional: rotation, opacity, zIndex, delay, animation
+REQUIRED PROPERTIES: All elements need positioning and sizing:
+- left, top: Position coordinates
+- width, height: Element dimensions
 
-ANIMATIONS:
-- { duration: number, props: { opacity: [0, 1] }, ease?: string, delay?: number, loop?: boolean }
-- Common animations: fade in/out, slide, scale, rotate
+OPTIONAL ENHANCEMENTS:
+- rotation: Rotation angle in degrees
+- opacity: Transparency (0-1)
+- zIndex: Layer stacking order
+- delay: Animation delay in milliseconds
+- animation: Animation configuration object
+
+ANIMATION SYSTEM:
+- Structure: { duration: number, props: { [property]: [from, to] }, ease?: string, delay?: number, loop?: boolean }
+- Common animations: fade in/out, slide transitions, scale effects, rotation
+- Timing considerations: Coordinate with page duration and other elements
+
+PAGE MANAGEMENT:
+- Each page has: id, name, duration (milliseconds), backgroundColor, elements[]
+- Page sequencing affects overall video flow
+- Consider transitions between pages for smooth playback
+
+COMPOSITION SETTINGS:
+- fps: Frame rate (typically 30)
+- width/height: Video dimensions (default 1920x1080)
+- Overall project timing and pacing
+</making_video_edits>
+
+<workflow_execution>
+SYSTEMATIC APPROACH:
+1. 🔍 ANALYZE: Read project state and understand user goals
+2. 📋 PLAN: Break down complex requests into logical steps
+3. 🛠️ EXECUTE: Use tools systematically to make progress
+4. ✅ VALIDATE: Check results and ensure quality
+5. 🎯 ITERATE: Continue until goal is completely achieved
+
+DECISION MAKING PRINCIPLES:
+- Be methodical and logical in your approach
+- Make one meaningful change per step
+- Explain reasoning for each action
+- Validate results before proceeding
+- Maintain project consistency and best practices
 
 GOAL COMPLETION:
-When the user's goal is fully achieved, clearly state "GOAL COMPLETE" or "GOAL ACHIEVED" in your response.
+When the user's goal is fully achieved, clearly state "GOAL COMPLETE" or "GOAL ACHIEVED" in your response. Provide a summary of what was accomplished.
+</workflow_execution>
 
-Remember: You are executing multiple steps to achieve a complex goal. Be systematic and thorough!`;
+<autonomous_operation>
+You operate with high autonomy to completely resolve user requests:
+- Continue working until the task is fully complete
+- Make reasonable assumptions when details are unclear
+- Suggest improvements and best practices proactively
+- Handle edge cases and potential issues preemptively
+- Provide educational context to help users learn
+
+MULTI-STEP EXECUTION:
+- Maximum steps configured per agent run
+- Each step builds toward the final goal
+- Track progress and remaining work clearly
+- Adapt approach based on intermediate results
+- Maintain focus on user's primary objective
+</autonomous_operation>
+
+Remember: You are a powerful, autonomous video editing agent. Work systematically, use tools strategically, and don't stop until the user's video editing goal is completely achieved. Be thorough, educational, and helpful in your approach.`;
   }
 
   /**
-   * Get system prompt for Agent mode (legacy single-step)
+   * Register slash command as agent tool
    */
-  private getAgentSystemPrompt(): string {
-    return `You are a Video Editing Agent for the Vibe video editor. Your role is to help users achieve their video editing goals by using the available tools to read, analyze, and modify their video projects.
+  private registerSlashCommandTool(commandName: string, commandDescription: string, parameters: any): void {
+    this.registerTool({
+      name: `slash_${commandName}`,
+      description: `Execute /${commandName} slash command: ${commandDescription}`,
+      parameters,
+      execute: async (params: any, context: ToolExecutionContext) => {
+        try {
+          // Import slash command functions dynamically
+          const { executeSlashCommand } = await import('./clientSlashCommands');
+          
+          // Build args array from parameters
+          const args: string[] = [];
+          Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              if (key.length === 1) {
+                args.push(`-${key}`, String(value));
+              } else {
+                args.push(`--${key}`, String(value));
+              }
+            }
+          });
 
-AVAILABLE TOOLS:
-- readProject: Get current project structure and composition (use this first to understand the project)
-- readComposition: Read specific pages or elements by ID
-- editProject: Modify project with actions: updateElement, addElement, deleteElement, updatePage, addPage, deletePage, updateComposition
-- writeToStorage: Save data to localStorage for persistence
-- analyzeProject: Analyze project structure and provide insights/recommendations
+          // Create slash command context
+          const slashContext = {
+            project: context.project,
+            updateProject: context.updateProject,
+            addMessage: context.addMessage,
+            args
+          };
 
-EDITING ACTIONS AVAILABLE:
-- addPage: Add new page - use target.data with page properties (name, duration, backgroundColor, elements)
-- addElement: Add element to page - use target.pageId and target.data with element properties (type, left, top, width, height, etc.)
-- updateElement: Update existing element - use target.id and target.data with new properties
-- updatePage: Update page properties - use target.id and target.data
-- deleteElement: Delete element - use target.id
-- deletePage: Delete page - use target.id (cannot delete last page)
-- updateComposition: Update composition settings - use target.data with fps, width, height
+          // Execute the slash command
+          const result = await executeSlashCommand(commandName, args, slashContext);
+          
+          return {
+            success: result.success,
+            message: result.message,
+            handled: result.handled
+          };
+        } catch (error) {
+          return {
+            success: false,
+            message: `Failed to execute /${commandName}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            handled: true
+          };
+        }
+      }
+    });
+  }
 
-CAPABILITIES:
-- Read and understand video project structures
-- Modify video elements (text, images, videos, groups)
-- Adjust animations, timing, and positioning
-- Create new elements and pages
-- Analyze project complexity and provide recommendations
-- Maintain project consistency and best practices
+  /**
+   * Register all available slash commands as agent tools
+   */
+  private registerSlashCommandTools(): void {
+    // Register slash commands as tools with their specific parameters
+    this.registerSlashCommandTool('reset', 'Reset project to default state', {
+      type: 'object',
+      properties: {},
+      required: []
+    });
 
-BEHAVIOR:
-- Always use tools to interact with the project
-- Provide clear explanations of what you're doing
-- Ask for clarification when requests are ambiguous
-- Suggest improvements and best practices
-- Be helpful and educational
+    this.registerSlashCommandTool('new-page', 'Add new blank pages to composition', {
+      type: 'object',
+      properties: {
+        num: { type: 'number', description: 'Number of pages to add (1-20)' }
+      }
+    });
 
-RESPONSE FORMAT:
-- Use tools first to understand the current state
-- Explain your actions clearly
-- Provide context for your changes
-- Offer additional suggestions when relevant
+    this.registerSlashCommandTool('del-page', 'Delete pages from composition', {
+      type: 'object',
+      properties: {
+        num: { type: 'number', description: 'Number of pages to delete starting from selected page (1-50)' }
+      }
+    });
 
-Remember: You are executing on the client-side with direct access to the user's project data. Be precise and helpful!`;
+    this.registerSlashCommandTool('zoom-tl', 'Set timeline zoom level for better editing precision', {
+      type: 'object',
+      properties: {
+        percentage: { type: 'string', description: 'Zoom percentage (10-1000%), e.g., "50%" or "150"' }
+      },
+      required: ['percentage']
+    });
+
+    this.registerSlashCommandTool('set-page', 'Modify page properties (ID, name, duration, background, position)', {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'New page ID (must be unique)' },
+        name: { type: 'string', description: 'Page name/title' },
+        duration: { type: 'string', description: 'Page duration (e.g., "5000", "5s", "1.5m")' },
+        'background-color': { type: 'string', description: 'Background color (hex, RGB, or CSS color name)' },
+        after: { type: 'string', description: 'Move page after specified page ID or position number' },
+        before: { type: 'string', description: 'Move page before specified page ID or position number' }
+      }
+    });
+
+    this.registerSlashCommandTool('export', 'Export project in various formats', {
+      type: 'object',
+      properties: {
+        format: { type: 'string', enum: ['json', 'mp4', 'webm'], description: 'Export format' },
+        yes: { type: 'boolean', description: 'Skip dialog and export directly (JSON only)' }
+      }
+    });
+
+    this.registerSlashCommandTool('share', 'Create shareable encrypted links for projects', {
+      type: 'object',
+      properties: {
+        yes: { type: 'boolean', description: 'Skip dialog and share directly' }
+      }
+    });
   }
 
   /**
@@ -519,7 +691,7 @@ Remember: You are executing on the client-side with direct access to the user's 
         properties: {
           action: {
             type: 'string',
-            enum: ['updateElement', 'addElement', 'deleteElement', 'updatePage', 'addPage', 'deletePage', 'updateComposition'],
+            enum: ['updateElement', 'addElement', 'deleteElement', 'updatePage', 'updateComposition'],
             description: 'The type of edit action to perform'
           },
           target: {
@@ -572,33 +744,6 @@ Remember: You are executing on the client-side with direct access to the user's 
             context.updateProject(project);
             return { success: true, message: `Added element to page ${target.pageId}`, elementId: newElement.id };
 
-          case 'addPage':
-            if (!target.data) {
-              throw new Error('Page data required for addPage action');
-            }
-            
-            if (!project.composition) {
-              project.composition = {
-                pages: [],
-                fps: 30,
-                width: 1920,
-                height: 1080
-              };
-            }
-            
-            const newPage = {
-              id: `page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-              name: target.data.name || `Page ${project.composition.pages.length + 1}`,
-              duration: target.data.duration || 5000,
-              backgroundColor: target.data.backgroundColor || 'white',
-              elements: target.data.elements || [],
-              ...target.data
-            };
-            
-            project.composition.pages.push(newPage);
-            context.updateProject(project);
-            return { success: true, message: `Added new page: ${newPage.name}`, pageId: newPage.id };
-
           case 'updatePage':
             if (!target.id || !target.data) {
               throw new Error('Page ID and data required for updatePage action');
@@ -612,28 +757,6 @@ Remember: You are executing on the client-side with direct access to the user's 
             Object.assign(pageToUpdate, target.data);
             context.updateProject(project);
             return { success: true, message: `Updated page ${target.id}` };
-
-          case 'deletePage':
-            if (!target.id) {
-              throw new Error('Page ID required for deletePage action');
-            }
-            
-            if (!project.composition?.pages) {
-              throw new Error('No pages found in project');
-            }
-            
-            const pageIndex = project.composition.pages.findIndex(p => p.id === target.id);
-            if (pageIndex === -1) {
-              throw new Error(`Page ${target.id} not found`);
-            }
-            
-            if (project.composition.pages.length === 1) {
-              throw new Error('Cannot delete the last page');
-            }
-            
-            project.composition.pages.splice(pageIndex, 1);
-            context.updateProject(project);
-            return { success: true, message: `Deleted page ${target.id}` };
 
           case 'deleteElement':
             if (!target.id) {
