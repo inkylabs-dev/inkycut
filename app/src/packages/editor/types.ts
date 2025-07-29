@@ -171,6 +171,12 @@ export interface LocalFile {
   dataUrl: string;
   /** Timestamp when file was added */
   createdAt: string;
+  /** Width in pixels (for images and videos) */
+  width?: number;
+  /** Height in pixels (for images and videos) */
+  height?: number;
+  /** Duration in milliseconds (for videos) */
+  duration?: number;
 }
 
 /**

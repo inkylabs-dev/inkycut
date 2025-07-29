@@ -7,6 +7,7 @@ import {
   getStorageModeForProject, 
   migrateFiles 
 } from './utils/fileStorage';
+import { getImageDimensions, getVideoDimensions, getVideoDuration } from './utils/mediaUtils';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -553,6 +554,31 @@ export const addFileAtom = atom(
         reader.readAsDataURL(file);
       });
 
+      // Extract metadata based on file type
+      let width: number | undefined;
+      let height: number | undefined;
+      let duration: number | undefined;
+
+      if (file.type.startsWith('image/')) {
+        const dimensions = await getImageDimensions(dataUrl);
+        if (dimensions) {
+          width = dimensions.width;
+          height = dimensions.height;
+        }
+      } else if (file.type.startsWith('video/')) {
+        const [dimensions, videoDuration] = await Promise.all([
+          getVideoDimensions(dataUrl),
+          getVideoDuration(dataUrl)
+        ]);
+        if (dimensions) {
+          width = dimensions.width;
+          height = dimensions.height;
+        }
+        if (videoDuration !== null) {
+          duration = videoDuration;
+        }
+      }
+
       // Create LocalFile object
       const localFile: LocalFile = {
         id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -560,7 +586,10 @@ export const addFileAtom = atom(
         type: file.type,
         size: file.size,
         dataUrl,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        width,
+        height,
+        duration
       };
 
       // Store file in current storage

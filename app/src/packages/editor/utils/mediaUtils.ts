@@ -44,6 +44,25 @@ export function getVideoDimensions(dataUrl: string): Promise<MediaDimensions | n
 }
 
 /**
+ * Get video duration from data URL
+ * @param dataUrl The data URL of the video
+ * @returns Promise that resolves to duration in milliseconds or null if failed
+ */
+export function getVideoDuration(dataUrl: string): Promise<number | null> {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.onloadedmetadata = () => {
+      const durationMs = Math.round(video.duration * 1000);
+      resolve(durationMs);
+    };
+    video.onerror = () => {
+      resolve(null);
+    };
+    video.src = dataUrl;
+  });
+}
+
+/**
  * Calculate element dimensions respecting aspect ratio
  * Fits content within a maximum size while maintaining aspect ratio
  * @param originalWidth Original width of the media

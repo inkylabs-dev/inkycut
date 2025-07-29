@@ -38,7 +38,7 @@ Previously, project files were stored as base64-encoded data URLs directly withi
 - **Local Projects**: Files stored in IndexedDB database `InkyCutFiles`
 - **Shared Projects**: Files stored in memory using Map-based storage
 - Database uses object store named `files` with keyPath `id`
-- Files contain: `id`, `name`, `type`, `size`, `dataUrl`, `createdAt`
+- Files contain: `id`, `name`, `type`, `size`, `dataUrl`, `createdAt`, `width`, `height`, `duration`
 
 ### 2. Project Data Structure
 
@@ -65,6 +65,7 @@ Previously, project files were stored as base64-encoded data URLs directly withi
 
 **Implementation**:
 - File converted to base64 data URL
+- Metadata extracted: dimensions (width/height) for images/videos, duration for videos
 - Stored using current storage mode (IndexedDB or memory)
 - `Project.files` remains empty
 - UI updated via `filesAtom` refresh
@@ -223,7 +224,7 @@ forkProjectAtom: WriteAtom<void>
 ### Local Project File Upload Flow
 1. User selects file via `LocalFileUpload` component
 2. System detects local project → use IndexedDB storage
-3. File converted to `LocalFile` object with data URL
+3. File converted to `LocalFile` object with data URL and metadata (width, height, duration)
 4. `addFileAtom` stores file in IndexedDB
 5. `filesAtom` refreshed to show new file in UI
 
