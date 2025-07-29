@@ -632,6 +632,89 @@ Modifies properties of an existing video element, including source, dimensions, 
 - Error (invalid height): "❌ **Invalid Height** - Height must be between 1 and 4320 pixels. Provided: {value}"
 - Error (execution failed): "❌ **Update Failed** - Failed to update composition properties. Please try again."
 
+### `/ls-comp`
+
+Lists composition overview with basic project information and page summary. Returns machine-readable JSON format for easy parsing.
+
+**Usage:** `/ls-comp`
+
+**Behavior:**
+- Displays composition overview without detailed page contents
+- Shows project metadata (name, ID) and composition settings (dimensions, fps)
+- Lists all pages with basic information (ID, name, duration, element count)
+- Returns structured JSON data within markdown code blocks
+- Provides total page count and composition statistics
+- No arguments required - simply lists the current composition state
+
+**JSON Structure:**
+```json
+{
+  "project": {
+    "name": "Project Title",
+    "id": "project-id"
+  },
+  "composition": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "totalPages": 3
+  },
+  "pages": [
+    {
+      "index": 1,
+      "id": "page-id",
+      "name": "Page Name",
+      "duration": 5000,
+      "durationSeconds": 5,
+      "elementCount": 2
+    }
+  ]
+}
+```
+
+**Response Messages:**
+- Success: Returns JSON data in markdown code block
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (execution failed): "❌ **List Failed** - Failed to list composition information. Please try again."
+
+### `/ls-page`
+
+Lists detailed information for a specific page, returning the raw page data model exactly as stored in the composition.
+
+**Usage:** `/ls-page [--id|-i page_id]`
+
+**Options:**
+- `--id`, `-i`: Specific page ID to display (optional - uses selected page if not provided)
+
+**Behavior:**
+- Returns complete raw page data model in JSON format
+- Uses currently selected page if no ID is specified
+- Shows all page properties exactly as stored (no transformation or restructuring)
+- Includes complete element data with all properties and type-specific attributes
+- Preserves original data structure for programmatic access
+- Returns syntax-highlighted JSON within markdown code blocks
+
+**Data Structure:**
+Returns the raw page object including:
+- Page metadata (id, name, duration, backgroundColor)
+- Complete elements array with all properties
+- Type-specific element data (text content, image/video sources, styling)
+- Position, size, opacity, rotation, and other element properties
+- Unmodified data structure matching internal composition format
+
+**Examples:**
+- `/ls-page` - Show details for currently selected page
+- `/ls-page --id page-intro` - Show details for specific page by ID
+- `/ls-page -i page-conclusion` - Show details for specific page (short form)
+
+**Response Messages:**
+- Success: Returns raw page JSON data in markdown code block
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (no pages): "❌ **No Pages** - The composition has no pages. Use `/new-page` to add pages."
+- Error (no page specified): "❌ **No Page Specified** - No page ID provided and no page is currently selected. Options: • Select a page in the editor, then use `/ls-page` • Specify a page ID: `/ls-page --id page_id`"
+- Error (page not found): "❌ **Page Not Found** - No page with ID '{id}' was found in the composition. Available pages: {page_ids}"
+- Error (execution failed): "❌ **List Failed** - Failed to list page information. Please try again."
+
 ## Architecture
 
 ### Core Components
@@ -755,6 +838,9 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['del-page', delPageCommand],
   ['zoom-tl', zoomTimelineCommand],
   ['set-page', setPageCommand],
+  ['set-comp', setCompCommand],
+  ['ls-comp', lsCompCommand],
+  ['ls-page', lsPageCommand],
   ['new-text', newTextCommand],
   ['new-image', newImageCommand],
   ['new-video', newVideoCommand],

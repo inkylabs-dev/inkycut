@@ -365,6 +365,8 @@ AVAILABLE SLASH COMMAND TOOLS:
 - slash_set_image: Modify properties of image elements (source, dimensions, position)
 - slash_set_video: Modify properties of video elements (source, dimensions, timing, position)
 - slash_set_comp: Modify composition properties (project title, fps, dimensions)
+- slash_ls_comp: List composition overview with basic page information (IDs only)
+- slash_ls_page: List detailed information for a specific page or selected page
 - slash_export: Export project in various formats (JSON, MP4, WebM)
 - slash_share: Create shareable encrypted links for projects
 
@@ -696,6 +698,19 @@ Remember: You are a powerful, autonomous video editing agent. Work systematicall
         fps: { type: 'number', minimum: 1, maximum: 120, description: 'Frames per second (1-120)' },
         width: { type: 'number', minimum: 1, maximum: 7680, description: 'Composition width in pixels (1-7680)' },
         height: { type: 'number', minimum: 1, maximum: 4320, description: 'Composition height in pixels (1-4320)' }
+      }
+    });
+
+    this.registerSlashCommandTool('ls-comp', 'List composition overview with basic page information (IDs only)', {
+      type: 'object',
+      properties: {},
+      required: []
+    });
+
+    this.registerSlashCommandTool('ls-page', 'List detailed information for a specific page or selected page', {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'Page ID to inspect. If not provided, uses the currently selected page.' }
       }
     });
   }

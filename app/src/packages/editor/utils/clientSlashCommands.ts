@@ -3423,6 +3423,151 @@ const setCompCommand: SlashCommand = {
 };
 
 /**
+ * List composition command - shows composition overview without page details
+ */
+const lsCompCommand: SlashCommand = {
+  name: 'ls-comp',
+  description: 'List composition overview with basic page information (IDs only)',
+  usage: '/ls-comp',
+  requiresConfirmation: false,
+  execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
+    try {
+      if (!context.project || !context.project.composition) {
+        return {
+          success: false,
+          message: '❌ **No Project**\n\nNo project is currently loaded. Please create or load a project first.',
+          handled: true
+        };
+      }
+
+      const composition = context.project.composition;
+      const pages = composition.pages || [];
+
+      // Build composition overview as JSON
+      const compositionData = {
+        project: {
+          name: context.project.name || 'Untitled Project',
+          id: context.project.id
+        },
+        composition: {
+          width: composition.width || 1920,
+          height: composition.height || 1080,
+          fps: composition.fps || 30,
+          totalPages: pages.length
+        },
+        pages: pages.map((page: any, index: number) => ({
+          index: index + 1,
+          id: page.id,
+          name: page.name || 'Untitled Page',
+          duration: page.duration || null,
+          durationSeconds: page.duration ? (page.duration / 1000) : null,
+          elementCount: page.elements ? page.elements.length : 0
+        }))
+      };
+
+      const message = `\`\`\`json\n${JSON.stringify(compositionData, null, 2)}\n\`\`\``;
+
+      return {
+        success: true,
+        message,
+        handled: true
+      };
+
+    } catch (error) {
+      console.error('Failed to list composition:', error);
+      return {
+        success: false,
+        message: '❌ **List Failed**\n\nFailed to list composition information. Please try again.',
+        handled: true
+      };
+    }
+  }
+};
+
+/**
+ * List page command - shows detailed information for a specific page
+ */
+const lsPageCommand: SlashCommand = {
+  name: 'ls-page',
+  description: 'List detailed information for a specific page or the currently selected page',
+  usage: '/ls-page [--id|-i page_id]',
+  requiresConfirmation: false,
+  execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
+    try {
+      if (!context.project || !context.project.composition) {
+        return {
+          success: false,
+          message: '❌ **No Project**\n\nNo project is currently loaded. Please create or load a project first.',
+          handled: true
+        };
+      }
+
+      const args = context.args || [];
+      const composition = context.project.composition;
+      const pages = composition.pages || [];
+
+      if (pages.length === 0) {
+        return {
+          success: false,
+          message: '❌ **No Pages**\n\nThe composition has no pages. Use `/new-page` to add pages.',
+          handled: true
+        };
+      }
+
+      let targetPageId: string | null = null;
+      
+      // Parse arguments for page ID
+      for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        if ((arg === '--id' || arg === '-i') && i + 1 < args.length) {
+          targetPageId = args[i + 1];
+          break;
+        }
+      }
+
+      // If no ID provided, use selected page
+      if (!targetPageId) {
+        targetPageId = context.project.appState?.selectedPageId;
+        if (!targetPageId) {
+          return {
+            success: false,
+            message: '❌ **No Page Specified**\n\nNo page ID provided and no page is currently selected.\n\nOptions:\n• Select a page in the editor, then use `/ls-page`\n• Specify a page ID: `/ls-page --id page_id`',
+            handled: true
+          };
+        }
+      }
+
+      // Find the target page
+      const targetPage = pages.find((page: any) => page.id === targetPageId);
+      if (!targetPage) {
+        return {
+          success: false,
+          message: `❌ **Page Not Found**\n\nNo page with ID "${targetPageId}" was found in the composition.\n\nAvailable pages: ${pages.map((p: any) => p.id).join(', ')}`,
+          handled: true
+        };
+      }
+
+      // Return raw page data model
+      const message = `\`\`\`json\n${JSON.stringify(targetPage, null, 2)}\n\`\`\``;
+
+      return {
+        success: true,
+        message,
+        handled: true
+      };
+
+    } catch (error) {
+      console.error('Failed to list page:', error);
+      return {
+        success: false,
+        message: '❌ **List Failed**\n\nFailed to list page information. Please try again.',
+        handled: true
+      };
+    }
+  }
+};
+
+/**
  * Registry of available slash commands
  */
 const commandRegistry: Map<string, SlashCommand> = new Map([
@@ -3435,6 +3580,8 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['zoom-tl', zoomTimelineCommand],
   ['set-page', setPageCommand],
   ['set-comp', setCompCommand],
+  ['ls-comp', lsCompCommand],
+  ['ls-page', lsPageCommand],
   ['new-text', newTextCommand],
   ['new-image', newImageCommand],
   ['new-video', newVideoCommand],
