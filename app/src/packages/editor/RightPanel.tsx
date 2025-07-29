@@ -77,6 +77,7 @@ export default function RightPanel({
   const [, setAddChatMessage] = useAtom(addChatMessageAtom);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [chatMode, setChatMode] = useAtom(chatModeAtom);
@@ -309,6 +310,11 @@ export default function RightPanel({
         // Handle slash command locally - don't send to parent or AI
         setInputMessage('');
         
+        // Focus the textarea after clearing the input
+        setTimeout(() => {
+          textareaRef.current?.focus();
+        }, 0);
+        
         try {
           const context: SlashCommandContext = {
             project,
@@ -378,6 +384,11 @@ export default function RightPanel({
       // The parent component handles adding the user message to the chat
       onSendMessage(userMessage, chatMode);
       setInputMessage('');
+      
+      // Focus the textarea after clearing the input
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 0);
       
       // Only process with AI if we have a project
       if (project?.id) {
@@ -713,6 +724,7 @@ export default function RightPanel({
         
         <div className="flex space-x-2">
           <textarea
+            ref={textareaRef}
             value={inputMessage}
             onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
