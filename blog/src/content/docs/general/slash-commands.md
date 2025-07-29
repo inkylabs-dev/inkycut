@@ -201,7 +201,7 @@ Deletes the selected page and optionally additional consecutive pages after it. 
 
 Sets properties of a page including ID, name, duration, background color, and position within the composition.
 
-**Usage:** `/set-page [target_page_id] [--id|-i id] [--name|-n name] [--duration|-d duration] [--background-color|-bg color] [--after|-a id|+n] [--before|-b id|-n]`
+**Usage:** `/set-page [target_page_id] [--id|-i id] [--name|-n name] [--duration|-d duration] [--background-color|-bg color] [--after|-a id|n] [--before|-b id|n]`
 
 **Options:**
 - `target_page_id` (optional): ID of the page to modify. If not specified, uses currently selected page or first page
@@ -209,22 +209,22 @@ Sets properties of a page including ID, name, duration, background color, and po
 - `--name`, `-n`: Set page name/title
 - `--duration`, `-d`: Set page duration in milliseconds
 - `--background-color`, `-bg`: Set page background color (hex, RGB, or CSS color names)
-- `--after`, `-a`: Move page after specified page ID or relative position (+n)
-- `--before`, `-b`: Move page before specified page ID or relative position (-n)
+- `--after`, `-a`: Move page after specified page ID or relative position (n)
+- `--before`, `-b`: Move page before specified page ID or relative position (n)
 
 **Behavior:**
 - Modifies properties of the target page with comprehensive validation
 - Enforces ID uniqueness across all pages in the composition
 - Validates duration as positive number in milliseconds
 - Validates color format (hex, RGB, or CSS color names)
-- Supports both absolute positioning (by page ID) and relative positioning (+n/-n)
+- Supports both absolute positioning (by page ID) and relative positioning (n)
 - Shows detailed change summary after successful modification
 - Automatically updates project state and UI
 
 **Examples:**
 - `/set-page --name "Introduction" --duration 8000` - Set name and 8-second duration for current page
 - `/set-page page-1 --id "intro-page" --background-color "#ff0000"` - Update specific page ID and background
-- `/set-page --duration 3000 --after "+1"` - Set duration and move 1 position forward
+- `/set-page --duration 3000 --after 1` - Set duration and move 1 position forward
 - `/set-page --name "Conclusion" --before "page-intro"` - Set name and move before specific page
 - `/set-page page-2 --after "page-1" --background-color "blue"` - Move page-2 after page-1 and set blue background
 
@@ -237,7 +237,7 @@ Sets properties of a page including ID, name, duration, background color, and po
 - Error (invalid color): "❌ **Invalid Color** - Invalid color format: '[value]'. Supported formats: hex, RGB, CSS names"
 - Error (duplicate ID): "❌ **Duplicate ID** - Page ID '[id]' already exists. Page IDs must be unique."
 - Error (page not found): "❌ **Page Not Found** - Page with ID '[id]' not found."
-- Error (invalid position): "❌ **Invalid Position** - Invalid relative position: '[value]'. Use format: +2 or -1"
+- Error (invalid position): "❌ **Invalid Position** - Invalid relative position: '[value]'. Use format: 2 or 1"
 - Error (reference page not found): "❌ **Reference Page Not Found** - Page with ID '[id]' not found for positioning."
 
 **Type Validation:**
@@ -249,7 +249,7 @@ Sets properties of a page including ID, name, duration, background color, and po
 
 **Position Logic:**
 - **Absolute positioning**: `--after "page-id"` or `--before "page-id"` references specific pages
-- **Relative positioning**: `--after "+2"` moves 2 positions forward, `--before "-1"` moves 1 position back
+- **Relative positioning**: `--after 2` moves 2 positions forward, `--before 1` moves 1 position back
 - **Boundary handling**: Positions are automatically clamped to valid range (0 to pages.length-1)
 - **Self-reference prevention**: Cannot position a page relative to itself
 
