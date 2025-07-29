@@ -372,10 +372,8 @@ AVAILABLE SLASH COMMAND TOOLS:
 - slash_share: Create shareable encrypted links for projects
 
 EDITING ACTIONS (via editProject):
-- addElement: Add video elements (text, image, video, group) to pages
 - updateElement: Modify existing element properties
 - updatePage: Update page metadata and settings
-- deleteElement: Remove elements from pages
 - updateComposition: Modify global composition settings (fps, dimensions)
 
 Tool usage guidelines:
@@ -747,7 +745,7 @@ Remember: You are a powerful, autonomous video editing agent. Work systematicall
         properties: {
           action: {
             type: 'string',
-            enum: ['updateElement', 'addElement', 'deleteElement', 'updatePage', 'updateComposition'],
+            enum: ['updateElement', 'updatePage', 'updateComposition'],
             description: 'The type of edit action to perform'
           },
           target: {
@@ -782,24 +780,6 @@ Remember: You are a powerful, autonomous video editing agent. Work systematicall
             }
             throw new Error(`Element ${target.id} not found`);
 
-          case 'addElement':
-            if (!target.pageId || !target.data) {
-              throw new Error('Page ID and element data required for addElement action');
-            }
-            
-            const page = project.composition?.pages.find(p => p.id === target.pageId);
-            if (!page) {
-              throw new Error(`Page ${target.pageId} not found`);
-            }
-            
-            const newElement = {
-              id: `element-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-              ...target.data
-            };
-            page.elements.push(newElement);
-            context.updateProject(project);
-            return { success: true, message: `Added element to page ${target.pageId}`, elementId: newElement.id };
-
           case 'updatePage':
             if (!target.id || !target.data) {
               throw new Error('Page ID and data required for updatePage action');
@@ -813,21 +793,6 @@ Remember: You are a powerful, autonomous video editing agent. Work systematicall
             Object.assign(pageToUpdate, target.data);
             context.updateProject(project);
             return { success: true, message: `Updated page ${target.id}` };
-
-          case 'deleteElement':
-            if (!target.id) {
-              throw new Error('Element ID required for deleteElement action');
-            }
-            
-            for (const page of project.composition?.pages || []) {
-              const elementIndex = page.elements.findIndex(el => el.id === target.id);
-              if (elementIndex !== -1) {
-                page.elements.splice(elementIndex, 1);
-                context.updateProject(project);
-                return { success: true, message: `Deleted element ${target.id}` };
-              }
-            }
-            throw new Error(`Element ${target.id} not found`);
 
           case 'updateComposition':
             if (!target.data) {
