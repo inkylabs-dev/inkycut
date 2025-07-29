@@ -177,6 +177,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
     return () => clearTimeout(timer);
   }, [playerReady]);
 
+
   // Calculate current page based on frame
   const getCurrentPage = () => {
     let cumulativeFrames = 0;
@@ -220,6 +221,26 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
       console.error('Error playing/pausing:', error);
     }
   }, [isPlaying, currentFrame, totalFrames, playerReady, startFrameTracking, stopFrameTracking]);
+
+  // Add spacebar event listener for play/pause
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only trigger if space is pressed and no input field is focused
+      if (event.code === 'Space' && 
+          !(event.target instanceof HTMLInputElement) && 
+          !(event.target instanceof HTMLTextAreaElement) &&
+          !(event.target as Element)?.closest?.('[contenteditable="true"]')) {
+        event.preventDefault();
+        handlePlay();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handlePlay]);
 
   const handleStop = useCallback(() => {
     if (!playerRef.current || !playerReady) {
