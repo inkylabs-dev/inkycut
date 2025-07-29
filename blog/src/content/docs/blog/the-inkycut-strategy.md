@@ -1,5 +1,5 @@
 ---
-title: The InkyCut Strategy - Lean UI, Powerful Commands, Smart AI
+title: "Behind InkyCut: How We’re Reimagining Video Editing from Scratch"
 description: How we're rethinking video editing with minimal interfaces and maximum intelligence
 date: 2025-07-30
 authors:
