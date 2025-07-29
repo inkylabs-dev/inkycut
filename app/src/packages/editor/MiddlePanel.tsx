@@ -11,6 +11,7 @@ import {
 import { CompositionData, defaultCompositionData } from './types';
 import { MainComposition } from './Composition';
 import { projectAtom, ensureCompositionIDs, filesAtom, appStateAtom, updateProjectAtom } from './atoms';
+import { createDraggable } from 'animejs';
 
 interface MiddlePanelProps {
   onTimelineUpdate: (timeline: any[]) => void;
@@ -294,8 +295,16 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   };
 
   const [isDragging, setIsDragging] = useState(false);
+  const [isPageDragging, setIsPageDragging] = useState(false);
+  const [draggedPageIndex, setDraggedPageIndex] = useState<number | null>(null);
+  const [dropIndicatorIndex, setDropIndicatorIndex] = useState<number | null>(null);
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizingPageIndex, setResizingPageIndex] = useState<number | null>(null);
+  const [startResizeWidth, setStartResizeWidth] = useState(0);
+  const [startMouseX, setStartMouseX] = useState(0);
   const [timelineZoom, setTimelineZoom] = useState(appState.zoomLevel || 1);
   const timelineContainerRef = useRef<HTMLDivElement>(null);
+  const playheadRef = useRef<HTMLDivElement>(null);
 
   const handlePlayheadMouseDown = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -303,30 +312,153 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
     setIsDragging(true);
   };
 
+  const handlePageMouseDown = (event: React.MouseEvent, pageIndex: number) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const rect = event.currentTarget.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const isResizeArea = clickX > rect.width - 10; // Right 10px is resize area
+    
+    if (isResizeArea) {
+      setIsResizing(true);
+      setResizingPageIndex(pageIndex);
+      setStartResizeWidth(rect.width);
+      setStartMouseX(event.clientX);
+    } else {
+      setIsPageDragging(true);
+      setDraggedPageIndex(pageIndex);
+    }
+  };
+
+  const handlePageReorder = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    
+    const newPages = [...compositionData.pages];
+    const [movedPage] = newPages.splice(fromIndex, 1);
+    newPages.splice(toIndex, 0, movedPage);
+    
+    const updatedComposition = {
+      ...compositionData,
+      pages: newPages
+    };
+    
+    if (project) {
+      const updatedProject = {
+        ...project,
+        composition: updatedComposition
+      };
+      updateProject(updatedProject);
+      
+      if (onCompositionUpdate) {
+        onCompositionUpdate(updatedComposition);
+      }
+    }
+  };
+
+  const handlePageDurationUpdate = (pageIndex: number, newDuration: number) => {
+    const newPages = [...compositionData.pages];
+    newPages[pageIndex] = {
+      ...newPages[pageIndex],
+      duration: Math.max(newDuration, 500) // Minimum 0.5 seconds
+    };
+    
+    const updatedComposition = {
+      ...compositionData,
+      pages: newPages
+    };
+    
+    if (project) {
+      const updatedProject = {
+        ...project,
+        composition: updatedComposition
+      };
+      updateProject(updatedProject);
+      
+      if (onCompositionUpdate) {
+        onCompositionUpdate(updatedComposition);
+      }
+    }
+  };
+
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
-      if (!isDragging) return;
-      
-      // Find the timeline ruler element
-      const timelineRuler = document.querySelector('.timeline-ruler') as HTMLElement;
-      if (!timelineRuler) return;
-      
-      const rect = timelineRuler.getBoundingClientRect();
-      const mouseX = event.clientX - rect.left;
-      const scrollLeft = timelineContainerRef.current?.scrollLeft || 0;
-      const adjustedMouseX = mouseX + scrollLeft;
-      const scaledTimelineWidth = totalDuration * 100 * timelineZoom;
-      const relativePosition = Math.max(0, Math.min(1, adjustedMouseX / scaledTimelineWidth));
-      
-      const targetFrame = Math.floor(relativePosition * totalFrames);
-      handleSeek(targetFrame);
+      if (isDragging) {
+        // Playhead dragging
+        const timelineRuler = document.querySelector('.timeline-ruler') as HTMLElement;
+        if (!timelineRuler) return;
+        
+        const rect = timelineRuler.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const scrollLeft = timelineContainerRef.current?.scrollLeft || 0;
+        const adjustedMouseX = mouseX + scrollLeft;
+        const scaledTimelineWidth = totalDuration * 100 * timelineZoom;
+        const relativePosition = Math.max(0, Math.min(1, adjustedMouseX / scaledTimelineWidth));
+        
+        const targetFrame = Math.floor(relativePosition * totalFrames);
+        handleSeek(targetFrame);
+      } else if (isPageDragging && draggedPageIndex !== null) {
+        // Page dragging for reordering
+        const pagesTrack = document.querySelector('.pages-track') as HTMLElement;
+        if (!pagesTrack) return;
+        
+        const rect = pagesTrack.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const scrollLeft = timelineContainerRef.current?.scrollLeft || 0;
+        const adjustedMouseX = mouseX + scrollLeft;
+        
+        // Calculate which position to drop at, based on mouse position over visible pages
+        let cumulativePosition = 0;
+        let targetIndex = 0;
+        
+        for (let i = 0; i < compositionData.pages.length; i++) {
+          // Skip the dragged page when calculating positions
+          if (i === draggedPageIndex) {
+            continue;
+          }
+          
+          const pageDuration = compositionData.pages[i].duration / 1000;
+          const blockWidth = Math.max(pageDuration * 100 * timelineZoom, 80);
+          
+          // If mouse is before the middle of this page, drop before it
+          if (adjustedMouseX < cumulativePosition + blockWidth / 2) {
+            break;
+          }
+          
+          cumulativePosition += blockWidth;
+          targetIndex++;
+        }
+        
+        // Update drop indicator position
+        setDropIndicatorIndex(targetIndex);
+      } else if (isResizing && resizingPageIndex !== null) {
+        // Page resizing for duration update
+        const deltaX = event.clientX - startMouseX;
+        const newWidth = Math.max(startResizeWidth + deltaX, 80); // Minimum 80px
+        const newDuration = Math.max((newWidth / (100 * timelineZoom)) * 1000, 500); // Convert back to milliseconds
+        
+        // Update duration in real-time
+        handlePageDurationUpdate(resizingPageIndex, newDuration);
+      }
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (event: MouseEvent) => {
+      if (isPageDragging && draggedPageIndex !== null) {
+        // Use the current drop indicator index for final placement
+        if (dropIndicatorIndex !== null) {
+          handlePageReorder(draggedPageIndex, dropIndicatorIndex);
+        }
+      }
+      
       setIsDragging(false);
+      setIsPageDragging(false);
+      setDraggedPageIndex(null);
+      setDropIndicatorIndex(null);
+      setIsResizing(false);
+      setResizingPageIndex(null);
     };
 
-    if (isDragging) {
+    if (isDragging || isPageDragging || isResizing) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     }
@@ -335,7 +467,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, totalFrames, handleSeek]);
+  }, [isDragging, isPageDragging, isResizing, draggedPageIndex, dropIndicatorIndex, resizingPageIndex, startResizeWidth, startMouseX, totalFrames, handleSeek, timelineZoom, compositionData.pages]);
 
 
   const updateZoomInAppState = (newZoom: number) => {
@@ -653,56 +785,132 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                       
                       {/* Playhead */}
                       <div
+                        ref={playheadRef}
                         className="absolute top-0 w-0.5 h-full bg-red-500 z-10 transition-all duration-100"
                         style={{ left: `${totalFrames > 0 ? (currentFrame / totalFrames) * totalDuration * 100 * timelineZoom : 0}px` }}
                       >
                         <div 
-                          className="absolute -top-1 -left-1 w-2 h-2 bg-red-500 rounded-full cursor-grab active:cursor-grabbing hover:scale-125 transition-transform" 
+                          className={`absolute -top-1 -left-1 w-2 h-2 bg-red-500 rounded-full hover:scale-125 transition-transform ${
+                            isDragging ? 'cursor-grabbing scale-125' : 'cursor-grab'
+                          }`}
                           onMouseDown={handlePlayheadMouseDown}
                         />
                       </div>
                     </div>
 
                     {/* Pages Track */}
-                    <div className="relative h-12 bg-gray-200 dark:bg-gray-700 rounded" style={{ width: '100%' }}>
+                    <div className="pages-track relative h-12 bg-gray-200 dark:bg-gray-700 rounded" style={{ width: '100%' }}>
                       {(() => {
                         let cumulativePosition = 0;
                         const currentPageIndex = getCurrentPage().pageIndex;
-                        return compositionData.pages.map((page, index) => {
+                        const elements: React.ReactElement[] = [];
+                        
+                        // Add drop indicator at the beginning if needed (before first page)
+                        if (isPageDragging && dropIndicatorIndex === 0) {
+                          elements.push(
+                            <div
+                              key="drop-indicator-start"
+                              className="absolute top-0 bottom-0 w-1 bg-blue-500 z-40 shadow-lg opacity-90"
+                              style={{
+                                left: '0px',
+                                boxShadow: '0 0 8px rgba(59, 130, 246, 0.8)',
+                                animation: 'pulse 1.2s infinite'
+                              }}
+                            />
+                          );
+                        }
+                        
+                        compositionData.pages.forEach((page, index) => {
                           const pageDuration = page.duration / 1000;
                           const pageColors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
                           const isSelected = index === currentPageIndex;
+                          const isDraggedPage = draggedPageIndex === index;
                           
                           // Calculate width in pixels - 100px per second at 100% zoom
                           const blockWidth = Math.max(pageDuration * 100 * timelineZoom, 80);
                           const leftPosition = cumulativePosition;
                           
-                          // Update cumulative position for next block
+                          // Always update cumulative position to maintain layout space
                           cumulativePosition += blockWidth;
                           
-                          return (
+                          elements.push(
                             <div
                               key={`page-${page.id}`}
-                              className={`absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center cursor-pointer hover:opacity-80 border-2 ${
+                              className={`absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center border-2 transition-all ${
                                 isSelected 
-                                  ? 'border-blue-400 shadow-lg' 
+                                  ? 'border-blue-400 shadow-lg z-20' 
                                   : 'border-gray-300 dark:border-gray-600'
+                              } ${
+                                isDraggedPage 
+                                  ? 'cursor-grabbing opacity-75 scale-105 z-30 shadow-2xl' 
+                                  : isPageDragging 
+                                    ? 'cursor-default' 
+                                    : 'cursor-grab hover:opacity-80'
                               }`}
                               style={{
                                 left: `${leftPosition}px`,
                                 width: `${blockWidth}px`,
                                 backgroundColor: pageColors[index % pageColors.length],
+                                transform: isDraggedPage ? 'rotate(2deg)' : 'none',
                               }}
-                              onClick={(event) => handlePageClick(index, event)}
-                              title={`${page.name} (${formatTime(pageDuration)})`}
+                              onClick={(event) => !isPageDragging && !isResizing && handlePageClick(index, event)}
+                              onMouseDown={(event) => handlePageMouseDown(event, index)}
+                              title={`${page.name} (${formatTime(pageDuration)}) - Drag to reorder, drag right edge to resize`}
                             >
-                              <div className="text-center px-2 overflow-hidden">
+                              <div className="text-center px-2 overflow-hidden flex-1">
                                 <div className="font-medium truncate">{page.name}</div>
                                 <div className="text-xs opacity-75">{formatTime(pageDuration)}</div>
                               </div>
+                              {/* Resize handle */}
+                              <div 
+                                className={`absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white hover:bg-opacity-20 transition-colors ${
+                                  resizingPageIndex === index ? 'bg-white bg-opacity-30' : ''
+                                }`}
+                                onMouseDown={(event) => {
+                                  event.stopPropagation();
+                                  setIsResizing(true);
+                                  setResizingPageIndex(index);
+                                  setStartResizeWidth(blockWidth);
+                                  setStartMouseX(event.clientX);
+                                }}
+                                title="Drag to resize duration"
+                              />
                             </div>
                           );
+                          
+                          // Add drop indicator after this page if needed
+                          // Convert dropIndicatorIndex (in visual space without dragged page) to actual page index
+                          let showIndicatorAfterThisPage = false;
+                          
+                          if (isPageDragging && !isDraggedPage) {
+                            // Calculate visual index for this page (how many non-dragged pages come before it)
+                            let visualIndex = 0;
+                            for (let i = 0; i < index; i++) {
+                              if (i !== draggedPageIndex) {
+                                visualIndex++;
+                              }
+                            }
+                            
+                            // Show indicator after this page if dropIndicatorIndex matches
+                            showIndicatorAfterThisPage = dropIndicatorIndex === visualIndex + 1;
+                          }
+                          
+                          if (showIndicatorAfterThisPage) {
+                            elements.push(
+                              <div
+                                key={`drop-indicator-${index + 1}`}
+                                className="absolute top-0 bottom-0 w-1 bg-blue-500 z-40 shadow-lg opacity-90"
+                                style={{
+                                  left: `${cumulativePosition}px`,
+                                  boxShadow: '0 0 8px rgba(59, 130, 246, 0.8)',
+                                  animation: 'pulse 1.2s infinite'
+                                }}
+                              />
+                            );
+                          }
                         });
+                        
+                        return elements;
                       })()}
                     </div>
                   </div>
