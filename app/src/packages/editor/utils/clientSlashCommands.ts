@@ -920,7 +920,7 @@ const zoomTimelineCommand: SlashCommand = {
 const setPageCommand: SlashCommand = {
   name: 'set-page',
   description: 'Set page properties including id, name, duration (supports human-readable formats), background color, and position',
-  usage: '/set-page [--id|-i id] [--name|-n name] [--duration|-d duration] [--background-color|-bg color] [--after|-a id|+n] [--before|-b id|-n]',
+  usage: '/set-page [--id|-i id] [--name|-n name] [--duration|-d duration] [--background-color|-bg color] [--after|-a id|n] [--before|-b id|n]',
   requiresConfirmation: false,
   execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
     try {
@@ -937,7 +937,7 @@ const setPageCommand: SlashCommand = {
       if (args.length === 0) {
         return {
           success: false,
-          message: '❌ **Missing Parameters**\n\nPlease specify at least one option to set.\n\nUsage: `/set-page [--id|-i id] [--name|-n name] [--duration|-d duration] [--background-color|-bg color] [--after|-a id|+n] [--before|-b id|-n]`\n\nExamples:\n• `/set-page --name "New Title" --duration 3s`\n• `/set-page --duration 1.5m --background-color "#ff0000"`\n• `/set-page --after "+1" --name "Moved Page"`',
+          message: '❌ **Missing Parameters**\n\nPlease specify at least one option to set.\n\nUsage: `/set-page [--id|-i id] [--name|-n name] [--duration|-d duration] [--background-color|-bg color] [--after|-a id|n] [--before|-b id|n]`\n\nExamples:\n• `/set-page --name "New Title" --duration 3s`\n• `/set-page --duration 1.5m --background-color "#ff0000"`\n• `/set-page --after 1 --name "Moved Page"`',
           handled: true
         };
       }
@@ -1034,7 +1034,7 @@ const setPageCommand: SlashCommand = {
             if (!nextArg) {
               return {
                 success: false,
-                message: '❌ **Missing Value**\n\nOption `--after` requires a page ID or relative position.\n\nExample: `--after "page-123"` or `--after "+2"`',
+                message: '❌ **Missing Value**\n\nOption `--after` requires a page ID or relative position.\n\nExample: `--after "page-123"` or `--after 2`',
                 handled: true
               };
             }
@@ -1046,7 +1046,7 @@ const setPageCommand: SlashCommand = {
             if (!nextArg) {
               return {
                 success: false,
-                message: '❌ **Missing Value**\n\nOption `--before` requires a page ID or relative position.\n\nExample: `--before "page-123"` or `--before "-1"`',
+                message: '❌ **Missing Value**\n\nOption `--before` requires a page ID or relative position.\n\nExample: `--before "page-123"` or `--before 1`',
                 handled: true
               };
             }
@@ -1156,19 +1156,15 @@ const setPageCommand: SlashCommand = {
           };
         }
 
-        // Check if it's a relative position (+n or -n)
-        if (positionArg.startsWith('+') || positionArg.startsWith('-')) {
-          const offset = parseInt(positionArg);
-          if (isNaN(offset)) {
-            return {
-              success: false,
-              message: `❌ **Invalid Position**\n\nInvalid relative position: '${positionArg}'\n\nUse format: \`+2\` (move 2 positions forward) or \`-1\` (move 1 position back)`,
-              handled: true
-            };
-          }
+        // Check if it's a numeric relative position
+        const numericValue = parseInt(positionArg, 10);
+        if (!isNaN(numericValue) && /^\d+$/.test(positionArg)) {
+          // For --after: move numericValue positions forward
+          // For --before: move numericValue positions backward  
+          const offset = isAfter ? numericValue : -numericValue;
           newPageIndex = Math.max(0, Math.min(pages.length - 1, targetPageIndex + offset));
         } else {
-          // Find page by ID
+          // Try to find page by ID
           const refPageIndex = pages.findIndex(p => p.id === positionArg);
           if (refPageIndex === -1) {
             return {
