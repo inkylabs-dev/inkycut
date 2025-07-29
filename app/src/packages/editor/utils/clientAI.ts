@@ -228,11 +228,6 @@ What should I do next to achieve the goal? Use tools to make progress or indicat
             yield { content: allContent, isComplete: false };
 
             const result = await tool.execute(parameters, updatedContext);
-            
-            // Update current project if the tool modified it
-            if (toolCall.name === 'editProject' && result.success) {
-              currentProject = updatedContext.project;
-            }
 
             executedToolCalls.push({
               id: toolCall.id,
@@ -341,7 +336,7 @@ You are a video editing specialist agent that works autonomously in the InkyCut 
 
 <communication>
 - Use clear, structured markdown in your responses
-- Provide step-by-step explanations of your actions
+- Provide step-by-step explanations of your actions, like "Now I'll"
 - Show progress indicators for multi-step workflows
 - Use emojis appropriately for visual clarity (🎬 🎥 ✅ 🔧 📝)
 - Format code snippets and data structures clearly
@@ -354,8 +349,6 @@ FUNDAMENTAL PRINCIPLE: Use tools strategically to achieve user goals. Always sta
 AVAILABLE CORE TOOLS:
 - readProject: Get current project structure and composition (ALWAYS use this first)
 - readComposition: Read specific pages or elements by ID for detailed analysis
-- editProject: Modify project with comprehensive editing actions
-- writeToStorage: Save data to localStorage for persistence
 - analyzeProject: Analyze project structure and provide insights/recommendations
 
 AVAILABLE SLASH COMMAND TOOLS:
@@ -374,11 +367,6 @@ AVAILABLE SLASH COMMAND TOOLS:
 - slash_set_comp: Modify composition properties (project title, fps, dimensions)
 - slash_export: Export project in various formats (JSON, MP4, WebM)
 - slash_share: Create shareable encrypted links for projects
-
-EDITING ACTIONS (via editProject):
-- updateElement: Modify existing element properties
-- updatePage: Update page metadata and settings
-- updateComposition: Modify global composition settings (fps, dimensions)
 
 Tool usage guidelines:
 - Start every workflow with readProject to understand current state
@@ -794,118 +782,6 @@ Remember: You are a powerful, autonomous video editing agent. Work systematicall
         }
 
         return { composition };
-      }
-    });
-
-    // Edit Project Tool
-    this.registerTool({
-      name: 'editProject',
-      description: 'Modify project elements, pages, or composition settings',
-      parameters: {
-        type: 'object',
-        properties: {
-          action: {
-            type: 'string',
-            enum: ['updateElement', 'updatePage', 'updateComposition'],
-            description: 'The type of edit action to perform'
-          },
-          target: {
-            type: 'object',
-            description: 'Target object (element, page, or composition data)',
-            properties: {
-              id: { type: 'string' },
-              data: { type: 'object' }
-            }
-          }
-        },
-        required: ['action', 'target']
-      },
-      execute: async (params: { action: string; target: any }, context: ToolExecutionContext) => {
-        const { action, target } = params;
-        let project = { ...context.project };
-
-        switch (action) {
-          case 'updateElement':
-            if (!target.id || !target.data) {
-              throw new Error('Element ID and data required for updateElement action');
-            }
-            
-            // Find and update element
-            for (const page of project.composition?.pages || []) {
-              const elementIndex = page.elements.findIndex(el => el.id === target.id);
-              if (elementIndex !== -1) {
-                page.elements[elementIndex] = { ...page.elements[elementIndex], ...target.data };
-                context.updateProject(project);
-                return { success: true, message: `Updated element ${target.id}` };
-              }
-            }
-            throw new Error(`Element ${target.id} not found`);
-
-          case 'updatePage':
-            if (!target.id || !target.data) {
-              throw new Error('Page ID and data required for updatePage action');
-            }
-            
-            const pageToUpdate = project.composition?.pages.find(p => p.id === target.id);
-            if (!pageToUpdate) {
-              throw new Error(`Page ${target.id} not found`);
-            }
-            
-            Object.assign(pageToUpdate, target.data);
-            context.updateProject(project);
-            return { success: true, message: `Updated page ${target.id}` };
-
-          case 'updateComposition':
-            if (!target.data) {
-              throw new Error('Composition data required for updateComposition action');
-            }
-            
-            if (!project.composition) {
-              project.composition = {
-                pages: [],
-                fps: 30,
-                width: 1920,
-                height: 1080
-              };
-            }
-            
-            Object.assign(project.composition, target.data);
-            context.updateProject(project);
-            return { success: true, message: 'Updated composition settings' };
-
-          default:
-            throw new Error(`Action ${action} not implemented`);
-        }
-      }
-    });
-
-    // Write to Storage Tool
-    this.registerTool({
-      name: 'writeToStorage',
-      description: 'Save data to localStorage for persistence',
-      parameters: {
-        type: 'object',
-        properties: {
-          key: {
-            type: 'string',
-            description: 'Storage key to save data under'
-          },
-          data: {
-            type: 'object',
-            description: 'Data to save to localStorage'
-          }
-        },
-        required: ['key', 'data']
-      },
-      execute: async (params: { key: string; data: any }, context: ToolExecutionContext) => {
-        const { key, data } = params;
-        
-        try {
-          localStorage.setItem(key, JSON.stringify(data));
-          return { success: true, message: `Data saved to localStorage under key: ${key}` };
-        } catch (error) {
-          throw new Error(`Failed to save to localStorage: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
       }
     });
 
