@@ -285,7 +285,136 @@ Sets the timeline zoom level to a specified percentage for better timeline navig
 - Error (invalid percentage): "❌ **Invalid Percentage** - Invalid percentage value 'xyz'. Please provide a positive number. Example: `/zoom-tl 50%` or `/zoom-tl 150`"
 - Error (execution failed): "❌ **Zoom Failed** - Failed to set timeline zoom level. Please try again."
 
+### `/new-text`
 
+Adds a new text element to the currently selected page with customizable text properties and positioning.
+
+**Usage:** `/new-text [--text|-t "text"] [--font-size|-fs size] [--color|-c color] [--font-family|-ff family] [--font-weight|-fw weight] [--text-align|-ta align] [--left|-l x] [--top|-tp y] [--width|-w width]`
+
+**Options:**
+- `--text`, `-t`: Text content for the element (use quotes for multi-word text). Default: "New Text"
+- `--font-size`, `-fs`: Font size in pixels (positive number). Default: 32
+- `--color`, `-c`: Text color (hex, RGB, or CSS color name). Default: "#000000"
+- `--font-family`, `-ff`: Font family specification. Default: "Arial, sans-serif"
+- `--font-weight`, `-fw`: Font weight (normal, bold, or numeric values). Default: "normal"
+- `--text-align`, `-ta`: Text alignment (left, center, right). Default: "left"
+- `--left`, `-l`: X-coordinate position in pixels. Default: 100
+- `--top`, `-tp`: Y-coordinate position in pixels. Default: 100
+- `--width`, `-w`: Element width in pixels (positive number). Default: 200
+
+**Behavior:**
+- Creates a new text element on the currently selected page
+- Requires a page to be selected (selects first page if none selected)
+- Generates unique element ID automatically (format: `text-{timestamp}-{random}`)
+- Supports all standard text styling properties
+- Height is auto-calculated based on font size and text content
+- Multi-word text must be wrapped in double quotes
+- Elements are immediately visible in the composition
+- Updates project state and refreshes the UI
+
+**Examples:**
+- `/new-text` - Creates text element with default "New Text"
+- `/new-text --text "Hello World" --font-size 48 --color "#ff0000"` - Creates red "Hello World" text at 48px
+- `/new-text -t "Multi Word Title" -fs 64 -c "blue" -ta center -w 400 -l 300` - Creates centered blue title with multiple words
+- `/new-text --text "Welcome to our site!" --font-family "Georgia, serif" --font-weight bold --left 50 --top 400` - Creates bold welcome message
+
+**Response Messages:**
+- Success: "✅ **Text Element Added** - Added text element '[text]' to page '[page name]' • Position: (x, y) • Width: widthpx (height auto-calculated) • Font: sizepx family • Color: color"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (no page selected): "❌ **No Page Selected** - Please select a page first before adding elements."
+- Error (page not found): "❌ **Page Not Found** - The selected page could not be found."
+- Error (invalid font size): "❌ **Invalid Font Size** - Font size must be a positive number. Got 'xyz'"
+- Error (invalid text align): "❌ **Invalid Text Align** - Text align must be 'left', 'center', or 'right'. Got 'xyz'"
+- Error (invalid position/size): "❌ **Invalid Position/Width/Height** - Value must be a (positive) number. Got 'xyz'"
+- Error (unknown option): "❌ **Unknown Option** - Unknown option '--xyz'. Use /new-text without arguments to see usage."
+- Error (execution failed): "❌ **Text Creation Failed** - Failed to create text element. Please try again."
+
+### `/new-image`
+
+Adds a new image element to the currently selected page with customizable positioning and visual properties.
+
+**Usage:** `/new-image --src|-s url [--left|-l x] [--top|-tp y] [--width|-w width] [--height|-h height] [--opacity|-o opacity] [--rotation|-r degrees]`
+
+**Options:**
+- `--src`, `-s`: **Required** - Image source URL (web URL or local file path)
+- `--left`, `-l`: X-coordinate position in pixels. Default: 100
+- `--top`, `-tp`: Y-coordinate position in pixels. Default: 100
+- `--width`, `-w`: Element width in pixels (positive number). Default: 200
+- `--height`, `-h`: Element height in pixels (positive number). Default: 150
+- `--opacity`, `-o`: Element opacity (0.0 to 1.0). Default: 1.0
+- `--rotation`, `-r`: Rotation angle in degrees. Default: 0
+
+**Behavior:**
+- Creates a new image element on the currently selected page
+- Requires a page to be selected and image source URL to be provided
+- Generates unique element ID automatically (format: `image-{timestamp}-{random}`)
+- Supports web URLs, data URLs, and relative paths
+- Images are loaded asynchronously and displayed when available
+- Maintains aspect ratio unless both width and height are explicitly set
+- Updates project state and refreshes the UI
+
+**Examples:**
+- `/new-image --src "https://picsum.photos/300/200"` - Creates image from Lorem Picsum service
+- `/new-image -s "https://example.com/logo.png" --width 100 --height 100 --left 50` - Creates square logo
+- `/new-image --src "./assets/banner.jpg" --width 800 --height 200 --opacity 0.8` - Creates semi-transparent banner
+- `/new-image -s "https://via.placeholder.com/150" -w 150 -h 150 -r 45 -o 0.7` - Creates rotated placeholder
+
+**Response Messages:**
+- Success: "✅ **Image Element Added** - Added image element to page '[page name]' • Source: url • Position: (x, y) • Size: width×height • Opacity: opacity • Rotation: degrees°"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (missing src): "❌ **Missing Image Source** - Image source is required. Usage: `/new-image --src 'https://example.com/image.jpg'` Example: • `/new-image --src 'https://picsum.photos/300/200' --width 300 --height 200`"
+- Error (no page selected): "❌ **No Page Selected** - Please select a page first before adding elements."
+- Error (page not found): "❌ **Page Not Found** - The selected page could not be found."
+- Error (invalid position/size): "❌ **Invalid Position/Width/Height** - Value must be a (positive) number. Got 'xyz'"
+- Error (invalid opacity): "❌ **Invalid Opacity** - Opacity must be a number between 0.0 and 1.0. Got 'xyz'"
+- Error (invalid rotation): "❌ **Invalid Rotation** - Rotation must be a number (degrees). Got 'xyz'"
+- Error (unknown option): "❌ **Unknown Option** - Unknown option '--xyz'. Use /new-image without arguments to see usage."
+- Error (execution failed): "❌ **Image Creation Failed** - Failed to create image element. Please try again."
+
+### `/new-video`
+
+Adds a new video element to the currently selected page with customizable positioning, visual properties, and timing.
+
+**Usage:** `/new-video --src|-s url [--left|-l x] [--top|-tp y] [--width|-w width] [--height|-h height] [--opacity|-o opacity] [--rotation|-r degrees] [--delay|-d milliseconds]`
+
+**Options:**
+- `--src`, `-s`: **Required** - Video source URL (web URL or local file path)
+- `--left`, `-l`: X-coordinate position in pixels. Default: 100
+- `--top`, `-tp`: Y-coordinate position in pixels. Default: 100
+- `--width`, `-w`: Element width in pixels (positive number). Default: 320
+- `--height`, `-h`: Element height in pixels (positive number). Default: 240
+- `--opacity`, `-o`: Element opacity (0.0 to 1.0). Default: 1.0
+- `--rotation`, `-r`: Rotation angle in degrees. Default: 0
+- `--delay`, `-d`: Animation delay in milliseconds (non-negative). Default: 0
+
+**Behavior:**
+- Creates a new video element on the currently selected page
+- Requires a page to be selected and video source URL to be provided
+- Generates unique element ID automatically (format: `video-{timestamp}-{random}`)
+- Supports MP4, WebM, and other HTML5 video formats
+- Videos are loaded asynchronously and can be controlled through the player
+- Maintains aspect ratio unless both width and height are explicitly set
+- Delay parameter controls when the video starts playing relative to page start
+- Updates project state and refreshes the UI
+
+**Examples:**
+- `/new-video --src "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4"` - Creates basic video element
+- `/new-video -s "./video/intro.mp4" --width 640 --height 360 --left 200` - Creates intro video
+- `/new-video --src "https://example.com/clip.webm" --delay 2000 --opacity 0.9` - Creates delayed, semi-transparent video
+- `/new-video -s "video.mp4" -w 400 -h 300 -r 10 -d 1500 -o 0.8` - Creates rotated video with delay
+
+**Response Messages:**
+- Success: "✅ **Video Element Added** - Added video element to page '[page name]' • Source: url • Position: (x, y) • Size: width×height • Opacity: opacity • Rotation: degrees° • Delay: delayms"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (missing src): "❌ **Missing Video Source** - Video source is required. Usage: `/new-video --src 'https://example.com/video.mp4'` Example: • `/new-video --src 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4' --width 640 --height 360`"
+- Error (no page selected): "❌ **No Page Selected** - Please select a page first before adding elements."
+- Error (page not found): "❌ **Page Not Found** - The selected page could not be found."
+- Error (invalid position/size): "❌ **Invalid Position/Width/Height** - Value must be a (positive) number. Got 'xyz'"
+- Error (invalid opacity): "❌ **Invalid Opacity** - Opacity must be a number between 0.0 and 1.0. Got 'xyz'"
+- Error (invalid rotation): "❌ **Invalid Rotation** - Rotation must be a number (degrees). Got 'xyz'"
+- Error (invalid delay): "❌ **Invalid Delay** - Delay must be a non-negative number (milliseconds). Got 'xyz'"
+- Error (unknown option): "❌ **Unknown Option** - Unknown option '--xyz'. Use /new-video without arguments to see usage."
+- Error (execution failed): "❌ **Video Creation Failed** - Failed to create video element. Please try again."
 
 ## Architecture
 
@@ -410,6 +539,9 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['del-page', delPageCommand],
   ['zoom-tl', zoomTimelineCommand],
   ['set-page', setPageCommand],
+  ['new-text', newTextCommand],
+  ['new-image', newImageCommand],
+  ['new-video', newVideoCommand],
   ['mycommand', myCommand], // Add your command here
 ]);
 ```

@@ -1226,6 +1226,810 @@ const setPageCommand: SlashCommand = {
 };
 
 /**
+ * Create a new text element command
+ * Supports --text, --font-size, --color, --font-family, --font-weight, --text-align, --left, --top, --width options
+ * Height is automatically determined by fontSize and text content
+ */
+const newTextCommand: SlashCommand = {
+  name: 'new-text',
+  description: 'Add a new text element to the selected page',
+  usage: '/new-text [--text|-t "text"] [--font-size|-fs size] [--color|-c color] [--font-family|-ff family] [--font-weight|-fw weight] [--text-align|-ta align] [--left|-l x] [--top|-tp y] [--width|-w width]',
+  requiresConfirmation: false,
+  execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
+    try {
+      if (!context.project || !context.project.composition) {
+        return {
+          success: false,
+          message: '❌ **No Project**\n\nNo project is currently loaded. Please create or load a project first.',
+          handled: true
+        };
+      }
+
+      const args = context.args || [];
+      
+      // Default text element properties
+      const elementData: any = {
+        type: 'text',
+        text: 'New Text',
+        left: 100,
+        top: 100,
+        width: 200,
+        fontSize: 32,
+        color: '#000000',
+        fontFamily: 'Arial, sans-serif',
+        fontWeight: 'normal',
+        textAlign: 'left'
+      };
+
+      // Parse arguments
+      for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        const nextArg = args[i + 1];
+
+        switch (arg) {
+          case '--text':
+          case '-t':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--text` requires a value.\n\nExample: `--text "Hello World"`',
+                handled: true
+              };
+            }
+            elementData.text = nextArg;
+            i++; // Skip next arg
+            break;
+
+          case '--font-size':
+          case '-fs':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--font-size` requires a value.\n\nExample: `--font-size 24`',
+                handled: true
+              };
+            }
+            const fontSize = parseInt(nextArg, 10);
+            if (isNaN(fontSize) || fontSize <= 0) {
+              return {
+                success: false,
+                message: `❌ **Invalid Font Size**\n\nFont size must be a positive number. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.fontSize = fontSize;
+            i++; // Skip next arg
+            break;
+
+          case '--color':
+          case '-c':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--color` requires a value.\n\nExamples: `--color "#ff0000"`, `--color "red"`, `--color "rgb(255,0,0)"`',
+                handled: true
+              };
+            }
+            elementData.color = nextArg;
+            i++; // Skip next arg
+            break;
+
+          case '--font-family':
+          case '-ff':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--font-family` requires a value.\n\nExample: `--font-family "Arial, sans-serif"`',
+                handled: true
+              };
+            }
+            elementData.fontFamily = nextArg;
+            i++; // Skip next arg
+            break;
+
+          case '--font-weight':
+          case '-fw':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--font-weight` requires a value.\n\nExamples: `--font-weight "bold"`, `--font-weight "normal"`, `--font-weight "600"`',
+                handled: true
+              };
+            }
+            elementData.fontWeight = nextArg;
+            i++; // Skip next arg
+            break;
+
+          case '--text-align':
+          case '-ta':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--text-align` requires a value.\n\nValid values: `left`, `center`, `right`',
+                handled: true
+              };
+            }
+            if (!['left', 'center', 'right'].includes(nextArg)) {
+              return {
+                success: false,
+                message: `❌ **Invalid Text Align**\n\nText align must be 'left', 'center', or 'right'. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.textAlign = nextArg;
+            i++; // Skip next arg
+            break;
+
+          case '--left':
+          case '-l':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--left` requires a value.\n\nExample: `--left 150`',
+                handled: true
+              };
+            }
+            const left = parseInt(nextArg, 10);
+            if (isNaN(left)) {
+              return {
+                success: false,
+                message: `❌ **Invalid Position**\n\nLeft position must be a number. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.left = left;
+            i++; // Skip next arg
+            break;
+
+          case '--top':
+          case '-tp':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--top` requires a value.\n\nExample: `--top 200`',
+                handled: true
+              };
+            }
+            const top = parseInt(nextArg, 10);
+            if (isNaN(top)) {
+              return {
+                success: false,
+                message: `❌ **Invalid Position**\n\nTop position must be a number. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.top = top;
+            i++; // Skip next arg
+            break;
+
+          case '--width':
+          case '-w':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--width` requires a value.\n\nExample: `--width 300`',
+                handled: true
+              };
+            }
+            const width = parseInt(nextArg, 10);
+            if (isNaN(width) || width <= 0) {
+              return {
+                success: false,
+                message: `❌ **Invalid Width**\n\nWidth must be a positive number. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.width = width;
+            i++; // Skip next arg
+            break;
+
+          default:
+            if (arg.startsWith('-')) {
+              return {
+                success: false,
+                message: `❌ **Unknown Option**\n\nUnknown option '${arg}'. Use /new-text without arguments to see usage.`,
+                handled: true
+              };
+            }
+            break;
+        }
+      }
+
+      // Get selected page
+      const selectedPageId = context.project.appState?.selectedPageId;
+      if (!selectedPageId) {
+        return {
+          success: false,
+          message: '❌ **No Page Selected**\n\nPlease select a page first before adding elements.',
+          handled: true
+        };
+      }
+
+      // Find the selected page
+      const pages = [...context.project.composition.pages];
+      const selectedPage = pages.find(page => page.id === selectedPageId);
+      if (!selectedPage) {
+        return {
+          success: false,
+          message: '❌ **Page Not Found**\n\nThe selected page could not be found.',
+          handled: true
+        };
+      }
+
+      // Create new element with unique ID
+      const newElement = {
+        id: `text-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        ...elementData
+      };
+
+      // Add element to page
+      selectedPage.elements.push(newElement);
+
+      // Update project
+      const updatedProject = {
+        ...context.project,
+        composition: {
+          ...context.project.composition,
+          pages: pages
+        }
+      };
+
+      context.updateProject(updatedProject);
+
+      return {
+        success: true,
+        message: `✅ **Text Element Added**\n\nAdded text element "${elementData.text}" to page "${selectedPage.name}"\n\n• Position: (${elementData.left}, ${elementData.top})\n• Width: ${elementData.width}px (height auto-calculated)\n• Font: ${elementData.fontSize}px ${elementData.fontFamily}\n• Color: ${elementData.color}`,
+        handled: true
+      };
+
+    } catch (error) {
+      console.error('Failed to create text element:', error);
+      return {
+        success: false,
+        message: '❌ **Text Creation Failed**\n\nFailed to create text element. Please try again.',
+        handled: true
+      };
+    }
+  }
+};
+
+/**
+ * Create a new image element command
+ * Supports --src, --left, --top, --width, --height, --opacity, --rotation options
+ */
+const newImageCommand: SlashCommand = {
+  name: 'new-image',
+  description: 'Add a new image element to the selected page',
+  usage: '/new-image --src|-s url [--left|-l x] [--top|-tp y] [--width|-w width] [--height|-h height] [--opacity|-o opacity] [--rotation|-r degrees]',
+  requiresConfirmation: false,
+  execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
+    try {
+      if (!context.project || !context.project.composition) {
+        return {
+          success: false,
+          message: '❌ **No Project**\n\nNo project is currently loaded. Please create or load a project first.',
+          handled: true
+        };
+      }
+
+      const args = context.args || [];
+      
+      // Default image element properties
+      const elementData: any = {
+        type: 'image',
+        src: '',
+        left: 100,
+        top: 100,
+        width: 200,
+        height: 150,
+        opacity: 1,
+        rotation: 0
+      };
+
+      // Parse arguments
+      for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        const nextArg = args[i + 1];
+
+        switch (arg) {
+          case '--src':
+          case '-s':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--src` requires a value.\n\nExample: `--src "https://example.com/image.jpg"`',
+                handled: true
+              };
+            }
+            elementData.src = nextArg;
+            i++; // Skip next arg
+            break;
+
+          case '--left':
+          case '-l':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--left` requires a value.\n\nExample: `--left 150`',
+                handled: true
+              };
+            }
+            const left = parseInt(nextArg, 10);
+            if (isNaN(left)) {
+              return {
+                success: false,
+                message: `❌ **Invalid Position**\n\nLeft position must be a number. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.left = left;
+            i++; // Skip next arg
+            break;
+
+          case '--top':
+          case '-tp':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--top` requires a value.\n\nExample: `--top 200`',
+                handled: true
+              };
+            }
+            const top = parseInt(nextArg, 10);
+            if (isNaN(top)) {
+              return {
+                success: false,
+                message: `❌ **Invalid Position**\n\nTop position must be a number. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.top = top;
+            i++; // Skip next arg
+            break;
+
+          case '--width':
+          case '-w':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--width` requires a value.\n\nExample: `--width 300`',
+                handled: true
+              };
+            }
+            const width = parseInt(nextArg, 10);
+            if (isNaN(width) || width <= 0) {
+              return {
+                success: false,
+                message: `❌ **Invalid Width**\n\nWidth must be a positive number. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.width = width;
+            i++; // Skip next arg
+            break;
+
+          case '--height':
+          case '-h':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--height` requires a value.\n\nExample: `--height 250`',
+                handled: true
+              };
+            }
+            const height = parseInt(nextArg, 10);
+            if (isNaN(height) || height <= 0) {
+              return {
+                success: false,
+                message: `❌ **Invalid Height**\n\nHeight must be a positive number. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.height = height;
+            i++; // Skip next arg
+            break;
+
+          case '--opacity':
+          case '-o':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--opacity` requires a value.\n\nExample: `--opacity 0.8` (0.0 to 1.0)',
+                handled: true
+              };
+            }
+            const opacity = parseFloat(nextArg);
+            if (isNaN(opacity) || opacity < 0 || opacity > 1) {
+              return {
+                success: false,
+                message: `❌ **Invalid Opacity**\n\nOpacity must be a number between 0.0 and 1.0. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.opacity = opacity;
+            i++; // Skip next arg
+            break;
+
+          case '--rotation':
+          case '-r':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--rotation` requires a value.\n\nExample: `--rotation 45` (degrees)',
+                handled: true
+              };
+            }
+            const rotation = parseInt(nextArg, 10);
+            if (isNaN(rotation)) {
+              return {
+                success: false,
+                message: `❌ **Invalid Rotation**\n\nRotation must be a number (degrees). Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.rotation = rotation;
+            i++; // Skip next arg
+            break;
+
+          default:
+            if (arg.startsWith('-')) {
+              return {
+                success: false,
+                message: `❌ **Unknown Option**\n\nUnknown option '${arg}'. Use /new-image without arguments to see usage.`,
+                handled: true
+              };
+            }
+            break;
+        }
+      }
+
+      // Validate required src parameter
+      if (!elementData.src) {
+        return {
+          success: false,
+          message: '❌ **Missing Image Source**\n\nImage source is required.\n\nUsage: `/new-image --src "https://example.com/image.jpg"`\n\nExample:\n• `/new-image --src "https://picsum.photos/300/200" --width 300 --height 200`',
+          handled: true
+        };
+      }
+
+      // Get selected page
+      const selectedPageId = context.project.appState?.selectedPageId;
+      if (!selectedPageId) {
+        return {
+          success: false,
+          message: '❌ **No Page Selected**\n\nPlease select a page first before adding elements.',
+          handled: true
+        };
+      }
+
+      // Find the selected page
+      const pages = [...context.project.composition.pages];
+      const selectedPage = pages.find(page => page.id === selectedPageId);
+      if (!selectedPage) {
+        return {
+          success: false,
+          message: '❌ **Page Not Found**\n\nThe selected page could not be found.',
+          handled: true
+        };
+      }
+
+      // Create new element with unique ID
+      const newElement = {
+        id: `image-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        ...elementData
+      };
+
+      // Add element to page
+      selectedPage.elements.push(newElement);
+
+      // Update project
+      const updatedProject = {
+        ...context.project,
+        composition: {
+          ...context.project.composition,
+          pages: pages
+        }
+      };
+
+      context.updateProject(updatedProject);
+
+      return {
+        success: true,
+        message: `✅ **Image Element Added**\n\nAdded image element to page "${selectedPage.name}"\n\n• Source: ${elementData.src}\n• Position: (${elementData.left}, ${elementData.top})\n• Size: ${elementData.width}×${elementData.height}\n• Opacity: ${elementData.opacity}\n• Rotation: ${elementData.rotation}°`,
+        handled: true
+      };
+
+    } catch (error) {
+      console.error('Failed to create image element:', error);
+      return {
+        success: false,
+        message: '❌ **Image Creation Failed**\n\nFailed to create image element. Please try again.',
+        handled: true
+      };
+    }
+  }
+};
+
+/**
+ * Create a new video element command
+ * Supports --src, --left, --top, --width, --height, --opacity, --rotation, --delay options
+ */
+const newVideoCommand: SlashCommand = {
+  name: 'new-video',
+  description: 'Add a new video element to the selected page',
+  usage: '/new-video --src|-s url [--left|-l x] [--top|-tp y] [--width|-w width] [--height|-h height] [--opacity|-o opacity] [--rotation|-r degrees] [--delay|-d milliseconds]',
+  requiresConfirmation: false,
+  execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
+    try {
+      if (!context.project || !context.project.composition) {
+        return {
+          success: false,
+          message: '❌ **No Project**\n\nNo project is currently loaded. Please create or load a project first.',
+          handled: true
+        };
+      }
+
+      const args = context.args || [];
+      
+      // Default video element properties
+      const elementData: any = {
+        type: 'video',
+        src: '',
+        left: 100,
+        top: 100,
+        width: 320,
+        height: 240,
+        opacity: 1,
+        rotation: 0,
+        delay: 0
+      };
+
+      // Parse arguments
+      for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        const nextArg = args[i + 1];
+
+        switch (arg) {
+          case '--src':
+          case '-s':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--src` requires a value.\n\nExample: `--src "https://example.com/video.mp4"`',
+                handled: true
+              };
+            }
+            elementData.src = nextArg;
+            i++; // Skip next arg
+            break;
+
+          case '--left':
+          case '-l':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--left` requires a value.\n\nExample: `--left 150`',
+                handled: true
+              };
+            }
+            const left = parseInt(nextArg, 10);
+            if (isNaN(left)) {
+              return {
+                success: false,
+                message: `❌ **Invalid Position**\n\nLeft position must be a number. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.left = left;
+            i++; // Skip next arg
+            break;
+
+          case '--top':
+          case '-tp':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--top` requires a value.\n\nExample: `--top 200`',
+                handled: true
+              };
+            }
+            const top = parseInt(nextArg, 10);
+            if (isNaN(top)) {
+              return {
+                success: false,
+                message: `❌ **Invalid Position**\n\nTop position must be a number. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.top = top;
+            i++; // Skip next arg
+            break;
+
+          case '--width':
+          case '-w':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--width` requires a value.\n\nExample: `--width 640`',
+                handled: true
+              };
+            }
+            const width = parseInt(nextArg, 10);
+            if (isNaN(width) || width <= 0) {
+              return {
+                success: false,
+                message: `❌ **Invalid Width**\n\nWidth must be a positive number. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.width = width;
+            i++; // Skip next arg
+            break;
+
+          case '--height':
+          case '-h':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--height` requires a value.\n\nExample: `--height 480`',
+                handled: true
+              };
+            }
+            const height = parseInt(nextArg, 10);
+            if (isNaN(height) || height <= 0) {
+              return {
+                success: false,
+                message: `❌ **Invalid Height**\n\nHeight must be a positive number. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.height = height;
+            i++; // Skip next arg
+            break;
+
+          case '--opacity':
+          case '-o':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--opacity` requires a value.\n\nExample: `--opacity 0.8` (0.0 to 1.0)',
+                handled: true
+              };
+            }
+            const opacity = parseFloat(nextArg);
+            if (isNaN(opacity) || opacity < 0 || opacity > 1) {
+              return {
+                success: false,
+                message: `❌ **Invalid Opacity**\n\nOpacity must be a number between 0.0 and 1.0. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.opacity = opacity;
+            i++; // Skip next arg
+            break;
+
+          case '--rotation':
+          case '-r':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--rotation` requires a value.\n\nExample: `--rotation 45` (degrees)',
+                handled: true
+              };
+            }
+            const rotation = parseInt(nextArg, 10);
+            if (isNaN(rotation)) {
+              return {
+                success: false,
+                message: `❌ **Invalid Rotation**\n\nRotation must be a number (degrees). Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.rotation = rotation;
+            i++; // Skip next arg
+            break;
+
+          case '--delay':
+          case '-d':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--delay` requires a value.\n\nExample: `--delay 1000` (milliseconds)',
+                handled: true
+              };
+            }
+            const delay = parseInt(nextArg, 10);
+            if (isNaN(delay) || delay < 0) {
+              return {
+                success: false,
+                message: `❌ **Invalid Delay**\n\nDelay must be a non-negative number (milliseconds). Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            elementData.delay = delay;
+            i++; // Skip next arg
+            break;
+
+          default:
+            if (arg.startsWith('-')) {
+              return {
+                success: false,
+                message: `❌ **Unknown Option**\n\nUnknown option '${arg}'. Use /new-video without arguments to see usage.`,
+                handled: true
+              };
+            }
+            break;
+        }
+      }
+
+      // Validate required src parameter
+      if (!elementData.src) {
+        return {
+          success: false,
+          message: '❌ **Missing Video Source**\n\nVideo source is required.\n\nUsage: `/new-video --src "https://example.com/video.mp4"`\n\nExample:\n• `/new-video --src "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4" --width 640 --height 360`',
+          handled: true
+        };
+      }
+
+      // Get selected page
+      const selectedPageId = context.project.appState?.selectedPageId;
+      if (!selectedPageId) {
+        return {
+          success: false,
+          message: '❌ **No Page Selected**\n\nPlease select a page first before adding elements.',
+          handled: true
+        };
+      }
+
+      // Find the selected page
+      const pages = [...context.project.composition.pages];
+      const selectedPage = pages.find(page => page.id === selectedPageId);
+      if (!selectedPage) {
+        return {
+          success: false,
+          message: '❌ **Page Not Found**\n\nThe selected page could not be found.',
+          handled: true
+        };
+      }
+
+      // Create new element with unique ID
+      const newElement = {
+        id: `video-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        ...elementData
+      };
+
+      // Add element to page
+      selectedPage.elements.push(newElement);
+
+      // Update project
+      const updatedProject = {
+        ...context.project,
+        composition: {
+          ...context.project.composition,
+          pages: pages
+        }
+      };
+
+      context.updateProject(updatedProject);
+
+      return {
+        success: true,
+        message: `✅ **Video Element Added**\n\nAdded video element to page "${selectedPage.name}"\n\n• Source: ${elementData.src}\n• Position: (${elementData.left}, ${elementData.top})\n• Size: ${elementData.width}×${elementData.height}\n• Opacity: ${elementData.opacity}\n• Rotation: ${elementData.rotation}°\n• Delay: ${elementData.delay}ms`,
+        handled: true
+      };
+
+    } catch (error) {
+      console.error('Failed to create video element:', error);
+      return {
+        success: false,
+        message: '❌ **Video Creation Failed**\n\nFailed to create video element. Please try again.',
+        handled: true
+      };
+    }
+  }
+};
+
+/**
  * Registry of available slash commands
  */
 const commandRegistry: Map<string, SlashCommand> = new Map([
@@ -1236,8 +2040,53 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['new-page', newPageCommand],
   ['del-page', delPageCommand],
   ['zoom-tl', zoomTimelineCommand],
-  ['set-page', setPageCommand]
+  ['set-page', setPageCommand],
+  ['new-text', newTextCommand],
+  ['new-image', newImageCommand],
+  ['new-video', newVideoCommand]
 ]);
+
+/**
+ * Parse command arguments with support for quoted strings
+ * Handles double quotes to allow multi-word arguments
+ */
+function parseCommandArguments(argString: string): string[] {
+  const args: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  let i = 0;
+  
+  while (i < argString.length) {
+    const char = argString[i];
+    
+    if (char === '"' && (i === 0 || argString[i - 1] !== '\\')) {
+      // Toggle quote state for unescaped quotes
+      inQuotes = !inQuotes;
+    } else if (char === ' ' && !inQuotes) {
+      // Space outside quotes - end current argument
+      if (current.trim()) {
+        args.push(current.trim());
+        current = '';
+      }
+    } else if (char === '\\' && i + 1 < argString.length && argString[i + 1] === '"') {
+      // Escaped quote - add the quote to current argument
+      current += '"';
+      i++; // Skip the next character (the escaped quote)
+    } else {
+      // Regular character - add to current argument
+      current += char;
+    }
+    
+    i++;
+  }
+  
+  // Add final argument if exists
+  if (current.trim()) {
+    args.push(current.trim());
+  }
+  
+  return args;
+}
 
 /**
  * Parse a message to check if it's a slash command
@@ -1249,9 +2098,21 @@ export function parseSlashCommand(message: string): { isCommand: boolean; comman
     return { isCommand: false };
   }
   
-  const parts = trimmed.slice(1).split(/\s+/);
-  const commandName = parts[0].toLowerCase();
-  const args = parts.slice(1);
+  const commandPart = trimmed.slice(1);
+  const spaceIndex = commandPart.search(/\s/);
+  
+  if (spaceIndex === -1) {
+    // No arguments - just command name
+    return {
+      isCommand: true,
+      commandName: commandPart.toLowerCase(),
+      args: []
+    };
+  }
+  
+  const commandName = commandPart.slice(0, spaceIndex).toLowerCase();
+  const argString = commandPart.slice(spaceIndex + 1);
+  const args = parseCommandArguments(argString);
   
   return {
     isCommand: true,

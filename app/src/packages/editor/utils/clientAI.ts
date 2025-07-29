@@ -364,6 +364,9 @@ AVAILABLE SLASH COMMAND TOOLS:
 - slash_del_page: Delete pages from composition  
 - slash_zoom_tl: Set timeline zoom level for better editing precision
 - slash_set_page: Modify page properties (ID, name, duration, background, position)
+- slash_new_text: Add new text elements to selected page with styling options
+- slash_new_image: Add new image elements to selected page from URLs
+- slash_new_video: Add new video elements to selected page from URLs
 - slash_export: Export project in various formats (JSON, MP4, WebM)
 - slash_share: Create shareable encrypted links for projects
 
@@ -594,6 +597,50 @@ Remember: You are a powerful, autonomous video editing agent. Work systematicall
       properties: {
         yes: { type: 'boolean', description: 'Skip dialog and share directly' }
       }
+    });
+
+    this.registerSlashCommandTool('new-text', 'Add a new text element to the selected page', {
+      type: 'object',
+      properties: {
+        text: { type: 'string', description: 'Text content for the element (use quotes for multi-word text)' },
+        'font-size': { type: 'number', description: 'Font size in pixels (positive number)' },
+        color: { type: 'string', description: 'Text color (hex, RGB, or CSS color name)' },
+        'font-family': { type: 'string', description: 'Font family specification' },
+        'font-weight': { type: 'string', description: 'Font weight (normal, bold, or numeric values)' },
+        'text-align': { type: 'string', enum: ['left', 'center', 'right'], description: 'Text alignment' },
+        left: { type: 'number', description: 'X-coordinate position in pixels' },
+        top: { type: 'number', description: 'Y-coordinate position in pixels' },
+        width: { type: 'number', description: 'Element width in pixels (positive number)' }
+      }
+    });
+
+    this.registerSlashCommandTool('new-image', 'Add a new image element to the selected page', {
+      type: 'object',
+      properties: {
+        src: { type: 'string', description: 'Image source URL (web URL or local file path)' },
+        left: { type: 'number', description: 'X-coordinate position in pixels' },
+        top: { type: 'number', description: 'Y-coordinate position in pixels' },
+        width: { type: 'number', description: 'Element width in pixels (positive number)' },
+        height: { type: 'number', description: 'Element height in pixels (positive number)' },
+        opacity: { type: 'number', minimum: 0, maximum: 1, description: 'Element opacity (0.0 to 1.0)' },
+        rotation: { type: 'number', description: 'Rotation angle in degrees' }
+      },
+      required: ['src']
+    });
+
+    this.registerSlashCommandTool('new-video', 'Add a new video element to the selected page', {
+      type: 'object',
+      properties: {
+        src: { type: 'string', description: 'Video source URL (web URL or local file path)' },
+        left: { type: 'number', description: 'X-coordinate position in pixels' },
+        top: { type: 'number', description: 'Y-coordinate position in pixels' },
+        width: { type: 'number', description: 'Element width in pixels (positive number)' },
+        height: { type: 'number', description: 'Element height in pixels (positive number)' },
+        opacity: { type: 'number', minimum: 0, maximum: 1, description: 'Element opacity (0.0 to 1.0)' },
+        rotation: { type: 'number', description: 'Rotation angle in degrees' },
+        delay: { type: 'number', minimum: 0, description: 'Animation delay in milliseconds (non-negative)' }
+      },
+      required: ['src']
     });
   }
 
