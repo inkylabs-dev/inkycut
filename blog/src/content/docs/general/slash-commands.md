@@ -331,33 +331,42 @@ Adds a new text element to the currently selected page with customizable text pr
 
 ### `/new-image`
 
-Adds a new image element to the currently selected page with customizable positioning and visual properties.
+Adds a new image element to the currently selected page with customizable positioning and visual properties. Automatically detects LocalFile dimensions and centers elements on the canvas.
 
 **Usage:** `/new-image --src|-s url [--left|-l x] [--top|-tp y] [--width|-w width] [--height|-h height] [--opacity|-o opacity] [--rotation|-r degrees]`
 
 **Options:**
 - `--src`, `-s`: **Required** - Image source URL (web URL or local file path)
-- `--left`, `-l`: X-coordinate position in pixels. Default: 100
-- `--top`, `-tp`: Y-coordinate position in pixels. Default: 100
-- `--width`, `-w`: Element width in pixels (positive number). Default: 200
-- `--height`, `-h`: Element height in pixels (positive number). Default: 150
+- `--left`, `-l`: X-coordinate position in pixels. Default: Center of canvas
+- `--top`, `-tp`: Y-coordinate position in pixels. Default: Center of canvas
+- `--width`, `-w`: Element width in pixels (positive number). Default: LocalFile width or 200px
+- `--height`, `-h`: Element height in pixels (positive number). Default: LocalFile height or 150px
 - `--opacity`, `-o`: Element opacity (0.0 to 1.0). Default: 1.0
 - `--rotation`, `-r`: Rotation angle in degrees. Default: 0
+
+**Smart Defaults:**
+- **LocalFile Detection**: When using a LocalFile from storage, automatically uses the file's original dimensions
+- **Canvas Centering**: If position is not specified, centers the element on the canvas based on composition dimensions
+- **Fallback Dimensions**: Uses 200x150px for external URLs or when LocalFile dimensions are unavailable
+- **Preserves Aspect Ratio**: Maintains original proportions when only width or height is specified
 
 **Behavior:**
 - Creates a new image element on the currently selected page
 - Requires a page to be selected and image source URL to be provided
 - Generates unique element ID automatically (format: `image-{timestamp}-{random}`)
-- Supports web URLs, data URLs, and relative paths
+- Supports web URLs, data URLs, and LocalFile references
+- For LocalFiles: Detects original dimensions from file storage and uses them as defaults
+- For external URLs: Uses fallback dimensions (200x150px) unless explicitly specified
+- Automatically centers element on canvas if position is not provided
 - Images are loaded asynchronously and displayed when available
-- Maintains aspect ratio unless both width and height are explicitly set
 - Updates project state and refreshes the UI
 
 **Examples:**
-- `/new-image --src "https://picsum.photos/300/200"` - Creates image from Lorem Picsum service
-- `/new-image -s "https://example.com/logo.png" --width 100 --height 100 --left 50` - Creates square logo
-- `/new-image --src "./assets/banner.jpg" --width 800 --height 200 --opacity 0.8` - Creates semi-transparent banner
-- `/new-image -s "https://via.placeholder.com/150" -w 150 -h 150 -r 45 -o 0.7` - Creates rotated placeholder
+- `/new-image --src "localfile.jpg"` - Uses original file dimensions, centered on canvas
+- `/new-image --src "https://picsum.photos/300/200"` - Creates 200x150px image (fallback), centered
+- `/new-image -s "logo.png" --left 50 --top 50` - Uses LocalFile dimensions, positioned at (50,50)
+- `/new-image --src "banner.jpg" --width 800` - Sets width to 800px, height auto-calculated from aspect ratio
+- `/new-image -s "https://via.placeholder.com/150" -w 150 -h 150 -r 45 -o 0.7` - Creates rotated placeholder with custom dimensions
 
 **Response Messages:**
 - Success: "✅ **Image Element Added** - Added image element to page '[page name]' • Source: url • Position: (x, y) • Size: width×height • Opacity: opacity • Rotation: degrees°"
@@ -373,35 +382,44 @@ Adds a new image element to the currently selected page with customizable positi
 
 ### `/new-video`
 
-Adds a new video element to the currently selected page with customizable positioning, visual properties, and timing.
+Adds a new video element to the currently selected page with customizable positioning, visual properties, and timing. Automatically detects LocalFile dimensions and centers elements on the canvas.
 
 **Usage:** `/new-video --src|-s url [--left|-l x] [--top|-tp y] [--width|-w width] [--height|-h height] [--opacity|-o opacity] [--rotation|-r degrees] [--delay|-d milliseconds]`
 
 **Options:**
 - `--src`, `-s`: **Required** - Video source URL (web URL or local file path)
-- `--left`, `-l`: X-coordinate position in pixels. Default: 100
-- `--top`, `-tp`: Y-coordinate position in pixels. Default: 100
-- `--width`, `-w`: Element width in pixels (positive number). Default: 320
-- `--height`, `-h`: Element height in pixels (positive number). Default: 240
+- `--left`, `-l`: X-coordinate position in pixels. Default: Center of canvas
+- `--top`, `-tp`: Y-coordinate position in pixels. Default: Center of canvas
+- `--width`, `-w`: Element width in pixels (positive number). Default: LocalFile width or 320px
+- `--height`, `-h`: Element height in pixels (positive number). Default: LocalFile height or 240px
 - `--opacity`, `-o`: Element opacity (0.0 to 1.0). Default: 1.0
 - `--rotation`, `-r`: Rotation angle in degrees. Default: 0
 - `--delay`, `-d`: Animation delay in milliseconds (non-negative). Default: 0
+
+**Smart Defaults:**
+- **LocalFile Detection**: When using a LocalFile from storage, automatically uses the file's original dimensions
+- **Canvas Centering**: If position is not specified, centers the element on the canvas based on composition dimensions
+- **Fallback Dimensions**: Uses 320x240px for external URLs or when LocalFile dimensions are unavailable
+- **Preserves Aspect Ratio**: Maintains original proportions when only width or height is specified
 
 **Behavior:**
 - Creates a new video element on the currently selected page
 - Requires a page to be selected and video source URL to be provided
 - Generates unique element ID automatically (format: `video-{timestamp}-{random}`)
-- Supports MP4, WebM, and other HTML5 video formats
+- Supports MP4, WebM, and other HTML5 video formats via web URLs or LocalFile references
+- For LocalFiles: Detects original dimensions from file storage and uses them as defaults
+- For external URLs: Uses fallback dimensions (320x240px) unless explicitly specified
+- Automatically centers element on canvas if position is not provided
 - Videos are loaded asynchronously and can be controlled through the player
-- Maintains aspect ratio unless both width and height are explicitly set
 - Delay parameter controls when the video starts playing relative to page start
 - Updates project state and refreshes the UI
 
 **Examples:**
-- `/new-video --src "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4"` - Creates basic video element
-- `/new-video -s "./video/intro.mp4" --width 640 --height 360 --left 200` - Creates intro video
-- `/new-video --src "https://example.com/clip.webm" --delay 2000 --opacity 0.9` - Creates delayed, semi-transparent video
-- `/new-video -s "video.mp4" -w 400 -h 300 -r 10 -d 1500 -o 0.8` - Creates rotated video with delay
+- `/new-video --src "intro.mp4"` - Uses original video dimensions, centered on canvas
+- `/new-video --src "https://sample-videos.com/clip.mp4"` - Creates 320x240px video (fallback), centered
+- `/new-video -s "demo.webm" --left 200 --top 100` - Uses LocalFile dimensions, positioned at (200,100)
+- `/new-video --src "promo.mp4" --width 640` - Sets width to 640px, height auto-calculated from aspect ratio
+- `/new-video -s "clip.mp4" -w 400 -h 300 -r 10 -d 1500 -o 0.8` - Creates rotated video with custom dimensions and delay
 
 **Response Messages:**
 - Success: "✅ **Video Element Added** - Added video element to page '[page name]' • Source: url • Position: (x, y) • Size: width×height • Opacity: opacity • Rotation: degrees° • Delay: delayms"

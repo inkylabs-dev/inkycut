@@ -1514,14 +1514,49 @@ const newImageCommand: SlashCommand = {
 
       const args = context.args || [];
       
-      // Default image element properties
+      // Get canvas dimensions from project composition
+      const canvasWidth = context.project.composition.width || 1920;
+      const canvasHeight = context.project.composition.height || 1080;
+      
+      // First pass: extract src to determine dimensions
+      let srcValue = '';
+      for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        const nextArg = args[i + 1];
+        if ((arg === '--src' || arg === '-s') && nextArg) {
+          srcValue = nextArg;
+          break;
+        }
+      }
+      
+      // Determine default dimensions from LocalFile or fallback
+      let defaultWidth = 200;
+      let defaultHeight = 150;
+      
+      if (srcValue && context.fileStorage) {
+        try {
+          const files = await context.fileStorage.getAllFiles();
+          const localFile = files.find(file => 
+            file.dataUrl === srcValue || file.name === srcValue
+          );
+          
+          if (localFile && localFile.width && localFile.height) {
+            defaultWidth = localFile.width;
+            defaultHeight = localFile.height;
+          }
+        } catch (error) {
+          console.warn('Failed to load files from storage:', error);
+        }
+      }
+      
+      // Image element properties with LocalFile dimensions
       const elementData: any = {
         type: 'image',
-        src: '',
-        left: 100,
-        top: 100,
-        width: 200,
-        height: 150,
+        src: srcValue,
+        left: Math.floor((canvasWidth - defaultWidth) / 2),
+        top: Math.floor((canvasHeight - defaultHeight) / 2),
+        width: defaultWidth,
+        height: defaultHeight,
         opacity: 1,
         rotation: 0
       };
@@ -1692,6 +1727,14 @@ const newImageCommand: SlashCommand = {
         };
       }
 
+      // Recalculate center position if position wasn't explicitly set
+      if (!args.some(arg => arg === '--left' || arg === '-l')) {
+        elementData.left = Math.floor((canvasWidth - elementData.width) / 2);
+      }
+      if (!args.some(arg => arg === '--top' || arg === '-tp')) {
+        elementData.top = Math.floor((canvasHeight - elementData.height) / 2);
+      }
+
       // Get selected page
       const selectedPageId = context.project.appState?.selectedPageId;
       if (!selectedPageId) {
@@ -1771,14 +1814,49 @@ const newVideoCommand: SlashCommand = {
 
       const args = context.args || [];
       
-      // Default video element properties
+      // Get canvas dimensions from project composition
+      const canvasWidth = context.project.composition.width || 1920;
+      const canvasHeight = context.project.composition.height || 1080;
+      
+      // First pass: extract src to determine dimensions
+      let srcValue = '';
+      for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        const nextArg = args[i + 1];
+        if ((arg === '--src' || arg === '-s') && nextArg) {
+          srcValue = nextArg;
+          break;
+        }
+      }
+      
+      // Determine default dimensions from LocalFile or fallback
+      let defaultWidth = 320;
+      let defaultHeight = 240;
+      
+      if (srcValue && context.fileStorage) {
+        try {
+          const files = await context.fileStorage.getAllFiles();
+          const localFile = files.find(file => 
+            file.dataUrl === srcValue || file.name === srcValue
+          );
+          
+          if (localFile && localFile.width && localFile.height) {
+            defaultWidth = localFile.width;
+            defaultHeight = localFile.height;
+          }
+        } catch (error) {
+          console.warn('Failed to load files from storage:', error);
+        }
+      }
+      
+      // Video element properties with LocalFile dimensions
       const elementData: any = {
         type: 'video',
-        src: '',
-        left: 100,
-        top: 100,
-        width: 320,
-        height: 240,
+        src: srcValue,
+        left: Math.floor((canvasWidth - defaultWidth) / 2),
+        top: Math.floor((canvasHeight - defaultHeight) / 2),
+        width: defaultWidth,
+        height: defaultHeight,
         opacity: 1,
         rotation: 0,
         delay: 0
@@ -1969,6 +2047,14 @@ const newVideoCommand: SlashCommand = {
           message: '❌ **Missing Video Source**\n\nVideo source is required.\n\nUsage: `/new-video --src "https://example.com/video.mp4"`\n\nExample:\n• `/new-video --src "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4" --width 640 --height 360`',
           handled: true
         };
+      }
+
+      // Recalculate center position if position wasn't explicitly set
+      if (!args.some(arg => arg === '--left' || arg === '-l')) {
+        elementData.left = Math.floor((canvasWidth - elementData.width) / 2);
+      }
+      if (!args.some(arg => arg === '--top' || arg === '-tp')) {
+        elementData.top = Math.floor((canvasHeight - elementData.height) / 2);
       }
 
       // Get selected page
