@@ -90,6 +90,10 @@ export default defineConfig({
               label: 'Slash Commands',
               link: '/general/slash-commands/',
             },
+            {
+              label: 'Timeline Control',
+              link: '/general/timeline-control/',
+            },
           ],
         },
         {
