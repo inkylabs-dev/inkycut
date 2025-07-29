@@ -1043,6 +1043,7 @@ const setPageCommand: SlashCommand = {
             break;
 
           case '--before':
+          case '-b':
             if (!nextArg) {
               return {
                 success: false,
