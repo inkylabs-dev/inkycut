@@ -367,6 +367,7 @@ AVAILABLE SLASH COMMAND TOOLS:
 - slash_new_text: Add new text elements to selected page with styling options
 - slash_new_image: Add new image elements to selected page from URLs
 - slash_new_video: Add new video elements to selected page from URLs
+- slash_del_elem: Delete elements from composition by ID
 - slash_export: Export project in various formats (JSON, MP4, WebM)
 - slash_share: Create shareable encrypted links for projects
 
@@ -641,6 +642,14 @@ Remember: You are a powerful, autonomous video editing agent. Work systematicall
         delay: { type: 'number', minimum: 0, description: 'Animation delay in milliseconds (non-negative)' }
       },
       required: ['src']
+    });
+
+    this.registerSlashCommandTool('del-elem', 'Delete an element from the composition by ID or delete the selected element', {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'Element ID to delete (e.g., text-1234567890-abc123). If not provided, deletes the selected element.' },
+        yes: { type: 'boolean', description: 'Skip confirmation dialog and delete immediately' }
+      }
     });
   }
 

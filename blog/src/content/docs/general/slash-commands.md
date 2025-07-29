@@ -416,6 +416,51 @@ Adds a new video element to the currently selected page with customizable positi
 - Error (unknown option): "❌ **Unknown Option** - Unknown option '--xyz'. Use /new-video without arguments to see usage."
 - Error (execution failed): "❌ **Video Creation Failed** - Failed to create video element. Please try again."
 
+### `/del-elem`
+
+Deletes an element from the composition by its unique ID, or deletes the currently selected element if no ID is provided. This is a destructive operation that requires confirmation.
+
+**Usage:** `/del-elem [--id|-i element_id] [--yes|-y]`
+
+**Options:**
+- `--id`, `-i`: The unique ID of the element to delete (optional - uses selected element if not provided)
+- `--yes`, `-y`: Skip confirmation dialog and delete immediately
+
+**Behavior:**
+- **Without arguments**: Deletes the currently selected element
+- **With ID argument**: Searches for the specified element across all pages in the composition
+- **With --yes flag**: Skips confirmation dialog and deletes immediately
+- Requires user confirmation before deletion unless `--yes` flag is used (destructive operation)
+- Automatically clears element selection if the deleted element was selected
+- Provides detailed feedback about the deleted element and deletion method
+- Cannot be undone - element is permanently removed from the project
+- Supports both formal `--id` syntax and shorthand direct ID specification
+
+**Examples:**
+- `/del-elem` - Delete the currently selected element (with confirmation)
+- `/del-elem --yes` - Delete the currently selected element without confirmation
+- `/del-elem --id text-1234567890-abc123` - Delete text element by ID (with confirmation)
+- `/del-elem -i image-1234567890-def456 --yes` - Delete image element without confirmation
+- `/del-elem video-1234567890-ghi789 -y` - Delete video element without confirmation (direct ID + short flag)
+
+**Finding Element IDs:**
+- Use the properties panel to view element IDs
+- Check the composition structure in developer tools
+- Element IDs follow the format: `{type}-{timestamp}-{random}`
+- Examples: `text-1640995200000-abc123`, `image-1640995201000-def456`
+
+**Response Messages:**
+- Success (selected): "✅ **Element Deleted** - Deleted selected element ({type}) from page '{page name}' • Element ID: {id} • Element type: {type} • {content details} • Page: {page name} • Selection cleared"
+- Success (by ID): "✅ **Element Deleted** - Deleted element '{id}' ({type}) from page '{page name}' • Element ID: {id} • Element type: {type} • {content details} • Page: {page name}"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (no selection): "❌ **No Element Selected** - No element ID provided and no element is currently selected. Options: • Select an element in the editor, then use `/del-elem` • Specify an element ID: `/del-elem --id element_id`"
+- Error (missing ID after args): "❌ **Missing Element ID** - Please specify an element ID to delete. Usage: `/del-elem [--id element_id]` Or select an element and use `/del-elem` without arguments."
+- Error (missing value): "❌ **Missing Value** - Option `--id` requires a value. Example: `--id text-1234567890-abc123`"
+- Error (element not found): "❌ **Element Not Found** - No element with ID '{id}' was found in the composition. Tip: Use the properties panel to find element IDs, or check the composition structure."
+- Error (unknown option): "❌ **Unknown Option** - Unknown option '{option}'. Usage: /del-elem [--id element_id]"
+- Error (confirmation cancelled): "⏸️ **Command Cancelled** - Element deletion was cancelled."
+- Error (execution failed): "❌ **Delete Failed** - Failed to delete element. Please try again."
+
 ## Architecture
 
 ### Core Components
@@ -542,6 +587,7 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['new-text', newTextCommand],
   ['new-image', newImageCommand],
   ['new-video', newVideoCommand],
+  ['del-elem', delElementCommand],
   ['mycommand', myCommand], // Add your command here
 ]);
 ```
