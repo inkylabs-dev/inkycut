@@ -371,6 +371,7 @@ AVAILABLE SLASH COMMAND TOOLS:
 - slash_set_text: Modify properties of text elements (content, styling, position)
 - slash_set_image: Modify properties of image elements (source, dimensions, position)
 - slash_set_video: Modify properties of video elements (source, dimensions, timing, position)
+- slash_set_comp: Modify composition properties (project title, fps, dimensions)
 - slash_export: Export project in various formats (JSON, MP4, WebM)
 - slash_share: Create shareable encrypted links for projects
 
@@ -697,6 +698,16 @@ Remember: You are a powerful, autonomous video editing agent. Work systematicall
         opacity: { type: 'number', minimum: 0, maximum: 1, description: 'Element opacity (0.0 to 1.0)' },
         rotation: { type: 'number', description: 'Rotation angle in degrees' },
         delay: { type: 'number', minimum: 0, description: 'Animation delay in milliseconds (non-negative)' }
+      }
+    });
+
+    this.registerSlashCommandTool('set-comp', 'Modify composition properties (project title, fps, dimensions)', {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'New project title' },
+        fps: { type: 'number', minimum: 1, maximum: 120, description: 'Frames per second (1-120)' },
+        width: { type: 'number', minimum: 1, maximum: 7680, description: 'Composition width in pixels (1-7680)' },
+        height: { type: 'number', minimum: 1, maximum: 4320, description: 'Composition height in pixels (1-4320)' }
       }
     });
   }

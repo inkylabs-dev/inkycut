@@ -592,6 +592,46 @@ Modifies properties of an existing video element, including source, dimensions, 
 - Error (invalid values): Various validation errors for position, size, opacity, rotation, delay, etc.
 - Error (execution failed): "❌ **Update Failed** - Failed to update video element. Please try again."
 
+## `/set-comp` - Modify Composition Properties
+
+**Syntax:** `/set-comp [options...]`
+
+**Purpose:** Modify global composition properties including project title, frame rate, and canvas dimensions.
+
+**Parameters:**
+- `--title`, `-t` - Project title (string)
+- `--fps`, `-f` - Frame rate in frames per second (number: 1-120)
+- `--width`, `-w` - Canvas width in pixels (number: 1-7680)
+- `--height`, `-h` - Canvas height in pixels (number: 1-4320)
+
+**Features:**
+- Updates global composition settings that affect the entire project
+- Validates frame rate and dimension limits for optimal performance
+- Changes the project title displayed in the interface
+- Modifies the canvas size for all pages in the composition
+- Adjusts frame rate for smoother or more efficient video output
+
+**Technical Notes:**
+- Frame rate affects video smoothness and file size
+- Canvas dimensions determine the output resolution
+- All changes are immediately applied to the composition
+- Title changes are reflected in the project interface
+
+**Examples:**
+- `/set-comp --title "My Video Project"` - Change project title
+- `/set-comp --fps 60` - Set frame rate to 60 FPS
+- `/set-comp -w 1920 -h 1080` - Set HD resolution (1920x1080)
+- `/set-comp -t "Demo Video" -f 30 -w 1280 -h 720` - Set title, frame rate, and 720p resolution
+
+**Response Messages:**
+- Success: "✅ **Composition Updated** - Updated composition properties • {list of changes made}"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (no updates): "❌ **No Updates Specified** - Please specify at least one property to update. Available options: --title, --fps, --width, --height"
+- Error (invalid fps): "❌ **Invalid FPS** - Frame rate must be between 1 and 120. Provided: {value}"
+- Error (invalid width): "❌ **Invalid Width** - Width must be between 1 and 7680 pixels. Provided: {value}"
+- Error (invalid height): "❌ **Invalid Height** - Height must be between 1 and 4320 pixels. Provided: {value}"
+- Error (execution failed): "❌ **Update Failed** - Failed to update composition properties. Please try again."
+
 ## Architecture
 
 ### Core Components
