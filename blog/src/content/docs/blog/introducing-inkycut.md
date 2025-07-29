@@ -91,4 +91,4 @@ Your vision matters more than your technical skills. InkyCut makes that possible
 
 ---
 
-Ready to try it? [Start creating](/) with just a conversation—no signup required.
+Ready to try it? [Start creating](https://inkycut.com) with just a conversation—no signup required.
