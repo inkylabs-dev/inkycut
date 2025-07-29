@@ -461,6 +461,137 @@ Deletes an element from the composition by its unique ID, or deletes the current
 - Error (confirmation cancelled): "⏸️ **Command Cancelled** - Element deletion was cancelled."
 - Error (execution failed): "❌ **Delete Failed** - Failed to delete element. Please try again."
 
+### `/set-text`
+
+Modifies properties of an existing text element, including content, styling, and positioning. Works with the currently selected element or a specific element ID.
+
+**Usage:** `/set-text [--id|-i element_id] [--text|-t "text"] [--font-size|-fs size] [--color|-c color] [--font-family|-ff family] [--font-weight|-fw weight] [--text-align|-ta align] [--left|-l x] [--top|-tp y] [--width|-w width] [--opacity|-o opacity] [--rotation|-r degrees]`
+
+**Options:**
+- `--id`, `-i`: Element ID to modify (optional - uses selected element if not provided)
+- `--text`, `-t`: New text content for the element (use quotes for multi-word text)
+- `--font-size`, `-fs`: Font size in pixels (positive number)
+- `--color`, `-c`: Text color (hex, RGB, or CSS color name)
+- `--font-family`, `-ff`: Font family specification
+- `--font-weight`, `-fw`: Font weight (normal, bold, or numeric values)
+- `--text-align`, `-ta`: Text alignment (left, center, right)
+- `--left`, `-l`: X-coordinate position in pixels
+- `--top`, `-tp`: Y-coordinate position in pixels
+- `--width`, `-w`: Element width in pixels (positive number)
+- `--opacity`, `-o`: Element opacity (0.0 to 1.0)
+- `--rotation`, `-r`: Rotation angle in degrees
+
+**Behavior:**
+- Modifies an existing text element rather than creating a new one
+- If no ID is provided, modifies the currently selected text element
+- Only affects the specific properties provided in the command
+- Validates element type - will error if target element is not a text element
+- Immediately updates the visual representation in the composition
+- Preserves existing properties that are not explicitly changed
+
+**Examples:**
+- `/set-text --text "Updated Content"` - Change text of selected element
+- `/set-text --id text-123 --font-size 48 --color "#ff0000"` - Make specific text larger and red
+- `/set-text -t "Centered Title" -ta center -fs 64 -fw bold` - Update selected text to be a centered bold title
+- `/set-text --id text-456 --left 200 --top 100 --rotation 15` - Move and rotate specific text element
+
+**Response Messages:**
+- Success: "✅ **Text Element Updated** - Updated text element '{id}' on page '{page name}' • {list of changes made}"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (no selection): "❌ **No Element Selected** - No element ID provided and no element is currently selected. Options: • Select a text element in the editor, then use `/set-text` • Specify an element ID: `/set-text --id element_id`"
+- Error (missing ID): "❌ **Missing Element ID** - Please specify an element ID or select an element. Usage: `/set-text [--id element_id] [options...]`"
+- Error (no updates): "❌ **No Updates Specified** - Please specify at least one property to update. Available options: --text, --font-size, --color, --font-family, --font-weight, --text-align, --left, --top, --width, --opacity, --rotation"
+- Error (element not found): "❌ **Element Not Found** - No element with ID '{id}' was found in the composition."
+- Error (wrong type): "❌ **Wrong Element Type** - Element '{id}' is a {type} element, not a text element. Use: • /set-text for text elements • /set-image for image elements • /set-video for video elements"
+- Error (invalid values): Various validation errors for font size, text align, position, opacity, etc.
+- Error (execution failed): "❌ **Update Failed** - Failed to update text element. Please try again."
+
+### `/set-image`
+
+Modifies properties of an existing image element, including source, dimensions, and positioning. Works with the currently selected element or a specific element ID.
+
+**Usage:** `/set-image [--id|-i element_id] [--src|-s url] [--left|-l x] [--top|-tp y] [--width|-w width] [--height|-h height] [--opacity|-o opacity] [--rotation|-r degrees]`
+
+**Options:**
+- `--id`, `-i`: Element ID to modify (optional - uses selected element if not provided)
+- `--src`, `-s`: New image source URL (web URL or local file path)
+- `--left`, `-l`: X-coordinate position in pixels
+- `--top`, `-tp`: Y-coordinate position in pixels
+- `--width`, `-w`: Element width in pixels (positive number)
+- `--height`, `-h`: Element height in pixels (positive number)
+- `--opacity`, `-o`: Element opacity (0.0 to 1.0)
+- `--rotation`, `-r`: Rotation angle in degrees
+
+**Behavior:**
+- Modifies an existing image element rather than creating a new one
+- If no ID is provided, modifies the currently selected image element
+- Only affects the specific properties provided in the command
+- Validates element type - will error if target element is not an image element
+- Changing the source URL will reload the image with the new content
+- Immediately updates the visual representation in the composition
+- Preserves existing properties that are not explicitly changed
+
+**Examples:**
+- `/set-image --src "https://example.com/new-image.jpg"` - Change image source of selected element
+- `/set-image --id image-123 --width 400 --height 300` - Resize specific image
+- `/set-image -s "new-logo.png" -l 50 -tp 50 -o 0.8` - Update selected image with new source, position, and opacity
+- `/set-image --id image-456 --rotation 45 --opacity 0.5` - Rotate and make specific image semi-transparent
+
+**Response Messages:**
+- Success: "✅ **Image Element Updated** - Updated image element '{id}' on page '{page name}' • {list of changes made}"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (no selection): "❌ **No Element Selected** - No element ID provided and no element is currently selected. Options: • Select an image element in the editor, then use `/set-image` • Specify an element ID: `/set-image --id element_id`"
+- Error (missing ID): "❌ **Missing Element ID** - Please specify an element ID or select an element. Usage: `/set-image [--id element_id] [options...]`"
+- Error (no updates): "❌ **No Updates Specified** - Please specify at least one property to update. Available options: --src, --left, --top, --width, --height, --opacity, --rotation"
+- Error (element not found): "❌ **Element Not Found** - No element with ID '{id}' was found in the composition."
+- Error (wrong type): "❌ **Wrong Element Type** - Element '{id}' is a {type} element, not an image element. Use: • /set-text for text elements • /set-image for image elements • /set-video for video elements"
+- Error (invalid values): Various validation errors for position, size, opacity, rotation, etc.
+- Error (execution failed): "❌ **Update Failed** - Failed to update image element. Please try again."
+
+### `/set-video`
+
+Modifies properties of an existing video element, including source, dimensions, timing, and positioning. Works with the currently selected element or a specific element ID.
+
+**Usage:** `/set-video [--id|-i element_id] [--src|-s url] [--left|-l x] [--top|-tp y] [--width|-w width] [--height|-h height] [--opacity|-o opacity] [--rotation|-r degrees] [--delay|-d milliseconds]`
+
+**Options:**
+- `--id`, `-i`: Element ID to modify (optional - uses selected element if not provided)
+- `--src`, `-s`: New video source URL (web URL or local file path)
+- `--left`, `-l`: X-coordinate position in pixels
+- `--top`, `-tp`: Y-coordinate position in pixels
+- `--width`, `-w`: Element width in pixels (positive number)
+- `--height`, `-h`: Element height in pixels (positive number)
+- `--opacity`, `-o`: Element opacity (0.0 to 1.0)
+- `--rotation`, `-r`: Rotation angle in degrees
+- `--delay`, `-d`: Animation delay in milliseconds (non-negative)
+
+**Behavior:**
+- Modifies an existing video element rather than creating a new one
+- If no ID is provided, modifies the currently selected video element
+- Only affects the specific properties provided in the command
+- Validates element type - will error if target element is not a video element
+- Changing the source URL will reload the video with the new content
+- Delay parameter controls when the video starts playing relative to page start
+- Immediately updates the visual representation in the composition
+- Preserves existing properties that are not explicitly changed
+
+**Examples:**
+- `/set-video --src "https://example.com/new-video.mp4"` - Change video source of selected element
+- `/set-video --id video-123 --delay 2000 --opacity 0.8` - Add 2-second delay and transparency to specific video
+- `/set-video -s "intro.webm" -w 640 -h 480 -l 100` - Update selected video with new source, size, and position
+- `/set-video --id video-456 --rotation 10 --delay 1500` - Rotate specific video and delay playback
+
+**Response Messages:**
+- Success: "✅ **Video Element Updated** - Updated video element '{id}' on page '{page name}' • {list of changes made}"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (no selection): "❌ **No Element Selected** - No element ID provided and no element is currently selected. Options: • Select a video element in the editor, then use `/set-video` • Specify an element ID: `/set-video --id element_id`"
+- Error (missing ID): "❌ **Missing Element ID** - Please specify an element ID or select an element. Usage: `/set-video [--id element_id] [options...]`"
+- Error (no updates): "❌ **No Updates Specified** - Please specify at least one property to update. Available options: --src, --left, --top, --width, --height, --opacity, --rotation, --delay"
+- Error (element not found): "❌ **Element Not Found** - No element with ID '{id}' was found in the composition."
+- Error (wrong type): "❌ **Wrong Element Type** - Element '{id}' is a {type} element, not a video element. Use: • /set-text for text elements • /set-image for image elements • /set-video for video elements"
+- Error (invalid values): Various validation errors for position, size, opacity, rotation, delay, etc.
+- Error (execution failed): "❌ **Update Failed** - Failed to update video element. Please try again."
+
 ## Architecture
 
 ### Core Components
@@ -588,6 +719,9 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['new-image', newImageCommand],
   ['new-video', newVideoCommand],
   ['del-elem', delElementCommand],
+  ['set-text', setTextCommand],
+  ['set-image', setImageCommand],
+  ['set-video', setVideoCommand],
   ['mycommand', myCommand], // Add your command here
 ]);
 ```

@@ -368,6 +368,9 @@ AVAILABLE SLASH COMMAND TOOLS:
 - slash_new_image: Add new image elements to selected page from URLs
 - slash_new_video: Add new video elements to selected page from URLs
 - slash_del_elem: Delete elements from composition by ID
+- slash_set_text: Modify properties of text elements (content, styling, position)
+- slash_set_image: Modify properties of image elements (source, dimensions, position)
+- slash_set_video: Modify properties of video elements (source, dimensions, timing, position)
 - slash_export: Export project in various formats (JSON, MP4, WebM)
 - slash_share: Create shareable encrypted links for projects
 
@@ -647,6 +650,53 @@ Remember: You are a powerful, autonomous video editing agent. Work systematicall
       properties: {
         id: { type: 'string', description: 'Element ID to delete (e.g., text-1234567890-abc123). If not provided, deletes the selected element.' },
         yes: { type: 'boolean', description: 'Skip confirmation dialog and delete immediately' }
+      }
+    });
+
+    this.registerSlashCommandTool('set-text', 'Modify properties of a text element (text content, styling, position)', {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'Element ID to modify. If not provided, modifies the selected element.' },
+        text: { type: 'string', description: 'New text content for the element (use quotes for multi-word text)' },
+        'font-size': { type: 'number', description: 'Font size in pixels (positive number)' },
+        color: { type: 'string', description: 'Text color (hex, RGB, or CSS color name)' },
+        'font-family': { type: 'string', description: 'Font family specification' },
+        'font-weight': { type: 'string', description: 'Font weight (normal, bold, or numeric values)' },
+        'text-align': { type: 'string', enum: ['left', 'center', 'right'], description: 'Text alignment' },
+        left: { type: 'number', description: 'X-coordinate position in pixels' },
+        top: { type: 'number', description: 'Y-coordinate position in pixels' },
+        width: { type: 'number', description: 'Element width in pixels (positive number)' },
+        opacity: { type: 'number', minimum: 0, maximum: 1, description: 'Element opacity (0.0 to 1.0)' },
+        rotation: { type: 'number', description: 'Rotation angle in degrees' }
+      }
+    });
+
+    this.registerSlashCommandTool('set-image', 'Modify properties of an image element (source, dimensions, position)', {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'Element ID to modify. If not provided, modifies the selected element.' },
+        src: { type: 'string', description: 'New image source URL (web URL or local file path)' },
+        left: { type: 'number', description: 'X-coordinate position in pixels' },
+        top: { type: 'number', description: 'Y-coordinate position in pixels' },
+        width: { type: 'number', description: 'Element width in pixels (positive number)' },
+        height: { type: 'number', description: 'Element height in pixels (positive number)' },
+        opacity: { type: 'number', minimum: 0, maximum: 1, description: 'Element opacity (0.0 to 1.0)' },
+        rotation: { type: 'number', description: 'Rotation angle in degrees' }
+      }
+    });
+
+    this.registerSlashCommandTool('set-video', 'Modify properties of a video element (source, dimensions, timing, position)', {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'Element ID to modify. If not provided, modifies the selected element.' },
+        src: { type: 'string', description: 'New video source URL (web URL or local file path)' },
+        left: { type: 'number', description: 'X-coordinate position in pixels' },
+        top: { type: 'number', description: 'Y-coordinate position in pixels' },
+        width: { type: 'number', description: 'Element width in pixels (positive number)' },
+        height: { type: 'number', description: 'Element height in pixels (positive number)' },
+        opacity: { type: 'number', minimum: 0, maximum: 1, description: 'Element opacity (0.0 to 1.0)' },
+        rotation: { type: 'number', description: 'Rotation angle in degrees' },
+        delay: { type: 'number', minimum: 0, description: 'Animation delay in milliseconds (non-negative)' }
       }
     });
   }
