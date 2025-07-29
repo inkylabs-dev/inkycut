@@ -1536,7 +1536,7 @@ const newImageCommand: SlashCommand = {
       if (srcValue && context.fileStorage) {
         try {
           const files = await context.fileStorage.getAllFiles();
-          const localFile = files.find(file => 
+          const localFile = files.find((file: any) => 
             file.dataUrl === srcValue || file.name === srcValue
           );
           
@@ -1836,7 +1836,7 @@ const newVideoCommand: SlashCommand = {
       if (srcValue && context.fileStorage) {
         try {
           const files = await context.fileStorage.getAllFiles();
-          const localFile = files.find(file => 
+          const localFile = files.find((file: any) => 
             file.dataUrl === srcValue || file.name === srcValue
           );
           
