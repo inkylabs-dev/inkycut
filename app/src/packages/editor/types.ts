@@ -234,6 +234,10 @@ export interface CompositionAudio {
   loop: boolean;
   /** Tone frequency adjustment from 0.01 to 2 (1 = normal pitch) */
   toneFrequency: number;
+  /** Delay before audio starts playing in milliseconds */
+  delay: number;
+  /** Duration of the audio track in milliseconds */
+  duration: number;
 }
 
 /**

@@ -335,18 +335,28 @@ export const MainComposition: React.FC<{
         {data.audios && data.audios.map((audio, index) => {
           const resolvedAudioSrc = audio.src && fileResolver ? fileResolver.resolve(audio.src) : audio.src;
           
+          // Convert delay and duration from milliseconds to frames
+          const delayInFrames = audio.delay ? Math.floor((audio.delay / 1000) * fps) : 0;
+          const durationInFrames = audio.duration ? Math.floor((audio.duration / 1000) * fps) : undefined;
+          
           return resolvedAudioSrc ? (
-            <Audio
-              key={`audio-${index}`}
-              src={resolvedAudioSrc}
-              volume={audio.muted ? 0 : audio.volume}
-              loop={audio.loop}
-              muted={audio.muted}
-              trimBefore={audio.trimBefore ? Math.floor((audio.trimBefore / 1000) * fps) : 0}
-              trimAfter={audio.trimAfter ? Math.floor((audio.trimAfter / 1000) * fps) : undefined}
-              playbackRate={audio.playbackRate || 1}
-              toneFrequency={audio.toneFrequency || 1}
-            />
+            <Sequence
+              key={`audio-sequence-${index}`}
+              from={delayInFrames}
+              durationInFrames={durationInFrames}
+            >
+              <Audio
+                key={`audio-${index}`}
+                src={resolvedAudioSrc}
+                volume={audio.muted ? 0 : audio.volume}
+                loop={audio.loop}
+                muted={audio.muted}
+                trimBefore={audio.trimBefore ? Math.floor((audio.trimBefore / 1000) * fps) : 0}
+                trimAfter={audio.trimAfter ? Math.floor((audio.trimAfter / 1000) * fps) : undefined}
+                playbackRate={audio.playbackRate || 1}
+                toneFrequency={audio.toneFrequency || 1}
+              />
+            </Sequence>
           ) : null;
         })}
         
@@ -406,18 +416,28 @@ export const MainComposition: React.FC<{
       {data.audios && data.audios.map((audio, index) => {
         const resolvedAudioSrc = audio.src && fileResolver ? fileResolver.resolve(audio.src) : audio.src;
         
+        // Convert delay and duration from milliseconds to frames
+        const delayInFrames = audio.delay ? Math.floor((audio.delay / 1000) * fps) : 0;
+        const durationInFrames = audio.duration ? Math.floor((audio.duration / 1000) * fps) : undefined;
+        
         return resolvedAudioSrc ? (
-          <Audio
-            key={`audio-${index}`}
-            src={resolvedAudioSrc}
-            volume={audio.muted ? 0 : audio.volume}
-            loop={audio.loop}
-            muted={audio.muted}
-            startFrom={audio.trimBefore ? Math.floor((audio.trimBefore / 1000) * fps) : 0}
-            endAt={audio.trimAfter ? Math.floor((audio.trimAfter / 1000) * fps) : undefined}
-            playbackRate={audio.playbackRate}
-            toneFrequency={audio.toneFrequency}
-          />
+          <Sequence
+            key={`audio-sequence-${index}`}
+            from={delayInFrames}
+            durationInFrames={durationInFrames}
+          >
+            <Audio
+              key={`audio-${index}`}
+              src={resolvedAudioSrc}
+              volume={audio.muted ? 0 : audio.volume}
+              loop={audio.loop}
+              muted={audio.muted}
+              startFrom={audio.trimBefore ? Math.floor((audio.trimBefore / 1000) * fps) : 0}
+              endAt={audio.trimAfter ? Math.floor((audio.trimAfter / 1000) * fps) : undefined}
+              playbackRate={audio.playbackRate}
+              toneFrequency={audio.toneFrequency}
+            />
+          </Sequence>
         ) : null;
       })}
       
