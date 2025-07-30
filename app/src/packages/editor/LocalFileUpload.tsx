@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useSetAtom } from 'jotai';
-import { DocumentIcon, PhotoIcon, VideoCameraIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import { DocumentIcon, PhotoIcon, VideoCameraIcon, MusicalNoteIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import { addFileAtom } from './atoms';
 import { LocalFile } from './types';
 
@@ -16,7 +16,7 @@ export default function LocalFileUpload({
   onUploadComplete,
   onUploadError,
   className = '',
-  accept = 'image/*,video/*',
+  accept = 'image/*,video/*,audio/*',
   buttonText = 'Add Files'
 }: LocalFileUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -124,7 +124,7 @@ export default function LocalFileUpload({
             <span> or drag and drop</span>
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            Images, videos up to 50MB
+            Images, videos, audio up to 50MB
           </div>
         </div>
       </div>
@@ -137,6 +137,8 @@ export function getFileIcon(type: string, className: string = 'w-6 h-6') {
     return <PhotoIcon className={className} />;
   } else if (type.startsWith('video/')) {
     return <VideoCameraIcon className={className} />;
+  } else if (type.startsWith('audio/')) {
+    return <MusicalNoteIcon className={className} />;
   } else {
     return <DocumentIcon className={className} />;
   }
