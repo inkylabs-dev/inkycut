@@ -738,17 +738,6 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                     <PlayIcon className="h-5 w-5" />
                   )}
                 </button>
-                <button
-                  onClick={handleStop}
-                  disabled={!playerReady}
-                  className={`p-2 rounded-full transition-all ${
-                    !playerReady 
-                      ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed text-gray-500 dark:text-gray-400' 
-                      : 'bg-gray-400 hover:bg-gray-500 dark:bg-gray-600 dark:hover:bg-gray-500 text-white'
-                  }`}
-                >
-                  <StopIcon className="h-5 w-5" />
-                </button>
                 <div className="text-gray-700 dark:text-gray-300 text-sm">
                   {formatTime(currentTime)} / {formatTime(totalDuration)}
                 </div>
