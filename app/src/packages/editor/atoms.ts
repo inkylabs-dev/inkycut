@@ -326,7 +326,8 @@ export const createDefaultProject = (name: string = 'My Project'): Project => {
       height: 1080
     },
     appState: createDefaultAppState(),
-    files: []
+    files: [],
+    audios: [],
   };
 };
 

@@ -200,6 +200,8 @@ export interface Project {
   appState: AppState;
   /** Local files stored in the project (no server uploads) */
   files: LocalFile[];
+  /** Array of all audio tracks in the composition */
+  audios: AudioData[];
   /** Optional additional metadata for the project */
   metadata?: {
     /** Timeline-specific data for rendering */
@@ -207,6 +209,29 @@ export interface Project {
     /** Additional metadata fields as needed */
     [key: string]: any;
   };
+}
+
+/**
+ * AudioData represents an audio track in the composition
+ * Audio tracks can be background music, sound effects, or voiceovers
+ */
+export interface AudioData {
+  /** Source URL for the audio file */
+  src: string;
+  /** Volume level from 0 (silent) to 1 (full volume) */
+  volume: number;
+  /** Time in milliseconds to trim from the beginning of the audio */
+  trimBefore: number;
+  /** Time in milliseconds to trim from the end of the audio */
+  trimAfter: number;
+  /** Playback speed multiplier (1 = normal speed, 2 = double speed, 0.5 = half speed) */
+  playbackRate: number;
+  /** Whether the audio track is muted */
+  muted: boolean;
+  /** Whether the audio should loop continuously */
+  loop: boolean;
+  /** Tone frequency adjustment from 0.01 to 2 (1 = normal pitch) */
+  toneFrequency: number;
 }
 
 /**
