@@ -6,12 +6,14 @@ import {
   PauseIcon, 
   StopIcon,
   CodeBracketIcon,
-  VideoCameraIcon
+  VideoCameraIcon,
+  MusicalNoteIcon
 } from '@heroicons/react/24/outline';
 import { CompositionData, defaultCompositionData } from './types';
 import { MainComposition } from './Composition';
 import { projectAtom, ensureCompositionIDs, filesAtom, appStateAtom, updateProjectAtom } from './atoms';
 import { createDraggable } from 'animejs';
+// import { useAudioSync } from './hooks/useAudioSync'; // Using Remotion Audio components instead
 
 interface MiddlePanelProps {
   onTimelineUpdate: (timeline: any[]) => void;
@@ -42,6 +44,18 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   
   // Store last edited composition to preserve changes when toggling views
   const lastEditedComposition = useRef<CompositionData | null>(null);
+
+  // Audio synchronization - now handled by Remotion Audio components
+  // const {
+  //   loadAudioTracks,
+  //   playAudio,
+  //   pauseAudio,
+  //   seekAudio,
+  //   syncAudio,
+  //   setTrackVolume,
+  //   setTrackMuted,
+  //   setMasterVolume
+  // } = useAudioSync();
 
   
   // Refs to track previous project state for comparison
@@ -82,25 +96,46 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
     prevCompositionRef.current = currentCompositionId;
   }, [project, userEditedJson, viewMode]);
   
-  // Initialize JSON string when composition data changes, but avoid unnecessary updates
+  // Initialize JSON string when project data changes, but avoid unnecessary updates
   useEffect(() => {
+    // Create a complete project object including audios for JSON display
+    const completeProjectData = {
+      composition: compositionData,
+      audios: project?.audios || [],
+      // Include other relevant project fields for completeness
+      ...(project && {
+        id: project.id,
+        name: project.name,
+        createdAt: project.createdAt,
+        updatedAt: project.updatedAt,
+        propertiesEnabled: project.propertiesEnabled
+      })
+    };
+
     // Always update the JSON string if we're not in code view or there are no user edits
     if (viewMode !== 'code' && !userEditedJson) {
-      setJsonString(JSON.stringify(compositionData, null, 2));
+      setJsonString(JSON.stringify(completeProjectData, null, 2));
     } 
     // Also update if this is first initialization
     else if (jsonString === '') {
-      setJsonString(JSON.stringify(compositionData, null, 2));
+      setJsonString(JSON.stringify(completeProjectData, null, 2));
     }
     // Special case: If we're in code view and project just got reset
-    else if (viewMode === 'code' && !userEditedJson && project?.composition) {
+    else if (viewMode === 'code' && !userEditedJson && project) {
       // Check if the JSON differs from what's displayed
-      const currentJson = JSON.stringify(project.composition, null, 2);
+      const currentJson = JSON.stringify(completeProjectData, null, 2);
       if (currentJson !== jsonString) {
         setJsonString(currentJson);
       }
     }
   }, [compositionData, viewMode, jsonString, userEditedJson, project]);
+
+  // Audio tracks are now handled by Remotion Audio components in the composition
+  // useEffect(() => {
+  //   if (project?.audios && files && files.length > 0) {
+  //     loadAudioTracks(project.audios, files);
+  //   }
+  // }, [project?.audios, files, loadAudioTracks]);
   
   // Calculate total duration and current time
   // Convert page durations from milliseconds to frames
@@ -123,6 +158,12 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
           const frame = playerRef.current.getCurrentFrame();
           setCurrentFrame(frame);
           
+          // Temporarily disable frequent audio sync to improve performance
+          // TODO: Re-enable when audio sync is optimized
+          // if (isPlaying && project?.audios && project.audios.length > 0 && frame % 10 === 0) {
+          //   syncAudio(frame, compositionData.fps, project.audios);
+          // }
+          
           // Auto-pause at end
           if (frame >= totalFrames - 1) {
             console.log('Reached end, auto-pausing');
@@ -133,8 +174,8 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
           console.error('Error getting current frame:', error);
         }
       }
-    }, 50); // Update every 50ms for smoother progress
-  }, [totalFrames, playerReady]);
+    }, 50); // Back to 50ms for better performance balance
+  }, [totalFrames, playerReady, isPlaying]);
 
   const stopFrameTracking = useCallback(() => {
     if (frameUpdateIntervalRef.current) {
@@ -212,7 +253,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
           playerRef.current.seekTo(0);
           setCurrentFrame(0);
         }
-        console.log('Playing player');
+        console.log('Playing player with audio');
         playerRef.current.play();
         setIsPlaying(true);
         startFrameTracking();
@@ -564,8 +605,21 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
     try {
       const parsed = JSON.parse(newJson);
       
+      // Handle both old format (just composition) and new format (with audios)
+      let compositionData: any;
+      let audiosData: any[] = [];
+      
+      if (parsed.composition) {
+        // New format: { composition: {...}, audios: [...], ...}
+        compositionData = parsed.composition;
+        audiosData = parsed.audios || [];
+      } else {
+        // Old format: assume the parsed object is the composition itself
+        compositionData = parsed;
+      }
+      
       // Ensure all pages and elements have IDs before proceeding
-      const compositionWithIDs = ensureCompositionIDs(parsed);
+      const compositionWithIDs = ensureCompositionIDs(compositionData);
       
       // Update local state first for immediate UI update
       setCompositionData(compositionWithIDs);
@@ -574,6 +628,16 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
       
       // Store the latest valid edit in our ref for persistence across view switches
       lastEditedComposition.current = { ...compositionWithIDs };
+      
+      // Update the project with both composition and audios
+      if (project && updateProject) {
+        const updatedProject = {
+          ...project,
+          composition: compositionWithIDs,
+          audios: audiosData
+        };
+        updateProject(updatedProject);
+      }
       
       // In offline mode, we automatically save to localStorage
       if (project?.id) {
@@ -636,8 +700,9 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   const inputProps = useMemo(() => ({
     data: compositionData,
     currentPageIndex: getCurrentPage().pageIndex,
-    files: files
-  }), [compositionData, currentFrame, files]);
+    files: files,
+    audios: project?.audios || []
+  }), [compositionData, currentFrame, files, project?.audios]);
 
   return (
     <div className="h-full flex flex-col bg-white dark:bg-gray-900">
@@ -929,6 +994,53 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                               />
                             );
                           }
+                        });
+                        
+                        return elements;
+                      })()}
+                    </div>
+
+                    {/* Audio Timeline Track */}
+                    <div className="audio-track relative h-12 bg-gray-300 dark:bg-gray-600 rounded mt-2" style={{ width: '100%' }}>
+                      <div className="absolute left-2 top-1 text-xs text-gray-600 dark:text-gray-400 pointer-events-none">
+                        <MusicalNoteIcon className="w-4 h-4 inline mr-1" />
+                        Audio
+                      </div>
+                      {(() => {
+                        if (!project?.audios || project.audios.length === 0) {
+                          return (
+                            <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-500 dark:text-gray-400">
+                              No audio tracks added yet
+                            </div>
+                          );
+                        }
+
+                        const elements: React.ReactElement[] = [];
+                        
+                        project.audios.forEach((audio, index) => {
+                          // Calculate position and width based on audio timing
+                          const startPositionPx = (audio.startTime / 1000) * 100 * timelineZoom;
+                          const widthPx = Math.max((audio.duration / 1000) * 100 * timelineZoom, 40);
+                          
+                          elements.push(
+                            <div
+                              key={`audio-${audio.id}`}
+                              className={`absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center border-2 transition-all cursor-grab hover:opacity-80 ${
+                                audio.muted ? 'opacity-50' : ''
+                              }`}
+                              style={{
+                                left: `${startPositionPx}px`,
+                                width: `${widthPx}px`,
+                                backgroundColor: '#8B5CF6', // Purple for audio
+                                borderColor: '#7C3AED'
+                              }}
+                              title={`${audio.name} - ${(audio.duration / 1000).toFixed(1)}s - Volume: ${Math.round(audio.volume * 100)}%`}
+                            >
+                              <span className="truncate px-1">
+                                {audio.name}
+                              </span>
+                            </div>
+                          );
                         });
                         
                         return elements;

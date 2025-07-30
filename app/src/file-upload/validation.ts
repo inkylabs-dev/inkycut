@@ -7,4 +7,13 @@ export const ALLOWED_FILE_TYPES = [
   'text/*',
   'video/quicktime',
   'video/mp4',
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/wav',
+  'audio/wave',
+  'audio/ogg',
+  'audio/mp4',
+  'audio/m4a',
+  'audio/aac',
+  'audio/flac',
 ] as const;

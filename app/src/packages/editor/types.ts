@@ -1,13 +1,13 @@
 /**
- * CompositionElement represents a visual element in the composition
- * Elements can be videos, images, or text that are positioned and styled
+ * CompositionElement represents an element in the composition
+ * Elements can be videos, images, text, groups, or audio that are positioned and styled
  * within the composition timeline.
  */
 export interface CompositionElement {
   /** Unique identifier for the element */
   id: string; 
-  /** Type of element: video, image, text, or group */
-  type: 'video' | 'image' | 'text' | 'group';
+  /** Type of element: video, image, text, group, or audio */
+  type: 'video' | 'image' | 'text' | 'group' | 'audio';
   /** X position from left edge (in pixels) */
   left: number;
   /** Y position from top edge (in pixels) */
@@ -46,6 +46,18 @@ export interface CompositionElement {
   fontWeight?: string;
   /** Horizontal text alignment */
   textAlign?: 'left' | 'center' | 'right';
+  
+  // Audio specific properties
+  /** Volume level from 0 (silent) to 1 (full volume) for audio elements */
+  volume?: number;
+  /** Whether the audio element is muted */
+  muted?: boolean;
+  /** Whether the audio should loop when it reaches the end */
+  loop?: boolean;
+  /** Fade in duration in milliseconds for audio elements */
+  fadeIn?: number;
+  /** Fade out duration in milliseconds for audio elements */
+  fadeOut?: number;
   
   // Interactive state (for editing)
   /** Whether element is currently being dragged by user */
@@ -155,6 +167,35 @@ export interface AppState {
 }
 
 /**
+ * AudioObject represents an audio track in the project timeline
+ * Audio tracks are separate from composition elements and can overlap
+ */
+export interface AudioObject {
+  /** Unique identifier for the audio track */
+  id: string;
+  /** User-friendly name for the audio track */
+  name: string;
+  /** Reference to the LocalFile containing the audio data */
+  src: string;
+  /** When the audio starts in the global timeline (in milliseconds) */
+  startTime: number;
+  /** Duration of the audio file (in milliseconds) */
+  duration: number;
+  /** Volume level from 0 (silent) to 1 (full volume) */
+  volume: number;
+  /** Whether the audio track is muted */
+  muted: boolean;
+  /** Whether the audio should loop when it reaches the end */
+  loop: boolean;
+  /** Fade in duration in milliseconds (optional) */
+  fadeIn?: number;
+  /** Fade out duration in milliseconds (optional) */
+  fadeOut?: number;
+  /** When the audio ends in timeline - for trimming (optional, defaults to startTime + duration) */
+  endTime?: number;
+}
+
+/**
  * LocalFile represents a file stored locally in the project
  * Files are stored as data URLs (base64 encoded)
  */
@@ -175,8 +216,12 @@ export interface LocalFile {
   width?: number;
   /** Height in pixels (for images and videos) */
   height?: number;
-  /** Duration in milliseconds (for videos) */
+  /** Duration in milliseconds (for videos and audio) */
   duration?: number;
+  /** Sample rate in Hz (for audio files) */
+  sampleRate?: number;
+  /** Number of audio channels (for audio files) */
+  channels?: number;
 }
 
 /**
@@ -200,6 +245,8 @@ export interface Project {
   appState: AppState;
   /** Local files stored in the project (no server uploads) */
   files: LocalFile[];
+  /** Audio tracks for the project - separate from composition elements */
+  audios: AudioObject[];
   /** Optional additional metadata for the project */
   metadata?: {
     /** Timeline-specific data for rendering */

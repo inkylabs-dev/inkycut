@@ -10,13 +10,17 @@ import {
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
   ShareIcon,
-  DocumentDuplicateIcon
+  DocumentDuplicateIcon,
+  MusicalNoteIcon,
+  TrashIcon,
+  SpeakerWaveIcon,
+  SpeakerXMarkIcon
 } from '@heroicons/react/24/outline';
 // import { useAuth } from 'wasp/client/auth';
 // import { routes } from 'wasp/client/router';
 import { Link } from 'react-router-dom';
 import { CompositionElement, LocalFile } from './types';
-import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject, filesAtom, chatMessagesAtom, clearAllFilesAtom, forkProjectAtom, isSharedProjectAtom } from './atoms';
+import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject, filesAtom, chatMessagesAtom, clearAllFilesAtom, forkProjectAtom, isSharedProjectAtom, updateProjectAtom } from './atoms';
 import LocalFileUpload from './LocalFileUpload';
 import ElementPreview from './ElementPreview';
 import FileListItem from './FileListItem';
@@ -87,8 +91,9 @@ export default function LeftPanel({
   const [selectedPage] = useAtom(selectedPageAtom);
   const setSelectedElement = useSetAtom(setSelectedElementAtom);
   const setSelectedPage = useSetAtom(setSelectedPageAtom);
+  const updateProject = useSetAtom(updateProjectAtom);
   
-  const [activeTab, setActiveTab] = useState<'files' | 'elements'>('files');
+  const [activeTab, setActiveTab] = useState<'files' | 'elements' | 'audio'>('files');
   const [showMenu, setShowMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [internalShowImportDialog, setInternalShowImportDialog] = useState(false);
@@ -416,6 +421,17 @@ export default function LeftPanel({
         >
           Elements
         </button>
+        <button
+          onClick={() => setActiveTab('audio')}
+          className={`flex-1 px-4 py-2 text-sm font-medium ${
+            activeTab === 'audio'
+              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-b-2 border-blue-500'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+          }`}
+        >
+          <MusicalNoteIcon className="w-4 h-4 inline mr-1" />
+          Audio
+        </button>
       </div>
 
       {/* Tab Content */}
@@ -516,6 +532,142 @@ export default function LeftPanel({
                 </p>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'audio' && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Audio Tracks</h3>
+            </div>
+            
+            {/* Audio Files Section */}
+            <div className="mb-6">
+              <h4 className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Available Audio Files</h4>
+              <div className="space-y-2">
+                {localFiles.filter(file => file.type.startsWith('audio/')).length > 0 ? (
+                  localFiles
+                    .filter(file => file.type.startsWith('audio/'))
+                    .map((file: LocalFile) => (
+                      <div key={file.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <MusicalNoteIcon className="w-5 h-5 text-purple-500" />
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{file.name}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {file.duration ? `${(file.duration / 1000).toFixed(1)}s` : 'Unknown duration'}
+                                {file.size && ` • ${(file.size / 1024 / 1024).toFixed(1)}MB`}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              // Add audio to timeline
+                              if (project && updateProject) {
+                                const newAudioTrack = {
+                                  id: `audio-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                                  name: file.name,
+                                  src: file.id,
+                                  startTime: 0,
+                                  duration: file.duration || 30000,
+                                  volume: 1.0,
+                                  muted: false,
+                                  loop: false
+                                };
+                                
+                                const updatedProject = {
+                                  ...project,
+                                  audios: [...(project.audios || []), newAudioTrack]
+                                };
+                                
+                                updateProject(updatedProject);
+                              }
+                            }}
+                            className="px-3 py-1 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50"
+                          >
+                            Add to Timeline
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <MusicalNoteIcon className="h-12 w-12 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+                    <p className="text-sm">No audio files uploaded</p>
+                    <p className="text-xs">Go to Files tab to upload audio files</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Timeline Audio Tracks Section */}
+            <div>
+              <h4 className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Timeline Audio Tracks</h4>
+              <div className="space-y-2">
+                {project?.audios && project.audios.length > 0 ? (
+                  project.audios.map((audio, index) => (
+                    <div key={audio.id} className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <MusicalNoteIcon className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{audio.name}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <button
+                            onClick={() => {
+                              // Toggle mute functionality
+                              if (project && updateProject) {
+                                const updatedAudios = project.audios.map(a => 
+                                  a.id === audio.id ? { ...a, muted: !a.muted } : a
+                                );
+                                updateProject({ ...project, audios: updatedAudios });
+                              }
+                            }}
+                            className={`p-1 rounded hover:bg-purple-200 dark:hover:bg-purple-800 ${
+                              audio.muted ? 'text-red-500' : 'text-purple-600 dark:text-purple-400'
+                            }`}
+                            title={audio.muted ? 'Unmute' : 'Mute'}
+                          >
+                            {audio.muted ? <SpeakerXMarkIcon className="w-4 h-4" /> : <SpeakerWaveIcon className="w-4 h-4" />}
+                          </button>
+                          <button
+                            onClick={() => {
+                              // Remove from timeline functionality
+                              if (project && updateProject) {
+                                const updatedAudios = project.audios.filter(a => a.id !== audio.id);
+                                updateProject({ ...project, audios: updatedAudios });
+                              }
+                            }}
+                            className="p-1 rounded hover:bg-red-200 dark:hover:bg-red-800 text-red-500"
+                            title="Remove from timeline"
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                        <div>Start: {(audio.startTime / 1000).toFixed(1)}s • Duration: {(audio.duration / 1000).toFixed(1)}s</div>
+                        <div className="flex items-center space-x-4">
+                          <span>Volume: {Math.round(audio.volume * 100)}%</span>
+                          {audio.loop && <span className="text-purple-600 dark:text-purple-400">Loop</span>}
+                          {audio.fadeIn && <span>Fade In: {audio.fadeIn}ms</span>}
+                          {audio.fadeOut && <span>Fade Out: {audio.fadeOut}ms</span>}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <div className="mb-2">
+                      <MusicalNoteIcon className="h-12 w-12 mx-auto text-gray-300 dark:text-gray-600" />
+                    </div>
+                    <p className="text-sm">No audio tracks in timeline</p>
+                    <p className="text-xs">Add audio files to the timeline to get started</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>

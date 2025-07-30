@@ -7,7 +7,7 @@ import {
   getStorageModeForProject, 
   migrateFiles 
 } from './utils/fileStorage';
-import { getImageDimensions, getVideoDimensions, getVideoDuration } from './utils/mediaUtils';
+import { getImageDimensions, getVideoDimensions, getVideoDuration, getAudioDuration, getAudioMetadata } from './utils/mediaUtils';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -326,7 +326,8 @@ export const createDefaultProject = (name: string = 'My Project'): Project => {
       height: 1080
     },
     appState: createDefaultAppState(),
-    files: []
+    files: [],
+    audios: []
   };
 };
 
@@ -558,6 +559,8 @@ export const addFileAtom = atom(
       let width: number | undefined;
       let height: number | undefined;
       let duration: number | undefined;
+      let sampleRate: number | undefined;
+      let channels: number | undefined;
 
       if (file.type.startsWith('image/')) {
         const dimensions = await getImageDimensions(dataUrl);
@@ -577,6 +580,18 @@ export const addFileAtom = atom(
         if (videoDuration !== null) {
           duration = videoDuration;
         }
+      } else if (file.type.startsWith('audio/')) {
+        const [audioDuration, audioMetadata] = await Promise.all([
+          getAudioDuration(dataUrl),
+          getAudioMetadata(dataUrl)
+        ]);
+        if (audioDuration !== null) {
+          duration = audioDuration;
+        }
+        if (audioMetadata) {
+          sampleRate = audioMetadata.sampleRate;
+          channels = audioMetadata.channels;
+        }
       }
 
       // Create LocalFile object
@@ -589,7 +604,9 @@ export const addFileAtom = atom(
         createdAt: new Date().toISOString(),
         width,
         height,
-        duration
+        duration,
+        sampleRate,
+        channels
       };
 
       // Store file in current storage

@@ -3654,6 +3654,233 @@ const lsPageCommand: SlashCommand = {
 };
 
 /**
+ * New audio command - add audio track to project timeline
+ */
+const newAudioCommand: SlashCommand = {
+  name: 'new-audio',
+  description: 'Add a new audio track to the project timeline',
+  usage: '/new-audio --src|-s file_reference [--start|-st milliseconds] [--volume|-v 0-1] [--loop|-lp] [--mute|-m] [--fadein|-fi milliseconds] [--fadeout|-fo milliseconds]',
+  requiresConfirmation: false,
+  execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
+    try {
+      if (!context.project) {
+        return {
+          success: false,
+          message: '❌ **No Project**\n\nNo project is currently loaded. Please create or load a project first.',
+          handled: true
+        };
+      }
+
+      const args = context.args || [];
+      
+      // Initialize audio track properties with defaults
+      const audioData: any = {
+        name: 'Audio Track',
+        src: '',
+        startTime: 0, // Start at beginning of timeline
+        duration: 0, // Will be determined from file
+        volume: 1.0,
+        muted: false,
+        loop: false,
+        fadeIn: undefined,
+        fadeOut: undefined
+      };
+
+      // Parse arguments
+      for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        const nextArg = args[i + 1];
+
+        switch (arg) {
+          case '--src':
+          case '-s':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--src` requires a value.\n\nExample: `--src "audio-file.mp3"`',
+                handled: true
+              };
+            }
+            audioData.src = nextArg;
+            i++; // Skip next arg
+            break;
+
+          case '--start':
+          case '-st':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--start` requires a value in milliseconds.\n\nExample: `--start 5000`',
+                handled: true
+              };
+            }
+            const startTime = parseInt(nextArg, 10);
+            if (isNaN(startTime) || startTime < 0) {
+              return {
+                success: false,
+                message: `❌ **Invalid Start Time**\n\nStart time must be a non-negative number (milliseconds). Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            audioData.startTime = startTime;
+            i++; // Skip next arg
+            break;
+
+          case '--volume':
+          case '-v':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--volume` requires a value between 0 and 1.\n\nExample: `--volume 0.8`',
+                handled: true
+              };
+            }
+            const volume = parseFloat(nextArg);
+            if (isNaN(volume) || volume < 0 || volume > 1) {
+              return {
+                success: false,
+                message: `❌ **Invalid Volume**\n\nVolume must be a number between 0 and 1. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            audioData.volume = volume;
+            i++; // Skip next arg
+            break;
+
+          case '--loop':
+          case '-lp':
+            audioData.loop = true;
+            break;
+
+          case '--mute':
+          case '-m':
+            audioData.muted = true;
+            break;
+
+          case '--fadein':
+          case '-fi':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--fadein` requires a value in milliseconds.\n\nExample: `--fadein 1000`',
+                handled: true
+              };
+            }
+            const fadeIn = parseInt(nextArg, 10);
+            if (isNaN(fadeIn) || fadeIn < 0) {
+              return {
+                success: false,
+                message: `❌ **Invalid Fade In**\n\nFade in must be a non-negative number (milliseconds). Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            audioData.fadeIn = fadeIn;
+            i++; // Skip next arg
+            break;
+
+          case '--fadeout':
+          case '-fo':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--fadeout` requires a value in milliseconds.\n\nExample: `--fadeout 1000`',
+                handled: true
+              };
+            }
+            const fadeOut = parseInt(nextArg, 10);
+            if (isNaN(fadeOut) || fadeOut < 0) {
+              return {
+                success: false,
+                message: `❌ **Invalid Fade Out**\n\nFade out must be a non-negative number (milliseconds). Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            audioData.fadeOut = fadeOut;
+            i++; // Skip next arg
+            break;
+
+          default:
+            if (arg.startsWith('-')) {
+              return {
+                success: false,
+                message: `❌ **Unknown Option**\n\nUnknown option '${arg}'. Use /new-audio without arguments to see usage.`,
+                handled: true
+              };
+            }
+            break;
+        }
+      }
+
+      // Validate required src parameter
+      if (!audioData.src) {
+        return {
+          success: false,
+          message: '❌ **Missing Audio Source**\n\nAudio source is required.\n\nUsage: `/new-audio --src "audio-file.mp3"`\n\nExample:\n• `/new-audio --src "background-music.mp3" --volume 0.5 --loop`',
+          handled: true
+        };
+      }
+
+      // Try to find the audio file in local storage and extract metadata
+      if (context.fileStorage) {
+        try {
+          const files = await context.fileStorage.getAllFiles();
+          const audioFile = files.find((file: any) => 
+            file.dataUrl === audioData.src || 
+            file.name === audioData.src ||
+            file.id === audioData.src
+          );
+          
+          if (audioFile) {
+            // Use file metadata if available
+            audioData.name = audioFile.name || 'Audio Track';
+            audioData.duration = audioFile.duration || 30000; // Default 30s if unknown
+            audioData.src = audioFile.id; // Use file ID as reference
+          } else {
+            return {
+              success: false,
+              message: `❌ **Audio File Not Found**\n\nCould not find audio file '${audioData.src}' in project files.\n\nMake sure to upload the audio file first, then reference it by name or ID.`,
+              handled: true
+            };
+          }
+        } catch (error) {
+          console.warn('Failed to load files from storage:', error);
+          // Continue with provided src, assume it's valid
+          audioData.duration = 30000; // Default duration
+        }
+      }
+
+      // Create new audio track with unique ID
+      const newAudioTrack = {
+        id: `audio-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        ...audioData
+      };
+
+      // Add to project's audios array
+      const currentAudios = context.project.audios || [];
+      const updatedProject = {
+        ...context.project,
+        audios: [...currentAudios, newAudioTrack]
+      };
+
+      context.updateProject(updatedProject);
+
+      return {
+        success: true,
+        message: `✅ **Audio Track Added**\n\n**${newAudioTrack.name}** has been added to the timeline.\n\n**Properties:**\n• Start Time: ${audioData.startTime}ms\n• Volume: ${Math.round(audioData.volume * 100)}%\n• Duration: ${audioData.duration}ms\n${audioData.loop ? '• Loop: Enabled\n' : ''}${audioData.muted ? '• Muted: Yes\n' : ''}${audioData.fadeIn ? `• Fade In: ${audioData.fadeIn}ms\n` : ''}${audioData.fadeOut ? `• Fade Out: ${audioData.fadeOut}ms\n` : ''}`,
+        handled: true
+      };
+    } catch (error) {
+      console.error('Error in new-audio command:', error);
+      return {
+        success: false,
+        message: `❌ **Error Adding Audio**\n\nFailed to add audio track: ${error}`,
+        handled: true
+      };
+    }
+  }
+};
+
+/**
  * Registry of available slash commands
  */
 const commandRegistry: Map<string, SlashCommand> = new Map([
@@ -3671,6 +3898,7 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['new-text', newTextCommand],
   ['new-image', newImageCommand],
   ['new-video', newVideoCommand],
+  ['new-audio', newAudioCommand],
   ['del-elem', delElementCommand],
   ['set-text', setTextCommand],
   ['set-image', setImageCommand],

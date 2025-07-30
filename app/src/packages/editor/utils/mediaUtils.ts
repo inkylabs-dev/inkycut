@@ -1,10 +1,16 @@
 /**
- * Media utilities for handling images, videos, and aspect ratios
+ * Media utilities for handling images, videos, audio, and aspect ratios
  */
 
 export interface MediaDimensions {
   width: number;
   height: number;
+}
+
+export interface AudioMetadata {
+  duration: number; // in milliseconds
+  sampleRate: number; // in Hz
+  channels: number; // number of audio channels
 }
 
 /**
@@ -63,6 +69,50 @@ export function getVideoDuration(dataUrl: string): Promise<number | null> {
 }
 
 /**
+ * Get audio duration from data URL
+ * @param dataUrl The data URL of the audio
+ * @returns Promise that resolves to duration in milliseconds or null if failed
+ */
+export function getAudioDuration(dataUrl: string): Promise<number | null> {
+  return new Promise((resolve) => {
+    const audio = document.createElement('audio');
+    audio.onloadedmetadata = () => {
+      const durationMs = Math.round(audio.duration * 1000);
+      resolve(durationMs);
+    };
+    audio.onerror = () => {
+      resolve(null);
+    };
+    audio.src = dataUrl;
+  });
+}
+
+/**
+ * Get audio metadata from data URL using Web Audio API
+ * @param dataUrl The data URL of the audio
+ * @returns Promise that resolves to audio metadata or null if failed
+ */
+export async function getAudioMetadata(dataUrl: string): Promise<AudioMetadata | null> {
+  return new Promise((resolve) => {
+    const audio = document.createElement('audio');
+    audio.onloadedmetadata = () => {
+      const duration = Math.round(audio.duration * 1000);
+      // Note: Web Audio API would be needed for sampleRate and channels
+      // For now, we'll use fallback values and duration from the audio element
+      resolve({
+        duration,
+        sampleRate: 44100, // Common default sample rate
+        channels: 2, // Stereo default
+      });
+    };
+    audio.onerror = () => {
+      resolve(null);
+    };
+    audio.src = dataUrl;
+  });
+}
+
+/**
  * Calculate element dimensions respecting aspect ratio
  * Fits content within a maximum size while maintaining aspect ratio
  * @param originalWidth Original width of the media
@@ -114,6 +164,9 @@ export async function getMediaDimensions(dataUrl: string, mimeType: string): Pro
     return getImageDimensions(dataUrl);
   } else if (mimeType.startsWith('video/')) {
     return getVideoDimensions(dataUrl);
+  } else if (mimeType.startsWith('audio/')) {
+    // Audio files don't have visual dimensions, return default audio element size
+    return DEFAULT_DIMENSIONS.audio;
   }
   return null;
 }
@@ -125,4 +178,5 @@ export const DEFAULT_DIMENSIONS = {
   image: { width: 400, height: 300 },
   video: { width: 640, height: 360 },
   text: { width: 300, height: 100 },
+  audio: { width: 300, height: 60 }, // Audio waveform visualization size
 } as const;

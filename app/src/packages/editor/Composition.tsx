@@ -10,11 +10,12 @@
 // Basic composition component
 import React, { useRef } from 'react';
 import { AbsoluteFill, useCurrentFrame, Img, Video, Sequence } from 'remotion';
-import { CompositionData, CompositionElement, ElementRendererProps, LocalFile } from './types';
+import { CompositionData, CompositionElement, ElementRendererProps, LocalFile, AudioObject } from './types';
 import { Layer } from './Layer';
 import { FileResolver, createFileResolver } from './utils/fileResolver';
 import { useAnimeTimeline } from './useAnimeTimeline';
 import { createTimeline } from "animejs";
+import { DataUrlAudio } from './AudioComponent';
 
 // Utility function to generate unique IDs
 const generateUniqueId = (): string => {
@@ -246,10 +247,12 @@ export const MainComposition: React.FC<{
   data: CompositionData;
   currentPageIndex?: number;
   files?: LocalFile[];
+  audios?: AudioObject[];
 }> = ({ 
   data, 
   currentPageIndex,
   files,
+  audios = [],
 }) => {
   // Only use Remotion hooks when in Player context (no currentPageIndex)
   let frame = 0;
@@ -395,6 +398,33 @@ export const MainComposition: React.FC<{
               ))}
             </AbsoluteFill>
           </Sequence>
+        );
+      })}
+      
+      {/* Render audio tracks */}
+      {audios && audios.length > 0 && audios.map((audioTrack) => {
+        // Find the corresponding audio file
+        const audioFile = files?.find(f => f.id === audioTrack.src);
+        
+        if (!audioFile || !audioFile.dataUrl) {
+          console.warn(`Audio file not found for track: ${audioTrack.name}`);
+          return null;
+        }
+        
+        // Convert timing from milliseconds to frames
+        const startFrame = Math.round((audioTrack.startTime / 1000) * fps);
+        const durationFrames = Math.round((audioTrack.duration / 1000) * fps);
+        
+        return (
+          <DataUrlAudio
+            key={`audio-${audioTrack.id}`}
+            src={audioFile.dataUrl}
+            volume={audioTrack.muted ? 0 : audioTrack.volume}
+            loop={audioTrack.loop}
+            muted={audioTrack.muted}
+            startFrame={startFrame}
+            durationFrames={durationFrames}
+          />
         );
       })}
     </AbsoluteFill>
