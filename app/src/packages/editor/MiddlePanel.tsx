@@ -628,9 +628,12 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   };
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    const totalTenths = Math.ceil(seconds * 10); // Round up total tenths
+    const mins = Math.floor(totalTenths / 600); // 600 tenths = 60 seconds = 1 minute
+    const remainingTenths = totalTenths % 600;
+    const secs = Math.floor(remainingTenths / 10);
+    const tenths = remainingTenths % 10;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${tenths}`;
   };
 
   const inputProps = useMemo(() => ({
