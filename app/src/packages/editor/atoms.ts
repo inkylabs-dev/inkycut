@@ -323,11 +323,11 @@ export const createDefaultProject = (name: string = 'My Project'): Project => {
       pages: [defaultPage],
       fps: 30,
       width: 1920,
-      height: 1080
+      height: 1080,
+      audios: [],
     },
     appState: createDefaultAppState(),
     files: [],
-    audios: [],
   };
 };
 

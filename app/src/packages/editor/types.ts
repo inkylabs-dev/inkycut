@@ -122,6 +122,8 @@ export interface CompositionData {
   width: number;
   /** Height of the composition canvas in pixels */
   height: number;
+  /** Audio tracks in the composition */
+  audios?: CompositionAudio[];
 }
 
 /**
@@ -169,6 +171,8 @@ export interface LocalFile {
   size: number;
   /** Data URL containing the file content (data:mime/type;base64,data) */
   dataUrl: string;
+  /** Blob representation of the file (for audio conversion) */
+  blob?: Blob;
   /** Timestamp when file was added */
   createdAt: string;
   /** Width in pixels (for images and videos) */
@@ -200,8 +204,6 @@ export interface Project {
   appState: AppState;
   /** Local files stored in the project (no server uploads) */
   files: LocalFile[];
-  /** Array of all audio tracks in the composition */
-  audios: AudioData[];
   /** Optional additional metadata for the project */
   metadata?: {
     /** Timeline-specific data for rendering */
@@ -212,10 +214,10 @@ export interface Project {
 }
 
 /**
- * AudioData represents an audio track in the composition
+ * CompositionAudio represents an audio track in the composition
  * Audio tracks can be background music, sound effects, or voiceovers
  */
-export interface AudioData {
+export interface CompositionAudio {
   /** Source URL for the audio file */
   src: string;
   /** Volume level from 0 (silent) to 1 (full volume) */

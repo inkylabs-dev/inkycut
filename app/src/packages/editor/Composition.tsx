@@ -9,7 +9,7 @@
 
 // Basic composition component
 import React, { useRef } from 'react';
-import { AbsoluteFill, useCurrentFrame, Img, Video, Sequence } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, Img, Video, Sequence, Audio } from 'remotion';
 import { CompositionData, CompositionElement, ElementRendererProps, LocalFile } from './types';
 import { Layer } from './Layer';
 import { FileResolver, createFileResolver } from './utils/fileResolver';
@@ -19,6 +19,31 @@ import { createTimeline } from "animejs";
 // Utility function to generate unique IDs
 const generateUniqueId = (): string => {
   return `el-${Math.random().toString(36).substring(2, 9)}-${Date.now().toString(36)}`;
+};
+
+// Utility function to resolve audio source with data URL conversion
+const resolveAudioSource = async (src: string, files?: LocalFile[]): Promise<string> => {
+  if (!files || !src.startsWith('LocalFile:')) {
+    return src; // Return as-is if not a LocalFile reference
+  }
+  
+  // Find the corresponding local file
+  const fileName = src.replace('LocalFile:', '');
+  const localFile = files.find(file => file.name === fileName);
+  
+  if (!localFile || !localFile.blob) {
+    console.warn(`Local audio file not found or no blob available: ${fileName}`);
+    return localFile?.dataUrl || src;
+  }
+  
+  try {
+    // For audio files, just return the data URL directly
+    // The audioBufferToDataUrl function is meant for Web Audio API AudioBuffer objects
+    return localFile.dataUrl;
+  } catch (error) {
+    console.warn(`Failed to convert audio to data URL: ${error}`);
+    return localFile.dataUrl || src;
+  }
 };
 
 // Helper functions to get element dimensions
@@ -306,6 +331,25 @@ export const MainComposition: React.FC<{
 
     return (
       <AbsoluteFill style={outer}>
+        {/* Audio tracks - render at root level */}
+        {data.audios && data.audios.map((audio, index) => {
+          const resolvedAudioSrc = audio.src && fileResolver ? fileResolver.resolve(audio.src) : audio.src;
+          
+          return resolvedAudioSrc ? (
+            <Audio
+              key={`audio-${index}`}
+              src={resolvedAudioSrc}
+              volume={audio.muted ? 0 : audio.volume}
+              loop={audio.loop}
+              muted={audio.muted}
+              trimBefore={audio.trimBefore ? Math.floor((audio.trimBefore / 1000) * fps) : 0}
+              trimAfter={audio.trimAfter ? Math.floor((audio.trimAfter / 1000) * fps) : undefined}
+              playbackRate={audio.playbackRate || 1}
+              toneFrequency={audio.toneFrequency || 1}
+            />
+          ) : null;
+        })}
+        
         {/* Base layer with content */}
         <AbsoluteFill style={layerContainer}>
           {/* Wrap ElementRenderer with Layer for proper time-based sequencing */}
@@ -358,6 +402,25 @@ export const MainComposition: React.FC<{
   
   return (
     <AbsoluteFill style={outer}>
+      {/* Audio tracks - render at root level for full video */}
+      {data.audios && data.audios.map((audio, index) => {
+        const resolvedAudioSrc = audio.src && fileResolver ? fileResolver.resolve(audio.src) : audio.src;
+        
+        return resolvedAudioSrc ? (
+          <Audio
+            key={`audio-${index}`}
+            src={resolvedAudioSrc}
+            volume={audio.muted ? 0 : audio.volume}
+            loop={audio.loop}
+            muted={audio.muted}
+            startFrom={audio.trimBefore ? Math.floor((audio.trimBefore / 1000) * fps) : 0}
+            endAt={audio.trimAfter ? Math.floor((audio.trimAfter / 1000) * fps) : undefined}
+            playbackRate={audio.playbackRate}
+            toneFrequency={audio.toneFrequency}
+          />
+        ) : null;
+      })}
+      
       {data.pages.map((page, index) => {
         // Calculate the start frame for this page
         const startFrame = cumulativeFrames;
