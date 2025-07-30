@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import { createDraggable } from 'animejs';
 import { CompositionAudio } from './types';
 
 interface AudioTimelineProps {
@@ -6,6 +7,8 @@ interface AudioTimelineProps {
   audios: CompositionAudio[];
   /** Timeline zoom level (pixels per second) */
   timelineZoom: number;
+  /** Callback to update audio delay when dragging */
+  onAudioDelayUpdate?: (audioId: string, newDelay: number) => void;
 }
 
 interface AudioTimelineGroupProps {
@@ -15,6 +18,8 @@ interface AudioTimelineGroupProps {
   timelineZoom: number;
   /** Index of this timeline group */
   timelineIndex: number;
+  /** Callback to update audio delay when dragging */
+  onAudioDelayUpdate?: (audioId: string, newDelay: number) => void;
 }
 
 /**
@@ -23,8 +28,22 @@ interface AudioTimelineGroupProps {
 const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({ 
   timeline, 
   timelineZoom, 
-  timelineIndex 
+  timelineIndex,
+  onAudioDelayUpdate 
 }) => {
+  const draggableRefs = useRef<Map<string, any>>(new Map());
+  const draggingStates = useRef<Map<string, boolean>>(new Map());
+  // Cleanup draggables on unmount and when timeline changes
+  useEffect(() => {
+    return () => {
+      draggableRefs.current.forEach(draggable => {
+        draggable.destroy?.();
+      });
+      draggableRefs.current.clear();
+      draggingStates.current.clear();
+    };
+  }, [timeline, timelineZoom]);
+  
   return (
     <div 
       key={`audio-timeline-${timelineIndex}`}
@@ -36,17 +55,91 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
         const audioDuration = audio.duration / 1000; // Convert to seconds
         const leftPosition = audioStart * 100 * timelineZoom; // Position in pixels
         const blockWidth = Math.max(audioDuration * 100 * timelineZoom, 20); // Minimum 20px width
+        const isCurrentlyDragging = draggingStates.current.get(audio.id) || false;
+        
+        const minHandleWidth = 20;
+        const showHandle = blockWidth < 40; // Show handle for small blocks
+        const handleWidth = Math.min(minHandleWidth, blockWidth * 0.3);
         
         return (
           <div
             key={`audio-block-${audio.id}`}
-            className="absolute top-0 bottom-0 bg-blue-500 rounded transition-all hover:bg-blue-600 cursor-pointer"
-            style={{
-              left: `${leftPosition}px`,
-              width: `${blockWidth}px`,
+            ref={(el) => {
+              if (el && onAudioDelayUpdate) {
+                // Clean up existing draggable if it exists
+                const existingDraggable = draggableRefs.current.get(audio.id);
+                if (existingDraggable) {
+                  existingDraggable.destroy?.();
+                }
+                
+                // Store initial delay and position to calculate offset during drag
+                let initialDelay = audio.delay;
+                let isDragging = false;
+                let dragStartX = 0;
+                
+                // Create new draggable
+                const draggable = createDraggable(el, {
+                  cursor: {
+                    onHover: 'grab',
+                    onGrab: 'grabbing'
+                  },
+                  // Configure for immediate response - no spring effects
+                  y: false, // Disable vertical movement
+                  onGrab: (draggableInstance: any) => {
+                    initialDelay = audio.delay;
+                    dragStartX = draggableInstance.x || 0;
+                    isDragging = true;
+                    draggingStates.current.set(audio.id, true);
+                  },
+                  onDrag: (draggableInstance: any) => {
+                    // Don't update delay during drag to avoid compound movement
+                    // The visual position is handled by the draggable itself
+                  },
+                  onRelease: (draggableInstance: any) => {
+                    isDragging = false;
+                    draggingStates.current.set(audio.id, false);
+                    
+                    // Calculate final delay based on total drag distance
+                    if (onAudioDelayUpdate) {
+                      const currentX = draggableInstance.x || 0;
+                      const dragPixels = currentX - dragStartX;
+                      const timeOffset = dragPixels / (100 * timelineZoom); // Convert px to seconds
+                      const timeOffsetMs = timeOffset * 1000;
+                      // Snap to 0.01s (10ms) increments
+                      const snappedTimeOffsetMs = Math.round(timeOffsetMs / 10) * 10;
+                      const newDelayMs = Math.max(0, initialDelay + snappedTimeOffsetMs);
+                      
+                      // Reset the draggable position immediately before state update
+                      if (draggableInstance.setX) {
+                        draggableInstance.setX(0);
+                      } else if (draggable && draggable.setX) {
+                        draggable.setX(0);
+                      }
+                      
+                      onAudioDelayUpdate(audio.id, newDelayMs);
+                    }
+                  }
+                });
+                
+                draggableRefs.current.set(audio.id, draggable);
+              }
             }}
-            title={`Audio: ${audio.src.split('/').pop()} (${Math.round(audioDuration * 100) / 100}s)`}
-          />
+            className="absolute top-0 bottom-0 bg-blue-500 rounded hover:bg-blue-600 cursor-grab select-none"
+            style={{
+              left: isCurrentlyDragging ? undefined : `${leftPosition}px`,
+              width: `${blockWidth}px`,
+              transition: isCurrentlyDragging ? 'none' : 'left 0.1s ease-out',
+            }}
+            title={`Audio: ${audio.src.split('/').pop()} (${Math.round(audioDuration * 100) / 100}s) - Drag to adjust delay`}
+          >
+            {showHandle && (
+              <div 
+                className="absolute left-0 top-0 bottom-0 bg-blue-600 rounded-l opacity-80 hover:opacity-100"
+                style={{ width: `${handleWidth}px` }}
+                title="Drag handle for small audio blocks"
+              />
+            )}
+          </div>
         );
       })}
     </div>
@@ -58,7 +151,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
  * Audio tracks are automatically grouped into separate timeline lanes when they overlap,
  * ensuring all audio is visible without visual conflicts.
  */
-const AudioTimeline: React.FC<AudioTimelineProps> = ({ audios, timelineZoom }) => {
+const AudioTimeline: React.FC<AudioTimelineProps> = ({ audios, timelineZoom, onAudioDelayUpdate }) => {
   // Don't render anything if there are no audio tracks
   if (!audios || audios.length === 0) {
     return null;
@@ -102,6 +195,7 @@ const AudioTimeline: React.FC<AudioTimelineProps> = ({ audios, timelineZoom }) =
           timeline={timeline}
           timelineZoom={timelineZoom}
           timelineIndex={timelineIndex}
+          onAudioDelayUpdate={onAudioDelayUpdate}
         />
       ))}
     </>

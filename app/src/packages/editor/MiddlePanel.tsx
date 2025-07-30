@@ -386,6 +386,35 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
     }
   };
 
+  const handleAudioDelayUpdate = (audioId: string, newDelay: number) => {
+    const newAudios = [...(compositionData.audios || [])];
+    const audioIndex = newAudios.findIndex(audio => audio.id === audioId);
+    
+    if (audioIndex !== -1) {
+      newAudios[audioIndex] = {
+        ...newAudios[audioIndex],
+        delay: Math.round(Math.max(0, newDelay)) // Round to integer milliseconds and ensure non-negative
+      };
+      
+      const updatedComposition = {
+        ...compositionData,
+        audios: newAudios
+      };
+      
+      if (project) {
+        const updatedProject = {
+          ...project,
+          composition: updatedComposition
+        };
+        updateProject(updatedProject);
+        
+        if (onCompositionUpdate) {
+          onCompositionUpdate(updatedComposition);
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
       if (isDragging) {
@@ -914,7 +943,8 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                     {/* Audio Timelines */}
                     <AudioTimeline 
                       audios={compositionData.audios || []} 
-                      timelineZoom={timelineZoom} 
+                      timelineZoom={timelineZoom}
+                      onAudioDelayUpdate={handleAudioDelayUpdate}
                     />
                   </div>
                 </div>
