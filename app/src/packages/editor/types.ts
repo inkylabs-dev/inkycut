@@ -218,6 +218,8 @@ export interface Project {
  * Audio tracks can be background music, sound effects, or voiceovers
  */
 export interface CompositionAudio {
+  /** Unique identifier for the audio track */
+  id: string;
   /** Source URL for the audio file */
   src: string;
   /** Volume level from 0 (silent) to 1 (full volume) */
