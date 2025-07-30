@@ -434,6 +434,137 @@ Adds a new video element to the currently selected page with customizable positi
 - Error (unknown option): "❌ **Unknown Option** - Unknown option '--xyz'. Use /new-video without arguments to see usage."
 - Error (execution failed): "❌ **Video Creation Failed** - Failed to create video element. Please try again."
 
+### `/new-audio`
+
+Creates a new audio track and adds it to the composition's audio timeline. Supports all CompositionAudio properties including volume, timing, playback controls, and audio effects.
+
+**Usage:** `/new-audio --src|-s url [--volume|-v 0-1] [--trim-before|-b ms] [--trim-after|-a ms] [--playback-rate|-r rate] [--muted|-m] [--loop|-l] [--tone-frequency|-f 0.01-2] [--delay|-d ms] [--duration|-dr ms]`
+
+**Options:**
+- `--src`, `-s`: **Required.** Audio source URL or LocalFile reference
+- `--volume`, `-v`: Audio volume level (0.0 to 1.0, default: 1.0)
+- `--trim-before`, `-b`: Trim audio from beginning in milliseconds (default: 0)
+- `--trim-after`, `-a`: Trim audio from end in milliseconds (default: 0)
+- `--playback-rate`, `-r`: Playback speed multiplier (positive number, default: 1.0)
+- `--muted`, `-m`: Start audio muted (flag, no value needed)
+- `--loop`, `-l`: Enable audio looping (flag, no value needed)
+- `--tone-frequency`, `-f`: Tone/pitch adjustment (0.01 to 2.0, default: 1.0)
+- `--delay`, `-d`: Start delay in milliseconds (default: 0)
+- `--duration`, `-dr`: Audio duration in milliseconds (default: 5000)
+
+**Duration Format Support:**
+- Milliseconds: `5000`, `1500`
+- Seconds: `5s`, `1.5s`, `10s`
+- Minutes: `2m`, `1.5m`
+
+**Behavior:**
+- Creates a new audio track with a unique ID: `audio-{timestamp}-{random}`
+- Adds the track to the composition's audio timeline
+- Audio tracks can overlap with other audio tracks (unlike page elements)
+- Generates unique ID for easy reference in other commands
+- Supports both external URLs and LocalFile references
+
+**Examples:**
+- `/new-audio --src "LocalFile:music.mp3"` - Add local music file with defaults
+- `/new-audio --src "https://example.com/sound.mp3" --volume 0.8 --delay 2s` - Add web audio with volume and delay
+- `/new-audio -s "LocalFile:voice.wav" -v 0.5 -d 1000 -dr 10s -l` - Add looping voice track with 1s delay and 10s duration
+- `/new-audio --src "bgm.mp3" --volume 0.3 --loop --delay 0 --duration 30s` - Add background music loop
+- `/new-audio -s "effect.wav" -m -r 1.5 -f 1.2 -b 500 -a 200` - Add muted effect with pitch shift and trimming
+
+**Response Messages:**
+- Success: "✅ **Audio Track Added** - Added new audio track to composition • ID: {audio_id} • Source: {src} • Volume: {volume} • Delay: {formatted_delay} • Duration: {formatted_duration} • Playback Rate: {rate}x • Muted: {Yes/No} • Loop: {Yes/No}"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (missing src): "❌ **Missing Audio Source** - Audio source is required. Usage: `/new-audio --src 'https://example.com/audio.mp3'` Example: • `/new-audio --src 'LocalFile:music.mp3' --volume 0.8 --delay 1s`"
+- Error (invalid volume): "❌ **Invalid Volume** - Volume must be a number between 0.0 and 1.0. Got '{value}'"
+- Error (invalid duration): "❌ **Invalid Duration** - Duration must be a positive duration. Got '{value}' Supported formats: `5000`, `5s`, `1.5m`"
+- Error (invalid playback rate): "❌ **Invalid Playback Rate** - Playback rate must be a positive number. Got '{value}'"
+- Error (invalid tone frequency): "❌ **Invalid Tone Frequency** - Tone frequency must be between 0.01 and 2. Got '{value}'"
+- Error (unknown option): "❌ **Unknown Option** - Unknown option '{option}'. Use /new-audio without arguments to see usage."
+- Error (execution failed): "❌ **Audio Creation Failed** - Failed to create audio track. Please try again."
+
+### `/set-audio`
+
+Updates properties of an existing audio track by its unique ID. Allows modification of all CompositionAudio properties including volume, timing, playback controls, and audio effects.
+
+**Usage:** `/set-audio --id|-i audio_id [--src|-s url] [--volume|-v 0-1] [--trim-before|-b ms] [--trim-after|-a ms] [--playback-rate|-r rate] [--muted|-m true|false] [--loop|-l true|false] [--tone-frequency|-f 0.01-2] [--delay|-d ms] [--duration|-dr ms]`
+
+**Options:**
+- `--id`, `-i`: **Required.** The unique ID of the audio track to modify
+- `--src`, `-s`: Update audio source URL or LocalFile reference
+- `--volume`, `-v`: Update volume level (0.0 to 1.0)
+- `--trim-before`, `-b`: Update trim from beginning in milliseconds
+- `--trim-after`, `-a`: Update trim from end in milliseconds
+- `--playback-rate`, `-r`: Update playback speed multiplier
+- `--muted`, `-m`: Set muted state (true or false)
+- `--loop`, `-l`: Set looping state (true or false)
+- `--tone-frequency`, `-f`: Update tone/pitch adjustment (0.01 to 2.0)
+- `--delay`, `-d`: Update start delay in milliseconds
+- `--duration`, `-dr`: Update audio duration in milliseconds
+
+**Duration Format Support:**
+- Same as `/new-audio`: milliseconds, seconds (`5s`), or minutes (`2m`)
+
+**Behavior:**
+- Finds audio track by unique ID across the composition
+- Updates only the specified properties, leaving others unchanged
+- Provides detailed feedback about what properties were changed
+- Supports both external URLs and LocalFile references for source updates
+
+**Examples:**
+- `/set-audio --id audio-123456789-abc123 --volume 0.5` - Adjust volume of specific track
+- `/set-audio -i audio-987654321-def456 --delay 3s --duration 15s` - Update timing
+- `/set-audio --id audio-111222333-ghi789 --muted true --loop false` - Change playback state
+- `/set-audio -i audio-444555666-jkl012 --src "LocalFile:new-music.mp3" --volume 0.8` - Replace source and adjust volume
+- `/set-audio --id audio-777888999-mno345 --trim-before 1s --trim-after 500ms --playback-rate 1.2` - Advanced editing
+
+**Response Messages:**
+- Success: "✅ **Audio Track Updated** - Updated audio track '{audio_id}' properties: • {property}: {old_value} → {new_value} • {property}: {old_value} → {new_value}"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (missing params): "❌ **Missing Parameters** - Please specify audio track ID and at least one property to update. Usage: `/set-audio --id audio_id [options]` Example: `/set-audio --id audio-123456789-abc123 --volume 0.5 --delay 2s`"
+- Error (missing ID): "❌ **Missing Audio ID** - Audio track ID is required. Usage: `/set-audio --id audio_id [options]`"
+- Error (no updates): "❌ **No Updates Specified** - Please specify at least one property to update. Available options: --src, --volume, --trim-before, --trim-after, --playback-rate, --muted, --loop, --tone-frequency, --delay, --duration"
+- Error (no tracks): "❌ **No Audio Tracks** - No audio tracks found in the composition. Use `/new-audio` to create one first."
+- Error (track not found): "❌ **Audio Track Not Found** - Audio track with ID '{id}' not found. Use `/list-audio` to see available audio tracks."
+- Error (invalid values): Same validation errors as `/new-audio` for respective properties
+- Error (execution failed): "❌ **Audio Update Failed** - Failed to update audio track. Please try again."
+
+### `/del-audio`
+
+Deletes an audio track from the composition by its unique ID. This is a destructive operation that requires confirmation unless bypassed with the `--yes` flag.
+
+**Usage:** `/del-audio --id|-i audio_id [--yes|-y]`
+
+**Options:**
+- `--id`, `-i`: **Required.** The unique ID of the audio track to delete
+- `--yes`, `-y`: Skip confirmation dialog and delete immediately
+
+**Behavior:**
+- Finds and removes audio track by unique ID from the composition
+- Requires user confirmation before deletion unless `--yes` flag is used
+- Permanently removes the audio track - cannot be undone
+- Provides detailed feedback about the deleted track
+
+**Examples:**
+- `/del-audio --id audio-123456789-abc123` - Delete audio track with confirmation
+- `/del-audio -i audio-987654321-def456 --yes` - Delete immediately without confirmation
+- `/del-audio --id audio-111222333-ghi789 -y` - Delete with short confirmation bypass
+
+**Finding Audio Track IDs:**
+- Audio IDs are shown when creating tracks with `/new-audio`
+- Use `/list-audio` command (if available) to see all audio tracks
+- Audio IDs follow the format: `audio-{timestamp}-{random}`
+- Example: `audio-1640995200000-abc123def`
+
+**Response Messages:**
+- Success: "✅ **Audio Track Deleted** - Deleted audio track '{audio_id}': • Source: {src} • Volume: {volume} • Duration: {duration}ms"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (missing ID): "❌ **Missing Audio ID** - Audio track ID is required. Usage: `/del-audio --id audio_id` Example: `/del-audio --id audio-123456789-abc123 --yes` (skip confirmation)"
+- Error (no tracks): "❌ **No Audio Tracks** - No audio tracks found in the composition."
+- Error (track not found): "❌ **Audio Track Not Found** - Audio track with ID '{id}' not found. Use `/list-audio` to see available audio tracks."
+- Error (missing value): "❌ **Missing Value** - Option `--id` requires a value. Example: `--id audio-123456789-abc123`"
+- Error (unknown option): "❌ **Unknown Option** - Unknown option '{option}'. Usage: /del-audio --id audio_id [--yes]"
+- Error (execution failed): "❌ **Audio Deletion Failed** - Failed to delete audio track. Please try again."
+
 ### `/del-elem`
 
 Deletes an element from the composition by its unique ID, or deletes the currently selected element if no ID is provided. This is a destructive operation that requires confirmation.
