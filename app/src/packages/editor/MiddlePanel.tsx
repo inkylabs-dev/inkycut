@@ -242,23 +242,6 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
     };
   }, [handlePlay]);
 
-  const handleStop = useCallback(() => {
-    if (!playerRef.current || !playerReady) {
-      console.warn('Player not ready');
-      return;
-    }
-
-    try {
-      playerRef.current.pause();
-      playerRef.current.seekTo(0);
-      setCurrentFrame(0);
-      setIsPlaying(false);
-      stopFrameTracking();
-    } catch (error) {
-      console.error('Error stopping:', error);
-    }
-  }, [playerReady, stopFrameTracking]);
-
   const handleSeek = useCallback((frame: number) => {
     if (!playerRef.current || !playerReady) {
       console.warn('Player not ready');
