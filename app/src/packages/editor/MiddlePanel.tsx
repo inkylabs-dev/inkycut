@@ -8,7 +8,7 @@ import {
   CodeBracketIcon,
   VideoCameraIcon
 } from '@heroicons/react/24/outline';
-import { CompositionData, defaultCompositionData } from './types';
+import { CompositionData, CompositionAudio, defaultCompositionData } from './types';
 import { MainComposition } from './Composition';
 import { projectAtom, ensureCompositionIDs, filesAtom, appStateAtom, updateProjectAtom } from './atoms';
 import { createDraggable } from 'animejs';
@@ -909,6 +909,66 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                         return elements;
                       })()}
                     </div>
+
+                    {/* Audio Timelines */}
+                    {compositionData.audios && compositionData.audios.length > 0 && (() => {
+                      // Group audios into non-overlapping timelines
+                      const audioTimelines: CompositionAudio[][] = [];
+                      const sortedAudios = [...compositionData.audios].sort((a, b) => a.delay - b.delay);
+                      
+                      for (const audio of sortedAudios) {
+                        const audioStart = audio.delay;
+                        const audioEnd = audio.delay + audio.duration;
+                        
+                        // Find a timeline where this audio doesn't overlap
+                        let placedInTimeline = false;
+                        for (const timeline of audioTimelines) {
+                          const canFitInTimeline = timeline.every(existingAudio => {
+                            const existingStart = existingAudio.delay;
+                            const existingEnd = existingAudio.delay + existingAudio.duration;
+                            return audioEnd <= existingStart || audioStart >= existingEnd;
+                          });
+                          
+                          if (canFitInTimeline) {
+                            timeline.push(audio);
+                            placedInTimeline = true;
+                            break;
+                          }
+                        }
+                        
+                        // If couldn't fit in any existing timeline, create a new one
+                        if (!placedInTimeline) {
+                          audioTimelines.push([audio]);
+                        }
+                      }
+                      
+                      return audioTimelines.map((timeline, timelineIndex) => (
+                        <div 
+                          key={`audio-timeline-${timelineIndex}`}
+                          className="audio-timeline relative bg-gray-300 dark:bg-gray-600 rounded mt-1" 
+                          style={{ height: '12px', width: '100%' }}
+                        >
+                          {timeline.map(audio => {
+                            const audioStart = audio.delay / 1000; // Convert to seconds
+                            const audioDuration = audio.duration / 1000; // Convert to seconds
+                            const leftPosition = audioStart * 100 * timelineZoom; // Position in pixels
+                            const blockWidth = Math.max(audioDuration * 100 * timelineZoom, 20); // Minimum 20px width
+                            
+                            return (
+                              <div
+                                key={`audio-block-${audio.id}`}
+                                className="absolute top-0 bottom-0 bg-blue-500 rounded transition-all hover:bg-blue-600 cursor-pointer"
+                                style={{
+                                  left: `${leftPosition}px`,
+                                  width: `${blockWidth}px`,
+                                }}
+                                title={`Audio: ${audio.src.split('/').pop()} (${Math.round(audioDuration * 100) / 100}s)`}
+                              />
+                            );
+                          })}
+                        </div>
+                      ));
+                    })()}
                   </div>
                 </div>
               </div>
