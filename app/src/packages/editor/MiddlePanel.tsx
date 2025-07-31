@@ -941,20 +941,32 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                     {/* Global Playhead - overlays all timeline sections */}
                     <div
                       ref={playheadRef}
-                      className="absolute top-0 w-0.5 bg-red-500 z-50 transition-all duration-100 pointer-events-none"
+                      className="absolute w-0.5 bg-red-500 z-50 transition-all duration-100 pointer-events-none"
                       style={{ 
                         left: `${totalFrames > 0 ? (currentFrame / totalFrames) * getActualTimelineWidth() : 0}px`,
-                        height: 'calc(100% - 0px)', // Extends through entire timeline height
+                        top: '14px', // Start below the triangle handle
+                        height: 'calc(100% - 14px)', // Extends through entire timeline height minus triangle space
                         boxShadow: '0 0 4px rgba(239, 68, 68, 0.5)' // Add subtle glow
                       }}
                     >
-                      {/* Playhead handle - only at the top for interaction */}
+                      {/* Playhead handle - upside-down triangle at the top */}
                       <div 
-                        className={`absolute -top-1 -left-1 w-2 h-2 bg-red-500 rounded-full hover:scale-125 transition-transform pointer-events-auto ${
-                          isDragging ? 'cursor-grabbing scale-125' : 'cursor-grab'
+                        className={`absolute pointer-events-auto ${
+                          isDragging ? 'cursor-grabbing' : 'cursor-grab'
                         }`}
                         onMouseDown={handlePlayheadMouseDown}
-                        style={{ boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)' }}
+                        style={{ 
+                          left: '-6px', // Center the triangle over the line
+                          top: '-14px', // Position above the line
+                          width: '0',
+                          height: '0',
+                          borderLeft: '6px solid transparent',
+                          borderRight: '6px solid transparent',
+                          borderTop: '12px solid #ef4444', // Red-500 color
+                          filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
+                          transform: isDragging ? 'scale(1.2)' : 'scale(1)',
+                          transition: 'transform 0.1s ease',
+                        }}
                       />
                     </div>
                   </div>
