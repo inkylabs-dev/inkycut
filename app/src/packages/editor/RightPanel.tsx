@@ -7,7 +7,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Markdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { 
   PaperAirplaneIcon,
   UserIcon,
@@ -17,7 +17,7 @@ import {
   ChevronDownIcon,
   BoltIcon
 } from '@heroicons/react/24/outline';
-import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom, chatModeAtom, agentSettingsAtom, type ChatMode } from './atoms';
+import { chatMessagesAtom, projectAtom, updateProjectAtom, addChatMessageAtom, chatModeAtom, agentSettingsAtom, userMessageQueueAtom, consumeUserMessageFromQueueAtom, type ChatMode } from './atoms';
 import { clientAI, StreamingResponse } from './utils/clientAI';
 import { parseSlashCommand, executeSlashCommand, matchSlashCommands, type SlashCommandContext } from './utils/clientSlashCommands';
 // import { processVideoAIPrompt } from 'wasp/client/operations';
@@ -118,6 +118,102 @@ export default function RightPanel({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isDropdownOpen, showAutocomplete]);
+
+  // Shared function to process slash commands
+  const processSlashCommand = async (userMessage: string, addUserMessage: boolean = true) => {
+    const slashCommand = parseSlashCommand(userMessage);
+    
+    if (!slashCommand.isCommand || !slashCommand.commandName) {
+      return false; // Not a slash command
+    }
+
+    try {
+      const context: SlashCommandContext = {
+        project,
+        updateProject: setUpdateProject,
+        addMessage: (content: string) => {
+          setAddChatMessage({
+            id: Date.now(),
+            role: 'assistant',
+            content,
+            timestamp: new Date().toISOString()
+          });
+        },
+        clearAllFiles,
+        setChatMessages,
+        setSelectedPage,
+        setSelectedElement,
+        setIsSharedProject,
+        setShowImportDialog,
+        setShowExportDialog,
+        setExportFormat,
+        fileStorage,
+        setShowShareDialog,
+        onShare
+      };
+
+      // Add user message to chat if requested
+      if (addUserMessage) {
+        setAddChatMessage({
+          id: Date.now(),
+          role: 'user',
+          content: userMessage,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      const result = await executeSlashCommand(
+        slashCommand.commandName, 
+        slashCommand.args || [], 
+        context
+      );
+      
+      // Add command result to chat if there's a message
+      if (result.message.trim()) {
+        setAddChatMessage({
+          id: Date.now(),
+          role: 'assistant',
+          content: result.message,
+          timestamp: new Date().toISOString()
+        });
+      }
+      
+      return true; // Successfully processed slash command
+    } catch (error) {
+      console.error('Slash command error:', error);
+      setAddChatMessage({
+        id: Date.now(),
+        role: 'assistant',
+        content: `❌ **Command Error**\n\nAn error occurred while executing the command: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        timestamp: new Date().toISOString()
+      });
+      return true; // Still processed as slash command (even if failed)
+    }
+  };
+
+  // Process message queue - consume messages from other components
+  const consumeMessage = useSetAtom(consumeUserMessageFromQueueAtom);
+  useEffect(() => {
+    const processQueue = async () => {
+      const nextMessage = consumeMessage();
+      if (nextMessage) {
+        // Add user message first, then process as slash command
+        setAddChatMessage({
+          id: Date.now(),
+          role: 'user',
+          content: nextMessage,
+          timestamp: new Date().toISOString()
+        });
+
+        // Process the message using the shared slash command handler
+        await processSlashCommand(nextMessage, false); // Don't add user message again
+      }
+    };
+
+    // Check for queued messages periodically
+    const interval = setInterval(processQueue, 100);
+    return () => clearInterval(interval);
+  }, [consumeMessage, processSlashCommand]);
 
   // Handle input changes and autocomplete
   const handleInputChange = (value: string) => {
@@ -303,92 +399,23 @@ export default function RightPanel({
       setIsTyping(true);
       const userMessage = inputMessage.trim();
       
-      // Check if this is a slash command
-      const slashCommand = parseSlashCommand(userMessage);
+      // Clear input and focus textarea
+      setInputMessage('');
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 0);
       
-      if (slashCommand.isCommand && slashCommand.commandName) {
-        // Handle slash command locally - don't send to parent or AI
-        setInputMessage('');
-        
-        // Focus the textarea after clearing the input
-        setTimeout(() => {
-          textareaRef.current?.focus();
-        }, 0);
-        
-        try {
-          const context: SlashCommandContext = {
-            project,
-            updateProject: (updatedProject: any) => setUpdateProject(updatedProject),
-            addMessage: (content: string) => {
-              setAddChatMessage({
-                id: Date.now(),
-                role: 'assistant',
-                content,
-                timestamp: new Date().toISOString()
-              });
-            },
-            clearAllFiles,
-            setChatMessages,
-            setSelectedPage,
-            setSelectedElement,
-            setIsSharedProject,
-            setShowImportDialog,
-            setShowExportDialog,
-            setExportFormat,
-            fileStorage,
-            setShowShareDialog,
-            onShare
-          };
-          
-          // Add user command to chat
-          setAddChatMessage({
-            id: Date.now(),
-            role: 'user',
-            content: userMessage,
-            timestamp: new Date().toISOString()
-          });
-          
-          // Execute the slash command
-          const result = await executeSlashCommand(
-            slashCommand.commandName, 
-            slashCommand.args || [], 
-            context
-          );
-          
-          // Add command result to chat (only if there's a message)
-          if (result.message.trim()) {
-            setAddChatMessage({
-              id: Date.now(),
-              role: 'assistant',
-              content: result.message,
-              timestamp: new Date().toISOString()
-            });
-          }
-          
-        } catch (error) {
-          console.error('Slash command error:', error);
-          setAddChatMessage({
-            id: Date.now(),
-            role: 'assistant',
-            content: `❌ **Command Error**\n\nAn error occurred while executing the command: ${error instanceof Error ? error.message : 'Unknown error'}`,
-            timestamp: new Date().toISOString()
-          });
-        } finally {
-          setIsTyping(false);
-        }
-        
+      // Try to process as slash command first
+      const wasSlashCommand = await processSlashCommand(userMessage, true);
+      
+      if (wasSlashCommand) {
+        setIsTyping(false);
         return; // Exit early for slash commands
       }
       
       // Pass the message to the parent component to add the USER message
       // The parent component handles adding the user message to the chat
       onSendMessage(userMessage, chatMode);
-      setInputMessage('');
-      
-      // Focus the textarea after clearing the input
-      setTimeout(() => {
-        textareaRef.current?.focus();
-      }, 0);
       
       // Only process with AI if we have a project
       if (project?.id) {

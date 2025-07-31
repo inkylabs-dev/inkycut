@@ -501,6 +501,40 @@ export const setChatMessagesAtom = atom(
 );
 
 /**
+ * Queue for user messages to be processed by RightPanel
+ * This allows components to send messages that will be processed as if typed in chat
+ */
+export const userMessageQueueAtom = atom<string[]>([]);
+
+/**
+ * Write-only atom for adding a user message to the queue
+ * RightPanel will consume these messages and process them naturally
+ */
+export const addUserMessageToQueueAtom = atom(
+  null,
+  (get, set, message: string) => {
+    const currentQueue = get(userMessageQueueAtom);
+    set(userMessageQueueAtom, [...currentQueue, message]);
+  }
+);
+
+/**
+ * Write-only atom for consuming (removing) the next message from the queue
+ * Returns the next message and removes it from the queue
+ */
+export const consumeUserMessageFromQueueAtom = atom(
+  null,  
+  (get, set): string | null => {
+    const currentQueue = get(userMessageQueueAtom);
+    if (currentQueue.length === 0) return null;
+    
+    const [nextMessage, ...remainingQueue] = currentQueue;
+    set(userMessageQueueAtom, remainingQueue);
+    return nextMessage;
+  }
+);
+
+/**
  * Base atom for tracking file refresh trigger
  * Used to invalidate the files cache when files change
  */

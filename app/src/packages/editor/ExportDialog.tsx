@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import Markdown from 'react-markdown';
 import { XMarkIcon, DocumentArrowDownIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
-import { projectAtom, fileStorageAtom } from './atoms';
+import { addUserMessageToQueueAtom } from './atoms';
 
 interface ExportDialogProps {
   isOpen: boolean;
@@ -13,11 +13,14 @@ interface ExportDialogProps {
 
 type ExportFormat = 'json' | 'mp4' | 'webm';
 
-export default function ExportDialog({ isOpen, onClose, initialFormat = 'json', onFormatChange }: ExportDialogProps) {
+export default function ExportDialog({ 
+  isOpen, 
+  onClose, 
+  initialFormat = 'json', 
+  onFormatChange
+}: ExportDialogProps) {
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>(initialFormat);
-  const [isExporting, setIsExporting] = useState(false);
-  const [project] = useAtom(projectAtom);
-  const [fileStorage] = useAtom(fileStorageAtom);
+  const addMessageToQueue = useSetAtom(addUserMessageToQueueAtom);
 
   // Sync with external format state
   useEffect(() => {
@@ -33,87 +36,13 @@ export default function ExportDialog({ isOpen, onClose, initialFormat = 'json', 
 
   const handleExport = () => {
     if (selectedFormat === 'json') {
-      handleJSONExport();
+      // Add the export command to the message queue
+      // RightPanel will process it naturally as if the user typed it
+      addMessageToQueue('/export --yes --format json');
+      onClose();
     } else {
       // Show coming soon message for video formats
       alert(`${selectedFormat.toUpperCase()} export is coming soon! Currently, you can run:\n\nnpx @inkycut/render /path/to/project.json\n\nto generate the video.`);
-    }
-  };
-
-  const handleJSONExport = async () => {
-    if (!project) {
-      alert('No project to export');
-      return;
-    }
-
-    setIsExporting(true);
-
-    try {
-      // Get files from current storage to include in export
-      const filesFromStorage = await fileStorage.getAllFiles();
-      
-      // Ensure the project has all required fields before export
-      const completeProject = {
-        ...project,
-        // Ensure required fields are present
-        id: project.id || `project-${Date.now()}`,
-        name: project.name || 'Untitled Project',
-        createdAt: project.createdAt || new Date().toISOString(),
-        updatedAt: project.updatedAt || new Date().toISOString(),
-        propertiesEnabled: project.propertiesEnabled ?? true,
-        // Ensure composition has all required fields
-        composition: project.composition ? {
-          pages: project.composition.pages || [],
-          fps: project.composition.fps || 30,
-          width: project.composition.width || 1920,
-          height: project.composition.height || 1080
-        } : {
-          pages: [],
-          fps: 30,
-          width: 1920,
-          height: 1080
-        },
-        // Ensure appState exists
-        appState: project.appState || {
-          selectedElementId: null,
-          selectedPageId: null,
-          viewMode: 'edit' as const,
-          zoomLevel: 1,
-          showGrid: false,
-          isLoading: false,
-          error: null,
-          history: { past: [], future: [] }
-        },
-        // Include files from IndexedDB in the exported JSON
-        files: filesFromStorage,
-        // Preserve metadata
-        metadata: project.metadata || {}
-      };
-
-      // Create JSON blob
-      const jsonData = JSON.stringify(completeProject, null, 2);
-      const blob = new Blob([jsonData], { type: 'application/json' });
-      
-      // Create download link
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${completeProject.name}.json`;
-      
-      // Trigger download
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // Cleanup
-      URL.revokeObjectURL(url);
-      
-      onClose();
-    } catch (error) {
-      console.error('Export failed:', error);
-      alert('Failed to export project');
-    } finally {
-      setIsExporting(false);
     }
   };
 
@@ -238,10 +167,9 @@ For now, you can follow the below instruction to render a video:
           </button>
           <button
             onClick={handleExport}
-            disabled={isExporting}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
           >
-            {isExporting ? 'Exporting...' : 'Export'}
+            Export
           </button>
         </div>
       </div>
