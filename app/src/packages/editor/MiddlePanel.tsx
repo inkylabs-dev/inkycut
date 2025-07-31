@@ -765,7 +765,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                 {/* Scrollable Timeline Container */}
                 <div 
                   ref={timelineContainerRef}
-                  className="overflow-x-auto overflow-y-hidden"
+                  className="overflow-x-auto overflow-y-hidden relative"
                   style={{ maxWidth: '100%' }}
                 >
                   <div style={{ width: `${Math.max(compositionData.pages.reduce((sum, p) => sum + Math.max((p.duration / 1000) * 100 * timelineZoom, 80), 0), 800)}px` }}>
@@ -802,24 +802,10 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                         }
                         return markers;
                       })()}
-                      
-                      {/* Playhead */}
-                      <div
-                        ref={playheadRef}
-                        className="absolute top-0 w-0.5 h-full bg-red-500 z-10 transition-all duration-100"
-                        style={{ left: `${totalFrames > 0 ? (currentFrame / totalFrames) * totalDuration * 100 * timelineZoom : 0}px` }}
-                      >
-                        <div 
-                          className={`absolute -top-1 -left-1 w-2 h-2 bg-red-500 rounded-full hover:scale-125 transition-transform ${
-                            isDragging ? 'cursor-grabbing scale-125' : 'cursor-grab'
-                          }`}
-                          onMouseDown={handlePlayheadMouseDown}
-                        />
-                      </div>
                     </div>
 
                     {/* Pages Track */}
-                    <div className="pages-track relative h-12 bg-gray-200 dark:bg-gray-700 rounded" style={{ width: '100%' }}>
+                    <div className="pages-track relative h-12 bg-gray-200 dark:bg-gray-700 rounded mb-2" style={{ width: '100%' }}>
                       {(() => {
                         let cumulativePosition = 0;
                         const currentPageIndex = getCurrentPage().pageIndex;
@@ -941,6 +927,26 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                       onAudioDelayChange={handleAudioDelayChange}
                       files={files}
                     />
+
+                    {/* Global Playhead - overlays all timeline sections */}
+                    <div
+                      ref={playheadRef}
+                      className="absolute top-0 w-0.5 bg-red-500 z-50 transition-all duration-100 pointer-events-none"
+                      style={{ 
+                        left: `${totalFrames > 0 ? (currentFrame / totalFrames) * totalDuration * 100 * timelineZoom : 0}px`,
+                        height: 'calc(100% - 0px)', // Extends through entire timeline height
+                        boxShadow: '0 0 4px rgba(239, 68, 68, 0.5)' // Add subtle glow
+                      }}
+                    >
+                      {/* Playhead handle - only at the top for interaction */}
+                      <div 
+                        className={`absolute -top-1 -left-1 w-2 h-2 bg-red-500 rounded-full hover:scale-125 transition-transform pointer-events-auto ${
+                          isDragging ? 'cursor-grabbing scale-125' : 'cursor-grab'
+                        }`}
+                        onMouseDown={handlePlayheadMouseDown}
+                        style={{ boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)' }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
