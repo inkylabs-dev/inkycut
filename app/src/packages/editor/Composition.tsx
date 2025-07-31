@@ -10,6 +10,7 @@
 // Basic composition component
 import React, { useRef } from 'react';
 import { AbsoluteFill, useCurrentFrame, Img, Video, Sequence, Audio } from 'remotion';
+import { Gif } from '@remotion/gif';
 import { CompositionData, CompositionElement, ElementRendererProps, LocalFile } from './types';
 import { Layer } from './Layer';
 import { FileResolver, createFileResolver } from './utils/fileResolver';
@@ -139,11 +140,20 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
     case 'image':
       return resolvedSrc ? (
         <div ref={elementRef} style={style} id={scopeRef}>
-          <Img
-            id={elementWithId.id}
-            src={resolvedSrc}
-            style={{ width: '100%', height: '100%' }}
-          />
+          {resolvedSrc.toLowerCase().endsWith('.gif') ? (
+            <Gif
+              id={elementWithId.id}
+              src={resolvedSrc}
+              playbackRate={1}
+              style={{ width: '100%', height: '100%' }}
+            />
+          ) : (
+            <Img
+              id={elementWithId.id}
+              src={resolvedSrc}
+              style={{ width: '100%', height: '100%' }}
+            />
+          )}
         </div>
       ) : null;
 
