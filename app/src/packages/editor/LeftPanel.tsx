@@ -540,13 +540,10 @@ export default function LeftPanel({
       />
 
       {/* Share Dialog */}
-      {onShare && (
-        <ShareDialog
-          isOpen={showShareDialog}
-          onClose={() => setShowShareDialog(false)}
-          onShare={onShare}
-        />
-      )}
+      <ShareDialog
+        isOpen={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+      />
     </div>
   );
 }

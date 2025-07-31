@@ -260,13 +260,6 @@ export interface ChatMessage {
 export interface ShareDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onShare: (args: { encryptedData: string; projectName: string }) => Promise<{ shareId: string }>;
-}
-
-export interface ShareState {
-  status: 'initial' | 'generating' | 'success' | 'error';
-  shareableLink: string;
-  error: string | null;
 }
 
 /**
