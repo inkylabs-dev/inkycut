@@ -35,12 +35,14 @@ async function performJSONExport(project: any, fileStorage: any): Promise<void> 
         pages: project.composition.pages || [],
         fps: project.composition.fps || 30,
         width: project.composition.width || 1920,
-        height: project.composition.height || 1080
+        height: project.composition.height || 1080,
+        audios: project.composition.audios || []
       } : {
         pages: [],
         fps: 30,
         width: 1920,
-        height: 1080
+        height: 1080,
+        audios: []
       },
       // Ensure appState exists
       appState: project.appState || {
