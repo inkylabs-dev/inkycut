@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import { createDraggable } from 'animejs';
 import { CompositionAudio } from './types';
 
 interface AudioTimelineProps {
@@ -25,8 +26,59 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
   timelineZoom, 
   timelineIndex 
 }) => {
+  const timelineRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!timelineRef.current) return;
+
+    let draggables: any[] = [];
+
+    // Wait for DOM to be ready, then create draggable for audio blocks in this specific timeline
+    const timeoutId = setTimeout(() => {
+      if (timelineRef.current) {
+        const audioBlocks = timelineRef.current.querySelectorAll('.audio-block');
+        
+        if (audioBlocks.length > 0) {
+          console.debug(`Creating draggables for ${audioBlocks.length} audio blocks in timeline ${timelineIndex}`);
+          
+          // Create draggable for each audio block in this timeline group
+          draggables = Array.from(audioBlocks).map((block, index) => {
+            console.debug(`Setting up draggable for block ${index}:`, block);
+            const draggable = createDraggable(block, {
+              y: false, // Disable vertical movement
+              onDrag: (instance: any) => {
+                console.debug('Dragging:', instance.x, instance.y);
+              },
+              onGrab: () => {
+                console.debug('Grabbed audio block');
+              },
+              onRelease: () => {
+                console.debug('Released audio block');
+              }
+            });
+            console.debug('Created draggable:', draggable);
+            return draggable;
+          });
+        }
+      }
+    }, 0);
+
+    // Cleanup function
+    return () => {
+      clearTimeout(timeoutId);
+      
+      // Disable all draggables
+      draggables.forEach(draggable => {
+        if (draggable && typeof draggable.disable === 'function') {
+          draggable.disable();
+        }
+      });
+    };
+  }, [timeline, timelineZoom, timelineIndex]);
+
   return (
     <div 
+      ref={timelineRef}
       key={`audio-timeline-${timelineIndex}`}
       className="audio-timeline relative bg-gray-300 dark:bg-gray-600 rounded mt-1" 
       style={{ height: '12px', width: '100%' }}
@@ -40,7 +92,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
         return (
           <div
             key={`audio-block-${audio.id}`}
-            className="absolute top-0 bottom-0 bg-blue-500 rounded transition-all hover:bg-blue-600 cursor-pointer"
+            className="audio-block absolute top-0 bottom-0 bg-blue-500 rounded transition-colors hover:bg-blue-600 cursor-move"
             style={{
               left: `${leftPosition}px`,
               width: `${blockWidth}px`,
