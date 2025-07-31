@@ -290,10 +290,10 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   const handleTimelineClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
-    const scrollLeft = timelineContainerRef.current?.scrollLeft || 0;
-    const adjustedClickX = clickX + scrollLeft;
-    const scaledTimelineWidth = totalDuration * 100 * timelineZoom; // 100px per second
-    const relativePosition = adjustedClickX / scaledTimelineWidth;
+    
+    // Use the actual timeline width calculation
+    const actualTimelineWidth = getActualTimelineWidth();
+    const relativePosition = Math.max(0, Math.min(1, clickX / actualTimelineWidth));
     
     const targetFrame = Math.floor(relativePosition * totalFrames);
     handleSeek(targetFrame);
@@ -310,6 +310,14 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   const [timelineZoom, setTimelineZoom] = useState(appState.zoomLevel || 1);
   const timelineContainerRef = useRef<HTMLDivElement>(null);
   const playheadRef = useRef<HTMLDivElement>(null);
+
+  // Helper function to calculate the actual timeline width (matches the rendered timeline width)
+  const getActualTimelineWidth = useCallback(() => {
+    return Math.max(
+      compositionData.pages.reduce((sum, p) => sum + Math.max((p.duration / 1000) * 100 * timelineZoom, 80), 0), 
+      800
+    );
+  }, [compositionData.pages, timelineZoom]);
 
   const handlePlayheadMouseDown = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -429,8 +437,10 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
         const mouseX = event.clientX - rect.left;
         const scrollLeft = timelineContainerRef.current?.scrollLeft || 0;
         const adjustedMouseX = mouseX + scrollLeft;
-        const scaledTimelineWidth = totalDuration * 100 * timelineZoom;
-        const relativePosition = Math.max(0, Math.min(1, adjustedMouseX / scaledTimelineWidth));
+        
+        // Use the actual timeline width calculation
+        const actualTimelineWidth = getActualTimelineWidth();
+        const relativePosition = Math.max(0, Math.min(1, adjustedMouseX / actualTimelineWidth));
         
         const targetFrame = Math.floor(relativePosition * totalFrames);
         handleSeek(targetFrame);
@@ -768,7 +778,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                   className="overflow-x-auto overflow-y-hidden relative"
                   style={{ maxWidth: '100%' }}
                 >
-                  <div style={{ width: `${Math.max(compositionData.pages.reduce((sum, p) => sum + Math.max((p.duration / 1000) * 100 * timelineZoom, 80), 0), 800)}px` }}>
+                  <div style={{ width: `${getActualTimelineWidth()}px` }}>
                     {/* Time ruler */}
                     <div 
                       className="relative h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2 cursor-pointer timeline-ruler"
@@ -933,7 +943,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                       ref={playheadRef}
                       className="absolute top-0 w-0.5 bg-red-500 z-50 transition-all duration-100 pointer-events-none"
                       style={{ 
-                        left: `${totalFrames > 0 ? (currentFrame / totalFrames) * totalDuration * 100 * timelineZoom : 0}px`,
+                        left: `${totalFrames > 0 ? (currentFrame / totalFrames) * getActualTimelineWidth() : 0}px`,
                         height: 'calc(100% - 0px)', // Extends through entire timeline height
                         boxShadow: '0 0 4px rgba(239, 68, 68, 0.5)' // Add subtle glow
                       }}
