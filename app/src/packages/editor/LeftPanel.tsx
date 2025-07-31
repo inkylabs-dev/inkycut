@@ -447,7 +447,6 @@ export default function LeftPanel({
                     <FileListItem
                       key={file.id}
                       file={file}
-                      onElementUpdate={onElementUpdate}
                     />
                   ))
                 ) : (
