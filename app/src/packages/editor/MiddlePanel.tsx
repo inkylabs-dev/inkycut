@@ -479,7 +479,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
       }
     };
 
-    const handleMouseUp = (event: MouseEvent) => {
+    const handleMouseUp = () => {
       if (isPageDragging && draggedPageIndex !== null) {
         // Use the current drop indicator index for final placement
         if (dropIndicatorIndex !== null) {
@@ -517,15 +517,6 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
         }
       };
       updateProject(updatedProject);
-    }
-  };
-
-  const setTimelineZoomLevel = (zoomPercent: string) => {
-    const percent = parseFloat(zoomPercent.replace('%', ''));
-    if (!isNaN(percent) && percent > 0) {
-      const newZoom = percent / 100;
-      setTimelineZoom(newZoom);
-      updateZoomInAppState(newZoom);
     }
   };
 
@@ -948,6 +939,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                       audios={compositionData.audios || []} 
                       timelineZoom={timelineZoom}
                       onAudioDelayChange={handleAudioDelayChange}
+                      files={files}
                     />
                   </div>
                 </div>

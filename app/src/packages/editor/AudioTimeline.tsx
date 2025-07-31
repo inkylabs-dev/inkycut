@@ -1,6 +1,8 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { createDraggable } from 'animejs';
-import { CompositionAudio } from './types';
+import { AudioVisualizer } from 'react-audio-visualize';
+import { CompositionAudio, LocalFile } from './types';
+import { createMediaResolver } from './utils/mediaResolver';
 
 interface AudioTimelineProps {
   /** Array of audio tracks to display */
@@ -9,6 +11,8 @@ interface AudioTimelineProps {
   timelineZoom: number;
   /** Callback to update audio delay when dragged */
   onAudioDelayChange?: (audioId: string, newDelay: number) => void;
+  /** Project files for media resolution */
+  files?: LocalFile[];
 }
 
 interface AudioTimelineGroupProps {
@@ -20,7 +24,89 @@ interface AudioTimelineGroupProps {
   timelineIndex: number;
   /** Callback to update audio delay when dragged */
   onAudioDelayChange?: (audioId: string, newDelay: number) => void;
+  /** Project files for media resolution */
+  files?: LocalFile[];
 }
+
+interface AudioBlockProps {
+  audio: CompositionAudio;
+  leftPosition: number;
+  blockWidth: number;
+  audioDuration: number;
+  files?: LocalFile[];
+}
+
+/**
+ * AudioBlock renders an individual audio block with waveform visualization
+ */
+const AudioBlock: React.FC<AudioBlockProps> = ({ audio, leftPosition, blockWidth, audioDuration, files }) => {
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Create media resolver for audio source resolution
+  const mediaResolver = useMemo(() => {
+    return files ? createMediaResolver(files) : null;
+  }, [files]);
+
+  useEffect(() => {
+    // Load audio file for waveform visualization
+    const loadAudioFile = async () => {
+      if (!mediaResolver) {
+        console.warn('No media resolver available for audio:', audio.src);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const blob = await mediaResolver.getAudioBlob(audio.src);
+        setAudioBlob(blob);
+      } catch (error) {
+        console.warn('Failed to load audio for waveform:', error);
+        setAudioBlob(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAudioFile();
+  }, [audio.src, mediaResolver]);
+
+  return (
+    <div
+      key={`audio-block-${audio.id}`}
+      className="audio-block absolute top-0 bg-blue-500 rounded transition-colors hover:bg-blue-600 cursor-move overflow-hidden"
+      style={{
+        left: `${leftPosition}px`,
+        width: `${blockWidth}px`,
+        height: '13px',
+      }}
+      title={`Audio: ${audio.src.split('/').pop()} (${Math.round(audioDuration * 100) / 100}s)`}
+    >
+      {audioBlob && !isLoading ? (
+        <div className="w-full h-full relative">
+          <AudioVisualizer
+            blob={audioBlob}
+            width={blockWidth}
+            height={13}
+            barWidth={2}
+            gap={1}
+            barColor="#ffffff"
+            backgroundColor="transparent"
+            barPlayedColor="#ffffff"
+          />
+        </div>
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          {isLoading ? (
+            <div className="text-white text-xs">Loading...</div>
+          ) : (
+            <div className="text-white text-xs">Audio</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 /**
  * AudioTimelineGroup renders a single timeline lane with non-overlapping audio blocks
@@ -29,7 +115,8 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
   timeline, 
   timelineZoom, 
   timelineIndex,
-  onAudioDelayChange
+  onAudioDelayChange,
+  files
 }) => {
   const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -51,7 +138,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
             
             const draggable = createDraggable(block, {
               y: false, // Disable vertical movement
-              onDrag: (instance: any) => {
+              onDrag: () => {
                 // Dragging in progress
               },
               onGrab: () => {
@@ -102,7 +189,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
       ref={timelineRef}
       key={`audio-timeline-${timelineIndex}`}
       className="audio-timeline relative bg-gray-300 dark:bg-gray-600 rounded mt-1" 
-      style={{ height: '12px', width: '100%' }}
+      style={{ height: '13px', width: '100%' }}
     >
       {timeline.map(audio => {
         const audioStart = audio.delay / 1000; // Convert to seconds
@@ -111,14 +198,13 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
         const blockWidth = Math.max(audioDuration * 100 * timelineZoom, 20); // Minimum 20px width
         
         return (
-          <div
+          <AudioBlock
             key={`audio-block-${audio.id}`}
-            className="audio-block absolute top-0 bottom-0 bg-blue-500 rounded transition-colors hover:bg-blue-600 cursor-move"
-            style={{
-              left: `${leftPosition}px`,
-              width: `${blockWidth}px`,
-            }}
-            title={`Audio: ${audio.src.split('/').pop()} (${Math.round(audioDuration * 100) / 100}s)`}
+            audio={audio}
+            leftPosition={leftPosition}
+            blockWidth={blockWidth}
+            audioDuration={audioDuration}
+            files={files}
           />
         );
       })}
@@ -131,7 +217,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
  * Audio tracks are automatically grouped into separate timeline lanes when they overlap,
  * ensuring all audio is visible without visual conflicts.
  */
-const AudioTimeline: React.FC<AudioTimelineProps> = ({ audios, timelineZoom, onAudioDelayChange }) => {
+const AudioTimeline: React.FC<AudioTimelineProps> = ({ audios, timelineZoom, onAudioDelayChange, files }) => {
   // Don't render anything if there are no audio tracks
   if (!audios || audios.length === 0) {
     return null;
@@ -176,6 +262,7 @@ const AudioTimeline: React.FC<AudioTimelineProps> = ({ audios, timelineZoom, onA
           timelineZoom={timelineZoom}
           timelineIndex={timelineIndex}
           onAudioDelayChange={onAudioDelayChange}
+          files={files}
         />
       ))}
     </>
