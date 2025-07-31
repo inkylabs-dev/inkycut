@@ -7,6 +7,8 @@ interface AudioTimelineProps {
   audios: CompositionAudio[];
   /** Timeline zoom level (pixels per second) */
   timelineZoom: number;
+  /** Callback to update audio delay when dragged */
+  onAudioDelayChange?: (audioId: string, newDelay: number) => void;
 }
 
 interface AudioTimelineGroupProps {
@@ -16,6 +18,8 @@ interface AudioTimelineGroupProps {
   timelineZoom: number;
   /** Index of this timeline group */
   timelineIndex: number;
+  /** Callback to update audio delay when dragged */
+  onAudioDelayChange?: (audioId: string, newDelay: number) => void;
 }
 
 /**
@@ -24,7 +28,8 @@ interface AudioTimelineGroupProps {
 const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({ 
   timeline, 
   timelineZoom, 
-  timelineIndex 
+  timelineIndex,
+  onAudioDelayChange
 }) => {
   const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -39,24 +44,40 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
         const audioBlocks = timelineRef.current.querySelectorAll('.audio-block');
         
         if (audioBlocks.length > 0) {
-          console.debug(`Creating draggables for ${audioBlocks.length} audio blocks in timeline ${timelineIndex}`);
-          
           // Create draggable for each audio block in this timeline group
           draggables = Array.from(audioBlocks).map((block, index) => {
-            console.debug(`Setting up draggable for block ${index}:`, block);
+            const audio = timeline[index];
+            const originalLeftPosition = audio.delay / 1000 * 100 * timelineZoom; // Original position in pixels
+            
             const draggable = createDraggable(block, {
               y: false, // Disable vertical movement
               onDrag: (instance: any) => {
-                console.debug('Dragging:', instance.x, instance.y);
+                // Dragging in progress
               },
               onGrab: () => {
-                console.debug('Grabbed audio block');
+                // Audio block grabbed
               },
-              onRelease: () => {
-                console.debug('Released audio block');
+              onRelease: (instance: any) => {
+                if (onAudioDelayChange) {
+                  // Calculate new delay based on original position plus drag delta
+                  // instance.x is the drag offset/delta, not absolute position
+                  const newPositionPixels = originalLeftPosition + instance.x;
+                  const newPositionSeconds = newPositionPixels / (100 * timelineZoom);
+                  const newDelayMs = Math.max(0, newPositionSeconds * 1000); // Ensure non-negative
+                  
+                  // Immediately update the element's CSS position to prevent visual jumping
+                  const blockElement = block as HTMLElement;
+                  const finalPositionPixels = Math.max(0, newPositionPixels); // Ensure non-negative
+                  blockElement.style.left = `${finalPositionPixels}px`;
+                  
+                  // Reset any transforms that anime.js might have applied
+                  blockElement.style.transform = 'none';
+                  
+                  // Update the state
+                  onAudioDelayChange(audio.id, newDelayMs);
+                }
               }
             });
-            console.debug('Created draggable:', draggable);
             return draggable;
           });
         }
@@ -110,7 +131,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
  * Audio tracks are automatically grouped into separate timeline lanes when they overlap,
  * ensuring all audio is visible without visual conflicts.
  */
-const AudioTimeline: React.FC<AudioTimelineProps> = ({ audios, timelineZoom }) => {
+const AudioTimeline: React.FC<AudioTimelineProps> = ({ audios, timelineZoom, onAudioDelayChange }) => {
   // Don't render anything if there are no audio tracks
   if (!audios || audios.length === 0) {
     return null;
@@ -154,6 +175,7 @@ const AudioTimeline: React.FC<AudioTimelineProps> = ({ audios, timelineZoom }) =
           timeline={timeline}
           timelineZoom={timelineZoom}
           timelineIndex={timelineIndex}
+          onAudioDelayChange={onAudioDelayChange}
         />
       ))}
     </>
