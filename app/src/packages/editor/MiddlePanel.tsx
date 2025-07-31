@@ -11,8 +11,8 @@ import {
 import { CompositionData, defaultCompositionData } from './types';
 import { MainComposition } from './Composition';
 import AudioTimeline from './AudioTimeline';
+import { Playhead } from './components/Playhead';
 import { projectAtom, ensureCompositionIDs, filesAtom, appStateAtom, updateProjectAtom } from './atoms';
-import { createDraggable } from 'animejs';
 
 interface MiddlePanelProps {
   onTimelineUpdate: (timeline: any[]) => void;
@@ -309,7 +309,6 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   const [startMouseX, setStartMouseX] = useState(0);
   const [timelineZoom, setTimelineZoom] = useState(appState.zoomLevel || 1);
   const timelineContainerRef = useRef<HTMLDivElement>(null);
-  const playheadRef = useRef<HTMLDivElement>(null);
 
   // Helper function to calculate the actual timeline width (matches the rendered timeline width)
   const getActualTimelineWidth = useCallback(() => {
@@ -938,37 +937,13 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                       files={files}
                     />
 
-                    {/* Global Playhead - overlays all timeline sections */}
-                    <div
-                      ref={playheadRef}
-                      className="absolute w-0.5 bg-red-500 z-50 transition-all duration-100 pointer-events-none"
-                      style={{ 
-                        left: `${totalFrames > 0 ? (currentFrame / totalFrames) * getActualTimelineWidth() : 0}px`,
-                        top: '14px', // Start below the triangle handle
-                        height: 'calc(100% - 14px)', // Extends through entire timeline height minus triangle space
-                        boxShadow: '0 0 4px rgba(239, 68, 68, 0.5)' // Add subtle glow
-                      }}
-                    >
-                      {/* Playhead handle - upside-down triangle at the top */}
-                      <div 
-                        className={`absolute pointer-events-auto ${
-                          isDragging ? 'cursor-grabbing' : 'cursor-grab'
-                        }`}
-                        onMouseDown={handlePlayheadMouseDown}
-                        style={{ 
-                          left: '-6px', // Center the triangle over the line
-                          top: '-14px', // Position above the line
-                          width: '0',
-                          height: '0',
-                          borderLeft: '6px solid transparent',
-                          borderRight: '6px solid transparent',
-                          borderTop: '12px solid #ef4444', // Red-500 color
-                          filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
-                          transform: isDragging ? 'scale(1.2)' : 'scale(1)',
-                          transition: 'transform 0.1s ease',
-                        }}
-                      />
-                    </div>
+                    <Playhead
+                      currentFrame={currentFrame}
+                      totalFrames={totalFrames}
+                      isDragging={isDragging}
+                      onMouseDown={handlePlayheadMouseDown}
+                      getActualTimelineWidth={getActualTimelineWidth}
+                    />
                   </div>
                 </div>
               </div>
