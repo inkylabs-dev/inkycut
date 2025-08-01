@@ -95,7 +95,7 @@ function parseDuration(durationStr: string): number | null {
   // If it's just a number, treat as milliseconds
   if (/^\d+(\.\d+)?$/.test(trimmed)) {
     const ms = parseFloat(trimmed);
-    return ms > 0 ? ms : null;
+    return ms >= 0 ? ms : null;
   }
   
   // Parse with unit suffix
