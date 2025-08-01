@@ -431,12 +431,16 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
     const handleMouseMove = (event: MouseEvent) => {
       if (isDragging) {
         // Playhead dragging
-        const timelineRuler = document.querySelector('.timeline-ruler') as HTMLElement;
-        if (!timelineRuler) return;
+        const timelineContainer = timelineContainerRef.current;
+        if (!timelineContainer) return;
         
-        const rect = timelineRuler.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left;
-        const scrollLeft = timelineContainerRef.current?.scrollLeft || 0;
+        // Get the timeline container bounds (the scrollable container)
+        const containerRect = timelineContainer.getBoundingClientRect();
+        const mouseX = event.clientX - containerRect.left;
+        const scrollLeft = timelineContainer.scrollLeft;
+        
+        // Calculate mouse position relative to the full timeline width
+        // This matches the coordinate system used by the playhead positioning
         const adjustedMouseX = mouseX + scrollLeft;
         
         // Use the actual timeline width calculation
