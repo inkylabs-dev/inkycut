@@ -11,6 +11,8 @@ interface AudioTimelineProps {
   timelineZoom: number;
   /** Callback to update audio delay when dragged */
   onAudioDelayChange?: (audioId: string, newDelay: number) => void;
+  /** Callback to update audio trimAfter when right edge is dragged */
+  onAudioTrimAfterChange?: (audioId: string, newTrimAfter: number, newDuration: number) => void;
   /** Project files for media resolution */
   files?: LocalFile[];
 }
@@ -24,6 +26,8 @@ interface AudioTimelineGroupProps {
   timelineIndex: number;
   /** Callback to update audio delay when dragged */
   onAudioDelayChange?: (audioId: string, newDelay: number) => void;
+  /** Callback to update audio trimAfter when right edge is dragged */
+  onAudioTrimAfterChange?: (audioId: string, newTrimAfter: number, newDuration: number) => void;
   /** Project files for media resolution */
   files?: LocalFile[];
 }
@@ -34,14 +38,26 @@ interface AudioBlockProps {
   blockWidth: number;
   audioDuration: number;
   files?: LocalFile[];
+  onTrimAfterChange?: (audioId: string, newTrimAfter: number, newDuration: number) => void;
+  timelineZoom: number;
 }
 
 /**
  * AudioBlock renders an individual audio block with waveform visualization
  */
-const AudioBlock: React.FC<AudioBlockProps> = ({ audio, leftPosition, blockWidth, audioDuration, files }) => {
+const AudioBlock: React.FC<AudioBlockProps> = ({ 
+  audio, 
+  leftPosition, 
+  blockWidth, 
+  audioDuration, 
+  files, 
+  onTrimAfterChange,
+  timelineZoom
+}) => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const blockRef = useRef<HTMLDivElement>(null);
 
   // Create media resolver for audio source resolution
   const mediaResolver = useMemo(() => {
@@ -71,39 +87,114 @@ const AudioBlock: React.FC<AudioBlockProps> = ({ audio, leftPosition, blockWidth
     loadAudioFile();
   }, [audio.src, mediaResolver]);
 
+
   return (
     <div
-      key={`audio-block-${audio.id}`}
-      className="audio-block absolute top-0 bg-blue-500 rounded transition-colors hover:bg-blue-600 cursor-move overflow-hidden"
+      ref={blockRef}
+      className="audio-block absolute top-0 bg-blue-500 rounded transition-colors overflow-hidden"
       style={{
         left: `${leftPosition}px`,
         width: `${blockWidth}px`,
         height: '13px',
       }}
-      title={`Audio: ${audio.src.split('/').pop()} (${Math.round(audioDuration * 100) / 100}s)`}
+      title={`Audio: ${audio.src.split('/').pop()} (${Math.round(audioDuration * 100) / 100}s / ${Math.round((audio.duration + audio.trimBefore + audio.trimAfter) / 100) / 10}s max) - Drag right edge to trim`}
     >
-      {audioBlob && !isLoading ? (
-        <div className="w-full h-full relative">
-          <AudioVisualizer
-            blob={audioBlob}
-            width={blockWidth}
-            height={13}
-            barWidth={2}
-            gap={1}
-            barColor="#ffffff"
-            backgroundColor="transparent"
-            barPlayedColor="#ffffff"
-          />
-        </div>
-      ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          {isLoading ? (
-            <div className="text-white text-xs">Loading...</div>
-          ) : (
-            <div className="text-white text-xs">Audio</div>
-          )}
-        </div>
-      )}
+      {/* Draggable content area - excludes the resize handle */}
+      <div 
+        className="audio-draggable-area absolute top-0 left-0 bottom-0 cursor-move hover:bg-blue-600 transition-colors"
+        style={{ 
+          right: '8px' // Leave space for 2px resize handle + some padding
+        }}
+      >
+        {audioBlob && !isLoading ? (
+          <div className="w-full h-full relative">
+            <AudioVisualizer
+              blob={audioBlob}
+              width={blockWidth - 8} // Adjust width to account for resize handle
+              height={13}
+              barWidth={2}
+              gap={1}
+              barColor="#ffffff"
+              backgroundColor="transparent"
+              barPlayedColor="#ffffff"
+            />
+          </div>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            {isLoading ? (
+              <div className="text-white text-xs">Loading...</div>
+            ) : (
+              <div className="text-white text-xs">Audio</div>
+            )}
+          </div>
+        )}
+      </div>
+      
+      {/* Resize handle */}
+      <div 
+        className={`audio-resize-handle absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-black hover:bg-opacity-30 transition-colors z-10 ${
+          isResizing ? 'bg-black bg-opacity-40' : ''
+        }`}
+        onMouseDown={(event) => {
+          console.log('Resize handle mousedown triggered');
+          event.stopPropagation();
+          event.preventDefault();
+          setIsResizing(true);
+          
+          const startMouseX = event.clientX;
+          const startWidth = blockWidth;
+
+          const handleMouseMove = (e: MouseEvent) => {
+            const deltaX = e.clientX - startMouseX;
+            
+            // Calculate maximum width based on total audio duration
+            // Total duration = current effective duration + trimBefore + trimAfter
+            const totalAudioDurationMs = audio.duration + audio.trimBefore + audio.trimAfter;
+            const totalAudioDurationSeconds = totalAudioDurationMs / 1000;
+            const maxWidth = totalAudioDurationSeconds * 100 * timelineZoom;
+            
+            // Constrain width between minimum (20px) and maximum (total duration)
+            const newWidth = Math.max(20, Math.min(maxWidth, startWidth + deltaX));
+            
+            if (blockRef.current) {
+              blockRef.current.style.width = `${newWidth}px`;
+            }
+          };
+
+          const handleMouseUp = (e: MouseEvent) => {
+            console.log('Resizing ended');
+            if (onTrimAfterChange) {
+              const deltaX = e.clientX - startMouseX;
+              
+              // Calculate maximum width based on total audio duration (same as in handleMouseMove)
+              const totalAudioDurationMs = audio.duration + audio.trimBefore + audio.trimAfter;
+              const totalAudioDurationSeconds = totalAudioDurationMs / 1000;
+              const maxWidth = totalAudioDurationSeconds * 100 * timelineZoom;
+              
+              // Constrain width between minimum (20px) and maximum (total duration)
+              const newWidth = Math.max(20, Math.min(maxWidth, startWidth + deltaX));
+              const newDurationSeconds = newWidth / (100 * timelineZoom);
+              const newDurationMs = newDurationSeconds * 1000;
+              
+              // Calculate new trimAfter: originalDuration - trimBefore - newDuration
+              // Since we're constraining to maxWidth, trimAfter should never be negative
+              const newTrimAfter = Math.max(0, totalAudioDurationMs - audio.trimBefore - newDurationMs);
+              
+              console.log(`Audio ${audio.id}: totalDuration=${totalAudioDurationMs}ms, newDuration=${newDurationMs}ms, newTrimAfter=${newTrimAfter}ms`);
+              
+              onTrimAfterChange(audio.id, newTrimAfter, newDurationMs);
+            }
+            
+            setIsResizing(false);
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+          };
+
+          document.addEventListener('mousemove', handleMouseMove);
+          document.addEventListener('mouseup', handleMouseUp);
+        }}
+        title={`Drag to trim audio end (max: ${Math.round((audio.duration + audio.trimBefore + audio.trimAfter) / 100) / 10}s total duration)`}
+      />
     </div>
   );
 };
@@ -116,6 +207,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
   timelineZoom, 
   timelineIndex,
   onAudioDelayChange,
+  onAudioTrimAfterChange,
   files
 }) => {
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -128,7 +220,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
     // Wait for DOM to be ready, then create draggable for audio blocks in this specific timeline
     const timeoutId = setTimeout(() => {
       if (timelineRef.current) {
-        const audioBlocks = timelineRef.current.querySelectorAll('.audio-block');
+        const audioBlocks = timelineRef.current.querySelectorAll('.audio-draggable-area');
         
         if (audioBlocks.length > 0) {
           // Create draggable for each audio block in this timeline group
@@ -141,8 +233,14 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
               onDrag: () => {
                 // Dragging in progress
               },
-              onGrab: () => {
-                // Audio block grabbed
+              onGrab: (event: any) => {
+                // Check if the grab originated from a resize handle
+                const target = event?.target || event?.srcElement;
+                if (target && target.closest('.audio-resize-handle')) {
+                  console.log('Drag blocked - resize handle clicked');
+                  return false; // Prevent dragging
+                }
+                console.log('Audio block grab started');
               },
               onRelease: (instance: any) => {
                 if (onAudioDelayChange) {
@@ -152,13 +250,16 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
                   const newPositionSeconds = newPositionPixels / (100 * timelineZoom);
                   const newDelayMs = Math.max(0, newPositionSeconds * 1000); // Ensure non-negative
                   
-                  // Immediately update the element's CSS position to prevent visual jumping
-                  const blockElement = block as HTMLElement;
-                  const finalPositionPixels = Math.max(0, newPositionPixels); // Ensure non-negative
-                  blockElement.style.left = `${finalPositionPixels}px`;
+                  // Immediately update the parent audio-block element's CSS position to prevent visual jumping
+                  const draggableElement = block as HTMLElement;
+                  const audioBlockElement = draggableElement.closest('.audio-block') as HTMLElement;
+                  if (audioBlockElement) {
+                    const finalPositionPixels = Math.max(0, newPositionPixels); // Ensure non-negative
+                    audioBlockElement.style.left = `${finalPositionPixels}px`;
+                  }
                   
                   // Reset any transforms that anime.js might have applied
-                  blockElement.style.transform = 'none';
+                  draggableElement.style.transform = 'none';
                   
                   // Update the state
                   onAudioDelayChange(audio.id, newDelayMs);
@@ -187,7 +288,6 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
   return (
     <div 
       ref={timelineRef}
-      key={`audio-timeline-${timelineIndex}`}
       className="audio-timeline relative bg-gray-300 dark:bg-gray-600 rounded mt-1" 
       style={{ height: '13px', width: '100%' }}
     >
@@ -205,6 +305,8 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
             blockWidth={blockWidth}
             audioDuration={audioDuration}
             files={files}
+            onTrimAfterChange={onAudioTrimAfterChange}
+            timelineZoom={timelineZoom}
           />
         );
       })}
@@ -217,7 +319,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
  * Audio tracks are automatically grouped into separate timeline lanes when they overlap,
  * ensuring all audio is visible without visual conflicts.
  */
-const AudioTimeline: React.FC<AudioTimelineProps> = ({ audios, timelineZoom, onAudioDelayChange, files }) => {
+const AudioTimeline: React.FC<AudioTimelineProps> = ({ audios, timelineZoom, onAudioDelayChange, onAudioTrimAfterChange, files }) => {
   // Don't render anything if there are no audio tracks
   if (!audios || audios.length === 0) {
     return null;
@@ -255,16 +357,21 @@ const AudioTimeline: React.FC<AudioTimelineProps> = ({ audios, timelineZoom, onA
   
   return (
     <>
-      {audioTimelines.map((timeline, timelineIndex) => (
-        <AudioTimelineGroup
-          key={`audio-timeline-group-${timelineIndex}`}
-          timeline={timeline}
-          timelineZoom={timelineZoom}
-          timelineIndex={timelineIndex}
-          onAudioDelayChange={onAudioDelayChange}
-          files={files}
-        />
-      ))}
+      {audioTimelines.map((timeline, timelineIndex) => {
+        // Create a stable key based on the audio IDs in this timeline
+        const timelineKey = timeline.map(audio => audio.id).sort().join('-');
+        return (
+          <AudioTimelineGroup
+            key={`timeline-${timelineKey}`}
+            timeline={timeline}
+            timelineZoom={timelineZoom}
+            timelineIndex={timelineIndex}
+            onAudioDelayChange={onAudioDelayChange}
+            onAudioTrimAfterChange={onAudioTrimAfterChange}
+            files={files}
+          />
+        );
+      })}
     </>
   );
 };

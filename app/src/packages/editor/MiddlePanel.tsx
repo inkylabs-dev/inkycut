@@ -14,7 +14,7 @@ import AudioTimeline from './AudioTimeline';
 import { Playhead } from './components/Playhead';
 import PageTrack from './components/PageTrack';
 import TimeRuler from './components/TimeRuler';
-import { projectAtom, ensureCompositionIDs, filesAtom, appStateAtom, updateProjectAtom } from './atoms';
+import { projectAtom, ensureCompositionIDs, filesAtom, appStateAtom, updateProjectAtom, addUserMessageToQueueAtom } from './atoms';
 
 interface MiddlePanelProps {
   onTimelineUpdate: (timeline: any[]) => void;
@@ -29,6 +29,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   const [files] = useAtom(filesAtom);
   const [appState] = useAtom(appStateAtom);
   const [, updateProject] = useAtom(updateProjectAtom);
+  const [, addUserMessageToQueue] = useAtom(addUserMessageToQueueAtom);
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -396,35 +397,20 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   };
 
   const handleAudioDelayChange = (audioId: string, newDelay: number) => {
-    const newAudios = [...(compositionData.audios || [])];
-    const audioIndex = newAudios.findIndex(audio => audio.id === audioId);
+    // Instead of directly updating the data structure, send a slash command to the message queue
+    const delayValue = Math.max(0, Math.round(newDelay));
     
-    if (audioIndex !== -1) {
-      newAudios[audioIndex] = {
-        ...newAudios[audioIndex],
-        delay: Math.max(0, Math.round(newDelay)) // Ensure non-negative and round to integer
-      };
-      
-      const updatedComposition = {
-        ...compositionData,
-        audios: newAudios
-      };
-      
-      // Update local composition data immediately for smooth UI
-      setCompositionData(updatedComposition);
-      
-      if (project) {
-        const updatedProject = {
-          ...project,
-          composition: updatedComposition
-        };
-        updateProject(updatedProject);
-        
-        if (onCompositionUpdate) {
-          onCompositionUpdate(updatedComposition);
-        }
-      }
-    }
+    const slashCommand = `/set-audio --id ${audioId} --delay ${delayValue}`;
+    addUserMessageToQueue(slashCommand);
+  };
+
+  const handleAudioTrimAfterChange = (audioId: string, newTrimAfter: number, newDuration: number) => {
+    // Instead of directly updating the data structure, send a slash command to the message queue
+    const trimAfterValue = Math.max(0, Math.round(newTrimAfter));
+    const durationValue = Math.max(0, Math.round(newDuration));
+    
+    const slashCommand = `/set-audio --id ${audioId} --trim-after ${trimAfterValue} --duration ${durationValue}`;
+    addUserMessageToQueue(slashCommand);
   };
 
   useEffect(() => {
@@ -817,6 +803,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                       audios={compositionData.audios || []} 
                       timelineZoom={timelineZoom}
                       onAudioDelayChange={handleAudioDelayChange}
+                      onAudioTrimAfterChange={handleAudioTrimAfterChange}
                       files={files}
                     />
 
