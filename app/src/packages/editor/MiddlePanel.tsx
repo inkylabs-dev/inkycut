@@ -780,7 +780,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                 {/* Scrollable Timeline Container */}
                 <div 
                   ref={timelineContainerRef}
-                  className="overflow-x-auto overflow-y-hidden relative"
+                  className="overflow-x-auto overflow-y-hidden relative no-scrollbar"
                   style={{ maxWidth: '100%' }}
                 >
                   <div style={{ width: `${getActualTimelineWidth()}px` }}>
