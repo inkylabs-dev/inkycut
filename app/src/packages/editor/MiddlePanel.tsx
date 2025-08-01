@@ -809,6 +809,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                       setStartResizeWidth={setStartResizeWidth}
                       setStartMouseX={setStartMouseX}
                       formatTime={formatTime}
+                      files={files}
                     />
 
                     {/* Audio Timelines */}

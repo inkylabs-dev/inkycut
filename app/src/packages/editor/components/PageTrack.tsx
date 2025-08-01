@@ -1,5 +1,6 @@
 import React from 'react';
-import { CompositionData } from '../types';
+import { CompositionData, LocalFile } from '../types';
+import PageThumbnail from './PageThumbnail';
 
 interface PageTrackProps {
   compositionData: CompositionData;
@@ -17,6 +18,7 @@ interface PageTrackProps {
   setStartResizeWidth: (value: number) => void;
   setStartMouseX: (value: number) => void;
   formatTime: (seconds: number) => string;
+  files?: LocalFile[];
 }
 
 export default function PageTrack({
@@ -34,10 +36,11 @@ export default function PageTrack({
   setResizingPageIndex,
   setStartResizeWidth,
   setStartMouseX,
-  formatTime
+  formatTime,
+  files
 }: PageTrackProps) {
   return (
-    <div className="pages-track relative h-12 bg-gray-200 dark:bg-gray-700 rounded mb-2" style={{ width: '100%' }}>
+    <div className="pages-track relative h-16 bg-gray-200 dark:bg-gray-700 rounded mb-2" style={{ width: '100%' }}>
       {(() => {
         let cumulativePosition = 0;
         const currentPageIndex = getCurrentPage().pageIndex;
@@ -60,12 +63,12 @@ export default function PageTrack({
         
         compositionData.pages.forEach((page, index) => {
           const pageDuration = page.duration / 1000;
-          const pageColors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
           const isSelected = index === currentPageIndex;
           const isDraggedPage = draggedPageIndex === index;
           
           // Calculate width in pixels - 100px per second at 100% zoom
           const blockWidth = Math.max(pageDuration * 100 * timelineZoom, 80);
+          const blockHeight = 56; // Height minus top/bottom margins (64px - 8px = 56px)
           const leftPosition = cumulativePosition;
           
           // Always update cumulative position to maintain layout space
@@ -74,7 +77,7 @@ export default function PageTrack({
           elements.push(
             <div
               key={`page-${page.id}`}
-              className={`absolute top-1 bottom-1 rounded text-white text-xs flex items-center justify-center border-2 transition-all ${
+              className={`absolute top-1 bottom-1 rounded overflow-hidden border-2 transition-all ${
                 isSelected 
                   ? 'border-blue-400 shadow-lg z-20' 
                   : 'border-gray-300 dark:border-gray-600'
@@ -88,21 +91,25 @@ export default function PageTrack({
               style={{
                 left: `${leftPosition}px`,
                 width: `${blockWidth}px`,
-                backgroundColor: pageColors[index % pageColors.length],
                 transform: isDraggedPage ? 'rotate(2deg)' : 'none',
               }}
               onClick={(event) => !isPageDragging && !isResizing && handlePageClick(index, event)}
               onMouseDown={(event) => handlePageMouseDown(event, index)}
               title={`${page.name} (${formatTime(pageDuration)}) - Drag to reorder, drag right edge to resize`}
             >
-              <div className="text-center px-2 overflow-hidden flex-1">
-                <div className="font-medium truncate">{page.name}</div>
-                <div className="text-xs opacity-75">{formatTime(pageDuration)}</div>
-              </div>
+              <PageThumbnail
+                page={page}
+                pageIndex={index}
+                compositionData={compositionData}
+                width={blockWidth}
+                height={blockHeight}
+                files={files}
+                className="w-full h-full"
+              />
               {/* Resize handle */}
               <div 
-                className={`absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white hover:bg-opacity-20 transition-colors ${
-                  resizingPageIndex === index ? 'bg-white bg-opacity-30' : ''
+                className={`absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-black hover:bg-opacity-20 transition-colors z-10 ${
+                  resizingPageIndex === index ? 'bg-black bg-opacity-30' : ''
                 }`}
                 onMouseDown={(event) => {
                   event.stopPropagation();
