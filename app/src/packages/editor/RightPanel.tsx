@@ -291,11 +291,13 @@ export default function RightPanel({
     // For fuzzy matches, highlight individual matching characters
     const result: React.ReactNode[] = [];
     let queryIndex = 0;
+    // Create unique key prefix to avoid conflicts between different highlight calls
+    const keyPrefix = `highlight-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     for (let i = 0; i < text.length && queryIndex < query.length; i++) {
       if (lowerText[i] === lowerQuery[queryIndex]) {
         result.push(
-          <span key={i} className="bg-yellow-200 dark:bg-yellow-800 text-gray-900 dark:text-gray-100">
+          <span key={`${keyPrefix}-${i}`} className="bg-yellow-200 dark:bg-yellow-800 text-gray-900 dark:text-gray-100">
             {text[i]}
           </span>
         );

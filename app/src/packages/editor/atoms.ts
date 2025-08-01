@@ -455,6 +455,9 @@ export const ensureCompositionIDs = (composition: CompositionData): CompositionD
   };
 };
 
+// Counter to ensure unique message IDs
+let messageIdCounter = 0;
+
 /**
  * Write-only atom for adding a new chat message
  * Adds a single message (either from user or AI) to the chat history
@@ -469,8 +472,9 @@ export const addChatMessageAtom = atom(
     
     if (typeof messageOrContent === 'string') {
       // Create a new message with the provided content
+      // Use timestamp + counter to ensure unique IDs even for rapid messages
       newMessage = {
-        id: Date.now(), // Use timestamp for unique IDs
+        id: Date.now() + (++messageIdCounter), // Use timestamp + counter for unique IDs
         role: 'user', // Default to user role when string is provided
         content: messageOrContent,
         timestamp: new Date().toISOString() // Store as ISO string for localStorage compatibility
