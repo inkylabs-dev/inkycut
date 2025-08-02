@@ -4,11 +4,6 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
-
-
-
 export const newTextCommand: SlashCommand = {
   name: 'new-text',
   description: 'Add a new text element to the selected page',

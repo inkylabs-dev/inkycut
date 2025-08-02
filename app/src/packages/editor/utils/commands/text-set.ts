@@ -4,11 +4,6 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
-
-
-
 export const setTextCommand: SlashCommand = {
   name: 'set-text',
   description: 'Modify properties of a text element',

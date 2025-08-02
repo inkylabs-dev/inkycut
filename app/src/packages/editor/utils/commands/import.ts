@@ -4,11 +4,6 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
-
-
-
 export const importCommand: SlashCommand = {
   name: 'import',
   description: 'Open the import dialog to import a project from JSON file',

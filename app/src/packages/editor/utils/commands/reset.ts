@@ -5,10 +5,6 @@
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 import { createDefaultProject } from '../../atoms';
 
-
-
-
-
 export const resetCommand: SlashCommand = {
   name: 'reset',
   description: 'Reset the project to its default state, clearing all files and chat history',

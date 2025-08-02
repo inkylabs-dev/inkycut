@@ -4,10 +4,7 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
 import { performJSONExport } from './helpers';
-
-
 
 export const exportCommand: SlashCommand = {
   name: 'export',

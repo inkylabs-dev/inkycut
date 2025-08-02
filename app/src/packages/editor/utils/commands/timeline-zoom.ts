@@ -4,11 +4,6 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
-
-
-
 export const zoomTimelineCommand: SlashCommand = {
   name: 'zoom-tl',
   description: 'Set timeline zoom level to specified percentage',

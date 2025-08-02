@@ -4,11 +4,6 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
-
-
-
 export const lsPageCommand: SlashCommand = {
   name: 'ls-page',
   description: 'List detailed information for a specific page or the currently selected page',

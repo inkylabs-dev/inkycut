@@ -4,11 +4,6 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
-
-
-
 export const setImageCommand: SlashCommand = {
   name: 'set-image',
   description: 'Modify properties of an image element',

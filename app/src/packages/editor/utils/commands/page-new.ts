@@ -6,9 +6,6 @@ import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './ty
 
 import { createDefaultPage } from '../../atoms';
 
-
-
-
 export const newPageCommand: SlashCommand = {
   name: 'new-page',
   description: 'Add blank page(s) after the selected page. Supports --num/-n option to add multiple pages',

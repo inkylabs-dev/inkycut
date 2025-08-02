@@ -4,11 +4,6 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
-
-
-
 export const lsCompCommand: SlashCommand = {
   name: 'ls-comp',
   description: 'List composition overview with basic page information (IDs only)',

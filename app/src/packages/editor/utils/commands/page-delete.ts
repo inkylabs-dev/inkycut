@@ -4,11 +4,6 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
-
-
-
 export const delPageCommand: SlashCommand = {
   name: 'del-page',
   description: 'Delete the selected page and optionally additional pages after it. Supports --num/-n option',

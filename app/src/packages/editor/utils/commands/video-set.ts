@@ -4,11 +4,6 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
-
-
-
 export const setVideoCommand: SlashCommand = {
   name: 'set-video',
   description: 'Modify properties of a video element',

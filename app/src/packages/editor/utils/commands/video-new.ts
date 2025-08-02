@@ -4,11 +4,6 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
-
-
-
 export const newVideoCommand: SlashCommand = {
   name: 'new-video',
   description: 'Add a new video element to the selected page',

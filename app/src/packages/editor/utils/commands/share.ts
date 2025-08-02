@@ -4,10 +4,7 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
 import { performDirectShare } from './helpers';
-
 
 export const shareCommand: SlashCommand = {
   name: 'share',

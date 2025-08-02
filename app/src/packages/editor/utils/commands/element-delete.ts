@@ -4,11 +4,6 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
-
-
-
 export const delElementCommand: SlashCommand = {
   name: 'del-elem',
   description: 'Delete an element from the composition by ID or delete the selected element',

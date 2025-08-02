@@ -4,11 +4,6 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
-
-
-
 export const newImageCommand: SlashCommand = {
   name: 'new-image',
   description: 'Add a new image element to the selected page',

@@ -4,11 +4,6 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
-
-
-
 export const setCompCommand: SlashCommand = {
   name: 'set-comp',
   description: 'Set composition properties including title, fps, width, and height',

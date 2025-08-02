@@ -4,11 +4,6 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-
-
-
-
-
 export const delAudioCommand: SlashCommand = {
   name: 'del-audio',
   description: 'Delete an audio track from the composition by ID',
