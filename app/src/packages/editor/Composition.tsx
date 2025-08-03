@@ -9,7 +9,7 @@
 
 // Basic composition component
 import React, { useRef } from 'react';
-import { AbsoluteFill, useCurrentFrame, Img, Video, Sequence, Audio } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, Img, OffthreadVideo, Sequence, Audio } from 'remotion';
 import { Gif } from '@remotion/gif';
 import { CompositionData, CompositionElement, ElementRendererProps, LocalFile } from './types';
 import { Layer } from './Layer';
@@ -160,7 +160,7 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
     case 'video':
       return resolvedSrc ? (
         <div ref={elementRef} style={style} id={scopeRef}>
-          <Video
+          <OffthreadVideo
             id={elementWithId.id}
             src={resolvedSrc}
             style={{ width: '100%', height: '100%' }}
