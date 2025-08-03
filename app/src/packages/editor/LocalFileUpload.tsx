@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { useSetAtom } from 'jotai';
+import { useSetAtom, useAtomValue } from 'jotai';
 import { DocumentIcon, PhotoIcon, VideoCameraIcon, MusicalNoteIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
-import { addFileAtom } from './atoms';
+import { addFileAtom, filesAtom, setReplacingFilesAtom } from './atoms';
 import { LocalFile } from './types';
 
 interface LocalFileUploadProps {
@@ -22,14 +22,32 @@ export default function LocalFileUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const addFile = useSetAtom(addFileAtom);
+  const existingFiles = useAtomValue(filesAtom);
+  const setReplacingFiles = useSetAtom(setReplacingFilesAtom);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     if (files.length === 0) return;
 
+    await processFiles(files);
+  };
+
+  const processFiles = async (files: File[]) => {
     setIsUploading(true);
 
     try {
+      // Check for replacements and mark them in the atom
+      const replacingFiles: Record<string, boolean> = {};
+      for (const file of files) {
+        const existingFile = existingFiles.find(f => f.name === file.name);
+        if (existingFile) {
+          replacingFiles[file.name] = true;
+        }
+      }
+
+      // Update the replacing files atom to show hints in file list
+      setReplacingFiles(replacingFiles);
+
       for (const file of files) {
         // Add file to project
         const localFile = await addFile(file);
@@ -37,11 +55,18 @@ export default function LocalFileUpload({
           onUploadComplete(localFile);
         }
       }
+      
+      // Clear replacement indicators after a delay
+      setTimeout(() => {
+        setReplacingFiles({});
+      }, 2000);
     } catch (error) {
       console.error('Error uploading file:', error);
       if (onUploadError) {
         onUploadError(error);
       }
+      // Clear replacement indicators on error
+      setReplacingFiles({});
     } finally {
       setIsUploading(false);
       // Clear the input
@@ -61,24 +86,7 @@ export default function LocalFileUpload({
     const files = Array.from(event.dataTransfer.files);
     if (files.length === 0) return;
 
-    setIsUploading(true);
-
-    try {
-      for (const file of files) {
-        // Add file to project
-        const localFile = await addFile(file);
-        if (localFile && onUploadComplete) {
-          onUploadComplete(localFile);
-        }
-      }
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      if (onUploadError) {
-        onUploadError(error);
-      }
-    } finally {
-      setIsUploading(false);
-    }
+    await processFiles(files);
   };
 
   const handleDragOver = (event: React.DragEvent) => {

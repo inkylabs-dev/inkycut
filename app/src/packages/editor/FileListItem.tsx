@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { useSetAtom } from 'jotai';
+import { useSetAtom, useAtomValue } from 'jotai';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { LocalFile } from './types';
-import { removeFileAtom } from './atoms';
+import { removeFileAtom, replacingFilesAtom } from './atoms';
 import { getFileIcon } from './LocalFileUpload';
 // Using CSS transitions instead of animejs for simple animations
 
@@ -24,6 +25,8 @@ export default function FileListItem({ file, onDragStart, onDragEnd }: FileListI
   const removeFile = useSetAtom(removeFileAtom);
   const itemRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const replacingFiles = useAtomValue(replacingFilesAtom);
+  const isBeingReplaced = replacingFiles[file.name] || false;
 
   const handleRemoveFile = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -69,47 +72,55 @@ export default function FileListItem({ file, onDragStart, onDragEnd }: FileListI
   };
 
   return (
-    <div
-      ref={itemRef}
-      draggable={file.type.startsWith('video/') || file.type.startsWith('image/')}
-      className={`flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 group transition-all duration-200 ease-out ${
-        (file.type.startsWith('video/') || file.type.startsWith('image/'))
-          ? 'cursor-grab hover:border-blue-300 dark:hover:border-blue-500' 
-          : 'cursor-pointer'
-      } ${isDragging ? 'cursor-grabbing' : ''}`}
-      onClick={handleFileClick}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      title={
-        file.type.startsWith('video/') 
-          ? 'Drag to PageTrack to add video to page' 
-          : file.type.startsWith('image/')
-            ? 'Drag to PageTrack to add image to page'
-            : file.name
-      }
-    >
-      <div className="mr-3">
-        <LocalFilePreviewItem file={file} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate" title={file.name}>
-          {file.name}
+    <div className="relative">
+      <div
+        ref={itemRef}
+        draggable={file.type.startsWith('video/') || file.type.startsWith('image/')}
+        className={`flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 group transition-all duration-200 ease-out ${
+          (file.type.startsWith('video/') || file.type.startsWith('image/'))
+            ? 'cursor-grab hover:border-blue-300 dark:hover:border-blue-500' 
+            : 'cursor-pointer'
+        } ${isDragging ? 'cursor-grabbing' : ''} ${
+          isBeingReplaced ? 'border-blue-300 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''
+        }`}
+        onClick={handleFileClick}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        title={
+          file.type.startsWith('video/') 
+            ? 'Drag to PageTrack to add video to page' 
+            : file.type.startsWith('image/')
+              ? 'Drag to PageTrack to add image to page'
+              : file.name
+        }
+      >
+        <div className="mr-3">
+          <LocalFilePreviewItem file={file} />
         </div>
-        <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-          {file.type} • {(file.size / 1024 / 1024).toFixed(1)}MB
-          {file.type.startsWith('video/') && file.duration && (
-            <> • {formatDuration(file.duration)}</>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate" title={file.name}>
+            {isBeingReplaced ? 'Replacing ' + file.name + ' ...' : file.name}
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+            {file.type} • {(file.size / 1024 / 1024).toFixed(1)}MB
+            {file.type.startsWith('video/') && file.duration && (
+              <> • {formatDuration(file.duration)}</>
+            )}
+          </div>
+        </div>
+        <div className="flex space-x-1">
+          {isBeingReplaced ? (
+            <ArrowPathIcon className="h-4 w-4 text-blue-500 dark:text-blue-400 animate-spin" />
+          ) : (
+            <button
+              onClick={handleRemoveFile}
+              className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 transition-opacity"
+              title="Remove file"
+            >
+              ×
+            </button>
           )}
         </div>
-      </div>
-      <div className="flex space-x-1">
-        <button
-          onClick={handleRemoveFile}
-          className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 transition-opacity"
-          title="Remove file"
-        >
-          ×
-        </button>
       </div>
     </div>
   );

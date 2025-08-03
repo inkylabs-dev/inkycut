@@ -177,6 +177,8 @@ export interface LocalFile {
   blob?: Blob;
   /** Timestamp when file was added */
   createdAt: string;
+  /** Timestamp when file was last updated */
+  updatedAt?: string;
   /** Width in pixels (for images and videos) */
   width?: number;
   /** Height in pixels (for images and videos) */

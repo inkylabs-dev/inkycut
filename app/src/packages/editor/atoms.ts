@@ -253,7 +253,6 @@ export const updateAppStateAtom = atom(
 /**
  * Persistent storage for chat messages using atomWithStorage
  * Stores the entire chat history in localStorage
- * @type {ChatMessage[]} - Array of chat messages with initial welcome message
  */
 export const chatMessagesAtom = atomWithStorage<ChatMessage[]>('vibe-chat-messages', [
   {
@@ -267,7 +266,6 @@ export const chatMessagesAtom = atomWithStorage<ChatMessage[]>('vibe-chat-messag
 /**
  * Atom for loading state to track application loading states
  * This is now separated from the project to avoid circular dependencies
- * @type {boolean} - Whether the application is currently loading data
  */
 export const loadingAtom = atom<boolean>(false);
 
@@ -285,7 +283,6 @@ export const setLoadingAtom = atom(
 /**
  * Atom for error state to track application errors
  * This is now separated from the project to avoid circular dependencies
- * @type {Error | null} - Current error or null if no error
  */
 export const errorAtom = atom<Error | null>(null);
 
@@ -367,7 +364,6 @@ export const createDefaultProject = (name: string = 'My Project'): Project => {
 
 /**
  * Derived atom providing the composition data for the current project
- * @type {CompositionData | null} - Composition data or null if no project is active
  */
 export const compositionAtom = atom(
   (get) => get(projectAtom)?.composition || null
@@ -573,6 +569,22 @@ export const consumeUserMessageFromQueueAtom = atom(
 );
 
 /**
+ * Atom to track files that are currently being replaced
+ * Maps file names to replacement status
+ */
+export const replacingFilesAtom = atom<Record<string, boolean>>({});
+
+/**
+ * Write-only atom for setting replacement status of files
+ */
+export const setReplacingFilesAtom = atom(
+  null,
+  (_, set, replacingFiles: Record<string, boolean>) => {
+    set(replacingFilesAtom, replacingFiles);
+  }
+);
+
+/**
  * Base atom for tracking file refresh trigger
  * Used to invalidate the files cache when files change
  */
@@ -581,7 +593,6 @@ const filesRefreshAtom = atom(0);
 /**
  * Derived atom providing the files array from current storage
  * Files are stored in IndexedDB for local projects, memory for shared projects
- * @type {LocalFile[]} - Array of local files from current storage
  */
 export const filesAtom = atom(
   async (get) => {
@@ -611,6 +622,7 @@ const refreshFilesAtom = atom(
 /**
  * Write-only atom for adding a new local file to current storage
  * Converts File object to LocalFile with data URL and stores it
+ * When a file with the same name exists, it replaces that file and updates metadata
  * @param {File} file - The File object to add to storage
  */
 export const addFileAtom = atom(
@@ -618,6 +630,10 @@ export const addFileAtom = atom(
   async (get, set, file: File) => {
     try {
       const storage = get(fileStorageAtom);
+      
+      // Check if a file with the same name already exists
+      const existingFiles = await storage.getAllFiles();
+      const existingFile = existingFiles.find(f => f.name === file.name);
       
       // Convert file to data URL
       const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -652,20 +668,21 @@ export const addFileAtom = atom(
         }
       }
 
-      // Create LocalFile object
+      // Create or update LocalFile object
       const localFile: LocalFile = {
-        id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: existingFile ? existingFile.id : `file-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
         name: file.name,
         type: file.type,
         size: file.size,
         dataUrl,
-        createdAt: new Date().toISOString(),
+        createdAt: existingFile ? existingFile.createdAt : new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         width,
         height,
         duration
       };
 
-      // Store file in current storage
+      // Store file in current storage (this will replace if ID exists)
       await storage.storeFile(localFile);
       
       // Trigger files atom refresh
