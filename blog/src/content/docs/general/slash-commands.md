@@ -141,17 +141,21 @@ Shares the project with a secure, encrypted link or opens the Share Dialog.
 
 ### `/new-page`
 
-Adds blank page(s) after the currently selected page. If no page is selected, adds after page 1.
+Adds blank page(s) after the currently selected page. If no page is selected, adds after page 1. Supports --copy to copy from existing page.
 
-**Usage:** `/new-page [--num|-n n]`
+**Usage:** `/new-page [--num|-n n] [--copy id]`
 
 **Options:**
 - `--num`, `-n`: Number of pages to add (1-20). Default: 1
+- `--copy`: Copy from existing page with specified ID
 
 **Behavior:**
 - Adds blank page(s) after the selected page in the composition
 - If no page is selected, adds after the first page (or at beginning if no pages exist)
 - Automatically names new pages sequentially based on current total (if you have 3 pages, new pages will be Page 4, Page 5, etc.)
+- With `--copy`: Copies all properties from source page including backgroundColor and all elements
+- Copied elements receive new unique IDs to prevent conflicts
+- Preserves animations and nested group elements
 - Selects the first newly created page after adding
 - Validates number input to prevent excessive page creation
 
@@ -159,12 +163,16 @@ Adds blank page(s) after the currently selected page. If no page is selected, ad
 - `/new-page` - Adds 1 blank page after selected page
 - `/new-page --num 3` - Adds 3 blank pages after selected page
 - `/new-page -n 5` - Adds 5 blank pages after selected page
+- `/new-page --copy page-123` - Copies properties from page-123 to new page
+- `/new-page --copy page-456 --num 3` - Creates 3 copies of page-456
 
 **Response Messages:**
 - Success: "✅ **N New Page(s) Added** - N blank page(s) have been added after page X. The first new page is now selected."
+- Success (with copy): "✅ **N New Page(s) Added** - N page(s) have been added after page X (copied from page 'Source Page'). The first new page is now selected."
 - Error (invalid number): "❌ **Invalid Number** - Number of pages must be between 1 and 20. Got 'xyz'"
+- Error (source not found): "❌ **Source Page Not Found** - Cannot find page with ID 'xyz' to copy from."
 - Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
-- Error (unknown option): "❌ **Unknown Option** - Unknown option '--xyz'. Usage: /new-page [--num|-n n]"
+- Error (unknown option): "❌ **Unknown Option** - Unknown option '--xyz'. Usage: /new-page [--num|-n n] [--copy id]"
 
 ### `/del-page`
 
@@ -287,9 +295,9 @@ Sets the timeline zoom level to a specified percentage for better timeline navig
 
 ### `/new-text`
 
-Adds a new text element to the currently selected page with customizable text properties and positioning.
+Adds a new text element to the currently selected page with customizable text properties and positioning. Supports --copy to copy from existing element.
 
-**Usage:** `/new-text [--text|-t "text"] [--font-size|-fs size] [--color|-c color] [--font-family|-ff family] [--font-weight|-fw weight] [--text-align|-ta align] [--left|-l x] [--top|-tp y] [--width|-w width]`
+**Usage:** `/new-text [--text|-t "text"] [--font-size|-fs size] [--color|-c color] [--font-family|-ff family] [--font-weight|-fw weight] [--text-align|-ta align] [--left|-l x] [--top|-tp y] [--width|-w width] [--copy id]`
 
 **Options:**
 - `--text`, `-t`: Text content for the element (use quotes for multi-word text). Default: "New Text"
@@ -301,6 +309,7 @@ Adds a new text element to the currently selected page with customizable text pr
 - `--left`, `-l`: X-coordinate position in pixels. Default: 100
 - `--top`, `-tp`: Y-coordinate position in pixels. Default: 100
 - `--width`, `-w`: Element width in pixels (positive number). Default: 200
+- `--copy`: Copy properties from any existing element with specified ID
 
 **Behavior:**
 - Creates a new text element on the currently selected page
@@ -309,6 +318,9 @@ Adds a new text element to the currently selected page with customizable text pr
 - Supports all standard text styling properties
 - Height is auto-calculated based on font size and text content
 - Multi-word text must be wrapped in double quotes
+- With `--copy`: Copies compatible properties from any element type (position, size, opacity, rotation, animations)
+- Text-specific properties are only copied from text elements
+- Additional options override copied properties
 - Elements are immediately visible in the composition
 - Updates project state and refreshes the UI
 
@@ -317,9 +329,12 @@ Adds a new text element to the currently selected page with customizable text pr
 - `/new-text --text "Hello World" --font-size 48 --color "#ff0000"` - Creates red "Hello World" text at 48px
 - `/new-text -t "Multi Word Title" -fs 64 -c "blue" -ta center -w 400 -l 300` - Creates centered blue title with multiple words
 - `/new-text --text "Welcome to our site!" --font-family "Georgia, serif" --font-weight bold --left 50 --top 400` - Creates bold welcome message
+- `/new-text --copy text-123` - Copies all properties from text-123
+- `/new-text --copy video-456 --text "New Text"` - Copies position/size from video-456, sets custom text
 
 **Response Messages:**
 - Success: "✅ **Text Element Added** - Added text element '[text]' to page '[page name]' • Position: (x, y) • Width: widthpx (height auto-calculated) • Font: sizepx family • Color: color"
+- Success (with copy): "✅ **Text Element Added** - Added text element '[text]' to page '[page name]' (copied from element ID: source-id) • Position: (x, y) • Width: widthpx (height auto-calculated) • Font: sizepx family • Color: color"
 - Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
 - Error (no page selected): "❌ **No Page Selected** - Please select a page first before adding elements."
 - Error (page not found): "❌ **Page Not Found** - The selected page could not be found."
@@ -331,9 +346,9 @@ Adds a new text element to the currently selected page with customizable text pr
 
 ### `/new-image`
 
-Adds a new image element to the currently selected page with customizable positioning and visual properties. Automatically detects LocalFile dimensions and centers elements on the canvas.
+Adds a new image element to the currently selected page with customizable positioning and visual properties. Automatically detects LocalFile dimensions and centers elements on the canvas. Supports --copy to copy from existing element.
 
-**Usage:** `/new-image --src|-s url [--left|-l x] [--top|-tp y] [--width|-w width] [--height|-h height] [--opacity|-o opacity] [--rotation|-r degrees]`
+**Usage:** `/new-image --src|-s url [--left|-l x] [--top|-tp y] [--width|-w width] [--height|-h height] [--opacity|-o opacity] [--rotation|-r degrees] [--copy id]`
 
 **Options:**
 - `--src`, `-s`: **Required** - Image source URL (web URL or local file path)
@@ -343,6 +358,7 @@ Adds a new image element to the currently selected page with customizable positi
 - `--height`, `-h`: Element height in pixels (positive number). Default: LocalFile height or 150px
 - `--opacity`, `-o`: Element opacity (0.0 to 1.0). Default: 1.0
 - `--rotation`, `-r`: Rotation angle in degrees. Default: 0
+- `--copy`: Copy properties from any existing element with specified ID
 
 **Smart Defaults:**
 - **LocalFile Detection**: When using a LocalFile from storage, automatically uses the file's original dimensions
@@ -357,6 +373,9 @@ Adds a new image element to the currently selected page with customizable positi
 - Supports web URLs, data URLs, and LocalFile references
 - For LocalFiles: Detects original dimensions from file storage and uses them as defaults
 - For external URLs: Uses fallback dimensions (200x150px) unless explicitly specified
+- With `--copy`: Copies compatible properties from any element type (position, size, opacity, rotation, animations)
+- Image source is only copied from image/video elements
+- Additional options override copied properties
 - Automatically centers element on canvas if position is not provided
 - Images are loaded asynchronously and displayed when available
 - Updates project state and refreshes the UI
@@ -367,9 +386,13 @@ Adds a new image element to the currently selected page with customizable positi
 - `/new-image -s "logo.png" --left 50 --top 50` - Uses LocalFile dimensions, positioned at (50,50)
 - `/new-image --src "banner.jpg" --width 800` - Sets width to 800px, height auto-calculated from aspect ratio
 - `/new-image -s "https://via.placeholder.com/150" -w 150 -h 150 -r 45 -o 0.7` - Creates rotated placeholder with custom dimensions
+- `/new-image --copy image-123` - Copies all properties from image-123
+- `/new-image --copy text-456 --src "photo.jpg"` - Copies position/size from text-456, uses custom image source
 
 **Response Messages:**
 - Success: "✅ **Image Element Added** - Added image element to page '[page name]' • Source: url • Position: (x, y) • Size: width×height • Opacity: opacity • Rotation: degrees°"
+- Success (with copy): "✅ **Image Element Added** - Added image element to page '[page name]' (copied from element ID: source-id) • Source: url • Position: (x, y) • Size: width×height • Opacity: opacity • Rotation: degrees°"
+- Error (source not found): "❌ **Source Element Not Found** - Cannot find element with ID 'xyz' to copy from."
 - Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
 - Error (missing src): "❌ **Missing Image Source** - Image source is required. Usage: `/new-image --src 'https://example.com/image.jpg'` Example: • `/new-image --src 'https://picsum.photos/300/200' --width 300 --height 200`"
 - Error (no page selected): "❌ **No Page Selected** - Please select a page first before adding elements."
@@ -382,9 +405,9 @@ Adds a new image element to the currently selected page with customizable positi
 
 ### `/new-video`
 
-Adds a new video element to the currently selected page with customizable positioning, visual properties, and timing. Automatically detects LocalFile dimensions and centers elements on the canvas.
+Adds a new video element to the currently selected page with customizable positioning, visual properties, and timing. Automatically detects LocalFile dimensions and centers elements on the canvas. Supports --copy to copy from existing element.
 
-**Usage:** `/new-video --src|-s url [--left|-l x] [--top|-tp y] [--width|-w width] [--height|-h height] [--opacity|-o opacity] [--rotation|-r degrees] [--delay|-d milliseconds]`
+**Usage:** `/new-video --src|-s url [--left|-l x] [--top|-tp y] [--width|-w width] [--height|-h height] [--opacity|-o opacity] [--rotation|-r degrees] [--delay|-d milliseconds] [--copy id]`
 
 **Options:**
 - `--src`, `-s`: **Required** - Video source URL (web URL or local file path)
@@ -395,6 +418,7 @@ Adds a new video element to the currently selected page with customizable positi
 - `--opacity`, `-o`: Element opacity (0.0 to 1.0). Default: 1.0
 - `--rotation`, `-r`: Rotation angle in degrees. Default: 0
 - `--delay`, `-d`: Animation delay in milliseconds (non-negative). Default: 0
+- `--copy`: Copy properties from any existing element with specified ID
 
 **Smart Defaults:**
 - **LocalFile Detection**: When using a LocalFile from storage, automatically uses the file's original dimensions
@@ -409,6 +433,9 @@ Adds a new video element to the currently selected page with customizable positi
 - Supports MP4, WebM, and other HTML5 video formats via web URLs or LocalFile references
 - For LocalFiles: Detects original dimensions from file storage and uses them as defaults
 - For external URLs: Uses fallback dimensions (320x240px) unless explicitly specified
+- With `--copy`: Copies compatible properties from any element type (position, size, opacity, rotation, animations, delay)
+- Video source is only copied from video/image elements
+- Additional options override copied properties
 - Automatically centers element on canvas if position is not provided
 - Videos are loaded asynchronously and can be controlled through the player
 - Delay parameter controls when the video starts playing relative to page start
@@ -420,9 +447,13 @@ Adds a new video element to the currently selected page with customizable positi
 - `/new-video -s "demo.webm" --left 200 --top 100` - Uses LocalFile dimensions, positioned at (200,100)
 - `/new-video --src "promo.mp4" --width 640` - Sets width to 640px, height auto-calculated from aspect ratio
 - `/new-video -s "clip.mp4" -w 400 -h 300 -r 10 -d 1500 -o 0.8` - Creates rotated video with custom dimensions and delay
+- `/new-video --copy video-123` - Copies all properties from video-123
+- `/new-video --copy image-456 --src "movie.mp4"` - Copies position/size from image-456, uses custom video source
 
 **Response Messages:**
 - Success: "✅ **Video Element Added** - Added video element to page '[page name]' • Source: url • Position: (x, y) • Size: width×height • Opacity: opacity • Rotation: degrees° • Delay: delayms"
+- Success (with copy): "✅ **Video Element Added** - Added video element to page '[page name]' (copied from element ID: source-id) • Source: url • Position: (x, y) • Size: width×height • Opacity: opacity • Rotation: degrees° • Delay: delayms"
+- Error (source not found): "❌ **Source Element Not Found** - Cannot find element with ID 'xyz' to copy from."
 - Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
 - Error (missing src): "❌ **Missing Video Source** - Video source is required. Usage: `/new-video --src 'https://example.com/video.mp4'` Example: • `/new-video --src 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4' --width 640 --height 360`"
 - Error (no page selected): "❌ **No Page Selected** - Please select a page first before adding elements."
