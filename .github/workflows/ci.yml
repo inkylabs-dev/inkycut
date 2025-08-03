@@ -120,8 +120,8 @@ jobs:
     - name: Start PostgreSQL
       run: |
         sudo systemctl start postgresql.service
-        sudo -u postgres createuser --createdb --login postgres || true
-        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';" || true
+        sudo -u postgres createuser --createdb --login opensaas_test || true
+        sudo -u postgres psql -c "ALTER USER opensaas_test PASSWORD 'postgres';" || true
         
     - name: Install Wasp CLI
       run: |
