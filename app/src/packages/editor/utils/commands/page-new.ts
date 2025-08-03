@@ -8,8 +8,8 @@ import { createDefaultPage } from '../../atoms';
 
 export const newPageCommand: SlashCommand = {
   name: 'new-page',
-  description: 'Add blank page(s) after the selected page. Supports --num/-n option to add multiple pages',
-  usage: '/new-page [--num|-n n]',
+  description: 'Add blank page(s) after the selected page. Supports --num/-n option to add multiple pages and --copy to copy from existing page',
+  usage: '/new-page [--num|-n n] [--copy id]',
   requiresConfirmation: false,
   execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
     try {
@@ -22,6 +22,7 @@ export const newPageCommand: SlashCommand = {
       }
 
       let numPages = 1;
+      let copyFromId = '';
       
       // Parse command arguments
       const args = context.args || [];
@@ -42,11 +43,16 @@ export const newPageCommand: SlashCommand = {
           numPages = numValue;
           i++; // Skip the number value
         }
+        // Handle --copy option
+        else if (arg === '--copy' && i + 1 < args.length) {
+          copyFromId = args[i + 1];
+          i++; // Skip the ID value
+        }
         // Handle unknown options
         else if (arg.startsWith('-')) {
           return {
             success: false,
-            message: `❌ **Unknown Option**\n\nUnknown option '${arg}'. Usage: /new-page [--num n]`,
+            message: `❌ **Unknown Option**\n\nUnknown option '${arg}'. Usage: /new-page [--num n] [--copy id]`,
             handled: true
           };
         }
@@ -84,17 +90,45 @@ export const newPageCommand: SlashCommand = {
         // Get existing page IDs to avoid conflicts
         const existingIds = new Set(updatedProject.composition.pages.map((page: any) => page.id));
         
+        // Find source page for copying if specified
+        let sourcePageTemplate: any = null;
+        if (copyFromId) {
+          sourcePageTemplate = updatedProject.composition.pages.find((page: any) => page.id === copyFromId);
+          if (!sourcePageTemplate) {
+            return {
+              success: false,
+              message: `❌ **Source Page Not Found**\n\nCannot find page with ID '${copyFromId}' to copy from.`,
+              handled: true
+            };
+          }
+        }
+        
         for (let i = 0; i < numPages; i++) {
           const pageNumber = currentTotalPages + i + 1;
-          let newPage = createDefaultPage();
+          let newPage: any;
           
-          // Set the page name
-          newPage.name = `Page ${pageNumber}`;
+          if (sourcePageTemplate) {
+            // Copy from source page
+            newPage = {
+              ...sourcePageTemplate,
+              // Override properties that must be unique
+              id: `page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              name: `${sourcePageTemplate.name} Copy ${i + 1 === 1 ? '' : i + 1}`.trim(),
+              // Deep copy elements to avoid shared references
+              elements: sourcePageTemplate.elements.map((element: any) => ({
+                ...element,
+                id: `${element.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+              }))
+            };
+          } else {
+            // Create default page
+            newPage = createDefaultPage();
+            newPage.name = `Page ${pageNumber}`;
+          }
           
           // Ensure unique ID by regenerating if conflict exists
           while (existingIds.has(newPage.id)) {
-            newPage = createDefaultPage();
-            newPage.name = `Page ${pageNumber}`;
+            newPage.id = `page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
           }
           
           // Add the new ID to our tracking set
@@ -115,10 +149,11 @@ export const newPageCommand: SlashCommand = {
 
         const pagesText = numPages === 1 ? 'page' : 'pages';
         const insertPosition = insertIndex === 0 ? 'at the beginning' : `after page ${insertIndex}`;
+        const copyMessage = copyFromId ? ` (copied from page "${sourcePageTemplate?.name}")` : '';
         
         return {
           success: true,
-          message: `✅ **${numPages} New ${pagesText.charAt(0).toUpperCase() + pagesText.slice(1)} Added**\n\n${numPages} blank ${pagesText} ${numPages === 1 ? 'has' : 'have'} been added ${insertPosition}. The first new page is now selected.`,
+          message: `✅ **${numPages} New ${pagesText.charAt(0).toUpperCase() + pagesText.slice(1)} Added**\n\n${numPages} ${pagesText} ${numPages === 1 ? 'has' : 'have'} been added ${insertPosition}${copyMessage}. The first new page is now selected.`,
           handled: true
         };
       } catch (error) {

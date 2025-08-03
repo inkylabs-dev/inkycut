@@ -6,8 +6,8 @@ import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './ty
 
 export const newVideoCommand: SlashCommand = {
   name: 'new-video',
-  description: 'Add a new video element to the selected page',
-  usage: '/new-video --src|-s url [--left|-l x] [--top|-tp y] [--width|-w width] [--height|-h height] [--opacity|-o opacity] [--rotation|-r degrees] [--delay|-d milliseconds]',
+  description: 'Add a new video element to the selected page. Supports --copy to copy from existing element',
+  usage: '/new-video [--src|-s url] [--left|-l x] [--top|-tp y] [--width|-w width] [--height|-h height] [--opacity|-o opacity] [--rotation|-r degrees] [--delay|-d milliseconds] [--copy id]',
   requiresConfirmation: false,
   execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
     try {
@@ -25,7 +25,16 @@ export const newVideoCommand: SlashCommand = {
       const canvasWidth = context.project.composition.width || 1920;
       const canvasHeight = context.project.composition.height || 1080;
       
-      // First pass: extract src to determine dimensions
+      // Check for --copy option first
+      let copyFromId = '';
+      for (let i = 0; i < args.length; i++) {
+        if (args[i] === '--copy' && i + 1 < args.length) {
+          copyFromId = args[i + 1];
+          break;
+        }
+      }
+      
+      // First pass: extract src to determine dimensions (or get from copy source)
       let srcValue = '';
       for (let i = 0; i < args.length; i++) {
         const arg = args[i];
@@ -39,6 +48,28 @@ export const newVideoCommand: SlashCommand = {
       // Determine default dimensions from LocalFile or fallback
       let defaultWidth = 320;
       let defaultHeight = 240;
+      
+      // If copying from existing element, get its properties first
+      if (copyFromId) {
+        const allElements: any[] = [];
+        context.project.composition.pages.forEach((page: any) => {
+          allElements.push(...page.elements);
+        });
+        
+        const sourceElement = allElements.find((el: any) => el.id === copyFromId);
+        if (!sourceElement) {
+          return {
+            success: false,
+            message: `❌ **Source Element Not Found**\n\nCannot find element with ID '${copyFromId}' to copy from.`,
+            handled: true
+          };
+        }
+        
+        // Use source element dimensions as defaults
+        defaultWidth = sourceElement.width || defaultWidth;
+        defaultHeight = sourceElement.height || defaultHeight;
+        srcValue = srcValue || sourceElement.src || '';
+      }
       
       if (srcValue && context.fileStorage) {
         try {
@@ -68,6 +99,32 @@ export const newVideoCommand: SlashCommand = {
         rotation: 0,
         delay: 0
       };
+
+      // If copying, apply source element properties
+      if (copyFromId) {
+        const allElements: any[] = [];
+        context.project.composition.pages.forEach((page: any) => {
+          allElements.push(...page.elements);
+        });
+        
+        const sourceElement = allElements.find((el: any) => el.id === copyFromId);
+        if (sourceElement) {
+          // Copy all compatible properties
+          Object.assign(elementData, {
+            src: sourceElement.src || elementData.src,
+            left: sourceElement.left || elementData.left,
+            top: sourceElement.top || elementData.top,
+            width: sourceElement.width || elementData.width,
+            height: sourceElement.height || elementData.height,
+            opacity: sourceElement.opacity !== undefined ? sourceElement.opacity : elementData.opacity,
+            rotation: sourceElement.rotation || elementData.rotation,
+            delay: sourceElement.delay || elementData.delay
+          });
+          
+          // Always ensure type is 'video' for this command
+          elementData.type = 'video';
+        }
+      }
 
       // Parse arguments
       for (let i = 0; i < args.length; i++) {
@@ -235,6 +292,13 @@ export const newVideoCommand: SlashCommand = {
             i++; // Skip next arg
             break;
 
+          case '--copy':
+            // Skip --copy since we handled it earlier
+            if (nextArg) {
+              i++; // Skip the ID value
+            }
+            break;
+
           default:
             if (arg.startsWith('-')) {
               return {
@@ -247,11 +311,11 @@ export const newVideoCommand: SlashCommand = {
         }
       }
 
-      // Validate required src parameter
+      // Validate required src parameter (unless copying from element that has src)
       if (!elementData.src) {
         return {
           success: false,
-          message: '❌ **Missing Video Source**\n\nVideo source is required.\n\nUsage: `/new-video --src "https://example.com/video.mp4"`\n\nExample:\n• `/new-video --src "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4" --width 640 --height 360`',
+          message: '❌ **Missing Video Source**\n\nVideo source is required.\n\nUsage: `/new-video --src "https://example.com/video.mp4"` or `/new-video --copy element-id`\n\nExample:\n• `/new-video --src "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4" --width 640 --height 360`',
           handled: true
         };
       }
@@ -305,9 +369,11 @@ export const newVideoCommand: SlashCommand = {
 
       context.updateProject(updatedProject);
 
+      const copyMessage = copyFromId ? ` (copied from element ID: ${copyFromId})` : '';
+
       return {
         success: true,
-        message: `✅ **Video Element Added**\n\nAdded video element to page "${selectedPage.name}"\n\n• Source: ${elementData.src}\n• Position: (${elementData.left}, ${elementData.top})\n• Size: ${elementData.width}×${elementData.height}\n• Opacity: ${elementData.opacity}\n• Rotation: ${elementData.rotation}°\n• Delay: ${elementData.delay}ms`,
+        message: `✅ **Video Element Added**\n\nAdded video element to page "${selectedPage.name}"${copyMessage}\n\n• Source: ${elementData.src}\n• Position: (${elementData.left}, ${elementData.top})\n• Size: ${elementData.width}×${elementData.height}\n• Opacity: ${elementData.opacity}\n• Rotation: ${elementData.rotation}°\n• Delay: ${elementData.delay}ms`,
         handled: true
       };
 

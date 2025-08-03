@@ -6,8 +6,8 @@ import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './ty
 
 export const newTextCommand: SlashCommand = {
   name: 'new-text',
-  description: 'Add a new text element to the selected page',
-  usage: '/new-text [--text|-t "text"] [--font-size|-fs size] [--color|-c color] [--font-family|-ff family] [--font-weight|-fw weight] [--text-align|-ta align] [--left|-l x] [--top|-tp y] [--width|-w width]',
+  description: 'Add a new text element to the selected page. Supports --copy to copy from existing element',
+  usage: '/new-text [--text|-t "text"] [--font-size|-fs size] [--color|-c color] [--font-family|-ff family] [--font-weight|-fw weight] [--text-align|-ta align] [--left|-l x] [--top|-tp y] [--width|-w width] [--copy id]',
   requiresConfirmation: false,
   execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
     try {
@@ -34,6 +34,51 @@ export const newTextCommand: SlashCommand = {
         fontWeight: 'normal',
         textAlign: 'left'
       };
+
+      // Check for --copy option first to establish base properties
+      let copyFromId = '';
+      for (let i = 0; i < args.length; i++) {
+        if (args[i] === '--copy' && i + 1 < args.length) {
+          copyFromId = args[i + 1];
+          break;
+        }
+      }
+
+      // If copying from existing element, find and copy its properties
+      if (copyFromId) {
+        const allElements: any[] = [];
+        context.project.composition.pages.forEach((page: any) => {
+          allElements.push(...page.elements);
+        });
+        
+        const sourceElement = allElements.find((el: any) => el.id === copyFromId);
+        if (!sourceElement) {
+          return {
+            success: false,
+            message: `❌ **Source Element Not Found**\n\nCannot find element with ID '${copyFromId}' to copy from.`,
+            handled: true
+          };
+        }
+        
+        // Copy all compatible properties from source element
+        Object.assign(elementData, {
+          left: sourceElement.left || elementData.left,
+          top: sourceElement.top || elementData.top,
+          width: sourceElement.width || elementData.width,
+          opacity: sourceElement.opacity || elementData.opacity,
+          rotation: sourceElement.rotation || elementData.rotation,
+          // Copy text-specific properties if available
+          text: sourceElement.text || elementData.text,
+          fontSize: sourceElement.fontSize || elementData.fontSize,
+          color: sourceElement.color || elementData.color,
+          fontFamily: sourceElement.fontFamily || elementData.fontFamily,
+          fontWeight: sourceElement.fontWeight || elementData.fontWeight,
+          textAlign: sourceElement.textAlign || elementData.textAlign
+        });
+        
+        // Always ensure type is 'text' for this command
+        elementData.type = 'text';
+      }
 
       // Parse arguments
       for (let i = 0; i < args.length; i++) {
@@ -197,6 +242,13 @@ export const newTextCommand: SlashCommand = {
             i++; // Skip next arg
             break;
 
+          case '--copy':
+            // Skip --copy since we handled it earlier
+            if (nextArg) {
+              i++; // Skip the ID value
+            }
+            break;
+
           default:
             if (arg.startsWith('-')) {
               return {
@@ -250,9 +302,11 @@ export const newTextCommand: SlashCommand = {
 
       context.updateProject(updatedProject);
 
+      const copyMessage = copyFromId ? ` (copied from element ID: ${copyFromId})` : '';
+
       return {
         success: true,
-        message: `✅ **Text Element Added**\n\nAdded text element "${elementData.text}" to page "${selectedPage.name}"\n\n• Position: (${elementData.left}, ${elementData.top})\n• Width: ${elementData.width}px (height auto-calculated)\n• Font: ${elementData.fontSize}px ${elementData.fontFamily}\n• Color: ${elementData.color}`,
+        message: `✅ **Text Element Added**\n\nAdded text element "${elementData.text}" to page "${selectedPage.name}"${copyMessage}\n\n• Position: (${elementData.left}, ${elementData.top})\n• Width: ${elementData.width}px (height auto-calculated)\n• Font: ${elementData.fontSize}px ${elementData.fontFamily}\n• Color: ${elementData.color}`,
         handled: true
       };
 
