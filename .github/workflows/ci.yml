@@ -150,9 +150,11 @@ jobs:
         APP_PID=$!
         
         # Wait for app frontend and backend to be ready
+        echo 'Waiting for app to be ready...'
         timeout 300 bash -c 'until curl -f http://localhost:3000; do sleep 5; done'
         
         # Run the tests
+        echo 'Running Playwright tests...'
         npx playwright test
         
         # Cleanup
