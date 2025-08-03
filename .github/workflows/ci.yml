@@ -54,6 +54,14 @@ jobs:
       run: |
         cd app
         npm run build:bundle
+        
+    - name: Upload build artifacts
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: wasp-build-artifacts
+        path: app/.wasp/build/
+        retention-days: 1
 
   build-blog:
     runs-on: ubuntu-latest
@@ -78,3 +86,11 @@ jobs:
       run: |
         cd blog
         npm run build
+        
+    - name: Upload blog artifacts
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: blog-build-artifacts
+        path: blog/dist/
+        retention-days: 1
