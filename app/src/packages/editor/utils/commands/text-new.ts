@@ -3,6 +3,7 @@
  */
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
+import { findElementById, copyElementProperties, generateElementId } from './helpers';
 
 export const newTextCommand: SlashCommand = {
   name: 'new-text',
@@ -46,12 +47,7 @@ export const newTextCommand: SlashCommand = {
 
       // If copying from existing element, find and copy its properties
       if (copyFromId) {
-        const allElements: any[] = [];
-        context.project.composition.pages.forEach((page: any) => {
-          allElements.push(...page.elements);
-        });
-        
-        const sourceElement = allElements.find((el: any) => el.id === copyFromId);
+        const sourceElement = findElementById(context.project, copyFromId);
         if (!sourceElement) {
           return {
             success: false,
@@ -61,23 +57,7 @@ export const newTextCommand: SlashCommand = {
         }
         
         // Copy all compatible properties from source element
-        Object.assign(elementData, {
-          left: sourceElement.left || elementData.left,
-          top: sourceElement.top || elementData.top,
-          width: sourceElement.width || elementData.width,
-          opacity: sourceElement.opacity || elementData.opacity,
-          rotation: sourceElement.rotation || elementData.rotation,
-          // Copy text-specific properties if available
-          text: sourceElement.text || elementData.text,
-          fontSize: sourceElement.fontSize || elementData.fontSize,
-          color: sourceElement.color || elementData.color,
-          fontFamily: sourceElement.fontFamily || elementData.fontFamily,
-          fontWeight: sourceElement.fontWeight || elementData.fontWeight,
-          textAlign: sourceElement.textAlign || elementData.textAlign
-        });
-        
-        // Always ensure type is 'text' for this command
-        elementData.type = 'text';
+        copyElementProperties(sourceElement, elementData, 'text');
       }
 
       // Parse arguments
@@ -284,7 +264,7 @@ export const newTextCommand: SlashCommand = {
 
       // Create new element with unique ID
       const newElement = {
-        id: `text-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: generateElementId('text'),
         ...elementData
       };
 

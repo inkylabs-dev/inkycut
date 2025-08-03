@@ -3,7 +3,7 @@
  */
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
-
+import { findPageById, copyPageProperties, generatePageId } from './helpers';
 import { createDefaultPage } from '../../atoms';
 
 export const newPageCommand: SlashCommand = {
@@ -93,7 +93,7 @@ export const newPageCommand: SlashCommand = {
         // Find source page for copying if specified
         let sourcePageTemplate: any = null;
         if (copyFromId) {
-          sourcePageTemplate = updatedProject.composition.pages.find((page: any) => page.id === copyFromId);
+          sourcePageTemplate = findPageById(updatedProject, copyFromId);
           if (!sourcePageTemplate) {
             return {
               success: false,
@@ -108,18 +108,17 @@ export const newPageCommand: SlashCommand = {
           let newPage: any;
           
           if (sourcePageTemplate) {
-            // Copy from source page
+            // Copy from source page using helper
             newPage = {
-              ...sourcePageTemplate,
-              // Override properties that must be unique
-              id: `page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-              name: `${sourcePageTemplate.name} Copy ${i + 1 === 1 ? '' : i + 1}`.trim(),
-              // Deep copy elements to avoid shared references
-              elements: sourcePageTemplate.elements.map((element: any) => ({
-                ...element,
-                id: `${element.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-              }))
+              // Start with default page structure
+              ...createDefaultPage(),
+              // Override with copied properties
+              id: generatePageId(),
+              name: `${sourcePageTemplate.name} Copy ${i + 1 === 1 ? '' : i + 1}`.trim()
             };
+            
+            // Copy all page properties including backgroundColor and elements
+            copyPageProperties(sourcePageTemplate, newPage);
           } else {
             // Create default page
             newPage = createDefaultPage();
@@ -128,7 +127,7 @@ export const newPageCommand: SlashCommand = {
           
           // Ensure unique ID by regenerating if conflict exists
           while (existingIds.has(newPage.id)) {
-            newPage.id = `page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            newPage.id = generatePageId();
           }
           
           // Add the new ID to our tracking set

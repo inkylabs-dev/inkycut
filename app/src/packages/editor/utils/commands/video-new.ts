@@ -3,6 +3,7 @@
  */
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
+import { findElementById, copyElementProperties, generateElementId } from './helpers';
 
 export const newVideoCommand: SlashCommand = {
   name: 'new-video',
@@ -51,12 +52,7 @@ export const newVideoCommand: SlashCommand = {
       
       // If copying from existing element, get its properties first
       if (copyFromId) {
-        const allElements: any[] = [];
-        context.project.composition.pages.forEach((page: any) => {
-          allElements.push(...page.elements);
-        });
-        
-        const sourceElement = allElements.find((el: any) => el.id === copyFromId);
+        const sourceElement = findElementById(context.project, copyFromId);
         if (!sourceElement) {
           return {
             success: false,
@@ -102,27 +98,10 @@ export const newVideoCommand: SlashCommand = {
 
       // If copying, apply source element properties
       if (copyFromId) {
-        const allElements: any[] = [];
-        context.project.composition.pages.forEach((page: any) => {
-          allElements.push(...page.elements);
-        });
-        
-        const sourceElement = allElements.find((el: any) => el.id === copyFromId);
+        const sourceElement = findElementById(context.project, copyFromId);
         if (sourceElement) {
-          // Copy all compatible properties
-          Object.assign(elementData, {
-            src: sourceElement.src || elementData.src,
-            left: sourceElement.left || elementData.left,
-            top: sourceElement.top || elementData.top,
-            width: sourceElement.width || elementData.width,
-            height: sourceElement.height || elementData.height,
-            opacity: sourceElement.opacity !== undefined ? sourceElement.opacity : elementData.opacity,
-            rotation: sourceElement.rotation || elementData.rotation,
-            delay: sourceElement.delay || elementData.delay
-          });
-          
-          // Always ensure type is 'video' for this command
-          elementData.type = 'video';
+          // Copy all compatible properties using helper
+          copyElementProperties(sourceElement, elementData, 'video');
         }
       }
 
@@ -351,7 +330,7 @@ export const newVideoCommand: SlashCommand = {
 
       // Create new element with unique ID
       const newElement = {
-        id: `video-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: generateElementId('video'),
         ...elementData
       };
 

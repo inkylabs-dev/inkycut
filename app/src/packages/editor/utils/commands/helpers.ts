@@ -3,6 +3,7 @@
  */
 
 import { generateKey, exportKey, encryptData, generateShareableKey } from '../encryptionUtils';
+import type { CompositionElement, CompositionPage } from '../../types';
 
 /**
  * Helper function to perform JSON export directly
@@ -175,4 +176,128 @@ export async function performDirectShare(project: any, onShare: any): Promise<st
     console.error('Share failed:', error);
     throw new Error(error instanceof Error ? error.message : 'Failed to share project');
   }
+}
+
+/**
+ * Find an element by ID across all pages in the project
+ */
+export function findElementById(project: any, elementId: string): CompositionElement | null {
+  if (!project?.composition?.pages) {
+    return null;
+  }
+
+  for (const page of project.composition.pages) {
+    const element = page.elements?.find((el: CompositionElement) => el.id === elementId);
+    if (element) {
+      return element;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Find a page by ID in the project
+ */
+export function findPageById(project: any, pageId: string): CompositionPage | null {
+  if (!project?.composition?.pages) {
+    return null;
+  }
+
+  return project.composition.pages.find((page: CompositionPage) => page.id === pageId) || null;
+}
+
+/**
+ * Copy all compatible properties from source element to target element data
+ * Preserves all properties from CompositionElement interface including animations
+ */
+export function copyElementProperties(sourceElement: CompositionElement, targetElementData: any, targetType: string): void {
+  // Common properties that apply to all element types
+  const commonProperties = [
+    'left', 'top', 'width', 'height', 'rotation', 'opacity', 'zIndex', 'delay'
+  ];
+
+  // Copy common properties
+  commonProperties.forEach(prop => {
+    if (sourceElement[prop as keyof CompositionElement] !== undefined) {
+      targetElementData[prop] = sourceElement[prop as keyof CompositionElement];
+    }
+  });
+
+  // Copy animation properties if present
+  if (sourceElement.animation) {
+    targetElementData.animation = {
+      ...sourceElement.animation,
+      // Deep copy props object if it exists
+      props: sourceElement.animation.props ? { ...sourceElement.animation.props } : undefined
+    };
+  }
+
+  // Copy type-specific properties based on target type
+  if (targetType === 'text') {
+    // Copy text-specific properties
+    if (sourceElement.text !== undefined) targetElementData.text = sourceElement.text;
+    if (sourceElement.fontSize !== undefined) targetElementData.fontSize = sourceElement.fontSize;
+    if (sourceElement.fontFamily !== undefined) targetElementData.fontFamily = sourceElement.fontFamily;
+    if (sourceElement.color !== undefined) targetElementData.color = sourceElement.color;
+    if (sourceElement.fontWeight !== undefined) targetElementData.fontWeight = sourceElement.fontWeight;
+    if (sourceElement.textAlign !== undefined) targetElementData.textAlign = sourceElement.textAlign;
+  } else if (targetType === 'video') {
+    // Copy video-specific properties
+    if (sourceElement.src !== undefined) targetElementData.src = sourceElement.src;
+  } else if (targetType === 'image') {
+    // Copy image-specific properties
+    if (sourceElement.src !== undefined) targetElementData.src = sourceElement.src;
+  }
+
+  // Always ensure the correct type for the target element
+  targetElementData.type = targetType;
+}
+
+/**
+ * Copy all properties from source page to target page data
+ * Preserves all properties from CompositionPage interface including backgroundColor
+ */
+export function copyPageProperties(sourcePage: CompositionPage, targetPageData: any): void {
+  // Copy all page properties except id and elements (handled separately)
+  if (sourcePage.name !== undefined) targetPageData.name = sourcePage.name;
+  if (sourcePage.duration !== undefined) targetPageData.duration = sourcePage.duration;
+  if (sourcePage.backgroundColor !== undefined) targetPageData.backgroundColor = sourcePage.backgroundColor;
+  
+  // Deep copy elements with new unique IDs
+  if (sourcePage.elements) {
+    targetPageData.elements = sourcePage.elements.map((element: CompositionElement) => ({
+      ...element,
+      // Generate new unique ID for the copied element
+      id: `${element.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      // Deep copy animation if present
+      animation: element.animation ? {
+        ...element.animation,
+        props: element.animation.props ? { ...element.animation.props } : undefined
+      } : undefined,
+      // Deep copy nested elements for groups if present
+      elements: element.elements ? element.elements.map((nestedEl: CompositionElement) => ({
+        ...nestedEl,
+        id: `${nestedEl.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        animation: nestedEl.animation ? {
+          ...nestedEl.animation,
+          props: nestedEl.animation.props ? { ...nestedEl.animation.props } : undefined
+        } : undefined
+      })) : undefined
+    }));
+  }
+}
+
+/**
+ * Generate a unique element ID with the specified type prefix
+ */
+export function generateElementId(type: string): string {
+  return `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * Generate a unique page ID
+ */
+export function generatePageId(): string {
+  return `page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
