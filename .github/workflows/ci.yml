@@ -163,7 +163,19 @@ jobs:
         npx playwright test
         
         # Cleanup
-        kill $APP_PID || true
+        # Gracefully terminate the app process
+        kill -TERM $APP_PID || true
+        # Wait up to 5 seconds for the process to exit
+        for i in {1..5}; do
+          if ! kill -0 $APP_PID 2>/dev/null; then
+            break
+          fi
+          sleep 1
+        done
+        # Force kill if still running
+        if kill -0 $APP_PID 2>/dev/null; then
+          kill -KILL $APP_PID || true
+        fi
         
     - name: Upload test results
       if: always()
