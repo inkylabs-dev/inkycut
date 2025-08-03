@@ -150,7 +150,7 @@ jobs:
         APP_PID=$!
         
         # Wait for app frontend and backend to be ready
-        timeout 300 bash -c 'until curl -f http://localhost:3000 && curl -f http://localhost:3001; do sleep 5; done'
+        timeout 300 bash -c 'until curl -f http://localhost:3000; do sleep 5; done'
         
         # Run the tests
         npx playwright test
