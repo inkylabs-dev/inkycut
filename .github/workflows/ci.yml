@@ -1,0 +1,80 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    env:
+      NODE_ENV: development
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'app/package-lock.json'
+        
+    - name: Install Wasp CLI
+      run: |
+        curl -sSL https://get.wasp-lang.dev/installer.sh | sh
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        
+    - name: Verify Wasp installation
+      run: |
+        export PATH="$HOME/.local/bin:$PATH"
+        wasp version
+      
+    - name: Install dependencies
+      run: |
+        cd app
+        npm ci
+        
+    - name: Build Wasp project (generates types)
+      run: |
+        cd app
+        export PATH="$HOME/.local/bin:$PATH"
+        wasp build
+        
+    - name: Run type check
+      run: |
+        cd app
+        npm run typecheck
+        
+    - name: Complete build (bundle step)
+      run: |
+        cd app
+        npm run build:bundle
+
+  build-blog:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'blog/package-lock.json'
+        
+    - name: Install blog dependencies
+      run: |
+        cd blog
+        npm ci
+        
+    - name: Build blog
+      run: |
+        cd blog
+        npm run build
