@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { Player, PlayerRef } from '@remotion/player';
 import { 
   PlayIcon, 
@@ -8,13 +8,13 @@ import {
   CodeBracketIcon,
   VideoCameraIcon
 } from '@heroicons/react/24/outline';
-import { CompositionData, defaultCompositionData } from './types';
+import { CompositionData, defaultCompositionData, LocalFile } from './types';
 import { MainComposition } from './Composition';
 import AudioTimeline from './AudioTimeline';
 import { Playhead } from './components/Playhead';
 import PageTrack from './components/PageTrack';
 import TimeRuler from './components/TimeRuler';
-import { projectAtom, ensureCompositionIDs, filesAtom, appStateAtom, updateProjectAtom, addUserMessageToQueueAtom } from './atoms';
+import { projectAtom, ensureCompositionIDs, filesAtom, appStateAtom, updateProjectAtom, addUserMessageToQueueAtom, updateAppStateAtom } from './atoms';
 
 interface MiddlePanelProps {
   onTimelineUpdate: (timeline: any[]) => void;
@@ -30,6 +30,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   const [appState] = useAtom(appStateAtom);
   const [, updateProject] = useAtom(updateProjectAtom);
   const [, addUserMessageToQueue] = useAtom(addUserMessageToQueueAtom);
+  const updateAppState = useSetAtom(updateAppStateAtom);
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -644,6 +645,51 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${tenths}`;
   };
 
+  const handleFileDropped = (file: LocalFile, pageIndex: number) => {
+    // Determine if it's a video or image file
+    const isVideo = file.type.startsWith('video/');
+    const isImage = file.type.startsWith('image/');
+    
+    if (!isVideo && !isImage) return;
+    
+    const targetPage = compositionData.pages[pageIndex];
+    if (!targetPage) return;
+    
+    // First, select the target page where we want to add the element
+    updateAppState({ selectedPageId: targetPage.id });
+    
+    // Get canvas dimensions for optimal sizing
+    const canvasWidth = compositionData.width || 1920;
+    const canvasHeight = compositionData.height || 1080;
+    
+    // Use file dimensions if available, otherwise default
+    let elementWidth = file.width || (isVideo ? 320 : 200);
+    let elementHeight = file.height || (isVideo ? 240 : 200);
+    
+    // If file is larger than canvas, scale it down proportionally
+    if (elementWidth > canvasWidth || elementHeight > canvasHeight) {
+      const widthRatio = canvasWidth / elementWidth;
+      const heightRatio = canvasHeight / elementHeight;
+      const scaleFactor = Math.min(widthRatio, heightRatio, 1);
+      
+      elementWidth = Math.floor(elementWidth * scaleFactor);
+      elementHeight = Math.floor(elementHeight * scaleFactor);
+    }
+    
+    // Calculate center position
+    const centerX = Math.floor((canvasWidth - elementWidth) / 2);
+    const centerY = Math.floor((canvasHeight - elementHeight) / 2);
+    
+    // Create the appropriate slash command based on file type
+    const command = isVideo ? 'new-video' : 'new-image';
+    const commandText = `/${command} --src "${file.name}" --left ${centerX} --top ${centerY} --width ${elementWidth} --height ${elementHeight}`;
+    
+    // Add command to user message queue
+    addUserMessageToQueue(commandText);
+    
+    console.log(`🎯 Dropped ${isVideo ? 'video' : 'image'} "${file.name}" on page "${targetPage.name}" - executing: ${commandText}`);
+  };
+
   const inputProps = useMemo(() => ({
     data: compositionData,
     currentPageIndex: getCurrentPage().pageIndex,
@@ -658,6 +704,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
           <div className="flex items-center space-x-2">
             <button
               onClick={toggleViewMode}
+              data-testid="toggle-player-mode"
               className={`flex items-center space-x-2 px-3 py-1 rounded text-sm font-medium transition-colors ${
                 viewMode === 'player' 
                   ? 'bg-blue-600 text-white' 
@@ -669,6 +716,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
             </button>
             <button
               onClick={toggleViewMode}
+              data-testid="toggle-code-view"
               className={`flex items-center space-x-2 px-3 py-1 rounded text-sm font-medium transition-colors ${
                 viewMode === 'code' 
                   ? 'bg-blue-600 text-white' 
@@ -796,6 +844,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                       setStartMouseX={setStartMouseX}
                       formatTime={formatTime}
                       files={files}
+                      onFileDropped={handleFileDropped}
                     />
 
                     {/* Audio Timelines */}

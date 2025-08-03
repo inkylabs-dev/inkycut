@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CompositionData, LocalFile } from '../types';
 import PageThumbnail from './PageThumbnail';
 
@@ -19,6 +19,7 @@ interface PageTrackProps {
   setStartMouseX: (value: number) => void;
   formatTime: (seconds: number) => string;
   files?: LocalFile[];
+  onFileDropped?: (file: LocalFile, pageIndex: number) => void;
 }
 
 export default function PageTrack({
@@ -37,8 +38,10 @@ export default function PageTrack({
   setStartResizeWidth,
   setStartMouseX,
   formatTime,
-  files
+  files,
+  onFileDropped
 }: PageTrackProps) {
+  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
   return (
     <div className="pages-track relative h-16 bg-gray-200 dark:bg-gray-700 rounded mb-2" style={{ width: '100%' }}>
       {(() => {
@@ -74,6 +77,37 @@ export default function PageTrack({
           // Always update cumulative position to maintain layout space
           cumulativePosition += blockWidth;
           
+          const handleDragOver = (e: React.DragEvent) => {
+            e.preventDefault();
+            setDropTargetIndex(index);
+          };
+          
+          const handleDragLeave = (e: React.DragEvent) => {
+            // Only clear if we're actually leaving the page (not just entering a child)
+            if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+              setDropTargetIndex(null);
+            }
+          };
+          
+          const handleDrop = (e: React.DragEvent) => {
+            e.preventDefault();
+            setDropTargetIndex(null);
+            
+            // Handle file drop from external sources or our drag system
+            const fileData = e.dataTransfer.getData('application/json');
+            if (fileData) {
+              try {
+                const file = JSON.parse(fileData) as LocalFile;
+                // Accept both video and image files
+                if (file.type.startsWith('video/') || file.type.startsWith('image/')) {
+                  onFileDropped?.(file, index);
+                }
+              } catch (error) {
+                console.error('Failed to parse dropped file data:', error);
+              }
+            }
+          };
+
           elements.push(
             <div
               key={`page-${page.id}`}
@@ -87,6 +121,10 @@ export default function PageTrack({
                   : isPageDragging 
                     ? 'cursor-default' 
                     : 'cursor-grab hover:opacity-80'
+              } ${
+                dropTargetIndex === index
+                  ? 'ring-2 ring-blue-400 ring-opacity-60 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30'
+                  : ''
               }`}
               style={{
                 left: `${leftPosition}px`,
@@ -95,7 +133,10 @@ export default function PageTrack({
               }}
               onClick={(event) => !isPageDragging && !isResizing && handlePageClick(index, event)}
               onMouseDown={(event) => handlePageMouseDown(event, index)}
-              title={`${page.name} (${formatTime(pageDuration)}) - Drag to reorder, drag right edge to resize`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              title={`${page.name} (${formatTime(pageDuration)}) - Drag to reorder, drag right edge to resize, or drop video/image files here`}
             >
               <PageThumbnail
                 page={page}

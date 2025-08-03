@@ -16,7 +16,7 @@ import {
 // import { routes } from 'wasp/client/router';
 import { Link } from 'react-router-dom';
 import { CompositionElement, LocalFile } from './types';
-import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject, filesAtom, chatMessagesAtom, clearAllFilesAtom, forkProjectAtom, isSharedProjectAtom } from './atoms';
+import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject, filesAtom, chatMessagesAtom, clearAllFilesAtom, forkProjectAtom, isSharedProjectAtom, updateAppStateAtom } from './atoms';
 import LocalFileUpload from './LocalFileUpload';
 import ElementPreview from './ElementPreview';
 import FileListItem from './FileListItem';
@@ -113,6 +113,17 @@ export default function LeftPanel({
   const clearAllFiles = useSetAtom(clearAllFilesAtom);
   const [isSharedProject, setIsSharedProject] = useAtom(isSharedProjectAtom);
   const forkProject = useSetAtom(forkProjectAtom);
+  const updateAppState = useSetAtom(updateAppStateAtom);
+  
+  const handleFileDragStart = (file: LocalFile) => {
+    // Store dragged file in project appState for access by other components
+    updateAppState({ draggedFile: file });
+  };
+  
+  const handleFileDragEnd = () => {
+    // Clear dragged file from project appState
+    updateAppState({ draggedFile: null });
+  };
 
   // Create file resolver from local files
   const fileResolver = React.useMemo(() => {
@@ -258,6 +269,7 @@ export default function LeftPanel({
             <div className="relative">
               <button 
                 className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none" 
+                data-testid="left-panel-menu-button"
                 onClick={() => setShowMenu(!showMenu)}
               >
                 <Bars3Icon className="h-6 w-6" />
@@ -328,6 +340,7 @@ export default function LeftPanel({
                   {menuConfig.showReset && (
                     <button
                       onClick={handleResetProject}
+                      data-testid="reset-project-button"
                       className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
                     >
                       <ArrowPathIcon className="mr-2 h-5 w-5 text-gray-500 dark:text-gray-400" />
@@ -447,6 +460,8 @@ export default function LeftPanel({
                     <FileListItem
                       key={file.id}
                       file={file}
+                      onDragStart={handleFileDragStart}
+                      onDragEnd={handleFileDragEnd}
                     />
                   ))
                 ) : (

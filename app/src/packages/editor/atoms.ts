@@ -217,6 +217,40 @@ export const setSelectedPageAtom = atom(
 );
 
 /**
+ * Write-only atom for updating the project's appState
+ * Makes it easy to update appState without manually spreading the entire project
+ * Updates the project's appState and persists the change with timestamp
+ * 
+ * @example
+ * // Instead of manually spreading the project:
+ * // const updatedProject = { ...project, appState: { ...project.appState, draggedFile: file } };
+ * // setProject(updatedProject);
+ * 
+ * // Simply use:
+ * // updateAppState({ draggedFile: file });
+ * 
+ * @param {Partial<AppState>} appStateUpdates - The appState properties to update
+ */
+export const updateAppStateAtom = atom(
+  null,
+  (get, set, appStateUpdates: Partial<AppState>) => {
+    const project = get(projectAtom);
+    if (!project) return;
+    
+    const updatedProject = {
+      ...project,
+      appState: {
+        ...project.appState || createDefaultAppState(),
+        ...appStateUpdates
+      }
+    };
+    
+    // Use updateProjectAtom to update the project in storage
+    set(updateProjectAtom, updatedProject);
+  }
+);
+
+/**
  * Persistent storage for chat messages using atomWithStorage
  * Stores the entire chat history in localStorage
  * @type {ChatMessage[]} - Array of chat messages with initial welcome message

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useSetAtom } from 'jotai';
 import { LocalFile } from './types';
 import { removeFileAtom } from './atoms';
 import { getFileIcon } from './LocalFileUpload';
+// Using CSS transitions instead of animejs for simple animations
 
 // Helper function to format duration in HH:MM:SS format
 function formatDuration(durationMs: number): string {
@@ -15,10 +16,15 @@ function formatDuration(durationMs: number): string {
 
 interface FileListItemProps {
   file: LocalFile;
+  onDragStart?: (file: LocalFile) => void;
+  onDragEnd?: () => void;
 }
 
-export default function FileListItem({ file }: FileListItemProps) {
+export default function FileListItem({ file, onDragStart, onDragEnd }: FileListItemProps) {
   const removeFile = useSetAtom(removeFileAtom);
+  const itemRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   const handleRemoveFile = (e: React.MouseEvent) => {
     e.stopPropagation();
     removeFile(file.id);
@@ -28,10 +34,59 @@ export default function FileListItem({ file }: FileListItemProps) {
     console.log('Local file selected:', file);
   };
 
+  const handleDragStart = (e: React.DragEvent) => {
+    // Only allow dragging for video and image files
+    if (!file.type.startsWith('video/') && !file.type.startsWith('image/')) {
+      e.preventDefault();
+      return;
+    }
+    
+    setIsDragging(true);
+    
+    // Set drag data
+    e.dataTransfer.setData('application/json', JSON.stringify(file));
+    e.dataTransfer.effectAllowed = 'copy';
+    
+    // Animate the original item to show it's being dragged
+    if (itemRef.current) {
+      itemRef.current.style.opacity = '0.5';
+      itemRef.current.style.transform = 'scale(0.95)';
+    }
+    
+    onDragStart?.(file);
+  };
+  
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    
+    // Restore original item
+    if (itemRef.current) {
+      itemRef.current.style.opacity = '1';
+      itemRef.current.style.transform = 'scale(1)';
+    }
+    
+    onDragEnd?.();
+  };
+
   return (
     <div
-      className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer border border-gray-200 dark:border-gray-600 group"
+      ref={itemRef}
+      draggable={file.type.startsWith('video/') || file.type.startsWith('image/')}
+      className={`flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 group transition-all duration-200 ease-out ${
+        (file.type.startsWith('video/') || file.type.startsWith('image/'))
+          ? 'cursor-grab hover:border-blue-300 dark:hover:border-blue-500' 
+          : 'cursor-pointer'
+      } ${isDragging ? 'cursor-grabbing' : ''}`}
       onClick={handleFileClick}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      title={
+        file.type.startsWith('video/') 
+          ? 'Drag to PageTrack to add video to page' 
+          : file.type.startsWith('image/')
+            ? 'Drag to PageTrack to add image to page'
+            : file.name
+      }
     >
       <div className="mr-3">
         <LocalFilePreviewItem file={file} />
