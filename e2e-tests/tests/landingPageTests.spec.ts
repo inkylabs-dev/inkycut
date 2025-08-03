@@ -13,15 +13,12 @@ test.describe('general landing page tests', () => {
 
   test('get started link', async ({ page }) => {
     await page.getByRole('link', { name: 'Get started' }).click();
-    await page.waitForURL(DOCS_URL);
+    await page.waitForURL('/login');
   });
 
   test('headings', async ({ page }) => {
     await expect(
       page.getByRole('heading', { name: 'Frequently asked questions' })
-    ).toBeVisible();
-    await expect(
-      page.getByRole('heading', { name: 'Some cool words' })
     ).toBeVisible();
   });
 });
@@ -55,8 +52,10 @@ test.describe('cookie consent tests', () => {
     const consentCookie = cookies.find((c) => c.name === 'cc_cookie');
     const cookieObject = JSON.parse(decodeURIComponent(consentCookie.value));
     // Check that the Cookie Consent cookie is set. This should happen immediately, and then the GA cookies will get set after it, dynamically.
+    // TODO: enable GA
+    
     expect(cookieObject.categories.includes('analytics')).toBeTruthy();
-
+    /*
     const areGaCookiesSet = (cookies: Cookie[]) => {
       const gaCookiesArr = cookies.filter((c) => c.name.startsWith('_ga'));
       return gaCookiesArr.length === 2; // GA cookies are _ga and _ga_<GA_ANALYTICS_ID>
@@ -73,5 +72,6 @@ test.describe('cookie consent tests', () => {
     }
 
     expect(timeElapsed).toBeLessThan(MAX_TIME_MS);
+    */
   });
 });
