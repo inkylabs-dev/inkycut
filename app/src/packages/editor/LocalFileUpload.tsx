@@ -31,11 +31,6 @@ export default function LocalFileUpload({
 
     try {
       for (const file of files) {
-        // Validate file size (max 50MB)
-        if (file.size > 50 * 1024 * 1024) {
-          throw new Error(`File "${file.name}" is too large. Maximum size is 50MB.`);
-        }
-
         // Add file to project
         const localFile = await addFile(file);
         if (localFile && onUploadComplete) {
@@ -70,11 +65,6 @@ export default function LocalFileUpload({
 
     try {
       for (const file of files) {
-        // Validate file size (max 50MB)
-        if (file.size > 50 * 1024 * 1024) {
-          throw new Error(`File "${file.name}" is too large. Maximum size is 50MB.`);
-        }
-
         // Add file to project
         const localFile = await addFile(file);
         if (localFile && onUploadComplete) {
@@ -124,7 +114,7 @@ export default function LocalFileUpload({
             <span> or drag and drop</span>
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            Images, videos, audio up to 50MB
+            Images, videos and audio are supported
           </div>
         </div>
       </div>

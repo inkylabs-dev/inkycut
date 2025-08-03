@@ -4,6 +4,15 @@ import { LocalFile } from './types';
 import { removeFileAtom } from './atoms';
 import { getFileIcon } from './LocalFileUpload';
 
+// Helper function to format duration in HH:MM:SS format
+function formatDuration(durationMs: number): string {
+  const totalSeconds = Math.floor(durationMs / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
 interface FileListItemProps {
   file: LocalFile;
 }
@@ -33,6 +42,9 @@ export default function FileListItem({ file }: FileListItemProps) {
         </div>
         <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
           {file.type} • {(file.size / 1024 / 1024).toFixed(1)}MB
+          {file.type.startsWith('video/') && file.duration && (
+            <> • {formatDuration(file.duration)}</>
+          )}
         </div>
       </div>
       <div className="flex space-x-1">
