@@ -156,8 +156,8 @@ jobs:
         npm run ci:e2e:start &
         APP_PID=$!
         
-        # Wait for app to be ready
-        timeout 300 bash -c 'until curl -f http://localhost:3000; do sleep 5; done'
+        # Wait for app frontend and backend to be ready
+        timeout 300 bash -c 'until curl -f http://localhost:3000 && curl -f http://localhost:3001; do sleep 5; done'
         
         # Run the tests
         npx playwright test
