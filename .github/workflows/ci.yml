@@ -101,7 +101,6 @@ jobs:
     
     env:
       WASP_TELEMETRY_DISABLE: 1
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/opensaas_test
       JWT_SECRET: test-jwt-secret-for-ci
       WASP_WEB_CLIENT_URL: http://localhost:3000
       WASP_SERVER_URL: http://localhost:3001
@@ -116,12 +115,6 @@ jobs:
         node-version: '20'
         cache: 'npm'
         cache-dependency-path: 'e2e-tests/package-lock.json'
-        
-    - name: Start PostgreSQL
-      run: |
-        sudo systemctl start postgresql.service
-        sudo -u postgres createuser --createdb --login opensaas_test || true
-        sudo -u postgres psql -c "ALTER USER opensaas_test PASSWORD 'postgres';" || true
         
     - name: Install Wasp CLI
       run: |
