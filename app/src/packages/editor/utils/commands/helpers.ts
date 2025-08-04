@@ -301,3 +301,51 @@ export function generateElementId(type: string): string {
 export function generatePageId(): string {
   return `page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
+
+/**
+ * Calculate total project duration in milliseconds (sum of all page durations)
+ */
+export function calculateTotalProjectDuration(project: any): number {
+  if (!project?.composition?.pages || project.composition.pages.length === 0) {
+    return 0;
+  }
+  
+  return project.composition.pages.reduce((sum: number, page: any) => sum + (page.duration || 0), 0);
+}
+
+/**
+ * Clamp audio duration to not exceed the total project duration
+ * This ensures audio tracks don't extend beyond the project timeline
+ */
+export function clampAudioDuration(audio: any, maxProjectDurationMs: number): any {
+  if (!audio) return audio;
+  
+  const audioEnd = audio.delay + audio.duration;
+  
+  // If audio extends beyond project duration, clamp it
+  if (audioEnd > maxProjectDurationMs) {
+    const clampedDuration = Math.max(0, maxProjectDurationMs - audio.delay);
+    return {
+      ...audio,
+      duration: clampedDuration
+    };
+  }
+  
+  return audio;
+}
+
+/**
+ * Clamp all audios in a composition to not exceed project duration
+ */
+export function clampCompositionAudios(composition: any): any {
+  if (!composition || !composition.audios || composition.audios.length === 0) {
+    return composition;
+  }
+  
+  const totalProjectDuration = composition.pages?.reduce((sum: number, page: any) => sum + (page.duration || 0), 0) || 0;
+  
+  return {
+    ...composition,
+    audios: composition.audios.map((audio: any) => clampAudioDuration(audio, totalProjectDuration))
+  };
+}

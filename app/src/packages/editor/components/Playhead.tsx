@@ -6,6 +6,8 @@ interface PlayheadProps {
   isDragging: boolean;
   onMouseDown: (event: React.MouseEvent) => void;
   getActualTimelineWidth: () => number;
+  timelineZoom: number;
+  totalDuration: number;
 }
 
 export const Playhead: React.FC<PlayheadProps> = ({
@@ -14,15 +16,22 @@ export const Playhead: React.FC<PlayheadProps> = ({
   isDragging,
   onMouseDown,
   getActualTimelineWidth,
+  timelineZoom,
+  totalDuration,
 }) => {
   const playheadRef = useRef<HTMLDivElement>(null);
+
+  // Calculate playhead position based on project duration, not timeline width
+  const playheadPosition = totalDuration > 0 
+    ? (currentFrame / totalFrames) * (totalDuration * 100 * timelineZoom) 
+    : 0;
 
   return (
     <div
       ref={playheadRef}
       className="absolute w-0.5 bg-red-500 z-50 transition-all duration-100 pointer-events-none"
       style={{ 
-        left: `${totalFrames > 0 ? (currentFrame / totalFrames) * getActualTimelineWidth() : 0}px`,
+        left: `${playheadPosition}px`,
         top: '14px',
         height: 'calc(100% - 14px)',
         boxShadow: '0 0 4px rgba(239, 68, 68, 0.5)'

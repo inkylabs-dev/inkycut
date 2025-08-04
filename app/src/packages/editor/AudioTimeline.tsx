@@ -1,8 +1,9 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { createDraggable } from 'animejs';
 import { AudioVisualizer } from 'react-audio-visualize';
-import { CompositionAudio, LocalFile } from './types';
+import { CompositionAudio, LocalFile, CompositionData } from './types';
 import { createMediaResolver } from './utils/mediaResolver';
+import { clampCompositionAudios } from './utils/commands/helpers';
 
 interface AudioTimelineProps {
   /** Array of audio tracks to display */
@@ -15,6 +16,8 @@ interface AudioTimelineProps {
   onAudioTrimAfterChange?: (audioId: string, newTrimAfter: number, newDuration: number) => void;
   /** Project files for media resolution */
   files?: LocalFile[];
+  /** Total project duration in milliseconds for clamping */
+  totalProjectDurationMs?: number;
 }
 
 interface AudioTimelineGroupProps {
@@ -319,15 +322,39 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
  * Audio tracks are automatically grouped into separate timeline lanes when they overlap,
  * ensuring all audio is visible without visual conflicts.
  */
-const AudioTimeline: React.FC<AudioTimelineProps> = ({ audios, timelineZoom, onAudioDelayChange, onAudioTrimAfterChange, files }) => {
+const AudioTimeline: React.FC<AudioTimelineProps> = ({ 
+  audios, 
+  timelineZoom, 
+  onAudioDelayChange, 
+  onAudioTrimAfterChange, 
+  files, 
+  totalProjectDurationMs 
+}) => {
   // Don't render anything if there are no audio tracks
   if (!audios || audios.length === 0) {
     return null;
   }
 
+  // Clamp audio durations to project duration if specified
+  const clampedAudios = useMemo(() => {
+    if (!totalProjectDurationMs) return audios;
+    
+    return audios.map(audio => {
+      const audioEnd = audio.delay + audio.duration;
+      if (audioEnd > totalProjectDurationMs) {
+        const clampedDuration = Math.max(0, totalProjectDurationMs - audio.delay);
+        return {
+          ...audio,
+          duration: clampedDuration
+        };
+      }
+      return audio;
+    });
+  }, [audios, totalProjectDurationMs]);
+
   // Group audios into non-overlapping timelines
   const audioTimelines: CompositionAudio[][] = [];
-  const sortedAudios = [...audios].sort((a, b) => a.delay - b.delay);
+  const sortedAudios = [...clampedAudios].sort((a, b) => a.delay - b.delay);
   
   for (const audio of sortedAudios) {
     const audioStart = audio.delay;

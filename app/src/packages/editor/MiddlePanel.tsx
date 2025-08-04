@@ -108,7 +108,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   }, [compositionData, viewMode, jsonString, userEditedJson, project]);
   
   // Calculate total duration and current time
-  // Convert page durations from milliseconds to frames
+  // Convert page durations from milliseconds to frames (reverted to original)
   const totalFrames = compositionData.pages.reduce((sum, page) => sum + Math.round((page.duration / 1000) * compositionData.fps), 0);
   const totalDuration = totalFrames / compositionData.fps;
   const currentTime = currentFrame / compositionData.fps;
@@ -295,9 +295,9 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
     const rect = event.currentTarget.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
     
-    // Use the actual timeline width calculation
-    const actualTimelineWidth = getActualTimelineWidth();
-    const relativePosition = Math.max(0, Math.min(1, clickX / actualTimelineWidth));
+    // Calculate position relative to project duration, not full timeline width
+    const projectDurationWidth = totalDuration * 100 * timelineZoom;
+    const relativePosition = Math.max(0, Math.min(1, clickX / projectDurationWidth));
     
     const targetFrame = Math.floor(relativePosition * totalFrames);
     handleSeek(targetFrame);
@@ -426,13 +426,12 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
         const mouseX = event.clientX - containerRect.left;
         const scrollLeft = timelineContainer.scrollLeft;
         
-        // Calculate mouse position relative to the full timeline width
-        // This matches the coordinate system used by the playhead positioning
+        // Calculate mouse position relative to the project duration width, not full timeline width
         const adjustedMouseX = mouseX + scrollLeft;
         
-        // Use the actual timeline width calculation
-        const actualTimelineWidth = getActualTimelineWidth();
-        const relativePosition = Math.max(0, Math.min(1, adjustedMouseX / actualTimelineWidth));
+        // Use project duration width for dragging bounds
+        const projectDurationWidth = totalDuration * 100 * timelineZoom;
+        const relativePosition = Math.max(0, Math.min(1, adjustedMouseX / projectDurationWidth));
         
         const targetFrame = Math.floor(relativePosition * totalFrames);
         handleSeek(targetFrame);
@@ -854,6 +853,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                       onAudioDelayChange={handleAudioDelayChange}
                       onAudioTrimAfterChange={handleAudioTrimAfterChange}
                       files={files}
+                      totalProjectDurationMs={compositionData.pages.reduce((sum, page) => sum + page.duration, 0)}
                     />
 
                     <Playhead
@@ -862,6 +862,8 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                       isDragging={isDragging}
                       onMouseDown={handlePlayheadMouseDown}
                       getActualTimelineWidth={getActualTimelineWidth}
+                      timelineZoom={timelineZoom}
+                      totalDuration={totalDuration}
                     />
                   </div>
                 </div>
