@@ -1,9 +1,8 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { createDraggable } from 'animejs';
-import { AudioVisualizer } from 'react-audio-visualize';
-import { CompositionAudio, LocalFile, CompositionData } from './types';
+import AudioVisualizer from './components/AudioVisualizer';
+import { CompositionAudio, LocalFile } from './types';
 import { createMediaResolver } from './utils/mediaResolver';
-import { clampCompositionAudios } from './utils/commands/helpers';
 
 interface AudioTimelineProps {
   /** Array of audio tracks to display */
@@ -60,12 +59,18 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [currentWidth, setCurrentWidth] = useState(blockWidth);
   const blockRef = useRef<HTMLDivElement>(null);
 
   // Create media resolver for audio source resolution
   const mediaResolver = useMemo(() => {
     return files ? createMediaResolver(files) : null;
   }, [files]);
+
+  // Update currentWidth when blockWidth prop changes
+  useEffect(() => {
+    setCurrentWidth(blockWidth);
+  }, [blockWidth]);
 
   useEffect(() => {
     // Load audio file for waveform visualization
@@ -97,7 +102,7 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
       className="audio-block absolute top-0 bg-blue-500 rounded transition-colors overflow-hidden"
       style={{
         left: `${leftPosition}px`,
-        width: `${blockWidth}px`,
+        width: `${currentWidth}px`,
         height: '13px',
       }}
       title={`Audio: ${audio.src.split('/').pop()} (${Math.round(audioDuration * 100) / 100}s / ${Math.round((audio.duration + audio.trimBefore + audio.trimAfter) / 100) / 10}s max) - Drag right edge to trim`}
@@ -113,13 +118,14 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
           <div className="w-full h-full relative">
             <AudioVisualizer
               blob={audioBlob}
-              width={blockWidth - 8} // Adjust width to account for resize handle
+              width={currentWidth - 8} // Adjust width to account for resize handle
               height={13}
               barWidth={2}
               gap={1}
               barColor="#ffffff"
               backgroundColor="transparent"
-              barPlayedColor="#ffffff"
+              trimBefore={audio.trimBefore}
+              trimAfter={audio.trimAfter}
             />
           </div>
         ) : (
@@ -159,9 +165,8 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
             // Constrain width between minimum (20px) and maximum (total duration)
             const newWidth = Math.max(20, Math.min(maxWidth, startWidth + deltaX));
             
-            if (blockRef.current) {
-              blockRef.current.style.width = `${newWidth}px`;
-            }
+            // Update both DOM and React state for immediate feedback and waveform update
+            setCurrentWidth(newWidth);
           };
 
           const handleMouseUp = (e: MouseEvent) => {
@@ -185,6 +190,8 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
               
               console.log(`Audio ${audio.id}: totalDuration=${totalAudioDurationMs}ms, newDuration=${newDurationMs}ms, newTrimAfter=${newTrimAfter}ms`);
               
+              // Final state update - this will trigger a re-render with the final width
+              setCurrentWidth(newWidth);
               onTrimAfterChange(audio.id, newTrimAfter, newDurationMs);
             }
             
@@ -299,6 +306,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
   return (
     <div 
       ref={timelineRef}
+      data-testid="audio-timeline"
       className="audio-timeline relative bg-gray-300 dark:bg-gray-600 rounded mt-1" 
       style={{ height: '13px', width: '100%' }}
     >
