@@ -184,9 +184,9 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
               const newDurationSeconds = newWidth / (100 * timelineZoom);
               const newDurationMs = newDurationSeconds * 1000;
               
-              // Calculate new trimAfter: originalDuration - trimBefore - newDuration
-              // Since we're constraining to maxWidth, trimAfter should never be negative
-              const newTrimAfter = Math.max(0, totalAudioDurationMs - audio.trimBefore - newDurationMs);
+              // When dragging right edge, duration and trimAfter should be the same value
+              // This means we're setting the visible duration, and trimAfter trims everything after that point
+              const newTrimAfter = newDurationMs;
               
               console.log(`Audio ${audio.id}: totalDuration=${totalAudioDurationMs}ms, newDuration=${newDurationMs}ms, newTrimAfter=${newTrimAfter}ms`);
               
