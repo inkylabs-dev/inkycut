@@ -223,7 +223,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
     // Wait for DOM to be ready, then create draggable for audio blocks in this specific timeline
     const timeoutId = setTimeout(() => {
       if (timelineRef.current) {
-        const audioBlocks = timelineRef.current.querySelectorAll('.audio-block');
+        const audioBlocks = timelineRef.current.querySelectorAll('.audio-draggable-area');
         
         if (audioBlocks.length > 0) {
           // Create draggable for each audio block in this timeline group
@@ -233,8 +233,14 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
             
             const draggable = createDraggable(block, {
               y: false, // Disable vertical movement
-              onDrag: () => {
-                // Dragging in progress
+              onDrag: (instance: any) => {
+                // During drag, also apply the same transform to the parent audio-block
+                // so the entire blue block moves with the content
+                const draggableElement = block as HTMLElement;
+                const audioBlockElement = draggableElement.closest('.audio-block') as HTMLElement;
+                if (audioBlockElement) {
+                  audioBlockElement.style.transform = `translateX(${instance.x}px)`;
+                }
               },
               onGrab: (event: any) => {
                 // Check if the grab originated from a resize handle
@@ -254,12 +260,17 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
                   const newDelayMs = Math.max(0, newPositionSeconds * 1000); // Ensure non-negative
                   
                   // Update the audio-block element's CSS position to prevent visual jumping
-                  const audioBlockElement = block as HTMLElement;
-                  const finalPositionPixels = Math.max(0, newPositionPixels); // Ensure non-negative
-                  audioBlockElement.style.left = `${finalPositionPixels}px`;
+                  const draggableElement = block as HTMLElement;
+                  const audioBlockElement = draggableElement.closest('.audio-block') as HTMLElement;
+                  if (audioBlockElement) {
+                    const finalPositionPixels = Math.max(0, newPositionPixels); // Ensure non-negative
+                    audioBlockElement.style.left = `${finalPositionPixels}px`;
+                    // Reset transforms on both elements
+                    audioBlockElement.style.transform = 'none';
+                  }
                   
-                  // Reset any transforms that anime.js might have applied
-                  audioBlockElement.style.transform = 'none';
+                  // Reset any transforms that anime.js might have applied to the draggable area
+                  draggableElement.style.transform = 'none';
                   
                   // Update the state
                   onAudioDelayChange(audio.id, newDelayMs);
