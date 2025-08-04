@@ -18,6 +18,7 @@ import { setPageCommand } from './page-set';
 import { setCompCommand } from './composition-set';
 import { lsCompCommand } from './composition-list';
 import { lsPageCommand } from './page-list';
+import { lsFilesCommand } from './file-list';
 import { newTextCommand } from './text-new';
 import { newImageCommand } from './image-new';
 import { newVideoCommand } from './video-new';
@@ -47,6 +48,7 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['set-comp', setCompCommand],
   ['ls-comp', lsCompCommand],
   ['ls-page', lsPageCommand],
+  ['ls-files', lsFilesCommand],
   ['new-text', newTextCommand],
   ['new-image', newImageCommand],
   ['new-video', newVideoCommand],
@@ -290,6 +292,7 @@ export {
   setCompCommand,
   lsCompCommand,
   lsPageCommand,
+  lsFilesCommand,
   newTextCommand,
   newImageCommand,
   newVideoCommand,

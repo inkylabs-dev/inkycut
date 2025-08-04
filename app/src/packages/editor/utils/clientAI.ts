@@ -713,6 +713,12 @@ Remember: You are a powerful, autonomous video editing agent. Work systematicall
         id: { type: 'string', description: 'Page ID to inspect. If not provided, uses the currently selected page.' }
       }
     });
+
+    this.registerSlashCommandTool('ls-files', 'List all file metadata from the current project storage', {
+      type: 'object',
+      properties: {},
+      required: []
+    });
   }
 
   /**

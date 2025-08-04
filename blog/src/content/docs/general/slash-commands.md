@@ -895,6 +895,37 @@ Returns the raw page object including:
 - Error (page not found): "❌ **Page Not Found** - No page with ID '{id}' was found in the composition. Available pages: {page_ids}"
 - Error (execution failed): "❌ **List Failed** - Failed to list page information. Please try again."
 
+### `/ls-files`
+
+Lists all file metadata from the current project storage, returning complete information about uploaded and stored files.
+
+**Usage:** `/ls-files`
+
+**Behavior:**
+- Returns filtered file metadata for all stored files in JSON format
+- Shows file properties including name, size, type, dimensions (for images/videos), and other metadata
+- Excludes large binary data (dataUrl, blob, arrayBuffer) to keep output readable
+- Provides programmatic access to useful file information currently in storage
+- Returns syntax-highlighted JSON within markdown code blocks
+- No arguments required - lists all files in current project storage
+
+**Data Structure:**
+Returns an array of file objects including:
+- File identification (name, type, size, lastModified)
+- Dimensions for media files (width, height)
+- Duration for video/audio files
+- Other useful metadata properties
+- Binary data fields (dataUrl, blob, arrayBuffer) are filtered out for readability
+
+**Examples:**
+- `/ls-files` - List all file metadata in current project
+
+**Response Messages:**
+- Success: Returns file metadata JSON array in markdown code block
+- Success (no files): "📁 **No Files** - No files are currently stored in the project."
+- Error (no storage): "❌ **No File Storage** - File storage is not available in the current context."
+- Error (execution failed): "❌ **List Failed** - Failed to list file metadata. Please try again."
+
 ## Architecture
 
 ### Core Components
@@ -1021,6 +1052,7 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['set-comp', setCompCommand],
   ['ls-comp', lsCompCommand],
   ['ls-page', lsPageCommand],
+  ['ls-files', lsFilesCommand],
   ['new-text', newTextCommand],
   ['new-image', newImageCommand],
   ['new-video', newVideoCommand],
