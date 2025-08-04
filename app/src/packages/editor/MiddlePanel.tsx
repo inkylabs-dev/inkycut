@@ -254,13 +254,21 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
     }
 
     try {
+      // If player is currently playing, pause it when seeking
+      if (isPlaying) {
+        console.log('Pausing player due to seek operation');
+        playerRef.current.pause();
+        setIsPlaying(false);
+        stopFrameTracking();
+      }
+
       const clampedFrame = Math.max(0, Math.min(frame, totalFrames - 1));
       playerRef.current.seekTo(clampedFrame);
       setCurrentFrame(clampedFrame);
     } catch (error) {
       console.error('Error seeking:', error);
     }
-  }, [totalFrames, playerReady]);
+  }, [totalFrames, playerReady, isPlaying, stopFrameTracking]);
 
   const handlePageClick = (pageIndex: number, event: React.MouseEvent<HTMLDivElement>) => {
     // Calculate the start frame of the clicked page
