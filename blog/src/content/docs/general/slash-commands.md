@@ -63,7 +63,7 @@ Resets the project to its default state, equivalent to clicking "Reset Project" 
 
 ### `/import`
 
-Opens the Import Dialog to import a project from a JSON file, equivalent to clicking "Import Project" in the menu.
+Opens the Import Dialog to import a project from a JSON file, equivalent to clicking "Import Project" in the menu. Imported projects will restore all data including composition, files, notes, and settings.
 
 **Usage:** `/import`
 
@@ -74,8 +74,16 @@ Opens the Import Dialog to import a project from a JSON file, equivalent to clic
 - Supports `.json` files containing project data
 - Validates project structure before importing
 - Automatically imports files to IndexedDB storage
+- Restores all project data including notes and annotations
 - Resets chat history with import success message
 - Sets project to local mode (not shared)
+
+**Data Restored from JSON Import:**
+- Complete composition structure (pages, elements, timeline)
+- All uploaded files and media assets
+- Project notes and annotations
+- App state and settings
+- Project metadata and timestamps
 
 **Response Messages:**
 - Success: Silent (dialog handles the import process and feedback)
@@ -84,7 +92,7 @@ Opens the Import Dialog to import a project from a JSON file, equivalent to clic
 
 ### `/export`
 
-Exports the project or opens the Export Dialog with optional format selection and auto-export capability.
+Exports the project or opens the Export Dialog with optional format selection and auto-export capability. Exported projects include all project data including composition, pages, elements, files, notes, and metadata.
 
 **Usage:** `/export [--format|-f json|mp4|webm] [--yes|-y]`
 
@@ -94,9 +102,17 @@ Exports the project or opens the Export Dialog with optional format selection an
 
 **Behavior:**
 - Without options: Opens Export Dialog with JSON format selected
-- With `--format`: Opens Export Dialog with specified format pre-selected
+- With `--format`: Opens Export Dialog with specified format pre-selected  
 - With `--yes` (JSON only): Performs direct export and download, bypassing dialog
 - With `--yes` (MP4/WebM): Shows error message (direct video export not yet supported)
+- JSON exports include complete project data: composition, pages, elements, files, notes, app state, and metadata
+
+**Data Included in JSON Export:**
+- Complete composition structure (pages, elements, timeline)
+- All uploaded files and media assets
+- Project notes and annotations
+- App state and settings
+- Project metadata and timestamps
 
 **Examples:**
 - `/export` - Opens export dialog
@@ -126,6 +142,7 @@ Shares the project with a secure, encrypted link or opens the Share Dialog.
 - With `--yes`: Performs direct sharing with end-to-end encryption and returns URL immediately
 - Creates encrypted shareable link with embedded decryption key in URL fragment
 - Uploads project data securely to server with end-to-end encryption
+- Shared projects include complete data: composition, files, notes, and settings
 
 **Examples:**
 - `/share` - Opens share dialog
@@ -926,6 +943,128 @@ Returns an array of file objects including:
 - Error (no storage): "❌ **No File Storage** - File storage is not available in the current context."
 - Error (execution failed): "❌ **List Failed** - Failed to list file metadata. Please try again."
 
+### `/new-note`
+
+Adds a new note to the project at the specified time position. If no time is specified, uses the current player time position. Notes are used for adding annotations, reminders, or comments at specific points in the timeline.
+
+**Usage:** `/new-note --text <text> [--time <time>]`
+
+**Options:**
+- `--text`, `-txt`: Note text content (required)
+- `--time`, `-t`: Time position in milliseconds or seconds (e.g., "1000" or "1.5s") (optional - defaults to current player time)
+
+**Behavior:**
+- Creates a new note with unique ID at the specified or current time position
+- Uses current player time when no time is specified
+- Supports time in milliseconds (e.g., 1000) or seconds with "s" suffix (e.g., 1.5s)
+- Adds note to project's notes array
+- Returns confirmation with note ID and formatted time
+
+**Examples:**
+- `/new-note --text "Add sound effect here"` - Add note at current player time
+- `/new-note --text "Important scene transition" --time 1.5s` - Add note at 1.5 seconds
+- `/new-note -txt "Review this section" -t 2500` - Add note at 2500ms using short flags
+
+**Response Messages:**
+- Success: "✅ **Note Added** - Note '{text}' added at time {time}ms ({seconds}s) (current player time). Note ID: `{id}`"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (missing text): "❌ **Missing Text** - Note text is required. Usage: `/new-note --text <text> [--time <time>]`"
+- Error (invalid time): "❌ **Invalid Time** - Time value must be a number (milliseconds) or end with 's' (seconds)"
+- Error (execution failed): "❌ **Create Failed** - Failed to create note. Please try again."
+
+### `/ls-notes`
+
+Lists all notes in the project with optional full-text search functionality. Returns notes sorted by time position.
+
+**Usage:** `/ls-notes [--query|-q <search_text>]`
+
+**Options:**
+- `--query`, `-q`: Optional search text to filter notes by content (case-insensitive)
+
+**Behavior:**
+- Returns all project notes in JSON format, sorted by time
+- Supports text search to filter notes containing specific words or phrases
+- Shows total count and filtered count when search is used
+- Returns complete note data including ID, time, text, and timestamps
+
+**Data Structure:**
+Returns an array of note objects including:
+- Note identification (id, time, text)
+- Creation and modification timestamps (createdAt, updatedAt)
+- Time-sorted order for chronological review
+
+**Examples:**
+- `/ls-notes` - List all notes in the project
+- `/ls-notes --query "sound"` - Find notes containing "sound"
+- `/ls-notes -q "transition"` - Find notes about transitions
+
+**Response Messages:**
+- Success: "📝 **Notes List** - Found {count} notes" with JSON data
+- Success (with query): "📝 **Notes List** - Found {filtered} notes matching '{query}' (of {total} total)" with JSON data
+- Success (no notes): "📝 **No Notes** - No notes found in the project. Use `/new-note` to add notes."
+- Success (no matches): "📝 **No Matching Notes** - No notes found matching query '{query}'. Total notes in project: {total}"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (execution failed): "❌ **List Failed** - Failed to list notes. Please try again."
+
+### `/set-note`
+
+Modifies properties of an existing note, allowing updates to time position and text content.
+
+**Usage:** `/set-note --id <note_id> [--time <time>] [--text <text>]`
+
+**Options:**
+- `--id`, `-i`: Note ID to modify (required)
+- `--time`, `-t`: New time position in milliseconds or seconds (optional)
+- `--text`, `-txt`: New note text content (optional)
+
+**Behavior:**
+- Updates specified properties of an existing note
+- Requires at least one property to be updated (time or text)
+- Supports time in milliseconds or seconds with "s" suffix
+- Updates modification timestamp automatically
+- Returns summary of changes made
+
+**Examples:**
+- `/set-note --id note-123 --text "Updated note text"` - Update note text only
+- `/set-note --id note-456 --time 2.5s` - Update note time position only
+- `/set-note -i note-789 -t 1500 -txt "New text at new time"` - Update both time and text
+
+**Response Messages:**
+- Success: "✅ **Note Updated** - Note '{id}' updated: • time: {time}ms ({seconds}s) • text: '{text}'"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (missing id): "❌ **Missing Note ID** - Note ID is required. Usage: `/set-note --id <note_id> [--time <time>] [--text <text>]`"
+- Error (no changes): "❌ **No Changes Specified** - At least one property must be specified to update."
+- Error (note not found): "❌ **Note Not Found** - No note with ID '{id}' was found in the project. Use `/ls-notes` to see available notes."
+- Error (invalid time): "❌ **Invalid Time** - Time value must be a number (milliseconds) or end with 's' (seconds)"
+- Error (execution failed): "❌ **Update Failed** - Failed to update note. Please try again."
+
+### `/del-note`
+
+Deletes a note from the project by ID. This operation requires confirmation and cannot be undone.
+
+**Usage:** `/del-note --id <note_id>`
+
+**Options:**
+- `--id`, `-i`: Note ID to delete (required)
+
+**Behavior:**
+- Removes the specified note from the project permanently
+- Requires user confirmation before deletion
+- Returns details of the deleted note for verification
+- Updates project with remaining notes
+
+**Examples:**
+- `/del-note --id note-123` - Delete note with ID "note-123"
+- `/del-note -i note-456` - Delete note using short flag
+
+**Response Messages:**
+- Success: "✅ **Note Deleted** - Note '{id}' has been deleted. Deleted note details: • Time: {time}ms ({seconds}s) • Text: '{text}' Remaining notes: {count}"
+- Error (no project): "❌ **No Project** - No project is currently loaded. Please create or load a project first."
+- Error (missing id): "❌ **Missing Note ID** - Note ID is required. Usage: `/del-note --id <note_id>`"
+- Error (no notes): "❌ **No Notes** - No notes found in the project. Use `/new-note` to add notes."
+- Error (note not found): "❌ **Note Not Found** - No note with ID '{id}' was found in the project. Available notes: {note_ids}"
+- Error (execution failed): "❌ **Delete Failed** - Failed to delete note. Please try again."
+
 ## Architecture
 
 ### Core Components
@@ -1053,6 +1192,10 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['ls-comp', lsCompCommand],
   ['ls-page', lsPageCommand],
   ['ls-files', lsFilesCommand],
+  ['new-note', newNoteCommand],
+  ['ls-notes', lsNotesCommand],
+  ['set-note', setNoteCommand],
+  ['del-note', delNoteCommand],
   ['new-text', newTextCommand],
   ['new-image', newImageCommand],
   ['new-video', newVideoCommand],

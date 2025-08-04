@@ -719,6 +719,40 @@ Remember: You are a powerful, autonomous video editing agent. Work systematicall
       properties: {},
       required: []
     });
+
+    this.registerSlashCommandTool('new-note', 'Add a new note to the project at a specific time (defaults to current player time)', {
+      type: 'object',
+      properties: {
+        text: { type: 'string', description: 'Note text content' },
+        time: { type: 'string', description: 'Optional time in milliseconds or with "s" suffix for seconds (e.g., "1000" or "1.5s"). Defaults to current player time if not specified.' }
+      },
+      required: ['text']
+    });
+
+    this.registerSlashCommandTool('ls-notes', 'List all notes in the project with optional text search', {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Optional search query to filter notes by text content' }
+      }
+    });
+
+    this.registerSlashCommandTool('set-note', 'Modify properties of an existing note', {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'Note ID to modify' },
+        time: { type: 'string', description: 'New time in milliseconds or with "s" suffix for seconds' },
+        text: { type: 'string', description: 'New note text content' }
+      },
+      required: ['id']
+    });
+
+    this.registerSlashCommandTool('del-note', 'Delete a note from the project by ID', {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'Note ID to delete' }
+      },
+      required: ['id']
+    });
   }
 
   /**

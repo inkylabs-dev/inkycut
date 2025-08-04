@@ -19,6 +19,10 @@ import { setCompCommand } from './composition-set';
 import { lsCompCommand } from './composition-list';
 import { lsPageCommand } from './page-list';
 import { lsFilesCommand } from './file-list';
+import { newNoteCommand } from './note-new';
+import { lsNotesCommand } from './note-list';
+import { setNoteCommand } from './note-set';
+import { delNoteCommand } from './note-delete';
 import { newTextCommand } from './text-new';
 import { newImageCommand } from './image-new';
 import { newVideoCommand } from './video-new';
@@ -49,6 +53,10 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['ls-comp', lsCompCommand],
   ['ls-page', lsPageCommand],
   ['ls-files', lsFilesCommand],
+  ['new-note', newNoteCommand],
+  ['ls-notes', lsNotesCommand],
+  ['set-note', setNoteCommand],
+  ['del-note', delNoteCommand],
   ['new-text', newTextCommand],
   ['new-image', newImageCommand],
   ['new-video', newVideoCommand],
@@ -293,6 +301,10 @@ export {
   lsCompCommand,
   lsPageCommand,
   lsFilesCommand,
+  newNoteCommand,
+  lsNotesCommand,
+  setNoteCommand,
+  delNoteCommand,
   newTextCommand,
   newImageCommand,
   newVideoCommand,

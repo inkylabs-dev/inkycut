@@ -51,6 +51,8 @@ export async function performJSONExport(project: any, fileStorage: any): Promise
         error: null,
         history: { past: [], future: [] }
       },
+      // Include notes array
+      notes: project.notes || [],
       // Include files from IndexedDB in the exported JSON
       files: filesFromStorage,
       // Preserve metadata
@@ -142,6 +144,8 @@ export async function performDirectShare(project: any, onShare: any): Promise<st
       ...project,
       // Include files in encrypted data for full project sharing
       files: project.files || [],
+      // Include notes for sharing
+      notes: project.notes || [],
       appState: {
         selectedElementId: null,
         selectedPageId: project.composition?.pages?.[0]?.id || null,
