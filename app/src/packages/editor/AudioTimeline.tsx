@@ -223,7 +223,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
     // Wait for DOM to be ready, then create draggable for audio blocks in this specific timeline
     const timeoutId = setTimeout(() => {
       if (timelineRef.current) {
-        const audioBlocks = timelineRef.current.querySelectorAll('.audio-draggable-area');
+        const audioBlocks = timelineRef.current.querySelectorAll('.audio-block');
         
         if (audioBlocks.length > 0) {
           // Create draggable for each audio block in this timeline group
@@ -253,16 +253,13 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
                   const newPositionSeconds = newPositionPixels / (100 * timelineZoom);
                   const newDelayMs = Math.max(0, newPositionSeconds * 1000); // Ensure non-negative
                   
-                  // Immediately update the parent audio-block element's CSS position to prevent visual jumping
-                  const draggableElement = block as HTMLElement;
-                  const audioBlockElement = draggableElement.closest('.audio-block') as HTMLElement;
-                  if (audioBlockElement) {
-                    const finalPositionPixels = Math.max(0, newPositionPixels); // Ensure non-negative
-                    audioBlockElement.style.left = `${finalPositionPixels}px`;
-                  }
+                  // Update the audio-block element's CSS position to prevent visual jumping
+                  const audioBlockElement = block as HTMLElement;
+                  const finalPositionPixels = Math.max(0, newPositionPixels); // Ensure non-negative
+                  audioBlockElement.style.left = `${finalPositionPixels}px`;
                   
                   // Reset any transforms that anime.js might have applied
-                  draggableElement.style.transform = 'none';
+                  audioBlockElement.style.transform = 'none';
                   
                   // Update the state
                   onAudioDelayChange(audio.id, newDelayMs);
