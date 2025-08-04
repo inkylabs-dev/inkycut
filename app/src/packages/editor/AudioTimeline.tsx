@@ -103,7 +103,7 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
       style={{
         left: `${leftPosition}px`,
         width: `${currentWidth}px`,
-        height: '13px',
+        height: '26px',
       }}
       title={`Audio: ${audio.src.split('/').pop()} (${Math.round(audioDuration * 100) / 100}s / ${Math.round((audio.duration + audio.trimBefore + audio.trimAfter) / 100) / 10}s max) - Drag right edge to trim`}
     >
@@ -119,7 +119,7 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
             <AudioVisualizer
               blob={audioBlob}
               width={currentWidth - 8} // Adjust width to account for resize handle
-              height={13}
+              height={26}
               barWidth={2}
               gap={1}
               barColor="#ffffff"
@@ -308,7 +308,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
       ref={timelineRef}
       data-testid="audio-timeline"
       className="audio-timeline relative bg-gray-300 dark:bg-gray-600 rounded mt-1" 
-      style={{ height: '13px', width: '100%' }}
+      style={{ height: '26px', width: '100%' }}
     >
       {timeline.map(audio => {
         const audioStart = audio.delay / 1000; // Convert to seconds
