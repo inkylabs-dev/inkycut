@@ -103,7 +103,7 @@ export default function FileListItem({ file, onDragStart, onDragEnd }: FileListI
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
             {file.type} • {(file.size / 1024 / 1024).toFixed(1)}MB
-            {file.type.startsWith('video/') && file.duration && (
+            {(file.type.startsWith('video/') || file.type.startsWith('audio/')) && file.duration && (
               <> • {formatDuration(file.duration)}</>
             )}
           </div>

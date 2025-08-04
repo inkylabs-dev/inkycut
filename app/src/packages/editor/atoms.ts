@@ -7,7 +7,7 @@ import {
   getStorageModeForProject, 
   migrateFiles 
 } from './utils/fileStorage';
-import { getImageDimensions, getVideoDimensions, getVideoDuration } from './utils/mediaUtils';
+import { getImageDimensions, getVideoDimensions, getVideoDuration, getAudioDuration } from './utils/mediaUtils';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -665,6 +665,11 @@ export const addFileAtom = atom(
         }
         if (videoDuration !== null) {
           duration = videoDuration;
+        }
+      } else if (file.type.startsWith('audio/')) {
+        const audioDuration = await getAudioDuration(dataUrl);
+        if (audioDuration !== null) {
+          duration = audioDuration;
         }
       }
 

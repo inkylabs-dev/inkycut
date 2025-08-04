@@ -63,6 +63,25 @@ export function getVideoDuration(dataUrl: string): Promise<number | null> {
 }
 
 /**
+ * Get audio duration from data URL
+ * @param dataUrl The data URL of the audio
+ * @returns Promise that resolves to duration in milliseconds or null if failed
+ */
+export function getAudioDuration(dataUrl: string): Promise<number | null> {
+  return new Promise((resolve) => {
+    const audio = document.createElement('audio');
+    audio.onloadedmetadata = () => {
+      const durationMs = Math.round(audio.duration * 1000);
+      resolve(durationMs);
+    };
+    audio.onerror = () => {
+      resolve(null);
+    };
+    audio.src = dataUrl;
+  });
+}
+
+/**
  * Calculate element dimensions respecting aspect ratio
  * Fits content within a maximum size while maintaining aspect ratio
  * @param originalWidth Original width of the media
