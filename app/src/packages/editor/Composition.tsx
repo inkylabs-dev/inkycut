@@ -164,7 +164,6 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
             id={elementWithId.id}
             src={resolvedSrc}
             style={{ width: '100%', height: '100%' }}
-            startFrom={Math.floor((currentTimeInSeconds - delayInSeconds) * fps)}
           />
         </div>
       ) : null;
@@ -442,8 +441,8 @@ export const MainComposition: React.FC<{
               volume={audio.muted ? 0 : audio.volume}
               loop={audio.loop}
               muted={audio.muted}
-              startFrom={audio.trimBefore ? Math.floor((audio.trimBefore / 1000) * fps) : 0}
-              endAt={audio.trimAfter ? Math.floor((audio.trimAfter / 1000) * fps) : undefined}
+              trimBefore={audio.trimBefore ? Math.floor((audio.trimBefore / 1000) * fps) : 0}
+              trimAfter={audio.trimAfter ? Math.floor((audio.trimAfter / 1000) * fps) : undefined}
               playbackRate={audio.playbackRate}
               toneFrequency={audio.toneFrequency}
             />
