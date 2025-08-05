@@ -84,7 +84,6 @@ export default function PageThumbnail({
           }}
           inputProps={{
             data: singlePageComposition,
-            currentPageIndex: 0,
             files: files
           }}
         />

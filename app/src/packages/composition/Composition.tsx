@@ -255,14 +255,12 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
 // Main composition component with outlines and pointer event support
 export const MainComposition: React.FC<{
   data: CompositionData;
-  currentPageIndex?: number;
   files?: LocalFile[];
 }> = ({ 
   data, 
-  currentPageIndex,
   files,
 }) => {
-  // Only use Remotion hooks when in Player context (no currentPageIndex)
+  // Use Remotion hooks for frame tracking in Player context
   let frame = 0;
   let isPlayerContext = false;
 
@@ -283,96 +281,7 @@ export const MainComposition: React.FC<{
   // Outer container style
   const outer: React.CSSProperties = {};
   
-  // When in editing mode (with a specific currentPageIndex), render only that page
-  if (currentPageIndex !== undefined) {
-    const currentPage = data.pages[currentPageIndex];
-    
-    if (!currentPage) {
-      return (
-        <AbsoluteFill style={{ backgroundColor: '#000000' }}>
-          <div style={{ 
-            color: 'white', 
-            fontSize: 24, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            height: '100%' 
-          }}>
-            No page found
-          </div>
-        </AbsoluteFill>
-      );
-    }
-    
-    // Styles for our layers
-    const layerContainer: React.CSSProperties = {
-      backgroundColor: currentPage.backgroundColor || '#ffffff',
-    };
-
-    // Process elements to ensure they all have IDs
-    const elementsWithIds = currentPage.elements.map(element => {
-      if (element.id) return element;
-      return { ...element, id: generateUniqueId() };
-    });
-
-    return (
-      <AbsoluteFill style={outer}>
-        {/* Audio tracks - render at root level */}
-        {data.audios && data.audios.map((audio, index) => {
-          const resolvedAudioSrc = audio.src && fileResolver ? fileResolver.resolve(audio.src) : audio.src;
-          
-          // Convert delay and duration from milliseconds to frames
-          const delayInFrames = audio.delay ? Math.floor((audio.delay / 1000) * fps) : 0;
-          const durationInFrames = audio.duration ? Math.floor((audio.duration / 1000) * fps) : undefined;
-          
-          return resolvedAudioSrc ? (
-            <Sequence
-              key={`audio-sequence-${index}`}
-              from={delayInFrames}
-              durationInFrames={durationInFrames}
-              premountFor={60}
-            >
-              <Audio
-                key={`audio-${index}`}
-                src={resolvedAudioSrc}
-                volume={audio.muted ? 0 : audio.volume}
-                loop={audio.loop}
-                muted={audio.muted}
-                trimBefore={audio.trimBefore ? Math.floor((audio.trimBefore / 1000) * fps) : 0}
-                trimAfter={audio.trimAfter ? Math.floor((audio.trimAfter / 1000) * fps) : undefined}
-                playbackRate={audio.playbackRate || 1}
-                toneFrequency={audio.toneFrequency || 1}
-              />
-            </Sequence>
-          ) : null;
-        })}
-        
-        {/* Base layer with content */}
-        <AbsoluteFill style={layerContainer}>
-          {/* Wrap ElementRenderer with Layer for proper time-based sequencing */}
-          {elementsWithIds.map((element) => (
-            <Layer
-              key={`element-${element.id}`}
-              element={element}
-              frame={frame}
-              fps={fps}
-              isPlayerContext={isPlayerContext}
-            >
-              <ElementRenderer
-                element={element}
-                frame={frame}
-                fps={fps}
-                fileResolver={fileResolver}
-                isPlayerContext={isPlayerContext}
-              />
-            </Layer>
-          ))}
-        </AbsoluteFill>
-      </AbsoluteFill>
-    );
-  }
-  
-  // When rendering the full video, wrap each page in a Sequence
+  // Always render the full video with all pages in sequence
   // Calculate the frame durations for each page
   // Handle missing or invalid data
   if (!data || !data.pages || !Array.isArray(data.pages) || data.pages.length === 0) {

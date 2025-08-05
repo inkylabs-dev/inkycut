@@ -30,8 +30,7 @@ const Root = () => {
         height={1080}
         defaultProps={{
           data: defaultCompositionData,
-          files: [],
-          // Remove currentPageIndex to enable multi-page rendering
+          files: []
         }}
         calculateMetadata={({ props }) => {
           // Calculate total duration from all pages, converting milliseconds to frames

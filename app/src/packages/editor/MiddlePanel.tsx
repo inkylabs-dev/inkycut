@@ -764,9 +764,8 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
 
   const inputProps = useMemo(() => ({
     data: compositionData,
-    currentPageIndex: getCurrentPage().pageIndex,
     files: files
-  }), [compositionData, currentFrame, files]);
+  }), [compositionData, files]);
 
   return (
     <div className="h-full flex flex-col bg-white dark:bg-gray-900">
