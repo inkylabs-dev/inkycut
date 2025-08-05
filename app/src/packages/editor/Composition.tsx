@@ -164,6 +164,7 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
             id={elementWithId.id}
             src={resolvedSrc}
             style={{ width: '100%', height: '100%' }}
+            pauseWhenBuffering={true}
           />
         </div>
       ) : null;
@@ -353,6 +354,7 @@ export const MainComposition: React.FC<{
               key={`audio-sequence-${index}`}
               from={delayInFrames}
               durationInFrames={durationInFrames}
+              premountFor={60}
             >
               <Audio
                 key={`audio-${index}`}
