@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage, AppState, LocalFile } from './types';
+import { CompositionData, CompositionElement, CompositionPage, Project, ChatMessage, AppState, LocalFile } from '../composition/types';
 import { 
   IFileStorage, 
   createFileStorage, 

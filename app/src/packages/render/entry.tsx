@@ -1,5 +1,5 @@
 import { registerRoot, Composition } from 'remotion';
-import { MainComposition } from '../../packages/editor';
+import { MainComposition } from '../../packages/composition';
 import React from 'react';
 
 const defaultCompositionData = {

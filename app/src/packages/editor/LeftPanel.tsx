@@ -15,7 +15,7 @@ import {
 // import { useAuth } from 'wasp/client/auth';
 // import { routes } from 'wasp/client/router';
 import { Link } from 'react-router-dom';
-import { CompositionElement, LocalFile } from './types';
+import { CompositionElement, LocalFile } from '../composition/types';
 import { projectAtom, selectedElementAtom, selectedPageAtom, setSelectedElementAtom, setSelectedPageAtom, createDefaultProject, filesAtom, chatMessagesAtom, clearAllFilesAtom, forkProjectAtom, isSharedProjectAtom, updateAppStateAtom } from './atoms';
 import LocalFileUpload from './LocalFileUpload';
 import ElementPreview from './ElementPreview';
@@ -24,7 +24,7 @@ import SettingsDialog from './SettingsDialog';
 import ImportDialog from './ImportDialog';
 import ExportDialog from './ExportDialog';
 import ShareDialog from './ShareDialog';
-import { createFileResolver } from './utils/fileResolver';
+import { createFileResolver } from '../composition/utils/fileResolver';
 
 interface MenuConfig {
   showImport?: boolean;

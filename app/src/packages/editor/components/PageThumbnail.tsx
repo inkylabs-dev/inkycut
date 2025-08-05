@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Thumbnail } from '@remotion/player';
-import { CompositionData, CompositionPage, LocalFile } from '../types';
-import { MainComposition } from '../Composition';
+import { CompositionData, CompositionPage, LocalFile } from '../../composition/types';
+import { MainComposition } from '../../composition';
 
 interface PageThumbnailProps {
   page: CompositionPage;

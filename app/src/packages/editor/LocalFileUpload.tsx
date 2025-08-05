@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useSetAtom, useAtomValue } from 'jotai';
 import { DocumentIcon, PhotoIcon, VideoCameraIcon, MusicalNoteIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import { addFileAtom, filesAtom, setReplacingFilesAtom } from './atoms';
-import { LocalFile } from './types';
+import { LocalFile } from '../composition/types';
 
 interface LocalFileUploadProps {
   onUploadComplete?: (file: LocalFile) => void;

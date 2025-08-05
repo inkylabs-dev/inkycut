@@ -8,8 +8,8 @@ import {
   CodeBracketIcon,
   VideoCameraIcon
 } from '@heroicons/react/24/outline';
-import { CompositionData, defaultCompositionData, LocalFile } from './types';
-import { MainComposition } from './Composition';
+import { CompositionData, defaultCompositionData, LocalFile } from '../composition/types';
+import { MainComposition } from '../composition';
 import AudioTimeline from './AudioTimeline';
 import { Playhead } from './components/Playhead';
 import PageTrack from './components/PageTrack';

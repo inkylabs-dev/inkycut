@@ -1,4 +1,4 @@
-import { LocalFile } from '../types';
+import { LocalFile } from '../../composition/types';
 
 /**
  * Service Worker URL Generator

@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { createDraggable } from 'animejs';
 import AudioVisualizer from './components/AudioVisualizer';
-import { CompositionAudio, LocalFile } from './types';
+import { CompositionAudio, LocalFile } from '../composition/types';
 import { createMediaResolver } from './utils/mediaResolver';
 
 interface AudioTimelineProps {

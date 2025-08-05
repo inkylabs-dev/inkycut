@@ -3,7 +3,7 @@
  * This module provides direct OpenAI API access from the browser for Agent mode
  */
 import OpenAI from 'openai';
-import { Project, CompositionElement, CompositionPage } from '../types';
+import { Project, CompositionElement, CompositionPage } from '../../composition/types';
 import { createServerSafeProject } from './projectUtils';
 
 export interface AgentTool {

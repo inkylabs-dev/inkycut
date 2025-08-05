@@ -1,5 +1,5 @@
-import { LocalFile } from '../types';
-import { FileResolver, createFileResolver } from './fileResolver';
+import { LocalFile } from '../../composition/types';
+import { FileResolver, createFileResolver } from '../../composition/utils/fileResolver';
 
 /**
  * Media resolution utility for handling audio, video, and image sources

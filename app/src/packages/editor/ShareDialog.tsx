@@ -8,7 +8,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { addUserMessageToQueueAtom } from './atoms';
-import type { ShareDialogProps } from './types';
+import type { ShareDialogProps } from '../composition/types';
 
 export default function ShareDialog({ isOpen, onClose }: ShareDialogProps) {
   const addMessageToQueue = useSetAtom(addUserMessageToQueueAtom);

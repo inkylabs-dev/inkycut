@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CompositionData, LocalFile } from '../types';
+import { CompositionData, LocalFile } from '../../composition/types';
 import PageThumbnail from './PageThumbnail';
 
 interface PageTrackProps {

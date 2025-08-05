@@ -1,4 +1,4 @@
-import { LocalFile } from '../types';
+import { LocalFile } from '../../composition/types';
 import { MediaResolver } from './mediaResolver';
 import { ServiceWorkerResolver } from './serviceWorkerResolver';
 

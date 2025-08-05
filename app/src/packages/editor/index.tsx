@@ -1,13 +1,8 @@
-export * from './types';
-export { useAnimeTimeline } from './useAnimeTimeline';
+// Re-export from composition package
+export * from '../composition';
 export * from './atoms';
-export * from './utils/fileResolver';
 export * from './utils/projectUtils';
 export * from './utils/mediaUtils';
-
-// Component exports
-export { MainComposition } from './Composition';
-export { Layer } from './Layer';
 export { default as ElementPreview } from './ElementPreview';
 export { default as FileListItem } from './FileListItem';
 export { default as FilePreview } from './FilePreview';

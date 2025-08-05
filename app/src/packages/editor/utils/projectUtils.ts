@@ -1,4 +1,4 @@
-import { Project } from '../types';
+import { Project } from '../../composition/types';
 
 /**
  * Creates a copy of the project data excluding fields that shouldn't be sent to the server

@@ -3,7 +3,7 @@
  */
 
 import { generateKey, exportKey, encryptData, generateShareableKey } from '../encryptionUtils';
-import type { CompositionElement, CompositionPage } from '../../types';
+import type { CompositionElement, CompositionPage } from '../../../composition/types';
 
 /**
  * Helper function to perform JSON export directly

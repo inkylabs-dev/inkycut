@@ -5,8 +5,8 @@ import {
   VideoCameraIcon,
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
-import { CompositionElement } from './types';
-import { FileResolver } from './utils/fileResolver';
+import { CompositionElement } from '../composition/types';
+import { FileResolver } from '../composition/utils/fileResolver';
 
 /**
  * Component to preview a composition element with appropriate rendering based on element type

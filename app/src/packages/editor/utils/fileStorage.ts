@@ -1,4 +1,4 @@
-import { LocalFile } from '../types';
+import { LocalFile } from '../../composition/types';
 
 /**
  * Interface for file storage implementations

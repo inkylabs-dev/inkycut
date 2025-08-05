@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useSetAtom, useAtomValue } from 'jotai';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
-import { LocalFile } from './types';
+import { LocalFile } from '../composition/types';
 import { removeFileAtom, replacingFilesAtom } from './atoms';
 import { getFileIcon } from './LocalFileUpload';
 // Using CSS transitions instead of animejs for simple animations
