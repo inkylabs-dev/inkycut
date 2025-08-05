@@ -321,6 +321,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   const [startMouseX, setStartMouseX] = useState(0);
   const [timelineZoom, setTimelineZoom] = useState(appState.zoomLevel || 1);
   const timelineContainerRef = useRef<HTMLDivElement>(null);
+  const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Helper function to calculate the actual timeline width (matches the rendered timeline width)
   const getActualTimelineWidth = useCallback(() => {
@@ -329,6 +330,57 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
       800
     );
   }, [compositionData.pages, timelineZoom]);
+
+  // Auto-scroll helper functions
+  const startAutoScroll = useCallback((direction: 'left' | 'right', speed: number = 10) => {
+    if (autoScrollIntervalRef.current) {
+      clearInterval(autoScrollIntervalRef.current);
+    }
+    
+    autoScrollIntervalRef.current = setInterval(() => {
+      const timelineContainer = timelineContainerRef.current;
+      if (!timelineContainer) return;
+      
+      const scrollAmount = direction === 'right' ? speed : -speed;
+      const newScrollLeft = Math.max(0, Math.min(
+        timelineContainer.scrollLeft + scrollAmount,
+        timelineContainer.scrollWidth - timelineContainer.clientWidth
+      ));
+      
+      timelineContainer.scrollLeft = newScrollLeft;
+    }, 16); // ~60fps
+  }, []);
+
+  const stopAutoScroll = useCallback(() => {
+    if (autoScrollIntervalRef.current) {
+      clearInterval(autoScrollIntervalRef.current);
+      autoScrollIntervalRef.current = null;
+    }
+  }, []);
+
+  const handleAutoScrollOnDrag = useCallback((mouseX: number, containerRect: DOMRect) => {
+    const edgeThreshold = 100; // pixels from edge to trigger auto-scroll
+    const maxScrollSpeed = 20;
+    
+    // Calculate distance from edges
+    const leftDistance = mouseX;
+    const rightDistance = containerRect.width - mouseX;
+    
+    if (leftDistance < edgeThreshold && leftDistance >= 0) {
+      // Near left edge, scroll left
+      const intensity = 1 - (leftDistance / edgeThreshold);
+      const speed = Math.ceil(intensity * maxScrollSpeed);
+      startAutoScroll('left', speed);
+    } else if (rightDistance < edgeThreshold && rightDistance >= 0) {
+      // Near right edge, scroll right
+      const intensity = 1 - (rightDistance / edgeThreshold);
+      const speed = Math.ceil(intensity * maxScrollSpeed);
+      startAutoScroll('right', speed);
+    } else {
+      // Not near edges, stop auto-scroll
+      stopAutoScroll();
+    }
+  }, [startAutoScroll, stopAutoScroll]);
 
   const handlePlayheadMouseDown = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -454,6 +506,9 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
         const scrollLeft = timelineContainer.scrollLeft;
         const adjustedMouseX = mouseX + scrollLeft;
         
+        // Handle auto-scroll when dragging near edges
+        handleAutoScrollOnDrag(mouseX, containerRect);
+        
         // Calculate which position to drop at, based on mouse position over visible pages
         let cumulativePosition = 0;
         let targetIndex = 0;
@@ -503,6 +558,9 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
       setDropIndicatorIndex(null);
       setIsResizing(false);
       setResizingPageIndex(null);
+      
+      // Stop auto-scroll when dragging ends
+      stopAutoScroll();
     };
 
     if (isDragging || isPageDragging || isResizing) {
@@ -514,8 +572,14 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isPageDragging, isResizing, draggedPageIndex, dropIndicatorIndex, resizingPageIndex, startResizeWidth, startMouseX, totalFrames, handleSeek, timelineZoom, compositionData.pages]);
+  }, [isDragging, isPageDragging, isResizing, draggedPageIndex, dropIndicatorIndex, resizingPageIndex, startResizeWidth, startMouseX, totalFrames, handleSeek, timelineZoom, compositionData.pages, handleAutoScrollOnDrag, stopAutoScroll]);
 
+  // Cleanup auto-scroll on unmount
+  useEffect(() => {
+    return () => {
+      stopAutoScroll();
+    };
+  }, [stopAutoScroll]);
 
   const updateZoomInAppState = (newZoom: number) => {
     if (project) {
