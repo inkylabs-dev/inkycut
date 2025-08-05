@@ -22,30 +22,6 @@ const generateUniqueId = (): string => {
   return `el-${Math.random().toString(36).substring(2, 9)}-${Date.now().toString(36)}`;
 };
 
-// Utility function to resolve audio source with data URL conversion
-const resolveAudioSource = async (src: string, files?: LocalFile[]): Promise<string> => {
-  if (!files || !src.startsWith('LocalFile:')) {
-    return src; // Return as-is if not a LocalFile reference
-  }
-  
-  // Find the corresponding local file
-  const fileName = src.replace('LocalFile:', '');
-  const localFile = files.find(file => file.name === fileName);
-  
-  if (!localFile || !localFile.blob) {
-    console.warn(`Local audio file not found or no blob available: ${fileName}`);
-    return localFile?.dataUrl || src;
-  }
-  
-  try {
-    // For audio files, just return the data URL directly
-    // The audioBufferToDataUrl function is meant for Web Audio API AudioBuffer objects
-    return localFile.dataUrl;
-  } catch (error) {
-    console.warn(`Failed to convert audio to data URL: ${error}`);
-    return localFile.dataUrl || src;
-  }
-};
 
 // Helper functions to get element dimensions
 const getElementWidth = (element: CompositionElement): number => {

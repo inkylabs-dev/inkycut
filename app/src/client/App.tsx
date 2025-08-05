@@ -8,6 +8,7 @@ import { routes } from 'wasp/client/router';
 import { Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from 'wasp/client/auth';
 import { useIsLandingPage } from './hooks/useIsLandingPage';
+import { registerServiceWorker } from './utils/serviceWorker';
 
 /**
  * use this component to wrap all child components
@@ -40,6 +41,21 @@ export default function App() {
       }
     }
   }, [location]);
+
+  // Register service worker for file caching
+  useEffect(() => {
+    registerServiceWorker({
+      onSuccess: (registration) => {
+        console.log('InkyCut Service Worker registered successfully:', registration);
+      },
+      onUpdate: (registration) => {
+        console.log('InkyCut Service Worker updated:', registration);
+      },
+      onError: (error) => {
+        console.error('InkyCut Service Worker registration failed:', error);
+      }
+    });
+  }, []);
 
   return (
     <>

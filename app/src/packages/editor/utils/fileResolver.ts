@@ -1,11 +1,12 @@
 import { LocalFile } from '../types';
 
 /**
- * Resolves file references in element sources to actual data URLs
- * Maps filenames like "1.png" to the corresponding base64 data URL from local files
+ * Resolves file references in element sources to service worker URLs or data URLs
+ * Maps filenames like "1.png" to service worker interceptable URLs when possible
  */
 export class FileResolver {
   private fileMap: Map<string, string> = new Map();
+  private files: LocalFile[] = [];
 
   constructor(files: LocalFile[]) {
     this.updateFiles(files);
@@ -16,20 +17,40 @@ export class FileResolver {
    * @param files Array of local files with data URLs
    */
   updateFiles(files: LocalFile[]) {
+    this.files = files;
     this.fileMap.clear();
     files.forEach(file => {
+      // Generate service worker URL if available, otherwise use dataUrl
+      const resolvedUrl = this.generateFileUrl(file);
+      
       // Map by exact filename
-      this.fileMap.set(file.name, file.dataUrl);
+      this.fileMap.set(file.name, resolvedUrl);
       
       // Also map by file ID for programmatic references
-      this.fileMap.set(file.id, file.dataUrl);
+      this.fileMap.set(file.id, resolvedUrl);
     });
   }
 
   /**
-   * Resolve a file reference to its data URL
-   * @param src File reference (filename, file ID, or already a data URL)
-   * @returns The resolved data URL or the original src if not found/already resolved
+   * Generate the best URL for a file (service worker URL or dataUrl fallback)
+   */
+  private generateFileUrl(file: LocalFile): string {
+    // Check if service worker is available
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      // Generate service worker interceptable URL
+      const baseUrl = window.location.origin;
+      // Use both ID and filename for robust lookup
+      return `${baseUrl}/sw-files/${file.id}/${encodeURIComponent(file.name)}`;
+    }
+    
+    // Fallback to dataUrl
+    return file.dataUrl;
+  }
+
+  /**
+   * Resolve a file reference to its URL (service worker URL or data URL)
+   * @param src File reference (filename, file ID, or already a URL)
+   * @returns The resolved URL or the original src if not found/already resolved
    */
   resolve(src: string): string {
     if (!src) return '';
