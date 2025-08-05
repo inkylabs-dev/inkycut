@@ -445,12 +445,13 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
         handleSeek(targetFrame);
       } else if (isPageDragging && draggedPageIndex !== null) {
         // Page dragging for reordering
-        const pagesTrack = document.querySelector('.pages-track') as HTMLElement;
-        if (!pagesTrack) return;
+        const timelineContainer = timelineContainerRef.current;
+        if (!timelineContainer) return;
         
-        const rect = pagesTrack.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left;
-        const scrollLeft = timelineContainerRef.current?.scrollLeft || 0;
+        // Use timeline container bounds for consistent coordinate system
+        const containerRect = timelineContainer.getBoundingClientRect();
+        const mouseX = event.clientX - containerRect.left;
+        const scrollLeft = timelineContainer.scrollLeft;
         const adjustedMouseX = mouseX + scrollLeft;
         
         // Calculate which position to drop at, based on mouse position over visible pages
