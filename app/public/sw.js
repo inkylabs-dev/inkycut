@@ -85,34 +85,109 @@ async function getFileFromDB(identifier) {
   }
 }
 
-// Helper function to convert dataUrl to Response
-function dataUrlToResponse(dataUrl, headers = {}) {
+// Helper function to parse Range header
+function parseRange(rangeHeader, contentLength) {
+  if (!rangeHeader || !rangeHeader.startsWith('bytes=')) {
+    return null;
+  }
+  
+  const range = rangeHeader.substring(6); // Remove 'bytes='
+  
+  // Handle multiple ranges (take first one for now)
+  const firstRange = range.split(',')[0].trim();
+  const [startStr, endStr] = firstRange.split('-');
+  
+  let start = startStr ? parseInt(startStr, 10) : 0;
+  let end = endStr ? parseInt(endStr, 10) : contentLength - 1;
+  
+  // Validate and fix range
+  if (isNaN(start)) start = 0;
+  if (isNaN(end) || end >= contentLength) end = contentLength - 1;
+  if (start < 0) start = 0;
+  if (start > end) return null;
+  
+  return { start, end };
+}
+
+// Optimized base64 to ArrayBuffer conversion
+function base64ToArrayBuffer(base64Data) {
+  const binaryString = atob(base64Data);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  
+  // Use batch processing for better performance with large files
+  const BATCH_SIZE = 8192; // 8KB batches for optimal performance
+  for (let i = 0; i < len; i += BATCH_SIZE) {
+    const end = Math.min(i + BATCH_SIZE, len);
+    for (let j = i; j < end; j++) {
+      bytes[j] = binaryString.charCodeAt(j);
+    }
+  }
+  return bytes;
+}
+
+// Helper function to convert dataUrl to Response with Range support
+function dataUrlToResponse(dataUrl, request, headers = {}) {
   try {
     // Parse the data URL
     const [header, base64Data] = dataUrl.split(',');
     const mimeMatch = header.match(/data:([^;]+)/);
     const mimeType = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
     
-    // Convert base64 to ArrayBuffer
-    const binaryString = atob(base64Data);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
+    // Convert base64 to ArrayBuffer using optimized function
+    const bytes = base64ToArrayBuffer(base64Data);
+    const contentLength = bytes.length;
+    
+    // Check for Range request
+    const rangeHeader = request.headers.get('Range');
+    const rangeData = parseRange(rangeHeader, contentLength);
+    
+    if (rangeData) {
+      // Handle Range request (206 Partial Content)
+      const { start, end } = rangeData;
+      const chunkLength = end - start + 1;
+      const chunk = bytes.slice(start, end + 1);
+      
+      const responseHeaders = {
+        'Content-Type': mimeType,
+        'Content-Length': chunkLength.toString(),
+        'Content-Range': `bytes ${start}-${end}/${contentLength}`,
+        'Accept-Ranges': 'bytes',
+        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Range, Content-Range, Content-Length',
+        'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges',
+        'Connection': 'keep-alive', // Important for streaming
+        'ETag': `"${btoa(base64Data.substring(0, 32))}"`, // Simple ETag
+        ...headers
+      };
+      
+      return new Response(chunk, {
+        status: 206,
+        statusText: 'Partial Content',
+        headers: responseHeaders
+      });
+    } else {
+      // Handle full content request (200 OK)
+      const responseHeaders = {
+        'Content-Type': mimeType,
+        'Content-Length': contentLength.toString(),
+        'Accept-Ranges': 'bytes',
+        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Range, Content-Range, Content-Length',
+        'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges',
+        'Connection': 'keep-alive', // Important for streaming
+        'ETag': `"${btoa(base64Data.substring(0, 32))}"`, // Simple ETag
+        ...headers
+      };
+      
+      return new Response(bytes, {
+        status: 200,
+        statusText: 'OK',
+        headers: responseHeaders
+      });
     }
-    
-    // Create response with proper headers
-    const responseHeaders = {
-      'Content-Type': mimeType,
-      'Cache-Control': 'public, max-age=31536000', // Cache for 1 year
-      'Access-Control-Allow-Origin': '*',
-      ...headers
-    };
-    
-    return new Response(bytes.buffer, {
-      status: 200,
-      statusText: 'OK',
-      headers: responseHeaders
-    });
   } catch (error) {
     console.error('Error converting dataUrl to Response:', error);
     return null;
@@ -188,6 +263,23 @@ function extractFileIdentifier(url) {
   }
 }
 
+// Helper function to check if file is a video
+function isVideoFile(mimeType, filename) {
+  const videoMimeTypes = ['video/', 'application/mp4', 'application/x-mpegURL'];
+  const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv', '.m4v', '.3gp'];
+  
+  if (mimeType && videoMimeTypes.some(type => mimeType.includes(type))) {
+    return true;
+  }
+  
+  if (filename) {
+    const lowerFilename = filename.toLowerCase();
+    return videoExtensions.some(ext => lowerFilename.endsWith(ext));
+  }
+  
+  return false;
+}
+
 // Main fetch event handler
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -223,16 +315,41 @@ self.addEventListener('fetch', (event) => {
         const localFile = await getFileFromDB(fileIdentifier);
         
         if (localFile && localFile.dataUrl) {
-          console.log('Service worker serving from IndexedDB:', fileIdentifier);
+          const isVideo = isVideoFile(localFile.type, localFile.name);
+          const rangeHeader = request.headers.get('Range');
           
-          // Convert dataUrl to Response
-          const response = dataUrlToResponse(localFile.dataUrl, {
+          // Enhanced logging for video range requests
+          if (isVideo && rangeHeader) {
+            const rangeData = parseRange(rangeHeader, localFile.dataUrl.length);
+            console.log('Video range request:', {
+              file: fileIdentifier,
+              range: rangeHeader,
+              parsedRange: rangeData,
+              fileName: localFile.name,
+              fileType: localFile.type
+            });
+          } else {
+            console.log('Service worker serving from IndexedDB:', {
+              file: fileIdentifier,
+              type: localFile.type,
+              isVideo,
+              hasRange: !!rangeHeader,
+              range: rangeHeader
+            });
+          }
+          
+          // Convert dataUrl to Response with Range support
+          const response = dataUrlToResponse(localFile.dataUrl, request, {
             'X-Served-By': 'InkyCut-ServiceWorker',
             'X-File-ID': localFile.id,
-            'X-File-Name': localFile.name
+            'X-File-Name': localFile.name,
+            'X-Is-Video': isVideo ? 'true' : 'false'
           });
           
           if (response) {
+            if (isVideo) {
+              console.log('Service worker served video with status:', response.status);
+            }
             return response;
           }
         }
