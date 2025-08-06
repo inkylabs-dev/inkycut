@@ -17,10 +17,11 @@ export const PlayerWrapper = forwardRef<PlayerRef, PlayerWrapperProps>(
     }), [compositionData, files]);
 
     // Calculate total frames once - ensure integer result
-    const totalFrames = useMemo(() => 
-      Math.round(compositionData.pages.reduce((sum, page) => sum + page.duration, 0)),
-      [compositionData.pages]
-    );
+    const totalFrames = useMemo(() => {
+      const total = compositionData.pages.reduce((sum, page) => sum + page.duration, 0);
+      // Use Math.floor to ensure we get a proper integer and avoid floating-point precision issues
+      return Math.floor(total);
+    }, [compositionData.pages]);
 
     return (
       <div className="flex-1 bg-gray-100 dark:bg-gray-800 flex items-center justify-center relative">
