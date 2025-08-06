@@ -19,8 +19,8 @@ export const PlayerWrapper = forwardRef<PlayerRef, PlayerWrapperProps>(
     // Calculate total frames once - ensure integer result
     const totalFrames = useMemo(() => {
       const total = compositionData.pages.reduce((sum, page) => sum + page.duration, 0);
-      // Use Math.floor to ensure we get a proper integer and avoid floating-point precision issues
-      return Math.floor(total);
+      // Use Math.round to ensure we get a proper integer and avoid floating-point precision issues
+      return Math.round(total);
     }, [compositionData.pages]);
 
     return (
