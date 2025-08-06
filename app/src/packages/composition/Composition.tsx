@@ -12,6 +12,7 @@ const generateUniqueId = (): string => {
 };
 
 
+
 // Helper functions to get element dimensions
 const getElementWidth = (element: CompositionElement): number => {
   if (element.getWidth) {
@@ -206,7 +207,7 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
             overflow: 'hidden',
           }}
         >
-          {childElements.map((childElement) => {
+          {childElements.map((childElement, childIndex) => {
             // Scale child element dimensions and position
             const scaledChild = {
               ...childElement,
@@ -224,7 +225,7 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
 
             return (
               <ElementRenderer
-                key={`group-child-${scaledChild.id}`}
+                key={`${childElement.type}-${childIndex}`}
                 element={scaledChild}
                 frame={frame}
                 fps={fps}
@@ -344,8 +345,9 @@ export const MainComposition: React.FC<{
             durationInFrames={pageDurations[index]}
           >
             <AbsoluteFill style={{ backgroundColor: page.backgroundColor || '#ffffff' }}>
-              {elementsWithIds.map((element) => (
+              {elementsWithIds.map((element, elementIndex) => (
                 <ElementRenderer
+                  key={`${element.type}-${elementIndex}`}
                   element={element}
                   frame={frame - startFrame}
                   fps={fps}

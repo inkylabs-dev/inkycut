@@ -587,9 +587,9 @@ export default function RightPanel({
         ref={messagesContainerRef}
         className="flex-1 overflow-y-auto p-4 space-y-4"
       >
-        {messages.map((message) => (
+        {messages.map((message, index) => (
           <div
-            key={message.id}
+            key={`chat-${index}`}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div className={`flex space-x-2 max-w-[80%] min-w-0 ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
