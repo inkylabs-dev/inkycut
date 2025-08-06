@@ -71,9 +71,9 @@ async function getFileFromDB(identifier) {
           return file;
         }
         currentCursor = await new Promise((resolve, reject) => {
-          const continueRequest = currentCursor.continue();
-          continueRequest.onsuccess = () => resolve(continueRequest.result);
-          continueRequest.onerror = () => reject(continueRequest.error);
+          currentCursor.continue();
+          currentCursor.onsuccess = () => resolve(currentCursor.result);
+          currentCursor.onerror = () => reject(currentCursor.error);
         });
       }
     }
