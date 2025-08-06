@@ -33,11 +33,11 @@ const Root = () => {
           files: []
         }}
         calculateMetadata={({ props }) => {
-          // Calculate total duration from all pages, converting milliseconds to frames
+          // Calculate total duration from all pages (already in frames)
           const fps = props.data?.fps || 30;
 
           const totalDuration = props.data?.pages?.reduce((total: number, page: any) => {
-            const durationInFrames = Math.round(((page.duration || 0) / 1000) * fps);
+            const durationInFrames = page.duration || 0; // duration is already in frames
             return total + durationInFrames;
           }, 0) || 300;
           

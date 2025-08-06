@@ -306,11 +306,11 @@ function getAgentModeSystemPrompt(): string {
     '- CompositionPage: { id: string, name: string, duration: number, backgroundColor?: string, elements: CompositionElement[] }\n' +
     '- CompositionElement: {\n' +
     '  id: string, type: "video"|"image"|"text"|"group", left: number, top: number, width: number, height: number,\n' +
-    '  rotation?: number, opacity?: number, zIndex?: number, delay?: number (in milliseconds),\n' +
+    '  rotation?: number, opacity?: number, zIndex?: number, delay?: number (in frames),\n' +
     '  src?: string (for video/image), elements?: CompositionElement[] (for group),\n' +
     '  text?: string, fontSize?: number, fontFamily?: string, color?: string,\n' +
     '  fontWeight?: string, textAlign?: "left"|"center"|"right",\n' +
-    '  animation?: { props?, duration?, ease?, delay?, alternate?, loop?, autoplay? }\n' +
+    '  animation?: { props?, duration? (in frames), ease?, delay? (in frames), alternate?, loop?, autoplay? }\n' +
     '}\n\n' +
     'AGENT DECISION MAKING:\n' +
     '- Be methodical and logical in your approach\n' +
@@ -493,13 +493,13 @@ function getEditModeSystemPrompt(): string {
     '- CompositionPage: { id: string, name: string, duration: number, backgroundColor?: string, elements: CompositionElement[] }\n' +
     '- CompositionElement: {\n' +
     '  id: string, type: "video"|"image"|"text"|"group", left: number, top: number, width: number, height: number,\n' +
-    '  rotation?: number, opacity?: number, zIndex?: number, delay?: number (in milliseconds),\n' +
+    '  rotation?: number, opacity?: number, zIndex?: number, delay?: number (in frames),\n' +
     '  src?: string (for video/image), elements?: CompositionElement[] (for group - child elements with absolute positioning),\n' +
     '  text?: string, fontSize?: number, fontFamily?: string, color?: string,\n' +
     '  fontWeight?: string, textAlign?: "left"|"center"|"right", isDragging?: boolean,\n' +
     '  animation?: {\n' +
-    '    props?: Record<string, any>, duration?: number, ease?: string,\n' +
-    '    delay?: number, alternate?: boolean, loop?: boolean|number, autoplay?: boolean\n' +
+    '    props?: Record<string, any>, duration?: number (in frames), ease?: string,\n' +
+    '    delay?: number (in frames), alternate?: boolean, loop?: boolean|number, autoplay?: boolean\n' +
     '  }\n' +
     '}\n\n' +
     'GROUP ELEMENT NOTES:\n' +
@@ -511,11 +511,11 @@ function getEditModeSystemPrompt(): string {
     '- Groups can contain any element type, including other groups (nesting supported)\n' +
     '- Groups act as containers that clip and scale their children to fit\n\n' +
     'ANIMATION EXAMPLES:\n' +
-    '- Fade in: { duration: 1000, props: { opacity: [0, 1] } }\n' +
-    '- Slide from left: { duration: 1000, props: { translateX: [-100, 0] } }\n' +
-    '- Scale up: { duration: 1000, props: { scale: [0.5, 1] } }\n' +
-    '- Rotate: { duration: 2000, props: { rotate: "1turn" } }\n' +
-    '- Bounce: { duration: 1000, ease: "easeOutBounce", props: { translateY: [-50, 0] } }\n\n' +
+    '- Fade in: { duration: 30, props: { opacity: [0, 1] } } // 1 second at 30fps\n' +
+    '- Slide from left: { duration: 30, props: { translateX: [-100, 0] } } // 1 second at 30fps\n' +
+    '- Scale up: { duration: 30, props: { scale: [0.5, 1] } } // 1 second at 30fps\n' +
+    '- Rotate: { duration: 60, props: { rotate: "1turn" } } // 2 seconds at 30fps\n' +
+    '- Bounce: { duration: 30, ease: "easeOutBounce", props: { translateY: [-50, 0] } } // 1 second at 30fps\n\n' +
     'You should call changeVideoSchema tool to apply changes.';
 }
 
@@ -540,7 +540,7 @@ function getAskModeSystemPrompt(): string {
     '  rotation?, opacity?, zIndex?, delay? (milliseconds),\n' +
     '  src? (for video/image), elements? (for group - child elements with absolute positioning, auto-scaled),\n' +
     '  text?, fontSize?, fontFamily?, color?, fontWeight?, textAlign?: "left"|"center"|"right",\n' +
-    '  animation?: { props?, duration?, ease?, delay?, alternate?, loop?, autoplay? }\n' +
+    '  animation?: { props?, duration? (in frames), ease?, delay? (in frames), alternate?, loop?, autoplay? }\n' +
     '}\n\n' +
     'GROUP ELEMENTS: Groups contain child elements positioned absolutely. The group auto-scales to fit children within allocated bounds.\n\n' +
     'Focus on being informative, analytical, and educational. Do NOT suggest modifications - only provide insights and information.';

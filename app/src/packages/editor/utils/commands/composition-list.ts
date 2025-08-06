@@ -39,7 +39,7 @@ export const lsCompCommand: SlashCommand = {
           id: page.id,
           name: page.name || 'Untitled Page',
           duration: page.duration || null,
-          durationSeconds: page.duration ? (page.duration / 1000) : null,
+          durationSeconds: page.duration ? (page.duration / (context.project.composition?.fps || 30)) : null,
           elementCount: page.elements ? page.elements.length : 0
         }))
       };

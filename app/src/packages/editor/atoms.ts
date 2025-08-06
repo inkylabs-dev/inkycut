@@ -306,7 +306,7 @@ export const createDefaultPage = (): CompositionPage => {
   return {
     id: `page-${Date.now()}`,
     name: 'Page 1',
-    duration: 5000, // 5 seconds in milliseconds
+    duration: 150, // 5 seconds at 30fps
     backgroundColor: 'white',
     elements: []
   };

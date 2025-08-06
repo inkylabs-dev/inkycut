@@ -7,8 +7,9 @@ import { getFileIcon } from './LocalFileUpload';
 // Using CSS transitions instead of animejs for simple animations
 
 // Helper function to format duration in HH:MM:SS format
-function formatDuration(durationMs: number): string {
-  const totalSeconds = Math.floor(durationMs / 1000);
+// Duration is now stored in frames, so we convert to seconds for display
+function formatDuration(durationFrames: number, fps: number = 30): string {
+  const totalSeconds = Math.floor(durationFrames / fps);
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;

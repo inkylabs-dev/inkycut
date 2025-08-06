@@ -884,7 +884,7 @@ Remember: You are a powerful, autonomous video editing agent. Work systematicall
             `Project contains ${composition.pages.length} page(s)`,
             `Total of ${composition.pages.reduce((sum, page) => sum + page.elements.length, 0)} elements`,
             `Video resolution: ${composition.width}x${composition.height} at ${composition.fps}fps`,
-            `Total duration: ${(composition.pages.reduce((sum, page) => sum + (page.duration || 0), 0) / 1000).toFixed(1)}s`
+            `Total duration: ${(composition.pages.reduce((sum, page) => sum + (page.duration || 0), 0) / (composition.fps || 30)).toFixed(1)}s`
           ]
         };
 
@@ -910,7 +910,7 @@ Remember: You are a powerful, autonomous video editing agent. Work systematicall
     }
 
     // Check for very short pages
-    const shortPages = composition.pages.filter((page: any) => (page.duration || 0) < 1000);
+    const shortPages = composition.pages.filter((page: any) => (page.duration || 0) < 30); // Less than 1 second at 30fps
     if (shortPages.length > 0) {
       recommendations.push('Some pages have very short durations - consider extending for better readability');
     }

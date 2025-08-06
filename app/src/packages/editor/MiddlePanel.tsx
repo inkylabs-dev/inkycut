@@ -109,7 +109,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   
   // Calculate total duration and current time
   // Convert page durations from milliseconds to frames (reverted to original)
-  const totalFrames = compositionData.pages.reduce((sum, page) => sum + Math.round((page.duration / 1000) * compositionData.fps), 0);
+  const totalFrames = compositionData.pages.reduce((sum, page) => sum + page.duration, 0);
   const totalDuration = totalFrames / compositionData.fps;
   const currentTime = currentFrame / compositionData.fps;
 
@@ -187,7 +187,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   const getCurrentPage = () => {
     let cumulativeFrames = 0;
     for (let i = 0; i < compositionData.pages.length; i++) {
-      const pageDurationInFrames = Math.round((compositionData.pages[i].duration / 1000) * compositionData.fps);
+      const pageDurationInFrames = compositionData.pages[i].duration;
       if (currentFrame < cumulativeFrames + pageDurationInFrames) {
         return { pageIndex: i, frameOffset: currentFrame - cumulativeFrames };
       }
@@ -326,7 +326,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
   // Helper function to calculate the actual timeline width (matches the rendered timeline width)
   const getActualTimelineWidth = useCallback(() => {
     return Math.max(
-      compositionData.pages.reduce((sum, p) => sum + Math.max((p.duration / 1000) * 100 * timelineZoom, 80), 0), 
+      compositionData.pages.reduce((sum, p) => sum + Math.max((p.duration / compositionData.fps) * 100 * timelineZoom, 80), 0), 
       800
     );
   }, [compositionData.pages, timelineZoom]);
@@ -519,7 +519,7 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
             continue;
           }
           
-          const pageDuration = compositionData.pages[i].duration / 1000;
+          const pageDuration = compositionData.pages[i].duration / compositionData.fps;
           const blockWidth = Math.max(pageDuration * 100 * timelineZoom, 80);
           
           // If mouse is before the middle of this page, drop before it
@@ -925,7 +925,8 @@ export default function MiddlePanel({ onCompositionUpdate, onPageSelect, isReadO
                       onAudioDelayChange={handleAudioDelayChange}
                       onAudioTrimAfterChange={handleAudioTrimAfterChange}
                       files={files}
-                      totalProjectDurationMs={compositionData.pages.reduce((sum, page) => sum + page.duration, 0)}
+                      totalProjectDurationFrames={compositionData.pages.reduce((sum, page) => sum + page.duration, 0)}
+                      fps={compositionData.fps}
                     />
 
                     <Playhead

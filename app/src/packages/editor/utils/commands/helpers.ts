@@ -83,21 +83,21 @@ export async function performJSONExport(project: any, fileStorage: any): Promise
 }
 
 /**
- * Helper function to parse human-readable duration strings
- * Supports: ms (default), s (seconds), m (minutes)
- * Examples: "1000", "1.5s", "2m", "500ms"
+ * Helper function to parse human-readable duration strings and convert to frames
+ * Supports: ms (milliseconds), s (seconds), m (minutes), f (frames)
+ * Examples: "1000ms", "1.5s", "2m", "30f"
  */
-export function parseDuration(durationStr: string): number | null {
+export function parseDuration(durationStr: string, fps: number = 30): number | null {
   const trimmed = durationStr.trim();
   
-  // If it's just a number, treat as milliseconds
+  // If it's just a number, treat as milliseconds for backward compatibility
   if (/^\d+(\.\d+)?$/.test(trimmed)) {
     const ms = parseFloat(trimmed);
-    return ms >= 0 ? ms : null;
+    return ms >= 0 ? Math.round((ms / 1000) * fps) : null;
   }
   
   // Parse with unit suffix
-  const match = trimmed.match(/^(\d+(?:\.\d+)?)(ms|s|m)$/i);
+  const match = trimmed.match(/^(\d+(?:\.\d+)?)(ms|s|m|f)$/i);
   if (!match) {
     return null;
   }
@@ -105,20 +105,50 @@ export function parseDuration(durationStr: string): number | null {
   const value = parseFloat(match[1]);
   const unit = match[2].toLowerCase();
   
-  if (value <= 0) {
+  if (value < 0) {
     return null;
   }
   
   switch (unit) {
     case 'ms':
-      return value;
+      return Math.round((value / 1000) * fps);
     case 's':
-      return value * 1000;
+      return Math.round(value * fps);
     case 'm':
-      return value * 60 * 1000;
+      return Math.round(value * 60 * fps);
+    case 'f':
+      return Math.round(value);
     default:
       return null;
   }
+}
+
+/**
+ * Format frames as human-readable duration string
+ * Returns the most appropriate unit (frames, seconds, or minutes)
+ */
+export function formatFramesToDuration(frames: number, fps: number = 30): string {
+  if (frames === 0) return '0f';
+  
+  const seconds = frames / fps;
+  
+  // If it's less than 1 second, show as frames
+  if (seconds < 1) {
+    return `${frames}f`;
+  }
+  
+  // If it's an exact number of minutes, show as minutes
+  if (seconds >= 60 && seconds % 60 === 0) {
+    return `${seconds / 60}m`;
+  }
+  
+  // If it's an exact number of seconds, show as seconds
+  if (seconds % 1 === 0) {
+    return `${seconds}s`;
+  }
+  
+  // Show as decimal seconds
+  return `${seconds.toFixed(1)}s`;
 }
 
 /**
@@ -307,7 +337,7 @@ export function generatePageId(): string {
 }
 
 /**
- * Calculate total project duration in milliseconds (sum of all page durations)
+ * Calculate total project duration in frames (sum of all page durations)
  */
 export function calculateTotalProjectDuration(project: any): number {
   if (!project?.composition?.pages || project.composition.pages.length === 0) {
@@ -321,14 +351,14 @@ export function calculateTotalProjectDuration(project: any): number {
  * Clamp audio duration to not exceed the total project duration
  * This ensures audio tracks don't extend beyond the project timeline
  */
-export function clampAudioDuration(audio: any, maxProjectDurationMs: number): any {
+export function clampAudioDuration(audio: any, maxProjectDurationFrames: number): any {
   if (!audio) return audio;
   
   const audioEnd = audio.delay + audio.duration;
   
   // If audio extends beyond project duration, clamp it
-  if (audioEnd > maxProjectDurationMs) {
-    const clampedDuration = Math.max(0, maxProjectDurationMs - audio.delay);
+  if (audioEnd > maxProjectDurationFrames) {
+    const clampedDuration = Math.max(0, maxProjectDurationFrames - audio.delay);
     return {
       ...audio,
       duration: clampedDuration

@@ -71,7 +71,7 @@ export default function PageThumbnail({
           compositionWidth={compositionData.width}
           compositionHeight={compositionData.height}
           frameToDisplay={0} // Show first frame of the page
-          durationInFrames={Math.floor((page.duration / 1000) * compositionData.fps)}
+          durationInFrames={page.duration}
           fps={compositionData.fps}
           style={{
             width: '100%',

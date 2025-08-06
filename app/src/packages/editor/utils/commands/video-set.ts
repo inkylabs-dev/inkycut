@@ -4,6 +4,8 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
+import { parseDuration } from './helpers';
+
 export const setVideoCommand: SlashCommand = {
   name: 'set-video',
   description: 'Modify properties of a video element',
@@ -203,11 +205,12 @@ export const setVideoCommand: SlashCommand = {
                   handled: true
                 };
               }
-              const delay = parseInt(nextArg, 10);
-              if (isNaN(delay) || delay < 0) {
+              const fps = context.project.composition?.fps || 30;
+              const delay = parseDuration(nextArg, fps);
+              if (delay === null || delay < 0) {
                 return {
                   success: false,
-                  message: `❌ **Invalid Delay**\n\nDelay must be a non-negative number (milliseconds). Got '${nextArg}'`,
+                  message: `❌ **Invalid Delay**\n\nDelay must be a non-negative duration. Got '${nextArg}'\n\nSupported formats:\n• Frames: \`30f\` (30 frames)\n• Milliseconds: \`1000ms\`\n• Seconds: \`1s\` or \`1.5s\`\n• Minutes: \`2m\``,
                   handled: true
                 };
               }
@@ -312,7 +315,7 @@ export const setVideoCommand: SlashCommand = {
           case 'height': return `Height: ${value}px`;
           case 'opacity': return `Opacity: ${value}`;
           case 'rotation': return `Rotation: ${value}°`;
-          case 'delay': return `Delay: ${value}ms`;
+          case 'delay': return `Delay: ${value}f`;
           default: return `${key}: ${value}`;
         }
       });

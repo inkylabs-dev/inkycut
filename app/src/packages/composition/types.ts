@@ -22,7 +22,7 @@ export interface CompositionElement {
   opacity?: number;
   /** Stack order - higher values appear above lower values */
   zIndex?: number;
-  /** Delay before element appears in the composition (in milliseconds) */
+  /** Delay before element appears in the composition (in frames) */
   delay?: number;
   
   // Video/Image specific properties
@@ -58,11 +58,11 @@ export interface CompositionElement {
      * can be css properties, css transforms, css variables, 
      */
     props?: Record<string, any>;
-    /** Animation duration in milliseconds */
+    /** Animation duration in frames */
     duration?: number;
     /** Animation easing function */
     ease?: string;
-    /** Animation delay in milliseconds */
+    /** Animation delay in frames */
     delay?: number;
     /** Animation direction */
     alternate?: boolean;
@@ -101,7 +101,7 @@ export interface CompositionPage {
   id: string;
   /** User-friendly name for the page */
   name: string;
-  /** Duration of the page in milliseconds */
+  /** Duration of the page in frames */
   duration: number;
   /** Background color of the page (CSS color value) */
   backgroundColor?: string;
@@ -183,7 +183,7 @@ export interface LocalFile {
   width?: number;
   /** Height in pixels (for images and videos) */
   height?: number;
-  /** Duration in milliseconds (for videos) */
+  /** Duration in frames (for videos) */
   duration?: number;
 }
 
@@ -228,9 +228,9 @@ export interface CompositionAudio {
   src: string;
   /** Volume level from 0 (silent) to 1 (full volume) */
   volume: number;
-  /** Time in milliseconds to trim from the beginning of the audio */
+  /** Time in frames to trim from the beginning of the audio */
   trimBefore: number;
-  /** Time in milliseconds to trim from the end of the audio */
+  /** Time in frames to trim from the end of the audio */
   trimAfter: number;
   /** Playback speed multiplier (1 = normal speed, 2 = double speed, 0.5 = half speed) */
   playbackRate: number;
@@ -240,9 +240,9 @@ export interface CompositionAudio {
   loop: boolean;
   /** Tone frequency adjustment from 0.01 to 2 (1 = normal pitch) */
   toneFrequency: number;
-  /** Delay before audio starts playing in milliseconds */
+  /** Delay before audio starts playing in frames */
   delay: number;
-  /** Duration of the audio track in milliseconds */
+  /** Duration of the audio track in frames */
   duration: number;
 }
 
@@ -278,7 +278,7 @@ export const defaultCompositionData: CompositionData = {
     {
       id: 'page1',
       name: 'Intro',
-      duration: 5000, // 5 seconds in milliseconds
+      duration: 150, // 5 seconds at 30fps
       backgroundColor: '#1e3a8a',
       elements: [
         {
@@ -306,14 +306,14 @@ export const defaultCompositionData: CompositionData = {
           fontSize: 24,
           color: '#e5e7eb',
           textAlign: 'center',
-          delay: 1000,
+          delay: 30, // 1 second at 30fps
         }
       ]
     },
     {
       id: 'page2',
       name: 'Content',
-      duration: 6000, // 6 seconds in milliseconds
+      duration: 180, // 6 seconds at 30fps
       backgroundColor: '#059669',
       elements: [
         {
@@ -346,7 +346,7 @@ export const defaultCompositionData: CompositionData = {
     {
       id: 'page3',
       name: 'Outro',
-      duration: 4000, // 4 seconds in milliseconds
+      duration: 120, // 4 seconds at 30fps
       backgroundColor: '#7c3aed',
       elements: [
         {

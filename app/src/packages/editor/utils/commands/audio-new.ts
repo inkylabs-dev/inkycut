@@ -35,8 +35,11 @@ export const newAudioCommand: SlashCommand = {
         loop: false,
         toneFrequency: 1.0,
         delay: 0,
-        duration: 5000 // Default 5 seconds
+        duration: 150 // Default 5 seconds at 30fps
       };
+
+      // Get FPS once at the beginning
+      const fps = context.project.composition?.fps || 30;
 
       // Parse arguments
       for (let i = 0; i < args.length; i++) {
@@ -87,7 +90,7 @@ export const newAudioCommand: SlashCommand = {
                 handled: true
               };
             }
-            const trimBefore = parseDuration(nextArg);
+            const trimBefore = parseDuration(nextArg, fps);
             if (trimBefore === null || trimBefore < 0) {
               return {
                 success: false,
@@ -108,7 +111,7 @@ export const newAudioCommand: SlashCommand = {
                 handled: true
               };
             }
-            const trimAfter = parseDuration(nextArg);
+            const trimAfter = parseDuration(nextArg, fps);
             if (trimAfter === null || trimAfter < 0) {
               return {
                 success: false,
@@ -183,7 +186,7 @@ export const newAudioCommand: SlashCommand = {
                 handled: true
               };
             }
-            const delay = parseDuration(nextArg);
+            const delay = parseDuration(nextArg, fps);
             if (delay === null || delay < 0) {
               return {
                 success: false,
@@ -204,7 +207,7 @@ export const newAudioCommand: SlashCommand = {
                 handled: true
               };
             }
-            const duration = parseDuration(nextArg);
+            const duration = parseDuration(nextArg, fps);
             if (duration === null || duration <= 0) {
               return {
                 success: false,

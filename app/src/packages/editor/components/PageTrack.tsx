@@ -65,7 +65,7 @@ export default function PageTrack({
         }
         
         compositionData.pages.forEach((page, index) => {
-          const pageDuration = page.duration / 1000;
+          const pageDuration = page.duration / compositionData.fps; // Convert frames to seconds
           const isSelected = index === currentPageIndex;
           const isDraggedPage = draggedPageIndex === index;
           

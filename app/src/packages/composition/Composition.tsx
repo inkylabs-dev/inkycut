@@ -55,8 +55,8 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
   const currentTimeInSeconds = frame / fps;
   
   // Check if element should be visible at current time
-  const delayMs = elementWithId.delay || 0;
-  const delayInSeconds = delayMs / 1000;
+  const delay = elementWithId.delay || 0;
+  const delayInSeconds = delay / fps;
   const isVisible = currentTimeInSeconds >= delayInSeconds;
   
   // Handle animation execution - only in Player context
@@ -71,9 +71,9 @@ const ElementRenderer: React.FC<ElementRendererProps & { fileResolver?: FileReso
     const { animation } = elementWithId;
     if (animation && animation.props && Object.keys(animation.props).length > 0) {
       const animationConfig = {
-        duration: animation.duration || 1000,
+        duration: (animation.duration || 30) / fps * 1000, // Convert frames to milliseconds for anime.js
         ease: animation.ease || 'linear',
-        delay: animation.delay || 0,
+        delay: (animation.delay || 0) / fps * 1000, // Convert frames to milliseconds for anime.js
         alternate: animation.alternate || false,
         loop: animation.loop || false,
         autoplay: animation.autoplay !== false,
@@ -302,7 +302,7 @@ export const MainComposition: React.FC<{
   }
 
   // Convert page durations from milliseconds to frames
-  const pageDurations = data.pages.map(page => Math.round(((page.duration || 0) / 1000) * fps));
+  const pageDurations = data.pages.map(page => page.duration || 0); // duration is already in frames
   let cumulativeFrames = 0;
   
   
@@ -312,9 +312,9 @@ export const MainComposition: React.FC<{
       {data.audios && data.audios.map((audio, index) => {
         const resolvedAudioSrc = audio.src && fileResolver ? fileResolver.resolve(audio.src) : audio.src;
         
-        // Convert delay and duration from milliseconds to frames
-        const delayInFrames = audio.delay ? Math.floor((audio.delay / 1000) * fps) : 0;
-        const durationInFrames = audio.duration ? Math.floor((audio.duration / 1000) * fps) : undefined;
+        // Audio delay and duration are already in frames
+        const delayInFrames = audio.delay || 0; // delay is already in frames
+        const durationInFrames = audio.duration || undefined; // duration is already in frames
         
         return resolvedAudioSrc ? (
           <Sequence

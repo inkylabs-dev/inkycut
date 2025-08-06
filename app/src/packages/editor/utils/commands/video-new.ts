@@ -3,7 +3,7 @@
  */
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
-import { findElementById, copyElementProperties, generateElementId } from './helpers';
+import { findElementById, copyElementProperties, generateElementId, parseDuration } from './helpers';
 
 export const newVideoCommand: SlashCommand = {
   name: 'new-video',
@@ -259,11 +259,12 @@ export const newVideoCommand: SlashCommand = {
                 handled: true
               };
             }
-            const delay = parseInt(nextArg, 10);
-            if (isNaN(delay) || delay < 0) {
+            const fps = context.project.composition?.fps || 30;
+            const delay = parseDuration(nextArg, fps);
+            if (delay === null || delay < 0) {
               return {
                 success: false,
-                message: `❌ **Invalid Delay**\n\nDelay must be a non-negative number (milliseconds). Got '${nextArg}'`,
+                message: `❌ **Invalid Delay**\n\nDelay must be a non-negative duration. Got '${nextArg}'\n\nSupported formats:\n• Frames: \`30f\` (30 frames)\n• Milliseconds: \`1000ms\`\n• Seconds: \`1s\` or \`1.5s\`\n• Minutes: \`2m\``,
                 handled: true
               };
             }
@@ -352,7 +353,7 @@ export const newVideoCommand: SlashCommand = {
 
       return {
         success: true,
-        message: `✅ **Video Element Added**\n\nAdded video element to page "${selectedPage.name}"${copyMessage}\n\n• Source: ${elementData.src}\n• Position: (${elementData.left}, ${elementData.top})\n• Size: ${elementData.width}×${elementData.height}\n• Opacity: ${elementData.opacity}\n• Rotation: ${elementData.rotation}°\n• Delay: ${elementData.delay}ms`,
+        message: `✅ **Video Element Added**\n\nAdded video element to page "${selectedPage.name}"${copyMessage}\n\n• Source: ${elementData.src}\n• Position: (${elementData.left}, ${elementData.top})\n• Size: ${elementData.width}×${elementData.height}\n• Opacity: ${elementData.opacity}\n• Rotation: ${elementData.rotation}°\n• Delay: ${elementData.delay}f`,
         handled: true
       };
 

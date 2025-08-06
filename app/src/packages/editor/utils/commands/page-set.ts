@@ -4,7 +4,7 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-import { parseDuration } from './helpers';
+import { parseDuration, formatFramesToDuration } from './helpers';
 
 export const setPageCommand: SlashCommand = {
   name: 'set-page',
@@ -84,11 +84,12 @@ export const setPageCommand: SlashCommand = {
                 handled: true
               };
             }
-            const duration = parseDuration(nextArg);
+            const fps = context.project.composition?.fps || 30;
+            const duration = parseDuration(nextArg, fps);
             if (duration === null || duration <= 0) {
               return {
                 success: false,
-                message: `❌ **Invalid Duration**\n\nInvalid duration format: '${nextArg}'\n\nSupported formats:\n• Milliseconds: \`5000\` or \`5000ms\`\n• Seconds: \`5s\` or \`1.5s\`\n• Minutes: \`2m\` or \`1.5m\``,
+                message: `❌ **Invalid Duration**\n\nInvalid duration format: '${nextArg}'\n\nSupported formats:\n• Frames: \`150f\` (150 frames)\n• Milliseconds: \`5000ms\`\n• Seconds: \`5s\` or \`1.5s\`\n• Minutes: \`2m\` or \`1.5m\``,
                 handled: true
               };
             }
@@ -216,15 +217,8 @@ export const setPageCommand: SlashCommand = {
 
       if (options.duration !== undefined) {
         targetPage.duration = options.duration;
-        const formatDuration = (ms: number): string => {
-          if (ms >= 60000 && ms % 60000 === 0) {
-            return `${ms / 60000}m`;
-          } else if (ms >= 1000 && ms % 1000 === 0) {
-            return `${ms / 1000}s`;
-          }
-          return `${ms}ms`;
-        };
-        changes.push(`Duration: ${formatDuration(originalPage.duration)} → ${formatDuration(options.duration)}`);
+        const fps = context.project.composition?.fps || 30;
+        changes.push(`Duration: ${formatFramesToDuration(originalPage.duration, fps)} → ${formatFramesToDuration(options.duration, fps)}`);
       }
 
       if (options.backgroundColor !== undefined) {

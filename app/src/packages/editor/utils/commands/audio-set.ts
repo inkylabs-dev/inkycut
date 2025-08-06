@@ -4,7 +4,7 @@
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
-import { parseDuration } from './helpers';
+import { parseDuration, formatFramesToDuration } from './helpers';
 
 export const setAudioCommand: SlashCommand = {
   name: 'set-audio',
@@ -33,6 +33,9 @@ export const setAudioCommand: SlashCommand = {
 
       let audioId: string | null = null;
       const updates: any = {};
+
+      // Get FPS once at the beginning
+      const fps = context.project.composition?.fps || 30;
 
       // Parse arguments
       for (let i = 0; i < args.length; i++) {
@@ -96,7 +99,7 @@ export const setAudioCommand: SlashCommand = {
                 handled: true
               };
             }
-            const trimBefore = parseDuration(nextArg);
+            const trimBefore = parseDuration(nextArg, fps);
             if (trimBefore === null || trimBefore < 0) {
               return {
                 success: false,
@@ -117,7 +120,7 @@ export const setAudioCommand: SlashCommand = {
                 handled: true
               };
             }
-            const trimAfter = parseDuration(nextArg);
+            const trimAfter = parseDuration(nextArg, fps);
             if (trimAfter === null || trimAfter < 0) {
               return {
                 success: false,
@@ -226,7 +229,7 @@ export const setAudioCommand: SlashCommand = {
                 handled: true
               };
             }
-            const delay = parseDuration(nextArg);
+            const delay = parseDuration(nextArg, fps);
             if (delay === null || delay < 0) {
               return {
                 success: false,
@@ -247,7 +250,7 @@ export const setAudioCommand: SlashCommand = {
                 handled: true
               };
             }
-            const duration = parseDuration(nextArg);
+            const duration = parseDuration(nextArg, fps);
             if (duration === null || duration <= 0) {
               return {
                 success: false,
@@ -332,12 +335,7 @@ export const setAudioCommand: SlashCommand = {
         const newValue = updates[key];
         
         if (key === 'delay' || key === 'duration' || key === 'trimBefore' || key === 'trimAfter') {
-          const formatDuration = (ms: number): string => {
-            if (ms >= 60000 && ms % 60000 === 0) return `${ms / 60000}m`;
-            if (ms >= 1000 && ms % 1000 === 0) return `${ms / 1000}s`;
-            return `${ms}ms`;
-          };
-          changesList.push(`${key}: ${formatDuration(oldValue)} → ${formatDuration(newValue)}`);
+          changesList.push(`${key}: ${formatFramesToDuration(oldValue, fps)} → ${formatFramesToDuration(newValue, fps)}`);
         } else {
           changesList.push(`${key}: ${oldValue} → ${newValue}`);
         }

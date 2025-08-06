@@ -15,8 +15,10 @@ interface AudioTimelineProps {
   onAudioTrimAfterChange?: (audioId: string, newTrimAfter: number, newDuration: number) => void;
   /** Project files for media resolution */
   files?: LocalFile[];
-  /** Total project duration in milliseconds for clamping */
-  totalProjectDurationMs?: number;
+  /** Total project duration in frames for clamping */
+  totalProjectDurationFrames?: number;
+  /** Frames per second for time conversions */
+  fps?: number;
 }
 
 interface AudioTimelineGroupProps {
@@ -32,6 +34,8 @@ interface AudioTimelineGroupProps {
   onAudioTrimAfterChange?: (audioId: string, newTrimAfter: number, newDuration: number) => void;
   /** Project files for media resolution */
   files?: LocalFile[];
+  /** Frames per second for time conversions */
+  fps?: number;
 }
 
 interface AudioBlockProps {
@@ -42,6 +46,7 @@ interface AudioBlockProps {
   files?: LocalFile[];
   onTrimAfterChange?: (audioId: string, newTrimAfter: number, newDuration: number) => void;
   timelineZoom: number;
+  fps?: number;
 }
 
 /**
@@ -54,7 +59,8 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
   audioDuration, 
   files, 
   onTrimAfterChange,
-  timelineZoom
+  timelineZoom,
+  fps = 30
 }) => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -105,7 +111,7 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
         width: `${currentWidth}px`,
         height: '26px',
       }}
-      title={`Audio: ${audio.src.split('/').pop()} (${Math.round(audioDuration * 100) / 100}s / ${Math.round((audio.duration + audio.trimBefore + audio.trimAfter) / 100) / 10}s max) - Drag right edge to trim`}
+      title={`Audio: ${audio.src.split('/').pop()} (${Math.round(audioDuration * 100) / 100}s / ${Math.round((audio.duration + audio.trimBefore + audio.trimAfter) / fps * 100) / 100}s max) - Drag right edge to trim`}
     >
       {/* Draggable content area - excludes the resize handle */}
       <div 
@@ -158,8 +164,8 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
             
             // Calculate maximum width based on total audio duration
             // Total duration = current effective duration + trimBefore + trimAfter
-            const totalAudioDurationMs = audio.duration + audio.trimBefore + audio.trimAfter;
-            const totalAudioDurationSeconds = totalAudioDurationMs / 1000;
+            const totalAudioDurationFrames = audio.duration + audio.trimBefore + audio.trimAfter;
+            const totalAudioDurationSeconds = totalAudioDurationFrames / fps;
             const maxWidth = totalAudioDurationSeconds * 100 * timelineZoom;
             
             // Constrain width between minimum (20px) and maximum (total duration)
@@ -175,24 +181,24 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
               const deltaX = e.clientX - startMouseX;
               
               // Calculate maximum width based on total audio duration (same as in handleMouseMove)
-              const totalAudioDurationMs = audio.duration + audio.trimBefore + audio.trimAfter;
-              const totalAudioDurationSeconds = totalAudioDurationMs / 1000;
+              const totalAudioDurationFrames = audio.duration + audio.trimBefore + audio.trimAfter;
+              const totalAudioDurationSeconds = totalAudioDurationFrames / fps;
               const maxWidth = totalAudioDurationSeconds * 100 * timelineZoom;
               
               // Constrain width between minimum (20px) and maximum (total duration)
               const newWidth = Math.max(20, Math.min(maxWidth, startWidth + deltaX));
               const newDurationSeconds = newWidth / (100 * timelineZoom);
-              const newDurationMs = newDurationSeconds * 1000;
+              const newDurationFrames = newDurationSeconds * fps;
               
               // When dragging right edge, duration and trimAfter should be the same value
               // This means we're setting the visible duration, and trimAfter trims everything after that point
-              const newTrimAfter = newDurationMs;
+              const newTrimAfter = newDurationFrames;
               
-              console.log(`Audio ${audio.id}: totalDuration=${totalAudioDurationMs}ms, newDuration=${newDurationMs}ms, newTrimAfter=${newTrimAfter}ms`);
+              console.log(`Audio ${audio.id}: totalDuration=${totalAudioDurationFrames}f, newDuration=${newDurationFrames}f, newTrimAfter=${newTrimAfter}f`);
               
               // Final state update - this will trigger a re-render with the final width
               setCurrentWidth(newWidth);
-              onTrimAfterChange(audio.id, newTrimAfter, newDurationMs);
+              onTrimAfterChange(audio.id, newTrimAfter, newDurationFrames);
             }
             
             setIsResizing(false);
@@ -203,7 +209,7 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
           document.addEventListener('mousemove', handleMouseMove);
           document.addEventListener('mouseup', handleMouseUp);
         }}
-        title={`Drag to trim audio end (max: ${Math.round((audio.duration + audio.trimBefore + audio.trimAfter) / 100) / 10}s total duration)`}
+        title={`Drag to trim audio end (max: ${Math.round((audio.duration + audio.trimBefore + audio.trimAfter) / fps * 100) / 100}s total duration)`}
       />
     </div>
   );
@@ -218,7 +224,8 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
   timelineIndex,
   onAudioDelayChange,
   onAudioTrimAfterChange,
-  files
+  files,
+  fps = 30
 }) => {
   const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -236,7 +243,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
           // Create draggable for each audio block in this timeline group
           draggables = Array.from(audioBlocks).map((block, index) => {
             const audio = timeline[index];
-            const originalLeftPosition = audio.delay / 1000 * 100 * timelineZoom; // Original position in pixels
+            const originalLeftPosition = audio.delay / fps * 100 * timelineZoom; // Original position in pixels
             
             const draggable = createDraggable(block, {
               y: false, // Disable vertical movement
@@ -311,8 +318,8 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
       style={{ height: '26px', width: '100%' }}
     >
       {timeline.map(audio => {
-        const audioStart = audio.delay / 1000; // Convert to seconds
-        const audioDuration = audio.duration / 1000; // Convert to seconds
+        const audioStart = audio.delay / fps; // Convert frames to seconds
+        const audioDuration = audio.duration / fps; // Convert frames to seconds
         const leftPosition = audioStart * 100 * timelineZoom; // Position in pixels
         const blockWidth = Math.max(audioDuration * 100 * timelineZoom, 20); // Minimum 20px width
         
@@ -326,6 +333,7 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
             files={files}
             onTrimAfterChange={onAudioTrimAfterChange}
             timelineZoom={timelineZoom}
+            fps={fps}
           />
         );
       })}
@@ -344,7 +352,8 @@ const AudioTimeline: React.FC<AudioTimelineProps> = ({
   onAudioDelayChange, 
   onAudioTrimAfterChange, 
   files, 
-  totalProjectDurationMs 
+  totalProjectDurationFrames,
+  fps = 30
 }) => {
   // Don't render anything if there are no audio tracks
   if (!audios || audios.length === 0) {
@@ -353,12 +362,12 @@ const AudioTimeline: React.FC<AudioTimelineProps> = ({
 
   // Clamp audio durations to project duration if specified
   const clampedAudios = useMemo(() => {
-    if (!totalProjectDurationMs) return audios;
+    if (!totalProjectDurationFrames) return audios;
     
     return audios.map(audio => {
       const audioEnd = audio.delay + audio.duration;
-      if (audioEnd > totalProjectDurationMs) {
-        const clampedDuration = Math.max(0, totalProjectDurationMs - audio.delay);
+      if (audioEnd > totalProjectDurationFrames) {
+        const clampedDuration = Math.max(0, totalProjectDurationFrames - audio.delay);
         return {
           ...audio,
           duration: clampedDuration
@@ -366,7 +375,7 @@ const AudioTimeline: React.FC<AudioTimelineProps> = ({
       }
       return audio;
     });
-  }, [audios, totalProjectDurationMs]);
+  }, [audios, totalProjectDurationFrames]);
 
   // Group audios into non-overlapping timelines
   const audioTimelines: CompositionAudio[][] = [];
@@ -412,6 +421,7 @@ const AudioTimeline: React.FC<AudioTimelineProps> = ({
             onAudioDelayChange={onAudioDelayChange}
             onAudioTrimAfterChange={onAudioTrimAfterChange}
             files={files}
+            fps={fps}
           />
         );
       })}
