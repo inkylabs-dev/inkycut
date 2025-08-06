@@ -1,13 +1,3 @@
-/**
- * Composition Component Exports:
- * 
- * 1. MyComposition - The basic original composition (without selection or interaction)
- * 2. VideoComposition - Simple wrapper for MyComposition (for backward compatibility)
- * 3. MainComposition - Enhanced composition with selection outlines and pointer events
- * 4. EnhancedVideoComposition - Wrapper for MainComposition
- */
-
-// Basic composition component
 import React, { useRef } from 'react';
 import { AbsoluteFill, useCurrentFrame, Img, OffthreadVideo, Sequence, Audio } from 'remotion';
 import { Gif } from '@remotion/gif';
