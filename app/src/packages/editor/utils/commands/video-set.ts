@@ -214,7 +214,7 @@ export const setVideoCommand: SlashCommand = {
                   handled: true
                 };
               }
-              updates.delay = delay;
+              updates.delay = Math.round(delay);
               i++; // Skip next arg
               break;
 

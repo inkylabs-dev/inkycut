@@ -237,7 +237,7 @@ export const setAudioCommand: SlashCommand = {
                 handled: true
               };
             }
-            updates.delay = delay;
+            updates.delay = Math.round(delay);
             i++; // Skip next arg
             break;
 
@@ -258,7 +258,7 @@ export const setAudioCommand: SlashCommand = {
                 handled: true
               };
             }
-            updates.duration = duration;
+            updates.duration = Math.round(duration);
             i++; // Skip next arg
             break;
 

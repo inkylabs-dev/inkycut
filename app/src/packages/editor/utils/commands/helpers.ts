@@ -295,7 +295,7 @@ export function copyElementProperties(sourceElement: CompositionElement, targetE
 export function copyPageProperties(sourcePage: CompositionPage, targetPageData: any): void {
   // Copy all page properties except id and elements (handled separately)
   if (sourcePage.name !== undefined) targetPageData.name = sourcePage.name;
-  if (sourcePage.duration !== undefined) targetPageData.duration = sourcePage.duration;
+  if (sourcePage.duration !== undefined) targetPageData.duration = Math.round(sourcePage.duration);
   if (sourcePage.backgroundColor !== undefined) targetPageData.backgroundColor = sourcePage.backgroundColor;
   
   // Deep copy elements with new unique IDs
@@ -344,7 +344,7 @@ export function calculateTotalProjectDuration(project: any): number {
     return 0;
   }
   
-  return project.composition.pages.reduce((sum: number, page: any) => sum + (page.duration || 0), 0);
+  return Math.round(project.composition.pages.reduce((sum: number, page: any) => sum + (page.duration || 0), 0));
 }
 
 /**
@@ -358,7 +358,7 @@ export function clampAudioDuration(audio: any, maxProjectDurationFrames: number)
   
   // If audio extends beyond project duration, clamp it
   if (audioEnd > maxProjectDurationFrames) {
-    const clampedDuration = Math.max(0, maxProjectDurationFrames - audio.delay);
+    const clampedDuration = Math.max(0, Math.round(maxProjectDurationFrames - audio.delay));
     return {
       ...audio,
       duration: clampedDuration
@@ -376,7 +376,7 @@ export function clampCompositionAudios(composition: any): any {
     return composition;
   }
   
-  const totalProjectDuration = composition.pages?.reduce((sum: number, page: any) => sum + (page.duration || 0), 0) || 0;
+  const totalProjectDuration = Math.round(composition.pages?.reduce((sum: number, page: any) => sum + (page.duration || 0), 0)) || 0;
   
   return {
     ...composition,

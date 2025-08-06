@@ -93,7 +93,7 @@ export const setPageCommand: SlashCommand = {
                 handled: true
               };
             }
-            options.duration = duration;
+            options.duration = Math.round(duration);
             i++; // Skip next arg
             break;
 
@@ -216,9 +216,9 @@ export const setPageCommand: SlashCommand = {
       }
 
       if (options.duration !== undefined) {
-        targetPage.duration = options.duration;
+        targetPage.duration = Math.round(options.duration);
         const fps = context.project.composition?.fps || 30;
-        changes.push(`Duration: ${formatFramesToDuration(originalPage.duration, fps)} → ${formatFramesToDuration(options.duration, fps)}`);
+        changes.push(`Duration: ${formatFramesToDuration(originalPage.duration, fps)} → ${formatFramesToDuration(Math.round(options.duration), fps)}`);
       }
 
       if (options.backgroundColor !== undefined) {
