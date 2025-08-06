@@ -263,18 +263,33 @@ function extractFileIdentifier(url) {
   }
 }
 
-// Helper function to check if file is a video
-function isVideoFile(mimeType, filename) {
-  const videoMimeTypes = ['video/', 'application/mp4', 'application/x-mpegURL'];
-  const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv', '.m4v', '.3gp'];
+// Helper function to check if file is a media file (image, video, audio)
+function isMediaFile(mimeType, filename) {
+  const mediaMimeTypes = [
+    // Video
+    'video/', 'application/mp4', 'application/x-mpegURL',
+    // Audio
+    'audio/',
+    // Image
+    'image/'
+  ];
   
-  if (mimeType && videoMimeTypes.some(type => mimeType.includes(type))) {
+  const mediaExtensions = [
+    // Video
+    '.mp4', '.webm', '.mov', '.avi', '.mkv', '.m4v', '.3gp', '.flv', '.wmv', '.m4v',
+    // Audio
+    '.mp3', '.wav', '.aac', '.ogg', '.m4a', '.flac', '.wma', '.opus',
+    // Image
+    '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.tiff', '.ico', '.avif'
+  ];
+  
+  if (mimeType && mediaMimeTypes.some(type => mimeType.includes(type))) {
     return true;
   }
   
   if (filename) {
     const lowerFilename = filename.toLowerCase();
-    return videoExtensions.some(ext => lowerFilename.endsWith(ext));
+    return mediaExtensions.some(ext => lowerFilename.endsWith(ext));
   }
   
   return false;
@@ -306,7 +321,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  console.log('Service worker intercepting request for:', fileIdentifier);
+  // Check if this is a media file before proceeding
+  const isMedia = isMediaFile(null, fileIdentifier.name || url);
+  if (!isMedia) {
+    console.log('Service worker skipping non-media file:', fileIdentifier);
+    return;
+  }
+  
+  console.log('Service worker intercepting media request for:', fileIdentifier);
   
   event.respondWith(
     (async () => {
@@ -315,7 +337,7 @@ self.addEventListener('fetch', (event) => {
         const localFile = await getFileFromDB(fileIdentifier);
         
         if (localFile && localFile.dataUrl) {
-          const isVideo = isVideoFile(localFile.type, localFile.name);
+          const isVideo = localFile.type && localFile.type.startsWith('video/');
           const rangeHeader = request.headers.get('Range');
           
           // Enhanced logging for video range requests
@@ -329,7 +351,7 @@ self.addEventListener('fetch', (event) => {
               fileType: localFile.type
             });
           } else {
-            console.log('Service worker serving from IndexedDB:', {
+            console.log('Service worker serving media from IndexedDB:', {
               file: fileIdentifier,
               type: localFile.type,
               isVideo,
@@ -343,7 +365,7 @@ self.addEventListener('fetch', (event) => {
             'X-Served-By': 'InkyCut-ServiceWorker',
             'X-File-ID': localFile.id,
             'X-File-Name': localFile.name,
-            'X-Is-Video': isVideo ? 'true' : 'false'
+            'X-Media-Type': localFile.type || 'unknown'
           });
           
           if (response) {
@@ -355,7 +377,7 @@ self.addEventListener('fetch', (event) => {
         }
         
         // Fall back to network request
-        console.log('Service worker falling back to network for:', fileIdentifier);
+        console.log('Service worker falling back to network for media file:', fileIdentifier);
         return fetch(request);
         
       } catch (error) {
