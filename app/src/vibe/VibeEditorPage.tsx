@@ -63,6 +63,9 @@ export default function VibeEditorPage () {
   // Share dialog state
   const [showShareDialog, setShowShareDialog] = useState(false);
   
+  // JSON Model dialog state
+  const [showJsonModelDialog, setShowJsonModelDialog] = useState(false);
+  
   // Initialize the project if none exists, with proper localStorage handling
   useEffect(() => {
     let isMounted = true;
@@ -282,6 +285,9 @@ export default function VibeEditorPage () {
             setExportFormat={setExportFormat}
             showShareDialog={showShareDialog}
             setShowShareDialog={setShowShareDialog}
+            showJsonModelDialog={showJsonModelDialog}
+            setShowJsonModelDialog={setShowJsonModelDialog}
+            onCompositionUpdate={handleCompositionUpdate}
           />
         </div>
 
@@ -308,6 +314,7 @@ export default function VibeEditorPage () {
             setExportFormat={setExportFormat}
             fileStorage={fileStorage}
             setShowShareDialog={setShowShareDialog}
+            setShowJsonModelDialog={setShowJsonModelDialog}
             onShare={shareProject}
             onHandleMessage={async (message: string, chatMode?: ChatMode) => {
               // Skip server processing for agent mode (handled client-side)

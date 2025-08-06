@@ -18,6 +18,7 @@ export interface SlashCommandContext {
   fileStorage?: any;
   setShowShareDialog?: (show: boolean) => void;
   onShare?: (args: { encryptedData: string; projectName: string }) => Promise<{ shareId: string }>;
+  setShowJsonModelDialog?: (show: boolean) => void;
   args?: string[];
 }
 

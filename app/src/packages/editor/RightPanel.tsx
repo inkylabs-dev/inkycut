@@ -44,6 +44,7 @@ interface RightPanelProps {
   setExportFormat?: (format: 'json' | 'mp4' | 'webm') => void;
   fileStorage?: any;
   setShowShareDialog?: (show: boolean) => void;
+  setShowJsonModelDialog?: (show: boolean) => void;
   onShare?: (args: { encryptedData: string; projectName: string }) => Promise<{ shareId: string }>;
 }
 
@@ -62,6 +63,7 @@ export default function RightPanel({
   setExportFormat,
   fileStorage,
   setShowShareDialog,
+  setShowJsonModelDialog,
   onShare
 }: RightPanelProps) {
   const [inputMessage, setInputMessage] = useState('');
@@ -149,6 +151,7 @@ export default function RightPanel({
         setExportFormat,
         fileStorage,
         setShowShareDialog,
+        setShowJsonModelDialog,
         onShare
       };
 

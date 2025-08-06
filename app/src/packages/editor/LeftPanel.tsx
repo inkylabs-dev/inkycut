@@ -10,7 +10,8 @@ import {
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
   ShareIcon,
-  DocumentDuplicateIcon
+  DocumentDuplicateIcon,
+  CodeBracketIcon
 } from '@heroicons/react/24/outline';
 // import { useAuth } from 'wasp/client/auth';
 // import { routes } from 'wasp/client/router';
@@ -24,6 +25,7 @@ import SettingsDialog from './SettingsDialog';
 import ImportDialog from './ImportDialog';
 import ExportDialog from './ExportDialog';
 import ShareDialog from './ShareDialog';
+import { JsonModelDialog } from './JsonModelDialog';
 import { createFileResolver } from '../composition/utils/fileResolver';
 
 interface MenuConfig {
@@ -36,6 +38,7 @@ interface MenuConfig {
   showHome?: boolean;
   showFollow?: boolean;
   showGitHub?: boolean;
+  showJsonModel?: boolean;
 }
 
 interface LeftPanelProps {
@@ -53,6 +56,9 @@ interface LeftPanelProps {
   setExportFormat?: (format: 'json' | 'mp4' | 'webm') => void;
   showShareDialog?: boolean;
   setShowShareDialog?: (show: boolean) => void;
+  showJsonModelDialog?: boolean;
+  setShowJsonModelDialog?: (show: boolean) => void;
+  onCompositionUpdate?: (composition: any) => void;
 }
 
 export default function LeftPanel({ 
@@ -69,6 +75,7 @@ export default function LeftPanel({
     showHome: true,
     showFollow: true,
     showGitHub: true,
+    showJsonModel: true,
   },
   onForkAndEdit,
   onShare,
@@ -79,7 +86,10 @@ export default function LeftPanel({
   exportFormat: propExportFormat,
   setExportFormat: propSetExportFormat,
   showShareDialog: propShowShareDialog,
-  setShowShareDialog: propSetShowShareDialog
+  setShowShareDialog: propSetShowShareDialog,
+  showJsonModelDialog: propShowJsonModelDialog,
+  setShowJsonModelDialog: propSetShowJsonModelDialog,
+  onCompositionUpdate
 }: LeftPanelProps) {
   // Use Jotai atoms instead of props
   const [project, setProject] = useAtom(projectAtom);
@@ -94,6 +104,7 @@ export default function LeftPanel({
   const [internalShowImportDialog, setInternalShowImportDialog] = useState(false);
   const [internalShowExportDialog, setInternalShowExportDialog] = useState(false);
   const [internalShowShareDialog, setInternalShowShareDialog] = useState(false);
+  const [internalShowJsonModelDialog, setInternalShowJsonModelDialog] = useState(false);
   
   // Use prop-based ImportDialog state when available, otherwise use internal state
   const showImportDialog = propShowImportDialog !== undefined ? propShowImportDialog : internalShowImportDialog;
@@ -106,6 +117,10 @@ export default function LeftPanel({
   // Use prop-based ShareDialog state when available, otherwise use internal state
   const showShareDialog = propShowShareDialog !== undefined ? propShowShareDialog : internalShowShareDialog;
   const setShowShareDialog = propSetShowShareDialog !== undefined ? propSetShowShareDialog : setInternalShowShareDialog;
+  
+  // Use prop-based JsonModelDialog state when available, otherwise use internal state
+  const showJsonModelDialog = propShowJsonModelDialog !== undefined ? propShowJsonModelDialog : internalShowJsonModelDialog;
+  const setShowJsonModelDialog = propSetShowJsonModelDialog !== undefined ? propSetShowJsonModelDialog : setInternalShowJsonModelDialog;
   const menuRef = useRef<HTMLDivElement>(null);
   // const { data: user } = useAuth();
   const [localFiles] = useAtom(filesAtom);
@@ -348,6 +363,19 @@ export default function LeftPanel({
                     </button>
                   )}
                   
+                  {menuConfig.showJsonModel && (
+                    <button
+                      onClick={() => {
+                        setShowJsonModelDialog(true);
+                        setShowMenu(false);
+                      }}
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
+                    >
+                      <CodeBracketIcon className="mr-2 h-5 w-5 text-gray-500 dark:text-gray-400" />
+                      JSON Model
+                    </button>
+                  )}
+                  
                   {menuConfig.showSettings && (
                     <button
                       onClick={() => {
@@ -558,6 +586,13 @@ export default function LeftPanel({
       <ShareDialog
         isOpen={showShareDialog}
         onClose={() => setShowShareDialog(false)}
+      />
+
+      {/* JSON Model Dialog */}
+      <JsonModelDialog
+        isOpen={showJsonModelDialog}
+        onClose={() => setShowJsonModelDialog(false)}
+        onCompositionUpdate={onCompositionUpdate}
       />
     </div>
   );

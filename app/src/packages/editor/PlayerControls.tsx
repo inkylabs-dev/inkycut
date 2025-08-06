@@ -3,16 +3,14 @@ import { useAtom, useSetAtom } from 'jotai';
 import { PlayerRef } from '@remotion/player';
 import { 
   PlayIcon, 
-  PauseIcon, 
-  CodeBracketIcon,
-  VideoCameraIcon
+  PauseIcon
 } from '@heroicons/react/24/outline';
 import { CompositionData, defaultCompositionData, LocalFile } from '../composition/types';
 import AudioTimeline from './AudioTimeline';
 import { Playhead } from './components/Playhead';
 import PageTrack from './components/PageTrack';
 import TimeRuler from './components/TimeRuler';
-import { projectAtom, ensureCompositionIDs, filesAtom, appStateAtom, updateProjectAtom, addUserMessageToQueueAtom, updateAppStateAtom } from './atoms';
+import { projectAtom, filesAtom, appStateAtom, updateProjectAtom, addUserMessageToQueueAtom, updateAppStateAtom } from './atoms';
 
 interface PlayerControlsProps {
   playerRef: React.RefObject<PlayerRef>;
@@ -39,23 +37,16 @@ export default function PlayerControls({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(0);
   const [showTimeline, ] = useState(true);
-  const [viewMode, setViewMode] = useState<'player' | 'code'>('player');
   const [compositionData, setCompositionData] = useState<CompositionData>(defaultCompositionData);
-  const [jsonString, setJsonString] = useState<string>('');
-  const [jsonError, setJsonError] = useState<string | null>(null);
   const [playerReady, setPlayerReady] = useState(false);
-  const [userEditedJson, setUserEditedJson] = useState(false);
   
   const frameUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Store last edited composition to preserve changes when toggling views
-  const lastEditedComposition = useRef<CompositionData | null>(null);
-
   // Refs to track previous project state for comparison
   const prevProjectIdRef = useRef<string>('');
   const prevCompositionRef = useRef<string>('');
   
-  // Update composition data when project changes, but only if user hasn't made direct edits
+  // Update composition data when project changes
   useEffect(() => {
     // Extract current project identifiers for comparison
     const currentProjectId = project?.id || '';
@@ -70,16 +61,7 @@ export default function PlayerControls({
       if (isNewProject || isCompositionReset) {
         console.log('Project reset or changed completely - updating editor');
         setCompositionData(project.composition);
-        setJsonString(JSON.stringify(project.composition, null, 2));
-        setUserEditedJson(false);
-        
-        // Reset our stored edited version too
-        lastEditedComposition.current = null;
-      } 
-      // Otherwise follow our normal update logic
-      else if (!userEditedJson) {
-        setCompositionData(project.composition);
-      } else if (viewMode !== 'code' && !userEditedJson) {
+      } else {
         setCompositionData(project.composition);
       }
     }
@@ -87,27 +69,7 @@ export default function PlayerControls({
     // Update refs for next comparison
     prevProjectIdRef.current = currentProjectId;
     prevCompositionRef.current = currentCompositionId;
-  }, [project, userEditedJson, viewMode]);
-  
-  // Initialize JSON string when composition data changes, but avoid unnecessary updates
-  useEffect(() => {
-    // Always update the JSON string if we're not in code view or there are no user edits
-    if (viewMode !== 'code' && !userEditedJson) {
-      setJsonString(JSON.stringify(compositionData, null, 2));
-    } 
-    // Also update if this is first initialization
-    else if (jsonString === '') {
-      setJsonString(JSON.stringify(compositionData, null, 2));
-    }
-    // Special case: If we're in code view and project just got reset
-    else if (viewMode === 'code' && !userEditedJson && project?.composition) {
-      // Check if the JSON differs from what's displayed
-      const currentJson = JSON.stringify(project.composition, null, 2);
-      if (currentJson !== jsonString) {
-        setJsonString(currentJson);
-      }
-    }
-  }, [compositionData, viewMode, jsonString, userEditedJson, project]);
+  }, [project]);
   
   // Calculate total duration and current time
   const totalFrames = compositionData.pages.reduce((sum, page) => sum + page.duration, 0);
@@ -588,57 +550,6 @@ export default function PlayerControls({
     };
   }, [timelineZoom, updateZoomInAppState]);
 
-  const handleJsonChange = (newJson: string) => {
-    setJsonString(newJson);
-    try {
-      const parsed = JSON.parse(newJson);
-      const compositionWithIDs = ensureCompositionIDs(parsed);
-      setCompositionData(compositionWithIDs);
-      setJsonError(null);
-      setUserEditedJson(true);
-      lastEditedComposition.current = { ...compositionWithIDs };
-      
-      if (project?.id) {
-        localStorage.setItem(`vibe-project-composition-${project.id}`, JSON.stringify(compositionWithIDs));
-      }
-      
-      if (onCompositionUpdate) {
-        onCompositionUpdate(compositionWithIDs);
-      }
-    } catch (error) {
-      setJsonError(error instanceof Error ? error.message : 'Invalid JSON');
-    }
-  };
-
-  const toggleViewMode = () => {
-    const newMode = viewMode === 'player' ? 'code' : 'player';
-    
-    if (newMode === 'player' && viewMode === 'code' && userEditedJson && !jsonError) {
-      const compositionWithIDs = ensureCompositionIDs(compositionData);
-      
-      if (onCompositionUpdate) {
-        onCompositionUpdate(compositionWithIDs);
-      }
-      
-      lastEditedComposition.current = { ...compositionWithIDs };
-      
-      if (project?.id) {
-        localStorage.setItem(`vibe-project-composition-${project.id}`, JSON.stringify(compositionWithIDs));
-      }
-    }
-    
-    if (newMode === 'code') {
-      if (userEditedJson && lastEditedComposition.current) {
-        setCompositionData(lastEditedComposition.current);
-        setJsonString(JSON.stringify(lastEditedComposition.current, null, 2));
-      } else {
-        setJsonString(JSON.stringify(compositionData, null, 2));
-      }
-    }
-    
-    setViewMode(newMode);
-  };
-
   const formatTime = (seconds: number) => {
     const totalTenths = Math.ceil(seconds * 10);
     const mins = Math.floor(totalTenths / 600);
@@ -687,208 +598,95 @@ export default function PlayerControls({
 
   return (
     <>
-      {/* Top Toggle Bar */}
-      <div className="bg-gray-50 dark:bg-gray-800 p-2 border-b border-gray-200 dark:border-gray-700">
+      {/* Control Bar */}
+      <div className="bg-gray-100 dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
             <button
-              onClick={toggleViewMode}
-              data-testid="toggle-player-mode"
-              className={`flex items-center space-x-2 px-3 py-1 rounded text-sm font-medium transition-colors ${
-                viewMode === 'player' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
+              onClick={handlePlay}
+              disabled={!playerReady}
+              className={`p-2 rounded-full transition-all ${
+                !playerReady 
+                  ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed text-gray-500 dark:text-gray-400' 
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
               }`}
             >
-              <VideoCameraIcon className="h-4 w-4" />
-              <span>Player</span>
-            </button>
-            <button
-              onClick={toggleViewMode}
-              data-testid="toggle-code-view"
-              className={`flex items-center space-x-2 px-3 py-1 rounded text-sm font-medium transition-colors ${
-                viewMode === 'code' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
-              }`}
-            >
-              <CodeBracketIcon className="h-4 w-4" />
-              <span>Code {isReadOnly ? '(Read-Only)' : ''}</span>
-              {userEditedJson && viewMode !== 'code' && !isReadOnly && (
-                <span className="inline-block w-2 h-2 bg-green-400 rounded-full ml-1"></span>
+              {isPlaying ? (
+                <PauseIcon className="h-5 w-5" />
+              ) : (
+                <PlayIcon className="h-5 w-5" />
               )}
             </button>
-          </div>
-          <div className="text-gray-800 dark:text-gray-200 text-sm flex items-center">
-            {project?.name || 'Untitled Project'}
-            {userEditedJson && (
-              <span className="ml-2 text-xs text-green-600 dark:text-green-400">(Edited)</span>
+            <div className="text-gray-700 dark:text-gray-300 text-sm">
+              {formatTime(currentTime)} / {formatTime(totalDuration)}
+            </div>
+            {!playerReady && (
+              <div className="text-yellow-600 dark:text-yellow-400 text-sm">
+                Initializing player...
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      {viewMode === 'player' ? (
-        <>
-          {/* Control Bar */}
-          <div className="bg-gray-100 dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={handlePlay}
-                  disabled={!playerReady}
-                  className={`p-2 rounded-full transition-all ${
-                    !playerReady 
-                      ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed text-gray-500 dark:text-gray-400' 
-                      : 'bg-blue-600 hover:bg-blue-700 text-white'
-                  }`}
-                >
-                  {isPlaying ? (
-                    <PauseIcon className="h-5 w-5" />
-                  ) : (
-                    <PlayIcon className="h-5 w-5" />
-                  )}
-                </button>
-                <div className="text-gray-700 dark:text-gray-300 text-sm">
-                  {formatTime(currentTime)} / {formatTime(totalDuration)}
-                </div>
-                {!playerReady && (
-                  <div className="text-yellow-600 dark:text-yellow-400 text-sm">
-                    Initializing player...
-                  </div>
-                )}
+      {/* Page-based Timeline */}
+      {showTimeline && (
+        <div className="bg-gray-100 dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700 max-h-64 overflow-y-auto">
+          <div className="mb-4">
+            <div 
+              ref={timelineContainerRef}
+              className="overflow-x-auto overflow-y-hidden relative no-scrollbar"
+              style={{ maxWidth: '100%' }}
+            >
+              <div style={{ width: `${getActualTimelineWidth()}px` }}>
+                <TimeRuler
+                  totalDuration={totalDuration}
+                  timelineZoom={timelineZoom}
+                  timelineContainerRef={timelineContainerRef}
+                  handleTimelineClick={handleTimelineClick}
+                />
+
+                <PageTrack
+                  compositionData={compositionData}
+                  timelineZoom={timelineZoom}
+                  getCurrentPage={getCurrentPage}
+                  handlePageClick={handlePageClick}
+                  handlePageMouseDown={handlePageMouseDown}
+                  isPageDragging={isPageDragging}
+                  draggedPageIndex={draggedPageIndex}
+                  dropIndicatorIndex={dropIndicatorIndex}
+                  isResizing={isResizing}
+                  resizingPageIndex={resizingPageIndex}
+                  setIsResizing={setIsResizing}
+                  setResizingPageIndex={setResizingPageIndex}
+                  setStartResizeWidth={setStartResizeWidth}
+                  setStartMouseX={setStartMouseX}
+                  formatTime={formatTime}
+                  files={files}
+                  onFileDropped={handleFileDropped}
+                />
+
+                <AudioTimeline 
+                  audios={compositionData.audios || []} 
+                  timelineZoom={timelineZoom}
+                  onAudioDelayChange={handleAudioDelayChange}
+                  onAudioTrimAfterChange={handleAudioTrimAfterChange}
+                  files={files}
+                  totalProjectDurationFrames={compositionData.pages.reduce((sum, page) => sum + page.duration, 0)}
+                  fps={compositionData.fps}
+                />
+
+                <Playhead
+                  currentFrame={currentFrame}
+                  totalFrames={totalFrames}
+                  isDragging={isDragging}
+                  onMouseDown={handlePlayheadMouseDown}
+                  getActualTimelineWidth={getActualTimelineWidth}
+                  timelineZoom={timelineZoom}
+                  totalDuration={totalDuration}
+                />
               </div>
             </div>
-          </div>
-
-          {/* Page-based Timeline */}
-          {showTimeline && (
-            <div className="bg-gray-100 dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700 max-h-64 overflow-y-auto">
-              <div className="mb-4">
-                <div 
-                  ref={timelineContainerRef}
-                  className="overflow-x-auto overflow-y-hidden relative no-scrollbar"
-                  style={{ maxWidth: '100%' }}
-                >
-                  <div style={{ width: `${getActualTimelineWidth()}px` }}>
-                    <TimeRuler
-                      totalDuration={totalDuration}
-                      timelineZoom={timelineZoom}
-                      timelineContainerRef={timelineContainerRef}
-                      handleTimelineClick={handleTimelineClick}
-                    />
-
-                    <PageTrack
-                      compositionData={compositionData}
-                      timelineZoom={timelineZoom}
-                      getCurrentPage={getCurrentPage}
-                      handlePageClick={handlePageClick}
-                      handlePageMouseDown={handlePageMouseDown}
-                      isPageDragging={isPageDragging}
-                      draggedPageIndex={draggedPageIndex}
-                      dropIndicatorIndex={dropIndicatorIndex}
-                      isResizing={isResizing}
-                      resizingPageIndex={resizingPageIndex}
-                      setIsResizing={setIsResizing}
-                      setResizingPageIndex={setResizingPageIndex}
-                      setStartResizeWidth={setStartResizeWidth}
-                      setStartMouseX={setStartMouseX}
-                      formatTime={formatTime}
-                      files={files}
-                      onFileDropped={handleFileDropped}
-                    />
-
-                    <AudioTimeline 
-                      audios={compositionData.audios || []} 
-                      timelineZoom={timelineZoom}
-                      onAudioDelayChange={handleAudioDelayChange}
-                      onAudioTrimAfterChange={handleAudioTrimAfterChange}
-                      files={files}
-                      totalProjectDurationFrames={compositionData.pages.reduce((sum, page) => sum + page.duration, 0)}
-                      fps={compositionData.fps}
-                    />
-
-                    <Playhead
-                      currentFrame={currentFrame}
-                      totalFrames={totalFrames}
-                      isDragging={isDragging}
-                      onMouseDown={handlePlayheadMouseDown}
-                      getActualTimelineWidth={getActualTimelineWidth}
-                      timelineZoom={timelineZoom}
-                      totalDuration={totalDuration}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      ) : (
-        /* Code Editor Area */
-        <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-gray-800 dark:text-gray-200 text-lg font-semibold">Composition JSON</h3>
-            <div className="flex items-center gap-3">
-              {userEditedJson && (
-                <div className="text-green-600 dark:text-green-400 text-sm flex items-center">
-                  <span className="inline-block w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full mr-1"></span>
-                  Changes applied
-                </div>
-              )}
-              {jsonError && (
-                <div className="text-red-600 dark:text-red-400 text-sm">
-                  Error: {jsonError}
-                </div>
-              )}
-            </div>
-          </div>
-          <textarea
-            value={jsonString}
-            onChange={isReadOnly ? undefined : (e) => handleJsonChange(e.target.value)}
-            readOnly={isReadOnly}
-            className={`flex-1 p-4 rounded-lg font-mono text-sm resize-none border focus:outline-none ${
-              isReadOnly 
-                ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 cursor-not-allowed'
-                : 'bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400'
-            }`}
-            placeholder={isReadOnly ? "Project JSON (Read-Only)" : "Edit your composition JSON here..."}
-            style={{ minHeight: '400px' }}
-          />
-          <div className="flex justify-between items-center mt-4">
-            <div className="text-gray-600 dark:text-gray-400 text-xs">
-              {isReadOnly 
-                ? '🔒 This project is shared in read-only mode. You can view the JSON structure but cannot make changes.'
-                : '💡 Tip: Edit the JSON directly to modify pages, elements, timing, and styling. Changes are applied in real-time.'
-              }
-            </div>
-            {!isReadOnly && (
-              <button 
-                onClick={() => {
-                  if (project?.composition && userEditedJson) {
-                    setCompositionData(project.composition);
-                    setJsonString(JSON.stringify(project.composition, null, 2));
-                    setUserEditedJson(false);
-                    lastEditedComposition.current = null;
-                    
-                    if (onCompositionUpdate) {
-                      onCompositionUpdate(project.composition);
-                    }
-                    
-                    if (project?.id) {
-                      localStorage.setItem(`vibe-project-composition-${project.id}`, JSON.stringify(project.composition));
-                    }
-                  }
-                }}
-                className={`px-3 py-1 rounded text-xs ${
-                  userEditedJson 
-                    ? 'bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                }`}
-                disabled={!userEditedJson}
-              >
-                Reset Changes
-              </button>
-            )}
           </div>
         </div>
       )}
