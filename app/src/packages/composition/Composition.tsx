@@ -12,7 +12,6 @@ import React, { useRef } from 'react';
 import { AbsoluteFill, useCurrentFrame, Img, OffthreadVideo, Sequence, Audio } from 'remotion';
 import { Gif } from '@remotion/gif';
 import { CompositionData, CompositionElement, ElementRendererProps, LocalFile } from './types';
-import { Layer } from './Layer';
 import { FileResolver, createFileResolver } from './utils/fileResolver';
 import { useAnimeTimeline } from './useAnimeTimeline';
 import { createTimeline } from "animejs";
@@ -356,21 +355,13 @@ export const MainComposition: React.FC<{
           >
             <AbsoluteFill style={{ backgroundColor: page.backgroundColor || '#ffffff' }}>
               {elementsWithIds.map((element) => (
-                <Layer
-                  key={`element-${element.id}`}
+                <ElementRenderer
                   element={element}
                   frame={frame - startFrame}
                   fps={fps}
+                  fileResolver={fileResolver}
                   isPlayerContext={isPlayerContext}
-                >
-                  <ElementRenderer
-                    element={element}
-                    frame={frame - startFrame}
-                    fps={fps}
-                    fileResolver={fileResolver}
-                    isPlayerContext={isPlayerContext}
-                  />
-                </Layer>
+                />
               ))}
             </AbsoluteFill>
           </Sequence>
