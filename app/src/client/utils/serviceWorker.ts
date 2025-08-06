@@ -28,13 +28,8 @@ export function registerServiceWorker(config?: ServiceWorkerConfig) {
         // This is running on localhost. Check if a service worker exists
         checkValidServiceWorker(swUrl, config);
 
-        // Add some additional logging to localhost, pointing developers to the
-        // service worker/PWA documentation.
         navigator.serviceWorker.ready.then(() => {
-          console.log(
-            'InkyCut Service Worker: This web app is being served cache-first by a service worker. ' +
-            'Files from IndexedDB will be served directly without network requests.'
-          );
+          // Service worker ready on localhost
         });
       } else {
         // Is not localhost. Just register service worker
@@ -60,10 +55,6 @@ function registerValidServiceWorker(swUrl: string, config?: ServiceWorkerConfig)
               // At this point, the updated precached content has been fetched,
               // but the previous service worker will still serve the older
               // content until all client tabs are closed.
-              console.log(
-                'InkyCut Service Worker: New content is available and will be used when all ' +
-                'tabs for this page are closed.'
-              );
 
               // Execute callback
               if (config && config.onUpdate) {
@@ -73,7 +64,6 @@ function registerValidServiceWorker(swUrl: string, config?: ServiceWorkerConfig)
               // At this point, everything has been precached.
               // It's the perfect time to display a
               // "Content is cached for offline use." message.
-              console.log('InkyCut Service Worker: Content is cached for offline use.');
 
               // Execute callback
               if (config && config.onSuccess) {
@@ -85,7 +75,7 @@ function registerValidServiceWorker(swUrl: string, config?: ServiceWorkerConfig)
       };
     })
     .catch((error) => {
-      console.error('InkyCut Service Worker: Error during service worker registration:', error);
+      console.error('Service Worker - Registration error:', error);
       if (config && config.onError) {
         config.onError(error);
       }
@@ -116,7 +106,7 @@ function checkValidServiceWorker(swUrl: string, config?: ServiceWorkerConfig) {
       }
     })
     .catch(() => {
-      console.log('InkyCut Service Worker: No internet connection found. App is running in offline mode.');
+      // No internet connection - service worker will work offline
     });
 }
 
@@ -125,10 +115,10 @@ export function unregisterServiceWorker() {
     navigator.serviceWorker.ready
       .then((registration) => {
         registration.unregister();
-        console.log('InkyCut Service Worker: Unregistered');
+        // Service worker unregistered
       })
       .catch((error) => {
-        console.error('InkyCut Service Worker: Error during unregistration:', error.message);
+        console.error('Service Worker - Unregistration error:', error.message);
       });
   }
 }

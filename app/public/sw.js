@@ -80,7 +80,7 @@ async function getFileFromDB(identifier) {
     
     return null;
   } catch (error) {
-    console.error('Error getting file from IndexedDB:', error);
+    console.error('Service Worker - Error getting file from IndexedDB:', error);
     return null;
   }
 }
@@ -189,7 +189,7 @@ function dataUrlToResponse(dataUrl, request, headers = {}) {
       });
     }
   } catch (error) {
-    console.error('Error converting dataUrl to Response:', error);
+    console.error('Service Worker - Error converting dataUrl to Response:', error);
     return null;
   }
 }
@@ -258,7 +258,7 @@ function extractFileIdentifier(url) {
     
     return null;
   } catch (error) {
-    console.error('Error extracting file identifier from URL:', error);
+    console.error('Service Worker - Error extracting file identifier from URL:', error);
     return null;
   }
 }
@@ -324,11 +324,8 @@ self.addEventListener('fetch', (event) => {
   // Check if this is a media file before proceeding
   const isMedia = isMediaFile(null, fileIdentifier.name || url);
   if (!isMedia) {
-    console.log('Service worker skipping non-media file:', fileIdentifier);
     return;
   }
-  
-  console.log('Service worker intercepting media request for:', fileIdentifier);
   
   event.respondWith(
     (async () => {
@@ -340,25 +337,6 @@ self.addEventListener('fetch', (event) => {
           const isVideo = localFile.type && localFile.type.startsWith('video/');
           const rangeHeader = request.headers.get('Range');
           
-          // Enhanced logging for video range requests
-          if (isVideo && rangeHeader) {
-            const rangeData = parseRange(rangeHeader, localFile.dataUrl.length);
-            console.log('Video range request:', {
-              file: fileIdentifier,
-              range: rangeHeader,
-              parsedRange: rangeData,
-              fileName: localFile.name,
-              fileType: localFile.type
-            });
-          } else {
-            console.log('Service worker serving media from IndexedDB:', {
-              file: fileIdentifier,
-              type: localFile.type,
-              isVideo,
-              hasRange: !!rangeHeader,
-              range: rangeHeader
-            });
-          }
           
           // Convert dataUrl to Response with Range support
           const response = dataUrlToResponse(localFile.dataUrl, request, {
@@ -369,19 +347,15 @@ self.addEventListener('fetch', (event) => {
           });
           
           if (response) {
-            if (isVideo) {
-              console.log('Service worker served video with status:', response.status);
-            }
             return response;
           }
         }
         
         // Fall back to network request
-        console.log('Service worker falling back to network for media file:', fileIdentifier);
         return fetch(request);
         
       } catch (error) {
-        console.error('Service worker error:', error);
+        console.error('Service Worker - Fetch error:', error);
         // Fall back to network on any error
         return fetch(request);
       }
@@ -391,13 +365,11 @@ self.addEventListener('fetch', (event) => {
 
 // Install event
 self.addEventListener('install', (event) => {
-  console.log('InkyCut Service Worker installing...');
   self.skipWaiting();
 });
 
 // Activate event
 self.addEventListener('activate', (event) => {
-  console.log('InkyCut Service Worker activated');
   event.waitUntil(self.clients.claim());
 });
 
@@ -421,6 +393,6 @@ self.addEventListener('message', (event) => {
       break;
       
     default:
-      console.log('Unknown message type:', type);
+      console.error('Service Worker - Unknown message type:', type);
   }
 });
