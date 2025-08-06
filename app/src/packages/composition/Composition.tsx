@@ -291,8 +291,8 @@ export const MainComposition: React.FC<{
     );
   }
 
-  // Convert page durations from milliseconds to frames
-  const pageDurations = data.pages.map(page => page.duration || 0); // duration is already in frames
+  // Convert page durations to frames and ensure they are integers
+  const pageDurations = data.pages.map(page => Math.floor(page.duration || 0));
   let cumulativeFrames = 0;
   
   
@@ -302,9 +302,9 @@ export const MainComposition: React.FC<{
       {data.audios && data.audios.map((audio, index) => {
         const resolvedAudioSrc = audio.src && fileResolver ? fileResolver.resolve(audio.src) : audio.src;
         
-        // Audio delay and duration are already in frames
-        const delayInFrames = audio.delay || 0; // delay is already in frames
-        const durationInFrames = audio.duration || undefined; // duration is already in frames
+        // Audio delay and duration are already in frames - ensure they are integers
+        const delayInFrames = Math.floor(audio.delay || 0);
+        const durationInFrames = audio.duration ? Math.floor(audio.duration) : undefined;
         
         return resolvedAudioSrc ? (
           <Sequence
