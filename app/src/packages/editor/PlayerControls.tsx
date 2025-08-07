@@ -467,11 +467,7 @@ export default function PlayerControls({
                 />
 
                 <AudioTimeline 
-                  audios={compositionData.audios || []} 
-                  timelineZoom={timelineZoom}
-                  files={files}
                   totalProjectDurationFrames={compositionData.pages.reduce((sum, page) => sum + page.duration, 0)}
-                  fps={compositionData.fps}
                   onAudioClick={handleSeek}
                 />
 

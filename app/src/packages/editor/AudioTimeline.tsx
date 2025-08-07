@@ -1,48 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useAtom } from 'jotai';
 import AudioVisualizer from './components/AudioVisualizer';
-import { CompositionAudio, LocalFile } from '../composition/types';
+import { CompositionAudio } from '../composition/types';
 import { createMediaResolver } from './utils/mediaResolver';
-
-interface AudioTimelineProps {
-  /** Array of audio tracks to display */
-  audios: CompositionAudio[];
-  /** Timeline zoom level (pixels per second) */
-  timelineZoom: number;
-  /** Project files for media resolution */
-  files?: LocalFile[];
-  /** Total project duration in frames for clamping */
-  totalProjectDurationFrames?: number;
-  /** Frames per second for time conversions */
-  fps?: number;
-  /** Callback for audio click-to-seek */
-  onAudioClick?: (targetFrame: number) => void;
-}
-
-interface AudioTimelineGroupProps {
-  /** Array of audio tracks in this timeline group */
-  timeline: CompositionAudio[];
-  /** Timeline zoom level (pixels per second) */
-  timelineZoom: number;
-  /** Index of this timeline group */
-  timelineIndex: number;
-  /** Project files for media resolution */
-  files?: LocalFile[];
-  /** Frames per second for time conversions */
-  fps?: number;
-  /** Callback for audio click-to-seek */
-  onAudioClick?: (targetFrame: number) => void;
-}
-
-interface AudioBlockProps {
-  audio: CompositionAudio;
-  leftPosition: number;
-  blockWidth: number;
-  audioDuration: number;
-  files?: LocalFile[];
-  fps?: number;
-  timelineZoom: number;
-  onAudioClick?: (targetFrame: number) => void;
-}
+import { projectAtom, filesAtom, appStateAtom } from './atoms';
+import { AudioTimelineProps, AudioTimelineGroupProps, AudioBlockProps } from './types';
 
 /**
  * AudioBlock renders an individual audio block with waveform visualization
@@ -52,13 +14,16 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
   leftPosition, 
   blockWidth, 
   audioDuration, 
-  files, 
-  fps = 30,
-  timelineZoom,
   onAudioClick
 }) => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Read values from atoms instead of props
+  const [files] = useAtom(filesAtom);
+  const [project] = useAtom(projectAtom);
+  
+  const fps = project?.composition?.fps || 30;
 
   // Create media resolver for audio source resolution
   const mediaResolver = useMemo(() => {
@@ -152,11 +117,16 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
  */
 const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({ 
   timeline, 
-  timelineZoom, 
-  files,
-  fps = 30,
+  timelineIndex,
   onAudioClick
 }) => {
+  // Read values from atoms instead of props
+  const [files] = useAtom(filesAtom);
+  const [project] = useAtom(projectAtom);
+  const [appState] = useAtom(appStateAtom);
+  
+  const fps = project?.composition?.fps || 30;
+  const timelineZoom = appState.zoomLevel || 1;
 
   return (
     <div 
@@ -177,9 +147,6 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
             leftPosition={leftPosition}
             blockWidth={blockWidth}
             audioDuration={audioDuration}
-            files={files}
-            fps={fps}
-            timelineZoom={timelineZoom}
             onAudioClick={onAudioClick}
           />
         );
@@ -194,13 +161,17 @@ const AudioTimelineGroup: React.FC<AudioTimelineGroupProps> = ({
  * ensuring all audio is visible without visual conflicts.
  */
 const AudioTimeline: React.FC<AudioTimelineProps> = ({ 
-  audios, 
-  timelineZoom, 
-  files, 
   totalProjectDurationFrames,
-  fps = 30,
   onAudioClick
 }) => {
+  // Read values from atoms instead of props
+  const [project] = useAtom(projectAtom);
+  const [files] = useAtom(filesAtom);
+  const [appState] = useAtom(appStateAtom);
+  
+  const audios = project?.composition?.audios || [];
+  const fps = project?.composition?.fps || 30;
+  const timelineZoom = appState.zoomLevel || 1;
   // Don't render anything if there are no audio tracks
   if (!audios || audios.length === 0) {
     return null;
@@ -262,10 +233,7 @@ const AudioTimeline: React.FC<AudioTimelineProps> = ({
           <AudioTimelineGroup
             key={`timeline-${timelineKey}`}
             timeline={timeline}
-            timelineZoom={timelineZoom}
             timelineIndex={timelineIndex}
-            files={files}
-            fps={fps}
             onAudioClick={onAudioClick}
           />
         );

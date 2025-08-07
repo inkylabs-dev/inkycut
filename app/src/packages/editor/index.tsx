@@ -1,6 +1,7 @@
 // Re-export from composition package
 export * from '../composition';
 export * from './atoms';
+export * from './types';
 export * from './utils/projectUtils';
 export * from './utils/mediaUtils';
 export { default as ElementPreview } from './ElementPreview';
