@@ -217,8 +217,7 @@ export default function PlayerControls({
     // Calculate the start frame of the clicked page
     let cumulativeFrames = 0;
     for (let i = 0; i < pageIndex; i++) {
-      const pageDurationMs = compositionData.pages[i].duration;
-      const pageDurationFrames = Math.round((pageDurationMs / 1000) * compositionData.fps);
+      const pageDurationFrames = compositionData.pages[i].duration; // duration is already in frames
       cumulativeFrames += pageDurationFrames;
     }
     
@@ -229,8 +228,7 @@ export default function PlayerControls({
     const relativePosition = clickX / blockWidth;
     
     // Calculate the frame position within the page
-    const pageDurationMs = compositionData.pages[pageIndex].duration;
-    const pageDurationFrames = Math.round((pageDurationMs / 1000) * compositionData.fps);
+    const pageDurationFrames = compositionData.pages[pageIndex].duration; // duration is already in frames
     const relativeFrames = Math.floor(relativePosition * pageDurationFrames);
     const targetFrame = cumulativeFrames + relativeFrames;
     
@@ -255,16 +253,8 @@ export default function PlayerControls({
   };
 
   const [isDragging, setIsDragging] = useState(false);
-  const [isPageDragging, setIsPageDragging] = useState(false);
-  const [draggedPageIndex, setDraggedPageIndex] = useState<number | null>(null);
-  const [dropIndicatorIndex, setDropIndicatorIndex] = useState<number | null>(null);
-  const [isResizing, setIsResizing] = useState(false);
-  const [resizingPageIndex, setResizingPageIndex] = useState<number | null>(null);
-  const [startResizeWidth, setStartResizeWidth] = useState(0);
-  const [startMouseX, setStartMouseX] = useState(0);
   const [timelineZoom, setTimelineZoom] = useState(appState.zoomLevel || 1);
   const timelineContainerRef = useRef<HTMLDivElement>(null);
-  const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Helper function to calculate the actual timeline width
   const getActualTimelineWidth = useCallback(() => {
@@ -274,52 +264,6 @@ export default function PlayerControls({
     );
   }, [compositionData.pages, timelineZoom]);
 
-  // Auto-scroll helper functions
-  const startAutoScroll = useCallback((direction: 'left' | 'right', speed: number = 10) => {
-    if (autoScrollIntervalRef.current) {
-      clearInterval(autoScrollIntervalRef.current);
-    }
-    
-    autoScrollIntervalRef.current = setInterval(() => {
-      const timelineContainer = timelineContainerRef.current;
-      if (!timelineContainer) return;
-      
-      const scrollAmount = direction === 'right' ? speed : -speed;
-      const newScrollLeft = Math.max(0, Math.min(
-        timelineContainer.scrollLeft + scrollAmount,
-        timelineContainer.scrollWidth - timelineContainer.clientWidth
-      ));
-      
-      timelineContainer.scrollLeft = newScrollLeft;
-    }, 16);
-  }, []);
-
-  const stopAutoScroll = useCallback(() => {
-    if (autoScrollIntervalRef.current) {
-      clearInterval(autoScrollIntervalRef.current);
-      autoScrollIntervalRef.current = null;
-    }
-  }, []);
-
-  const handleAutoScrollOnDrag = useCallback((mouseX: number, containerRect: DOMRect) => {
-    const edgeThreshold = 100;
-    const maxScrollSpeed = 20;
-    
-    const leftDistance = mouseX;
-    const rightDistance = containerRect.width - mouseX;
-    
-    if (leftDistance < edgeThreshold && leftDistance >= 0) {
-      const intensity = 1 - (leftDistance / edgeThreshold);
-      const speed = Math.ceil(intensity * maxScrollSpeed);
-      startAutoScroll('left', speed);
-    } else if (rightDistance < edgeThreshold && rightDistance >= 0) {
-      const intensity = 1 - (rightDistance / edgeThreshold);
-      const speed = Math.ceil(intensity * maxScrollSpeed);
-      startAutoScroll('right', speed);
-    } else {
-      stopAutoScroll();
-    }
-  }, [startAutoScroll, stopAutoScroll]);
 
   const handlePlayheadMouseDown = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -327,87 +271,7 @@ export default function PlayerControls({
     setIsDragging(true);
   };
 
-  const handlePageMouseDown = (event: React.MouseEvent, pageIndex: number) => {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    const rect = event.currentTarget.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const isResizeArea = clickX > rect.width - 10;
-    
-    if (isResizeArea) {
-      setIsResizing(true);
-      setResizingPageIndex(pageIndex);
-      setStartResizeWidth(rect.width);
-      setStartMouseX(event.clientX);
-    } else {
-      setIsPageDragging(true);
-      setDraggedPageIndex(pageIndex);
-    }
-  };
 
-  const handlePageReorder = (fromIndex: number, toIndex: number) => {
-    if (fromIndex === toIndex) return;
-    
-    const newPages = [...compositionData.pages];
-    const [movedPage] = newPages.splice(fromIndex, 1);
-    newPages.splice(toIndex, 0, movedPage);
-    
-    const updatedComposition = {
-      ...compositionData,
-      pages: newPages
-    };
-    
-    if (project) {
-      const updatedProject = {
-        ...project,
-        composition: updatedComposition
-      };
-      updateProject(updatedProject);
-      
-      if (onCompositionUpdate) {
-        onCompositionUpdate(updatedComposition);
-      }
-    }
-  };
-
-  const handlePageDurationUpdate = (pageIndex: number, newDuration: number) => {
-    const newPages = [...compositionData.pages];
-    newPages[pageIndex] = {
-      ...newPages[pageIndex],
-      duration: Math.max(newDuration, 500)
-    };
-    
-    const updatedComposition = {
-      ...compositionData,
-      pages: newPages
-    };
-    
-    if (project) {
-      const updatedProject = {
-        ...project,
-        composition: updatedComposition
-      };
-      updateProject(updatedProject);
-      
-      if (onCompositionUpdate) {
-        onCompositionUpdate(updatedComposition);
-      }
-    }
-  };
-
-  const handleAudioDelayChange = (audioId: string, newDelay: number) => {
-    const delayValue = Math.max(0, Math.round(newDelay));
-    const slashCommand = `/set-audio --id ${audioId} --delay ${delayValue}`;
-    addUserMessageToQueue(slashCommand);
-  };
-
-  const handleAudioTrimAfterChange = (audioId: string, newTrimAfter: number, newDuration: number) => {
-    const trimAfterValue = Math.max(0, Math.round(newTrimAfter));
-    const durationValue = Math.max(0, Math.round(newDuration));
-    const slashCommand = `/set-audio --id ${audioId} --trim-after ${trimAfterValue} --duration ${durationValue}`;
-    addUserMessageToQueue(slashCommand);
-  };
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -423,62 +287,14 @@ export default function PlayerControls({
         const relativePosition = Math.max(0, Math.min(1, adjustedMouseX / projectDurationWidth));
         const targetFrame = Math.floor(relativePosition * totalFrames);
         handleSeek(targetFrame);
-      } else if (isPageDragging && draggedPageIndex !== null) {
-        const timelineContainer = timelineContainerRef.current;
-        if (!timelineContainer) return;
-        
-        const containerRect = timelineContainer.getBoundingClientRect();
-        const mouseX = event.clientX - containerRect.left;
-        const scrollLeft = timelineContainer.scrollLeft;
-        const adjustedMouseX = mouseX + scrollLeft;
-        
-        handleAutoScrollOnDrag(mouseX, containerRect);
-        
-        let cumulativePosition = 0;
-        let targetIndex = 0;
-        
-        for (let i = 0; i < compositionData.pages.length; i++) {
-          if (i === draggedPageIndex) {
-            continue;
-          }
-          
-          const pageDuration = compositionData.pages[i].duration / compositionData.fps;
-          const blockWidth = Math.max(pageDuration * 100 * timelineZoom, 80);
-          
-          if (adjustedMouseX < cumulativePosition + blockWidth / 2) {
-            break;
-          }
-          
-          cumulativePosition += blockWidth;
-          targetIndex++;
-        }
-        
-        setDropIndicatorIndex(targetIndex);
-      } else if (isResizing && resizingPageIndex !== null) {
-        const deltaX = event.clientX - startMouseX;
-        const newWidth = Math.max(startResizeWidth + deltaX, 80);
-        const newDuration = Math.max((newWidth / (100 * timelineZoom)) * 1000, 500);
-        handlePageDurationUpdate(resizingPageIndex, newDuration);
       }
     };
 
     const handleMouseUp = () => {
-      if (isPageDragging && draggedPageIndex !== null) {
-        if (dropIndicatorIndex !== null) {
-          handlePageReorder(draggedPageIndex, dropIndicatorIndex);
-        }
-      }
-      
       setIsDragging(false);
-      setIsPageDragging(false);
-      setDraggedPageIndex(null);
-      setDropIndicatorIndex(null);
-      setIsResizing(false);
-      setResizingPageIndex(null);
-      stopAutoScroll();
     };
 
-    if (isDragging || isPageDragging || isResizing) {
+    if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     }
@@ -487,14 +303,8 @@ export default function PlayerControls({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isPageDragging, isResizing, draggedPageIndex, dropIndicatorIndex, resizingPageIndex, startResizeWidth, startMouseX, totalFrames, handleSeek, timelineZoom, compositionData.pages, handleAutoScrollOnDrag, stopAutoScroll]);
+  }, [isDragging, totalFrames, handleSeek, timelineZoom, totalDuration]);
 
-  // Cleanup auto-scroll on unmount
-  useEffect(() => {
-    return () => {
-      stopAutoScroll();
-    };
-  }, [stopAutoScroll]);
 
   const updateZoomInAppState = (newZoom: number) => {
     if (project) {
@@ -651,16 +461,6 @@ export default function PlayerControls({
                   timelineZoom={timelineZoom}
                   getCurrentPage={getCurrentPage}
                   handlePageClick={handlePageClick}
-                  handlePageMouseDown={handlePageMouseDown}
-                  isPageDragging={isPageDragging}
-                  draggedPageIndex={draggedPageIndex}
-                  dropIndicatorIndex={dropIndicatorIndex}
-                  isResizing={isResizing}
-                  resizingPageIndex={resizingPageIndex}
-                  setIsResizing={setIsResizing}
-                  setResizingPageIndex={setResizingPageIndex}
-                  setStartResizeWidth={setStartResizeWidth}
-                  setStartMouseX={setStartMouseX}
                   formatTime={formatTime}
                   files={files}
                   onFileDropped={handleFileDropped}
@@ -669,11 +469,10 @@ export default function PlayerControls({
                 <AudioTimeline 
                   audios={compositionData.audios || []} 
                   timelineZoom={timelineZoom}
-                  onAudioDelayChange={handleAudioDelayChange}
-                  onAudioTrimAfterChange={handleAudioTrimAfterChange}
                   files={files}
                   totalProjectDurationFrames={compositionData.pages.reduce((sum, page) => sum + page.duration, 0)}
                   fps={compositionData.fps}
+                  onAudioClick={handleSeek}
                 />
 
                 <Playhead

@@ -23,6 +23,8 @@ export const PlayerWrapper = forwardRef<PlayerRef, PlayerWrapperProps>(
       return Math.round(total);
     }, [compositionData.pages]);
 
+    console.log('Total frames:', totalFrames, 'for composition:');
+
     return (
       <div className="flex-1 bg-gray-100 dark:bg-gray-800 flex items-center justify-center relative">
         <div className="w-full max-w-4xl aspect-video">
