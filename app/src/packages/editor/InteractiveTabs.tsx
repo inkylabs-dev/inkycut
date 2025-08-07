@@ -58,7 +58,7 @@ export default function InteractiveTabs({ disableFileUpload = false }: Interacti
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 p-4 overflow-y-auto min-h-0" style={{ maxHeight: 'calc(100vh - 120px)' }}>
         {activeTab === 'files' && (
           <FileTab disableFileUpload={disableFileUpload} />
         )}

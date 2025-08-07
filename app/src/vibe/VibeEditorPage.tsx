@@ -266,7 +266,7 @@ export default function VibeEditorPage () {
       {/* Main content area without top banner */}
       <div className="flex w-full h-full overflow-hidden">
         {/* Left Panel - Files / Elements */}
-        <div className="w-80 bg-white dark:bg-boxdark border-r border-gray-200 dark:border-strokedark flex-shrink-0 overflow-hidden">
+        <div className="w-80 bg-white dark:bg-boxdark border-r border-gray-200 dark:border-strokedark flex-shrink-0">
           <LeftPanel 
             showImportDialog={showImportDialog}
             setShowImportDialog={setShowImportDialog}
