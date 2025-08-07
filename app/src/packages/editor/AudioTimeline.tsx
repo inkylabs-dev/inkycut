@@ -84,8 +84,8 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
     <div
       className={`audio-block absolute top-0 rounded overflow-hidden cursor-pointer transition-all duration-200 ${
         selectedAudioId === audio.id
-          ? 'bg-blue-600 shadow-[0_0_0_2px_rgba(59,130,246,0.8)] dark:shadow-[0_0_0_2px_rgba(96,165,250,0.8)]'
-          : 'bg-blue-500 hover:bg-blue-600'
+          ? 'bg-blue-600 shadow-[0_0_0_2px_rgba(59,130,246,0.8)] dark:shadow-[0_0_0_2px_rgba(96,165,250,0.8)] opacity-100'
+          : 'bg-blue-500 hover:bg-blue-600 opacity-70 hover:opacity-90'
       }`}
       style={{
         left: `${leftPosition}px`,
