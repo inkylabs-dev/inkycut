@@ -9,7 +9,7 @@ import { parseDuration, formatFramesToDuration } from './helpers';
 export const setAudioCommand: SlashCommand = {
   name: 'set-audio',
   description: 'Update properties of an existing audio track by ID',
-  usage: '/set-audio --id|-i audio_id [--src|-s url] [--volume|-v 0-1] [--trim-before|-b ms] [--trim-after|-a ms] [--playback-rate|-r rate] [--muted|-m true|false] [--loop|-l true|false] [--tone-frequency|-f 0.01-2] [--delay|-d ms] [--duration|-dr ms]',
+  usage: '/set-audio --id|-i audio_id [--src|-s url] [--volume|-v 0-1] [--trim-before|-b ms] [--trim-after|-a ms] [--playback-rate|-r rate] [--muted|-m true|false] [--loop|-l true|false] [--tone-frequency|-f 0.01-2] [--delay|-d ms] [--duration|-dr ms] [--before|-be positions] [--after|-af positions]',
   requiresConfirmation: false,
   execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
     try {
@@ -33,6 +33,7 @@ export const setAudioCommand: SlashCommand = {
 
       let audioId: string | null = null;
       const updates: any = {};
+      let moveOperation: { type: 'before' | 'after'; positions: number } | null = null;
 
       // Get FPS once at the beginning
       const fps = context.project.composition?.fps || 30;
@@ -262,6 +263,48 @@ export const setAudioCommand: SlashCommand = {
             i++; // Skip next arg
             break;
 
+          case '--before':
+          case '-be':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--before` requires a number of positions.\n\nExample: `--before 1`',
+                handled: true
+              };
+            }
+            const beforePositions = parseInt(nextArg);
+            if (isNaN(beforePositions) || beforePositions <= 0) {
+              return {
+                success: false,
+                message: `❌ **Invalid Before Positions**\n\nBefore positions must be a positive integer. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            moveOperation = { type: 'before', positions: beforePositions };
+            i++; // Skip next arg
+            break;
+
+          case '--after':
+          case '-af':
+            if (!nextArg) {
+              return {
+                success: false,
+                message: '❌ **Missing Value**\n\nOption `--after` requires a number of positions.\n\nExample: `--after 1`',
+                handled: true
+              };
+            }
+            const afterPositions = parseInt(nextArg);
+            if (isNaN(afterPositions) || afterPositions <= 0) {
+              return {
+                success: false,
+                message: `❌ **Invalid After Positions**\n\nAfter positions must be a positive integer. Got '${nextArg}'`,
+                handled: true
+              };
+            }
+            moveOperation = { type: 'after', positions: afterPositions };
+            i++; // Skip next arg
+            break;
+
           default:
             if (arg.startsWith('-')) {
               return {
@@ -283,11 +326,11 @@ export const setAudioCommand: SlashCommand = {
         };
       }
 
-      // Check if we have updates
-      if (Object.keys(updates).length === 0) {
+      // Check if we have updates or move operations
+      if (Object.keys(updates).length === 0 && !moveOperation) {
         return {
           success: false,
-          message: '❌ **No Updates Specified**\n\nPlease specify at least one property to update.\n\nAvailable options: --src, --volume, --trim-before, --trim-after, --playback-rate, --muted, --loop, --tone-frequency, --delay, --duration',
+          message: '❌ **No Updates Specified**\n\nPlease specify at least one property to update or movement operation.\n\nAvailable options: --src, --volume, --trim-before, --trim-after, --playback-rate, --muted, --loop, --tone-frequency, --delay, --duration, --before, --after',
           handled: true
         };
       }
@@ -311,7 +354,7 @@ export const setAudioCommand: SlashCommand = {
         };
       }
 
-      // Update the audio track
+      // Create updated project
       const updatedProject = {
         ...context.project,
         composition: {
@@ -320,30 +363,67 @@ export const setAudioCommand: SlashCommand = {
         }
       };
 
-      const originalAudio = updatedProject.composition.audios[audioIndex];
-      updatedProject.composition.audios[audioIndex] = {
-        ...originalAudio,
-        ...updates
-      };
+      let message = '';
+      let changesList: string[] = [];
+
+      // Handle move operations
+      if (moveOperation) {
+        const audios = updatedProject.composition.audios;
+        const audioToMove = audios[audioIndex];
+        
+        // Remove the audio from its current position
+        audios.splice(audioIndex, 1);
+        
+        // Calculate new index based on the move operation
+        let newIndex: number;
+        if (moveOperation.type === 'before') {
+          newIndex = Math.max(0, audioIndex - moveOperation.positions);
+        } else { // 'after'
+          newIndex = Math.min(audios.length, audioIndex + moveOperation.positions);
+        }
+        
+        // Insert the audio at the new position
+        audios.splice(newIndex, 0, audioToMove);
+        
+        message = `✅ **Audio Track Moved**\n\nMoved audio track '${audioId}' ${moveOperation.positions} position${moveOperation.positions !== 1 ? 's' : ''} ${moveOperation.type}.\n\nNew position: ${newIndex + 1} of ${audios.length}`;
+      }
+
+      // Handle property updates
+      if (Object.keys(updates).length > 0) {
+        const originalAudio = updatedProject.composition.audios.find((audio: any) => audio.id === audioId);
+        const audioIndex = updatedProject.composition.audios.findIndex((audio: any) => audio.id === audioId);
+        
+        if (originalAudio && audioIndex !== -1) {
+          updatedProject.composition.audios[audioIndex] = {
+            ...originalAudio,
+            ...updates
+          };
+
+          // Create summary of property changes
+          Object.keys(updates).forEach(key => {
+            const oldValue = (originalAudio as any)[key];
+            const newValue = updates[key];
+            
+            if (key === 'delay' || key === 'duration' || key === 'trimBefore' || key === 'trimAfter') {
+              changesList.push(`${key}: ${formatFramesToDuration(oldValue, fps)} → ${formatFramesToDuration(newValue, fps)}`);
+            } else {
+              changesList.push(`${key}: ${oldValue} → ${newValue}`);
+            }
+          });
+          
+          if (moveOperation) {
+            message += `\n\n**Properties Updated:**\n\n• ${changesList.join('\n• ')}`;
+          } else {
+            message = `✅ **Audio Track Updated**\n\nUpdated audio track '${audioId}' properties:\n\n• ${changesList.join('\n• ')}`;
+          }
+        }
+      }
 
       context.updateProject(updatedProject);
 
-      // Create summary of changes
-      const changesList: string[] = [];
-      Object.keys(updates).forEach(key => {
-        const oldValue = (originalAudio as any)[key];
-        const newValue = updates[key];
-        
-        if (key === 'delay' || key === 'duration' || key === 'trimBefore' || key === 'trimAfter') {
-          changesList.push(`${key}: ${formatFramesToDuration(oldValue, fps)} → ${formatFramesToDuration(newValue, fps)}`);
-        } else {
-          changesList.push(`${key}: ${oldValue} → ${newValue}`);
-        }
-      });
-
       return {
         success: true,
-        message: `✅ **Audio Track Updated**\n\nUpdated audio track '${audioId}' properties:\n\n• ${changesList.join('\n• ')}`,
+        message,
         handled: true
       };
 
