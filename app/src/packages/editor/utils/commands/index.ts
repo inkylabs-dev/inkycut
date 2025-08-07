@@ -34,6 +34,7 @@ import { setVideoCommand } from './video-set';
 import { setAudioCommand } from './audio-set';
 import { delAudioCommand } from './audio-delete';
 import { newChatCommand } from './new-chat';
+import { delChatCommand } from './del-chat';
 
 import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './types';
 
@@ -68,6 +69,7 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['set-audio', setAudioCommand],
   ['del-audio', delAudioCommand],
   ['new-chat', newChatCommand],
+  ['del-chat', delChatCommand],
 ]);
 
 /**
