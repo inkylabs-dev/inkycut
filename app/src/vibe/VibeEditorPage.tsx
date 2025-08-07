@@ -12,7 +12,6 @@ import {
   errorAtom,
   setLoadingAtom,
   setErrorAtom,
-  updateElementAtom,
   updateCompositionAtom,
   addChatMessageAtom,
   setSelectedElementAtom,
@@ -178,7 +177,6 @@ export default function VibeEditorPage () {
   }, [project, setUpdateProject, setError]);
 
   // Import necessary update atoms from the atoms file
-  const setUpdateElement = useSetAtom(updateElementAtom);
   const setUpdateComposition = useSetAtom(updateCompositionAtom);
   const setAddChatMessage = useSetAtom(addChatMessageAtom);
 
@@ -228,11 +226,6 @@ export default function VibeEditorPage () {
   // This effect has been removed as we're now using a single project model
   // The initialization logic is handled in the first useEffect
 
-  // Element update now uses Jotai atom
-  const handleElementUpdate = (elementId: string, updatedData: any) => {
-    // Use Jotai atom to update element
-    setUpdateElement({ elementId, updatedData });
-  };
 
   // Auto-save functionality removed to make the app fully offline
   // No auto-saving to server or localStorage, changes are only saved when
@@ -275,8 +268,6 @@ export default function VibeEditorPage () {
         {/* Left Panel - Files / Elements */}
         <div className="w-80 bg-white dark:bg-boxdark border-r border-gray-200 dark:border-strokedark flex-shrink-0 overflow-hidden">
           <LeftPanel 
-            onElementUpdate={handleElementUpdate}
-            onShare={shareProject}
             showImportDialog={showImportDialog}
             setShowImportDialog={setShowImportDialog}
             showExportDialog={showExportDialog}

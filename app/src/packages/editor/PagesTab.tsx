@@ -2,7 +2,8 @@ import React from 'react';
 import { useAtom } from 'jotai';
 import { projectAtom, addUserMessageToQueueAtom } from './atoms';
 import { CompositionPage } from '../composition/types';
-import PageListItem from './PageListItem';
+import DragDropProvider from './DragDropProvider';
+import DraggablePageListItem from './DraggablePageListItem';
 
 export default function PagesTab() {
   const [project] = useAtom(projectAtom);
@@ -51,6 +52,18 @@ export default function PagesTab() {
     }
   };
 
+  const handleMovePageBefore = (dragIndex: number, hoverIndex: number) => {
+    const diff = hoverIndex - dragIndex;
+    const command = `/set-page ${pages[dragIndex].id} --before ${Math.abs(diff)}`;
+    addUserMessageToQueue(command);
+  };
+
+  const handleMovePageAfter = (dragIndex: number, hoverIndex: number) => {
+    const diff = hoverIndex - dragIndex;
+    const command = `/set-page ${pages[dragIndex].id} --after ${Math.abs(diff)}`;
+    addUserMessageToQueue(command);
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -59,15 +72,20 @@ export default function PagesTab() {
       </div>
       
       <div className="space-y-2">
-        {pages.map((page) => (
-          <PageListItem
-            key={page.id}
-            page={page}
-            fps={project.composition.fps}
-            onDelete={() => handleDeletePage(page)}
-            onCopyId={() => handleCopyPageId(page)}
-          />
-        ))}
+        <DragDropProvider>
+          {pages.map((page, index) => (
+            <DraggablePageListItem
+              key={page.id}
+              page={page}
+              index={index}
+              fps={project.composition.fps}
+              onDelete={() => handleDeletePage(page)}
+              onCopyId={() => handleCopyPageId(page)}
+              onMovePageBefore={handleMovePageBefore}
+              onMovePageAfter={handleMovePageAfter}
+            />
+          ))}
+        </DragDropProvider>
       </div>
     </div>
   );

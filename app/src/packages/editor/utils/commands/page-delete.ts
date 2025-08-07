@@ -6,8 +6,8 @@ import type { SlashCommand, SlashCommandContext, SlashCommandResult } from './ty
 
 export const delPageCommand: SlashCommand = {
   name: 'del-page',
-  description: 'Delete the selected page and optionally additional pages after it. Supports --num/-n option',
-  usage: '/del-page [--num|-n n]',
+  description: 'Delete the specified page and optionally additional pages after it. Supports --id/-i and --num/-n options',
+  usage: '/del-page [--id|-i pageId] [--num|-n n]',
   requiresConfirmation: true,
   confirmationMessage: 'Are you sure you want to delete the selected page(s)? This action cannot be undone.',
   execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
@@ -29,6 +29,7 @@ export const delPageCommand: SlashCommand = {
       }
 
       let numPages = 1;
+      let targetPageId: string | null = null;
       
       // Parse command arguments
       const args = context.args || [];
@@ -36,8 +37,13 @@ export const delPageCommand: SlashCommand = {
       for (let i = 0; i < args.length; i++) {
         const arg = args[i];
         
+        // Handle --id option
+        if ((arg === '--id' || arg === '-i') && i + 1 < args.length) {
+          targetPageId = args[i + 1];
+          i++; // Skip the id value
+        }
         // Handle --num option
-        if ((arg === '--num' || arg === '-n') && i + 1 < args.length) {
+        else if ((arg === '--num' || arg === '-n') && i + 1 < args.length) {
           const numValue = parseInt(args[i + 1], 10);
           if (isNaN(numValue) || numValue < 1 || numValue > 50) {
             return {
@@ -53,7 +59,7 @@ export const delPageCommand: SlashCommand = {
         else if (arg.startsWith('-')) {
           return {
             success: false,
-            message: `❌ **Unknown Option**\n\nUnknown option '${arg}'. Usage: /del-page [--num|-n n]`,
+            message: `❌ **Unknown Option**\n\nUnknown option '${arg}'. Usage: /del-page [--id|-i pageId] [--num|-n n]`,
             handled: true
           };
         }
@@ -63,28 +69,41 @@ export const delPageCommand: SlashCommand = {
         const updatedProject = { ...context.project };
         const pages = [...updatedProject.composition.pages];
         
-        // Find selected page index
-        const selectedPageId = updatedProject.appState?.selectedPageId;
-        let selectedPageIndex = -1;
+        // Find target page index
+        let targetPageIndex = -1;
         
-        if (selectedPageId) {
-          selectedPageIndex = pages.findIndex((page: any) => page.id === selectedPageId);
-        }
-        
-        // If no page selected or not found, default to first page
-        if (selectedPageIndex === -1) {
-          if (pages.length === 0) {
+        if (targetPageId) {
+          // Use the specified page ID
+          targetPageIndex = pages.findIndex((page: any) => page.id === targetPageId);
+          if (targetPageIndex === -1) {
             return {
               success: false,
-              message: '❌ **No Pages**\n\nThere are no pages to delete in this project.',
+              message: `❌ **Page Not Found**\n\nPage with ID "${targetPageId}" was not found in this project.`,
               handled: true
             };
           }
-          selectedPageIndex = 0;
+        } else {
+          // Fall back to selected page
+          const selectedPageId = updatedProject.appState?.selectedPageId;
+          if (selectedPageId) {
+            targetPageIndex = pages.findIndex((page: any) => page.id === selectedPageId);
+          }
+          
+          // If no page selected or not found, default to first page
+          if (targetPageIndex === -1) {
+            if (pages.length === 0) {
+              return {
+                success: false,
+                message: '❌ **No Pages**\n\nThere are no pages to delete in this project.',
+                handled: true
+              };
+            }
+            targetPageIndex = 0;
+          }
         }
 
         // Calculate how many pages we can actually delete
-        const availablePages = pages.length - selectedPageIndex;
+        const availablePages = pages.length - targetPageIndex;
         const pagesToDelete = Math.min(numPages, availablePages);
         
         if (pagesToDelete === pages.length) {
@@ -96,18 +115,18 @@ export const delPageCommand: SlashCommand = {
         }
 
         // Get names of pages being deleted for the success message
-        const deletedPageNames = pages.slice(selectedPageIndex, selectedPageIndex + pagesToDelete)
+        const deletedPageNames = pages.slice(targetPageIndex, targetPageIndex + pagesToDelete)
           .map((page: any) => page.name);
 
         // Remove the pages
-        pages.splice(selectedPageIndex, pagesToDelete);
+        pages.splice(targetPageIndex, pagesToDelete);
         updatedProject.composition.pages = pages;
 
         // Update selected page to a valid one
         let newSelectedPage: any = null;
         if (pages.length > 0) {
           // Select the page at the same index, or the last page if index is out of bounds
-          const newSelectedIndex = Math.min(selectedPageIndex, pages.length - 1);
+          const newSelectedIndex = Math.min(targetPageIndex, pages.length - 1);
           newSelectedPage = pages[newSelectedIndex];
           
           // Update app state

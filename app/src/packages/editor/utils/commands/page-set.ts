@@ -9,7 +9,7 @@ import { parseDuration, formatFramesToDuration } from './helpers';
 export const setPageCommand: SlashCommand = {
   name: 'set-page',
   description: 'Set page properties including id, name, duration (supports human-readable formats), background color, and position',
-  usage: '/set-page [--id|-i id] [--name|-n name] [--duration|-d duration] [--background-color|-bg color] [--after|-a id|n] [--before|-b id|n]',
+  usage: '/set-page [id] [--id|-i id] [--name|-n name] [--duration|-d duration] [--background-color|-bg color] [--after|-a id|n] [--before|-b id|n]',
   requiresConfirmation: false,
   execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
     try {
