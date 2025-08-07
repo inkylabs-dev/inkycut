@@ -4,10 +4,15 @@ import { projectAtom, addUserMessageToQueueAtom } from './atoms';
 import { CompositionAudio } from '../composition/types';
 import DragDropProvider from './DragDropProvider';
 import DraggableAudioListItem from './DraggableAudioListItem';
+import AudioEditPanel from './AudioEditPanel';
 
 export default function AudioTab() {
   const [project, setProject] = useAtom(projectAtom);
   const [, addUserMessageToQueue] = useAtom(addUserMessageToQueueAtom);
+
+  // Get selected audio
+  const selectedAudioId = project?.appState?.selectedAudioId;
+  const selectedAudio = project?.composition?.audios?.find(audio => audio.id === selectedAudioId);
 
   if (!project?.composition?.audios || project.composition.audios.length === 0) {
     return (
@@ -88,18 +93,24 @@ export default function AudioTab() {
       <div className="space-y-2">
         <DragDropProvider>
           {audios.map((audio, index) => (
-            <DraggableAudioListItem
-              key={audio.id}
-              audio={audio}
-              index={index}
-              fps={project.composition.fps}
-              onDelete={() => handleDeleteAudio(audio)}
-              onCopyId={() => handleCopyAudioId(audio)}
-              onClick={() => handleAudioClick(audio)}
-              isSelected={project.appState?.selectedAudioId === audio.id}
-              onMoveAudioBefore={handleMoveAudioBefore}
-              onMoveAudioAfter={handleMoveAudioAfter}
-            />
+            <div key={audio.id}>
+              <DraggableAudioListItem
+                audio={audio}
+                index={index}
+                fps={project.composition.fps}
+                onDelete={() => handleDeleteAudio(audio)}
+                onCopyId={() => handleCopyAudioId(audio)}
+                onClick={() => handleAudioClick(audio)}
+                isSelected={project.appState?.selectedAudioId === audio.id}
+                onMoveAudioBefore={handleMoveAudioBefore}
+                onMoveAudioAfter={handleMoveAudioAfter}
+              />
+              
+              {/* Edit Panel for Selected Audio - appears right under the selected audio */}
+              {selectedAudio && selectedAudio.id === audio.id && (
+                <AudioEditPanel audio={selectedAudio} />
+              )}
+            </div>
           ))}
         </DragDropProvider>
       </div>
