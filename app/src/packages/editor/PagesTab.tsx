@@ -6,7 +6,7 @@ import DragDropProvider from './DragDropProvider';
 import DraggablePageListItem from './DraggablePageListItem';
 
 export default function PagesTab() {
-  const [project] = useAtom(projectAtom);
+  const [project, setProject] = useAtom(projectAtom);
   const [, addUserMessageToQueue] = useAtom(addUserMessageToQueueAtom);
 
   if (!project?.composition?.pages) {
@@ -64,6 +64,20 @@ export default function PagesTab() {
     addUserMessageToQueue(command);
   };
 
+  const handlePageClick = (page: CompositionPage) => {
+    if (!project) return;
+    
+    const updatedProject = {
+      ...project,
+      appState: {
+        ...project.appState,
+        selectedPageId: page.id
+      }
+    };
+    
+    setProject(updatedProject);
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -81,6 +95,8 @@ export default function PagesTab() {
               fps={project.composition.fps}
               onDelete={() => handleDeletePage(page)}
               onCopyId={() => handleCopyPageId(page)}
+              onClick={() => handlePageClick(page)}
+              isSelected={project.appState?.selectedPageId === page.id}
               onMovePageBefore={handleMovePageBefore}
               onMovePageAfter={handleMovePageAfter}
             />

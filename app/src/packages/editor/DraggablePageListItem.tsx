@@ -15,6 +15,8 @@ interface DraggablePageListItemProps {
   fps: number;
   onDelete: () => void;
   onCopyId: () => void;
+  onClick?: () => void;
+  isSelected?: boolean;
   onMovePageBefore: (dragIndex: number, hoverIndex: number) => void;
   onMovePageAfter: (dragIndex: number, hoverIndex: number) => void;
 }
@@ -27,6 +29,8 @@ export default function DraggablePageListItem({
   fps,
   onDelete,
   onCopyId,
+  onClick,
+  isSelected = false,
   onMovePageBefore,
   onMovePageAfter
 }: DraggablePageListItemProps) {
@@ -114,6 +118,8 @@ export default function DraggablePageListItem({
         fps={fps}
         onDelete={onDelete}
         onCopyId={onCopyId}
+        onClick={onClick}
+        isSelected={isSelected}
       />
     </div>
   );

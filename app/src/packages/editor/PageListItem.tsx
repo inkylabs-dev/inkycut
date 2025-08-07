@@ -19,13 +19,17 @@ interface PageListItemProps {
   fps: number;
   onDelete: () => void;
   onCopyId: () => void;
+  onClick?: () => void;
+  isSelected?: boolean;
 }
 
 export default function PageListItem({
   page,
   fps,
   onDelete,
-  onCopyId
+  onCopyId,
+  onClick,
+  isSelected = false
 }: PageListItemProps) {
   const [files] = useAtom(filesAtom);
   const [showCopyFeedback, setShowCopyFeedback] = useState(false);
@@ -46,7 +50,14 @@ export default function PageListItem({
 
   return (
     <div className="relative">
-      <div className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 group transition-all duration-200 ease-out">
+      <div 
+        className={`flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded border group transition-all duration-200 ease-out cursor-pointer ${
+          isSelected 
+            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400' 
+            : 'border-gray-200 dark:border-gray-600'
+        }`}
+        onClick={onClick}
+      >
         {/* Thumbnail */}
         <div className="mr-3 flex-shrink-0">
           <PageThumbnail 
