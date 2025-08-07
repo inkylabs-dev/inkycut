@@ -135,6 +135,8 @@ export interface AppState {
   selectedElementId: string | null;
   /** ID of the currently selected page (if any) */
   selectedPageId: string | null;
+  /** ID of the currently selected audio (if any) */
+  selectedAudioId?: string | null;
   /** Current view mode: edit or preview */
   viewMode: 'edit' | 'preview';
   /** Current zoom level of the canvas (1 = 100%) */

@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import FileTab from './FileTab';
 import ElementTab from './ElementTab';
 import PagesTab from './PagesTab';
+import AudioTab from './AudioTab';
 
 interface InteractiveTabsProps {
   disableFileUpload?: boolean;
 }
 
 export default function InteractiveTabs({ disableFileUpload = false }: InteractiveTabsProps) {
-  const [activeTab, setActiveTab] = useState<'files' | 'elements' | 'pages'>('files');
+  const [activeTab, setActiveTab] = useState<'files' | 'elements' | 'pages' | 'audios'>('files');
 
   return (
     <div className="flex flex-col flex-1">
@@ -44,6 +45,16 @@ export default function InteractiveTabs({ disableFileUpload = false }: Interacti
         >
           Elements
         </button>
+        <button
+          onClick={() => setActiveTab('audios')}
+          className={`flex-1 px-3 py-2 text-sm font-medium ${
+            activeTab === 'audios'
+              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-b-2 border-blue-500'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+          }`}
+        >
+          Audios
+        </button>
       </div>
 
       {/* Tab Content */}
@@ -58,6 +69,10 @@ export default function InteractiveTabs({ disableFileUpload = false }: Interacti
 
         {activeTab === 'elements' && (
           <ElementTab />
+        )}
+
+        {activeTab === 'audios' && (
+          <AudioTab />
         )}
       </div>
     </div>

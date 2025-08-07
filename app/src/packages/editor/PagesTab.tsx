@@ -4,6 +4,7 @@ import { projectAtom, addUserMessageToQueueAtom } from './atoms';
 import { CompositionPage } from '../composition/types';
 import DragDropProvider from './DragDropProvider';
 import DraggablePageListItem from './DraggablePageListItem';
+import Input from './components/Input';
 
 export default function PagesTab() {
   const [project, setProject] = useAtom(projectAtom);
@@ -170,64 +171,39 @@ export default function PagesTab() {
                 <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                   <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Edit Page</h4>
                   
-                  {/* Name Input */}
-                  <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      NAME:
-                    </label>
-                    <input
-                      type="text"
+                  <div className="space-y-2">
+                    {/* Name Input */}
+                    <Input
+                      label="Name"
                       value={editName}
-                      onChange={(e) => handleNameChange(e.target.value)}
-                      onBlur={handleNameBlur}
-                      className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      type="text"
                       placeholder="Enter page name"
+                      onChange={handleNameChange}
+                      onBlur={handleNameBlur}
                     />
-                  </div>
 
-                  {/* Duration Input */}
-                  <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      DURATION:
-                    </label>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="number"
-                        value={editDuration}
-                        onChange={(e) => handleDurationChange(e.target.value)}
-                        onBlur={handleDurationBlur}
-                        step="0.1"
-                        min="0.1"
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0.0"
-                      />
-                      <span className="text-xs text-gray-500 dark:text-gray-400">seconds</span>
-                    </div>
-                  </div>
+                    {/* Duration Input */}
+                    <Input
+                      label="Duration"
+                      value={editDuration}
+                      type="number"
+                      placeholder="0.0"
+                      unit="seconds"
+                      step={0.1}
+                      min={0.1}
+                      onChange={handleDurationChange}
+                      onBlur={handleDurationBlur}
+                    />
 
-                  {/* Background Color Input */}
-                  <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Background Color:
-                    </label>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="color"
-                        value={editBackgroundColor || '#000000'}
-                        onChange={(e) => handleBackgroundColorChange(e.target.value)}
-                        onBlur={handleBackgroundColorBlur}
-                        className="w-8 h-8 border border-gray-300 dark:border-gray-600 rounded cursor-pointer"
-                        title="Pick a color"
-                      />
-                      <input
-                        type="text"
-                        value={editBackgroundColor}
-                        onChange={(e) => handleBackgroundColorChange(e.target.value)}
-                        onBlur={handleBackgroundColorBlur}
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="#000000"
-                      />
-                    </div>
+                    {/* Background Color Input */}
+                    <Input
+                      label="Background"
+                      value={editBackgroundColor}
+                      type="color"
+                      placeholder="#000000"
+                      onChange={handleBackgroundColorChange}
+                      onBlur={handleBackgroundColorBlur}
+                    />
                   </div>
                 </div>
               )}
