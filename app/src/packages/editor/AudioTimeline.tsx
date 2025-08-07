@@ -166,7 +166,6 @@ const AudioTimeline: React.FC<AudioTimelineProps> = ({
 }) => {
   // Read values from atoms instead of props
   const [project] = useAtom(projectAtom);
-  const [files] = useAtom(filesAtom);
   const [appState] = useAtom(appStateAtom);
   
   const audios = project?.composition?.audios || [];
