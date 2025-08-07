@@ -10,7 +10,7 @@ import AudioTimeline from './AudioTimeline';
 import { Playhead } from './components/Playhead';
 import PageTrack from './components/PageTrack';
 import TimeRuler from './components/TimeRuler';
-import { projectAtom, filesAtom, appStateAtom, updateProjectAtom, addUserMessageToQueueAtom, updateAppStateAtom } from './atoms';
+import { projectAtom, filesAtom, appStateAtom, updateProjectAtom, addUserMessageToQueueAtom, updateAppStateAtom, setSelectedPageAtom } from './atoms';
 
 interface PlayerControlsProps {
   playerRef: React.RefObject<PlayerRef>;
@@ -33,6 +33,7 @@ export default function PlayerControls({
   const [, updateProject] = useAtom(updateProjectAtom);
   const [, addUserMessageToQueue] = useAtom(addUserMessageToQueueAtom);
   const updateAppState = useSetAtom(updateAppStateAtom);
+  const setSelectedPage = useSetAtom(setSelectedPageAtom);
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -76,6 +77,29 @@ export default function PlayerControls({
   const totalDuration = totalFrames / compositionData.fps;
   const currentTime = currentFrame / compositionData.fps;
 
+  // Update selected page based on current frame
+  const updateSelectedPageFromFrame = useCallback((frame: number) => {
+    let cumulativeFrames = 0;
+    for (let i = 0; i < compositionData.pages.length; i++) {
+      const pageDurationInFrames = compositionData.pages[i].duration;
+      if (frame < cumulativeFrames + pageDurationInFrames) {
+        const currentPage = compositionData.pages[i];
+        if (currentPage && project?.appState?.selectedPageId !== currentPage.id) {
+          setSelectedPage(currentPage);
+        }
+        return;
+      }
+      cumulativeFrames += pageDurationInFrames;
+    }
+    // If we're at the end, select the last page
+    if (compositionData.pages.length > 0) {
+      const lastPage = compositionData.pages[compositionData.pages.length - 1];
+      if (lastPage && project?.appState?.selectedPageId !== lastPage.id) {
+        setSelectedPage(lastPage);
+      }
+    }
+  }, [compositionData.pages, project?.appState?.selectedPageId, setSelectedPage]);
+
   // Frame tracking functions
   const startFrameTracking = useCallback(() => {
     console.log('Starting frame tracking');
@@ -89,6 +113,9 @@ export default function PlayerControls({
           const frame = playerRef.current.getCurrentFrame();
           setCurrentFrame(frame);
           
+          // Update selected page during playback
+          updateSelectedPageFromFrame(frame);
+          
           // Auto-pause at end
           if (frame >= totalFrames - 1) {
             console.log('Reached end, auto-pausing');
@@ -100,7 +127,7 @@ export default function PlayerControls({
         }
       }
     }, 50);
-  }, [totalFrames, playerReady]);
+  }, [totalFrames, playerReady, updateSelectedPageFromFrame]);
 
   const stopFrameTracking = useCallback(() => {
     if (frameUpdateIntervalRef.current) {
@@ -208,10 +235,13 @@ export default function PlayerControls({
       const clampedFrame = Math.max(0, Math.min(frame, totalFrames - 1));
       playerRef.current.seekTo(clampedFrame);
       setCurrentFrame(clampedFrame);
+      
+      // Update selected page based on the new frame position
+      updateSelectedPageFromFrame(clampedFrame);
     } catch (error) {
       console.error('Error seeking:', error);
     }
-  }, [totalFrames, playerReady, isPlaying, stopFrameTracking]);
+  }, [totalFrames, playerReady, isPlaying, stopFrameTracking, updateSelectedPageFromFrame]);
 
   const handlePageClick = (pageIndex: number, event: React.MouseEvent<HTMLDivElement>) => {
     // Calculate the start frame of the clicked page
@@ -250,6 +280,9 @@ export default function PlayerControls({
     
     const targetFrame = Math.floor(relativePosition * totalFrames);
     handleSeek(targetFrame);
+    
+    // Update selected page when clicking on timeline
+    updateSelectedPageFromFrame(targetFrame);
   };
 
   const [isDragging, setIsDragging] = useState(false);
@@ -287,6 +320,9 @@ export default function PlayerControls({
         const relativePosition = Math.max(0, Math.min(1, adjustedMouseX / projectDurationWidth));
         const targetFrame = Math.floor(relativePosition * totalFrames);
         handleSeek(targetFrame);
+        
+        // Update selected page during drag
+        updateSelectedPageFromFrame(targetFrame);
       }
     };
 
@@ -303,7 +339,7 @@ export default function PlayerControls({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, totalFrames, handleSeek, timelineZoom, totalDuration]);
+  }, [isDragging, totalFrames, handleSeek, timelineZoom, totalDuration, updateSelectedPageFromFrame]);
 
 
   const updateZoomInAppState = (newZoom: number) => {
