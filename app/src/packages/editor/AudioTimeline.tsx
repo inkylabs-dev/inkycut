@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import AudioVisualizer from './components/AudioVisualizer';
 import { CompositionAudio } from '../composition/types';
 import { createMediaResolver } from './utils/mediaResolver';
-import { projectAtom, filesAtom, appStateAtom } from './atoms';
+import { projectAtom, filesAtom, appStateAtom, updateAppStateAtom } from './atoms';
 import { AudioTimelineProps, AudioTimelineGroupProps, AudioBlockProps } from './types';
 
 /**
@@ -22,8 +22,10 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
   // Read values from atoms instead of props
   const [files] = useAtom(filesAtom);
   const [project] = useAtom(projectAtom);
+  const updateAppState = useSetAtom(updateAppStateAtom);
   
   const fps = project?.composition?.fps || 30;
+  const selectedAudioId = project?.appState?.selectedAudioId;
 
   // Create media resolver for audio source resolution
   const mediaResolver = useMemo(() => {
@@ -55,28 +57,36 @@ const AudioBlock: React.FC<AudioBlockProps> = ({
   }, [audio.src, mediaResolver]);
 
   const handleAudioClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!onAudioClick) return;
-    
     event.preventDefault();
     event.stopPropagation();
     
-    // Calculate the clicked position within the audio block
-    const rect = event.currentTarget.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const relativePosition = clickX / blockWidth; // Position within the audio block (0-1)
+    // Select this audio track
+    updateAppState({ selectedAudioId: audio.id });
     
-    // Calculate the target frame based on audio delay and relative position
-    const audioDelayFrames = audio.delay; // audio.delay is already in frames
-    const audioDurationFrames = audio.duration; // audio.duration is already in frames
-    const clickOffsetFrames = relativePosition * audioDurationFrames;
-    const targetFrame = Math.floor(audioDelayFrames + clickOffsetFrames);
-    
-    onAudioClick(targetFrame);
+    // If onAudioClick callback is provided, handle seeking
+    if (onAudioClick) {
+      // Calculate the clicked position within the audio block
+      const rect = event.currentTarget.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const relativePosition = clickX / blockWidth; // Position within the audio block (0-1)
+      
+      // Calculate the target frame based on audio delay and relative position
+      const audioDelayFrames = audio.delay; // audio.delay is already in frames
+      const audioDurationFrames = audio.duration; // audio.duration is already in frames
+      const clickOffsetFrames = relativePosition * audioDurationFrames;
+      const targetFrame = Math.floor(audioDelayFrames + clickOffsetFrames);
+      
+      onAudioClick(targetFrame);
+    }
   };
 
   return (
     <div
-      className="audio-block absolute top-0 bg-blue-500 rounded overflow-hidden cursor-pointer hover:bg-blue-600 transition-colors"
+      className={`audio-block absolute top-0 rounded overflow-hidden cursor-pointer transition-all duration-200 ${
+        selectedAudioId === audio.id
+          ? 'bg-blue-600 shadow-[0_0_0_2px_rgba(59,130,246,0.8)] dark:shadow-[0_0_0_2px_rgba(96,165,250,0.8)]'
+          : 'bg-blue-500 hover:bg-blue-600'
+      }`}
       style={{
         left: `${leftPosition}px`,
         width: `${blockWidth}px`,
