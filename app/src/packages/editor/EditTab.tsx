@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { 
   projectAtom, 
-  selectedPageAtom, 
-  selectedAudioAtom,
+  editContextAtom,
+  activeTabAtom,
   addUserMessageToQueueAtom
 } from './atoms';
 import AudioEditPanel from './AudioEditPanel';
@@ -11,24 +12,44 @@ import Input from './components/Input';
 
 export default function EditTab() {
   const [project] = useAtom(projectAtom);
-  const [selectedPage] = useAtom(selectedPageAtom);
-  const [selectedAudio] = useAtom(selectedAudioAtom);
+  const [editContext, setEditContext] = useAtom(editContextAtom);
+  const setActiveTab = useSetAtom(activeTabAtom);
   const [, addUserMessageToQueue] = useAtom(addUserMessageToQueueAtom);
+  
+  // Find the current page or audio being edited
+  const currentPage = editContext?.type === 'page' ? 
+    project?.composition?.pages.find(p => p.id === editContext.id) : null;
+  const currentAudio = editContext?.type === 'audio' ? 
+    project?.composition?.audios?.find(a => a.id === editContext.id) : null;
+    
+  // Handle closing edit mode
+  const handleCloseEdit = () => {
+    setEditContext(null);
+    setActiveTab('files');
+  };
+  
+  // If the item being edited no longer exists, close the edit mode
+  useEffect(() => {
+    if (editContext && !currentPage && !currentAudio) {
+      setEditContext(null);
+      setActiveTab('files');
+    }
+  }, [editContext, currentPage, currentAudio, setEditContext, setActiveTab]);
   
   // Local state for page edit panel inputs
   const [editName, setEditName] = useState('');
   const [editDuration, setEditDuration] = useState('');
   const [editBackgroundColor, setEditBackgroundColor] = useState('');
 
-  // Update page edit inputs when selected page changes
+  // Update page edit inputs when current page changes
   useEffect(() => {
-    if (selectedPage) {
-      setEditName(selectedPage.name);
+    if (currentPage) {
+      setEditName(currentPage.name);
       const fps = project?.composition?.fps || 30;
-      setEditDuration((selectedPage.duration / fps).toString());
-      setEditBackgroundColor(selectedPage.backgroundColor || '#ffffff');
+      setEditDuration((currentPage.duration / fps).toString());
+      setEditBackgroundColor(currentPage.backgroundColor || '#ffffff');
     }
-  }, [selectedPage, project?.composition?.fps]);
+  }, [currentPage, project?.composition?.fps]);
 
   // Page edit handlers
   const handleNameChange = (newName: string) => {
@@ -44,59 +65,77 @@ export default function EditTab() {
   };
 
   const handleNameBlur = () => {
-    if (selectedPage && editName.trim() && editName !== selectedPage.name) {
-      const command = `/set-page --id ${selectedPage.id} --name "${editName}"`;
+    if (currentPage && editName.trim() && editName !== currentPage.name) {
+      const command = `/set-page --id ${currentPage.id} --name "${editName}"`;
       addUserMessageToQueue(command);
     }
   };
 
   const handleDurationBlur = () => {
-    if (selectedPage && editDuration.trim()) {
+    if (currentPage && editDuration.trim()) {
       const duration = parseFloat(editDuration);
       const fps = project?.composition?.fps || 30;
-      const currentDurationInSeconds = selectedPage.duration / fps;
+      const currentDurationInSeconds = currentPage.duration / fps;
       if (!isNaN(duration) && duration > 0 && duration !== currentDurationInSeconds) {
-        const command = `/set-page --id ${selectedPage.id} --duration ${duration}s`;
+        const command = `/set-page --id ${currentPage.id} --duration ${duration}s`;
         addUserMessageToQueue(command);
       }
     }
   };
 
   const handleBackgroundColorBlur = () => {
-    if (selectedPage && editBackgroundColor !== selectedPage.backgroundColor) {
-      const command = `/set-page --id ${selectedPage.id} --background "${editBackgroundColor}"`;
+    if (currentPage && editBackgroundColor !== currentPage.backgroundColor) {
+      const command = `/set-page --id ${currentPage.id} --background "${editBackgroundColor}"`;
       addUserMessageToQueue(command);
     }
   };
 
-  if (selectedAudio) {
-    // Show audio edit panel if an audio is selected
+  if (currentAudio) {
+    // Show audio edit panel if an audio is being edited
     return (
       <div>
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Edit Audio
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Editing: {selectedAudio.name || selectedAudio.id}
-          </p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              Edit Audio
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Editing: {currentAudio.src.split('/').pop()?.split('?')[0] || currentAudio.id}
+            </p>
+          </div>
+          <button
+            onClick={handleCloseEdit}
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 p-1"
+            title="Close edit panel"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
         </div>
-        <AudioEditPanel audio={selectedAudio} />
+        <AudioEditPanel audio={currentAudio} />
       </div>
     );
   }
 
-  if (selectedPage) {
-    // Show page edit panel if a page is selected
+  if (currentPage) {
+    // Show page edit panel if a page is being edited
     return (
       <div>
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Edit Page
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Editing: {selectedPage.name}
-          </p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              Edit Page
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Editing: {currentPage.name}
+            </p>
+          </div>
+          <button
+            onClick={handleCloseEdit}
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 p-1"
+            title="Close edit panel"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
         </div>
         
         <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
@@ -139,7 +178,7 @@ export default function EditTab() {
     );
   }
 
-  // No selection - show helpful message
+  // No edit context - this should not be shown as the Edit tab is conditional
   return (
     <div className="flex flex-col items-center justify-center h-64 text-center">
       <div className="mb-4">
@@ -158,10 +197,10 @@ export default function EditTab() {
         </svg>
       </div>
       <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-        Select an Object to Edit
+        Click an Edit Icon
       </h3>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 max-w-sm">
-        Select a page from the Pages tab or an audio from the Audios tab to see editing options here.
+        Click the edit icon on a page or audio item to start editing. This tab only appears when editing is active.
       </p>
       <div className="text-xs text-gray-400 dark:text-gray-500 space-y-1">
         <div>• Pages: Edit name, duration, and background color</div>

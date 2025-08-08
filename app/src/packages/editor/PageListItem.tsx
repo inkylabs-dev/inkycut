@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useAtom } from 'jotai';
-import { XMarkIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { useAtom, useSetAtom } from 'jotai';
+import { XMarkIcon, DocumentDuplicateIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { CompositionPage } from '../composition/types';
-import { filesAtom } from './atoms';
+import { filesAtom, activeTabAtom, editContextAtom } from './atoms';
 import PageThumbnail from './PageThumbnail';
 
 // Helper function to format duration in HH:MM:SS format
@@ -32,6 +32,8 @@ export default function PageListItem({
   isSelected = false
 }: PageListItemProps) {
   const [files] = useAtom(filesAtom);
+  const setActiveTab = useSetAtom(activeTabAtom);
+  const setEditContext = useSetAtom(editContextAtom);
   const [showCopyFeedback, setShowCopyFeedback] = useState(false);
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -46,6 +48,19 @@ export default function PageListItem({
     // Show feedback
     setShowCopyFeedback(true);
     setTimeout(() => setShowCopyFeedback(false), 1000);
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    // Set the edit context for this page
+    setEditContext({
+      type: 'page',
+      id: page.id
+    });
+    
+    // Switch to Edit tab
+    setActiveTab('edit');
   };
 
   return (
@@ -80,6 +95,15 @@ export default function PageListItem({
         
         {/* Actions */}
         <div className="flex space-x-1 ml-2">
+          {/* Edit Button */}
+          <button
+            onClick={handleEdit}
+            className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 p-1 transition-opacity"
+            title="Edit page"
+          >
+            <PencilSquareIcon className="h-4 w-4" />
+          </button>
+          
           {/* Copy ID Button */}
           <button
             onClick={handleCopyId}

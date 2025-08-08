@@ -181,10 +181,6 @@ const AudioTimeline: React.FC<AudioTimelineProps> = ({
   const audios = project?.composition?.audios || [];
   const fps = project?.composition?.fps || 30;
   const timelineZoom = appState.zoomLevel || 1;
-  // Don't render anything if there are no audio tracks
-  if (!audios || audios.length === 0) {
-    return null;
-  }
 
   // Clamp audio durations to project duration if specified
   const clampedAudios = useMemo(() => {
@@ -202,6 +198,11 @@ const AudioTimeline: React.FC<AudioTimelineProps> = ({
       return audio;
     });
   }, [audios, totalProjectDurationFrames]);
+
+  // Don't render anything if there are no audio tracks
+  if (!audios || audios.length === 0) {
+    return null;
+  }
 
   // Group audios into non-overlapping timelines
   const audioTimelines: CompositionAudio[][] = [];

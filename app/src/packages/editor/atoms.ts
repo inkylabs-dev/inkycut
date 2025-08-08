@@ -76,6 +76,33 @@ export const agentSettingsAtom = atomWithStorage('agent-settings', {
 });
 
 /**
+ * Active tab type definition
+ */
+export type ActiveTab = 'files' | 'elements' | 'pages' | 'audios' | 'edit';
+
+/**
+ * Atom for managing the active tab state
+ * Allows components to control which tab is currently active
+ * @type {ActiveTab} - The currently active tab
+ */
+export const activeTabAtom = atom<ActiveTab>('files');
+
+/**
+ * Edit context type definition
+ */
+export type EditContext = {
+  type: 'page' | 'audio';
+  id: string;
+} | null;
+
+/**
+ * Atom for tracking what is currently being edited
+ * When null, no Edit tab is shown
+ * @type {EditContext} - The current edit context or null
+ */
+export const editContextAtom = atom<EditContext>(null);
+
+/**
  * Write-only atom for updating the project
  * Updates the project's timestamp before storing
  * @param {Project | null} updatedProject - The project to update or null to clear

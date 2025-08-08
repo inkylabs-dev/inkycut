@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { XMarkIcon, DocumentDuplicateIcon, SpeakerWaveIcon, SpeakerXMarkIcon } from '@heroicons/react/24/outline';
+import { useSetAtom } from 'jotai';
+import { XMarkIcon, DocumentDuplicateIcon, SpeakerWaveIcon, SpeakerXMarkIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { CompositionAudio } from '../composition/types';
+import { activeTabAtom, editContextAtom } from './atoms';
 
 // Helper function to format duration in HH:MM:SS format
 function formatDuration(durationFrames: number, fps: number = 30): string {
@@ -48,6 +50,8 @@ export default function AudioListItem({
   onClick,
   isSelected = false
 }: AudioListItemProps) {
+  const setActiveTab = useSetAtom(activeTabAtom);
+  const setEditContext = useSetAtom(editContextAtom);
   const [showCopyFeedback, setShowCopyFeedback] = useState(false);
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -62,6 +66,19 @@ export default function AudioListItem({
     // Show feedback
     setShowCopyFeedback(true);
     setTimeout(() => setShowCopyFeedback(false), 1000);
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    // Set the edit context for this audio
+    setEditContext({
+      type: 'audio',
+      id: audio.id
+    });
+    
+    // Switch to Edit tab
+    setActiveTab('edit');
   };
 
   const filename = getFilename(audio.src);
@@ -101,6 +118,15 @@ export default function AudioListItem({
         
         {/* Actions */}
         <div className="flex space-x-1 ml-2">
+          {/* Edit Button */}
+          <button
+            onClick={handleEdit}
+            className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 p-1 transition-opacity"
+            title="Edit audio"
+          >
+            <PencilSquareIcon className="h-4 w-4" />
+          </button>
+          
           {/* Copy ID Button */}
           <button
             onClick={handleCopyId}

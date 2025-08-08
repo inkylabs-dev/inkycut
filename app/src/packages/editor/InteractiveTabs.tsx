@@ -1,4 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useAtom } from 'jotai';
+import { 
+  FolderIcon, 
+  DocumentTextIcon, 
+  Squares2X2Icon, 
+  SpeakerWaveIcon, 
+  PencilSquareIcon 
+} from '@heroicons/react/24/outline';
+import { activeTabAtom, editContextAtom } from './atoms';
 import FileTab from './FileTab';
 import ElementTab from './ElementTab';
 import PagesTab from './PagesTab';
@@ -10,7 +19,15 @@ interface InteractiveTabsProps {
 }
 
 export default function InteractiveTabs({ disableFileUpload = false }: InteractiveTabsProps) {
-  const [activeTab, setActiveTab] = useState<'files' | 'elements' | 'pages' | 'audios' | 'edit'>('files');
+  const [activeTab, setActiveTab] = useAtom(activeTabAtom);
+  const [editContext, setEditContext] = useAtom(editContextAtom);
+  
+  // If edit tab is active but no edit context, switch to files tab
+  React.useEffect(() => {
+    if (activeTab === 'edit' && !editContext) {
+      setActiveTab('files');
+    }
+  }, [activeTab, editContext, setActiveTab]);
 
   return (
     <div className="flex flex-col flex-1">
@@ -18,54 +35,61 @@ export default function InteractiveTabs({ disableFileUpload = false }: Interacti
       <div className="flex border-b border-gray-200 dark:border-strokedark">
         <button
           onClick={() => setActiveTab('files')}
-          className={`flex-1 px-3 py-2 text-sm font-medium ${
+          className={`flex-1 px-3 py-2 text-sm font-medium flex items-center justify-center ${
             activeTab === 'files'
               ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-b-2 border-blue-500'
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
+          title="Files"
         >
-          Files
+          <FolderIcon className="h-5 w-5" />
         </button>
         <button
           onClick={() => setActiveTab('pages')}
-          className={`flex-1 px-3 py-2 text-sm font-medium ${
+          className={`flex-1 px-3 py-2 text-sm font-medium flex items-center justify-center ${
             activeTab === 'pages'
               ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-b-2 border-blue-500'
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
+          title="Pages"
         >
-          Pages
+          <DocumentTextIcon className="h-5 w-5" />
         </button>
         <button
           onClick={() => setActiveTab('elements')}
-          className={`flex-1 px-3 py-2 text-sm font-medium ${
+          className={`flex-1 px-3 py-2 text-sm font-medium flex items-center justify-center ${
             activeTab === 'elements'
               ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-b-2 border-blue-500'
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
+          title="Elements"
         >
-          Elements
+          <Squares2X2Icon className="h-5 w-5" />
         </button>
         <button
           onClick={() => setActiveTab('audios')}
-          className={`flex-1 px-3 py-2 text-sm font-medium ${
+          className={`flex-1 px-3 py-2 text-sm font-medium flex items-center justify-center ${
             activeTab === 'audios'
               ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-b-2 border-blue-500'
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
+          title="Audios"
         >
-          Audios
+          <SpeakerWaveIcon className="h-5 w-5" />
         </button>
-        <button
-          onClick={() => setActiveTab('edit')}
-          className={`flex-1 px-3 py-2 text-sm font-medium ${
-            activeTab === 'edit'
-              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-b-2 border-blue-500'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-          }`}
-        >
-          Edit
-        </button>
+        {editContext && (
+          <button
+            onClick={() => setActiveTab('edit')}
+            className={`flex-1 px-3 py-2 text-sm font-medium flex items-center justify-center ${
+              activeTab === 'edit'
+                ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-b-2 border-blue-500'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+            title={`Edit ${editContext.type === 'page' ? 'Page' : 'Audio'}`}
+          >
+            <PencilSquareIcon className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
       {/* Tab Content */}
