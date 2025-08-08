@@ -129,6 +129,14 @@ export const selectedPageIdAtom = atom(
 );
 
 /**
+ * Derived atom for the ID of the currently selected audio
+ * @type {string | null} - ID of selected audio or null if none selected
+ */
+export const selectedAudioIdAtom = atom(
+  (get) => get(appStateAtom).selectedAudioId || null
+);
+
+/**
  * Read-only derived atom that provides the currently selected element
  * Searches through all pages to find the element with the selected ID
  * @type {CompositionElement | null} - The selected element object or null
@@ -166,6 +174,20 @@ export const selectedPageAtom = atom<CompositionPage | null>((get) => {
   
   // Find the page with matching ID
   return project.composition.pages.find(page => page.id === selectedPageId) || null;
+});
+
+/**
+ * Read-only derived atom that provides the currently selected audio
+ * @type {any | null} - The selected audio object or null
+ */
+export const selectedAudioAtom = atom<any | null>((get) => {
+  const project = get(projectAtom);
+  const selectedAudioId = get(selectedAudioIdAtom);
+  
+  if (!project || !selectedAudioId || !project.composition) return null;
+  
+  // Find the audio with matching ID
+  return project.composition.audios?.find(audio => audio.id === selectedAudioId) || null;
 });
 
 /**
@@ -208,6 +230,30 @@ export const setSelectedPageAtom = atom(
       appState: {
         ...project.appState || {},
         selectedPageId: newPage?.id || null
+      }
+    };
+    
+    // Use updateProjectAtom to update the project in storage
+    set(updateProjectAtom, updatedProject);
+  }
+);
+
+/**
+ * Write-only atom for selecting an audio
+ * Updates the project's appState.selectedAudioId and persists the change
+ * @param {any | null} newAudio - The audio to select, or null to clear selection
+ */
+export const setSelectedAudioAtom = atom(
+  null,
+  (get, set, newAudio: any | null) => {
+    const project = get(projectAtom);
+    if (!project) return;
+    
+    const updatedProject = {
+      ...project,
+      appState: {
+        ...project.appState || {},
+        selectedAudioId: newAudio?.id || null
       }
     };
     
