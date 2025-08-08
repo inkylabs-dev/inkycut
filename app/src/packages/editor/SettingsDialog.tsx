@@ -128,7 +128,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                 onChange={(e) => setApiKey(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="sk-..."
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
               />
               <button
                 type="button"
@@ -221,7 +221,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                     ...agentSettings,
                     model: e.target.value
                   })}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="gpt-4o">GPT-4o (Recommended)</option>
                   <option value="gpt-4o-mini">GPT-4o Mini (Faster)</option>

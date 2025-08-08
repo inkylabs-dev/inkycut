@@ -148,7 +148,7 @@ export const JsonModelDialog: React.FC<JsonModelDialogProps> = ({
             <textarea
               value={jsonString}
               onChange={(e) => handleJsonChange(e.target.value)}
-              className="w-full h-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm text-gray-800 dark:text-gray-200 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full h-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm text-gray-800 dark:text-gray-200 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Edit your composition JSON here..."
               spellCheck={false}
             />

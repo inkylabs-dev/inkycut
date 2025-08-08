@@ -348,7 +348,7 @@ export default function EditTab() {
           </button>
         </div>
         
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm">
           <div className="p-6 space-y-6">
             {/* Page Properties */}
             <div>
@@ -423,7 +423,7 @@ export default function EditTab() {
           </button>
         </div>
         
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm">
           <div className="p-6 space-y-6">
             {/* Text Properties - only for text elements */}
             {currentElement.type === 'text' && (

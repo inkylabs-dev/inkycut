@@ -218,7 +218,7 @@ export default function EditorMenu({
       <div className="flex items-center mb-4">
         <div className="relative">
           <button 
-            className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none" 
+            className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white" 
             data-testid="left-panel-menu-button"
             onClick={() => setShowMenu(!showMenu)}
           >
