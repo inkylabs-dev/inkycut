@@ -47,6 +47,33 @@ export const fileStorageAtom = atom(
 );
 
 /**
+ * Non-persistent atom for transient drag state
+ * This avoids localStorage quota issues when dragging large files
+ * @type {string | null} - ID of the currently dragged file
+ */
+export const draggedFileIdAtom = atom<string | null>(null);
+
+/**
+ * Derived atom that gets the currently dragged file from file storage
+ * Returns null if no file is being dragged or file not found
+ */
+export const draggedFileAtom = atom(
+  async (get) => {
+    const draggedFileId = get(draggedFileIdAtom);
+    if (!draggedFileId) return null;
+    
+    try {
+      const storage = get(fileStorageAtom);
+      const files = await storage.getAllFiles();
+      return files.find(file => file.id === draggedFileId) || null;
+    } catch (error) {
+      console.error('Failed to get dragged file:', error);
+      return null;
+    }
+  }
+);
+
+/**
  * Persistent storage for theme mode using atomWithStorage
  * Stores the theme preference in localStorage
  * @type {ThemeMode} - The current theme mode: 'light', 'dark', or 'system'

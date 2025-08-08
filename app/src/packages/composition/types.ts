@@ -154,8 +154,6 @@ export interface AppState {
     /** Future states for redo operations */
     future: any[];
   };
-  /** Currently dragged file during drag and drop operations */
-  draggedFile?: LocalFile | null;
   /** Additional state properties can be added as needed */
   [key: string]: any; // Allow for extension
 }
@@ -370,4 +368,4 @@ export const defaultCompositionData: CompositionData = {
   ]
 };
 
-// Note: draggedFile is now stored in project.appState instead of window
+// Note: draggedFileId is now stored in a separate non-persistent atom to avoid localStorage quota issues

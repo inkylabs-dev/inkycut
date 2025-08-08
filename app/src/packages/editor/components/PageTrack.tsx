@@ -57,17 +57,12 @@ export default function PageTrack({
             e.preventDefault();
             setDropTargetIndex(null);
             
-            // Handle file drop from external sources or our drag system
-            const fileData = e.dataTransfer.getData('application/json');
-            if (fileData) {
-              try {
-                const file = JSON.parse(fileData) as LocalFile;
-                // Accept both video and image files
-                if (file.type.startsWith('video/') || file.type.startsWith('image/')) {
-                  onFileDropped?.(file, index);
-                }
-              } catch (error) {
-                console.error('Failed to parse dropped file data:', error);
+            // Handle file drop from our drag system
+            const fileId = e.dataTransfer.getData('text/plain');
+            if (fileId && files) {
+              const file = files.find(f => f.id === fileId);
+              if (file && (file.type.startsWith('video/') || file.type.startsWith('image/'))) {
+                onFileDropped?.(file, index);
               }
             }
           };

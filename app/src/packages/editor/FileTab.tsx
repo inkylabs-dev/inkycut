@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { LocalFile } from '../composition/types';
-import { filesAtom, updateAppStateAtom } from './atoms';
+import { filesAtom, draggedFileIdAtom } from './atoms';
 import LocalFileUpload from './LocalFileUpload';
 import FileListItem from './FileListItem';
 
@@ -11,16 +11,16 @@ interface FileTabProps {
 
 export default function FileTab({ disableFileUpload = false }: FileTabProps) {
   const [localFiles] = useAtom(filesAtom);
-  const updateAppState = useSetAtom(updateAppStateAtom);
+  const setDraggedFileId = useSetAtom(draggedFileIdAtom);
   
   const handleFileDragStart = (file: LocalFile) => {
-    // Store dragged file in project appState for access by other components
-    updateAppState({ draggedFile: file });
+    // Store only the file ID in transient state to avoid localStorage quota issues
+    setDraggedFileId(file.id);
   };
   
   const handleFileDragEnd = () => {
-    // Clear dragged file from project appState
-    updateAppState({ draggedFile: null });
+    // Clear dragged file ID from transient state
+    setDraggedFileId(null);
   };
 
   const handleUploadComplete = () => {

@@ -47,8 +47,8 @@ export default function FileListItem({ file, onDragStart, onDragEnd }: FileListI
     
     setIsDragging(true);
     
-    // Set drag data
-    e.dataTransfer.setData('application/json', JSON.stringify(file));
+    // Set drag data - only transfer the file ID to avoid large data transfer
+    e.dataTransfer.setData('text/plain', file.id);
     e.dataTransfer.effectAllowed = 'copy';
     
     // Animate the original item to show it's being dragged
