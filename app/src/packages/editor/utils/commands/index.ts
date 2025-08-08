@@ -28,6 +28,7 @@ import { newImageCommand } from './image-new';
 import { newVideoCommand } from './video-new';
 import { newAudioCommand } from './audio-new';
 import { delElementCommand } from './element-delete';
+import { setElementCommand } from './element-set';
 import { setTextCommand } from './text-set';
 import { setImageCommand } from './image-set';
 import { setVideoCommand } from './video-set';
@@ -63,6 +64,7 @@ const commandRegistry: Map<string, SlashCommand> = new Map([
   ['new-video', newVideoCommand],
   ['new-audio', newAudioCommand],
   ['del-elem', delElementCommand],
+  ['set-element', setElementCommand],
   ['set-text', setTextCommand],
   ['set-image', setImageCommand],
   ['set-video', setVideoCommand],
@@ -312,6 +314,7 @@ export {
   newVideoCommand,
   newAudioCommand,
   delElementCommand,
+  setElementCommand,
   setTextCommand,
   setImageCommand,
   setVideoCommand,

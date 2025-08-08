@@ -42,39 +42,43 @@ export default function Input({
   };
 
   return (
-    <div className={`flex flex-col space-y-1 ${className}`}>
+    <div className={`space-y-2 ${className}`}>
       {/* Label */}
-      <label className="text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wide">
-        {label}:
+      <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100">
+        {label}
       </label>
       
       {/* Input Container */}
-      <div className="relative flex items-center">
+      <div className="relative">
         {isColor ? (
           // Color input with text input
-          <div className="flex items-center space-x-2 w-full">
-            <input
-              type="color"
-              value={String(value) || '#000000'}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={disabled}
-              className="w-8 h-6 border border-gray-300 dark:border-gray-600 rounded cursor-pointer"
-              title="Pick a color"
-            />
-            <input
-              type="text"
-              value={String(value)}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={disabled}
-              placeholder={placeholder}
-              className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <input
+                type="color"
+                value={String(value) || '#000000'}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                disabled={disabled}
+                className="w-10 h-10 border-2 border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer shadow-sm hover:border-gray-300 dark:hover:border-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Pick a color"
+              />
+            </div>
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={String(value)}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                disabled={disabled}
+                placeholder={placeholder}
+                className="w-full px-4 py-3 text-sm font-medium border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:border-gray-300 dark:hover:border-gray-500"
+              />
+            </div>
           </div>
         ) : (
           // Regular input
-          <div className="flex items-center w-full">
+          <div className="relative">
             <input
               type={type}
               value={String(value)}
@@ -85,12 +89,16 @@ export default function Input({
               min={min}
               max={max}
               step={step}
-              className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full px-4 py-3 text-sm font-medium border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:border-gray-300 dark:hover:border-gray-500 ${
+                unit ? 'pr-12' : ''
+              }`}
             />
             {unit && (
-              <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
-                {unit}
-              </span>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-4">
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400 select-none">
+                  {unit}
+                </span>
+              </div>
             )}
           </div>
         )}

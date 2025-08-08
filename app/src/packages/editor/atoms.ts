@@ -118,7 +118,7 @@ export const activeTabAtom = atom<ActiveTab>('files');
  * Edit context type definition
  */
 export type EditContext = {
-  type: 'page' | 'audio';
+  type: 'page' | 'audio' | 'element';
   id: string;
 } | null;
 

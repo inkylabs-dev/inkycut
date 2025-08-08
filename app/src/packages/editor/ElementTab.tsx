@@ -2,20 +2,89 @@ import React from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { DocumentIcon } from '@heroicons/react/24/outline';
 import { CompositionElement } from '../composition/types';
-import { selectedElementAtom, selectedPageAtom, setSelectedElementAtom, filesAtom } from './atoms';
-import ElementPreview from './ElementPreview';
-import { createFileResolver } from '../composition/utils/fileResolver';
+import { selectedElementAtom, selectedPageAtom, setSelectedElementAtom, filesAtom, projectAtom, addUserMessageToQueueAtom } from './atoms';
+import DragDropProvider from './DragDropProvider';
+import DraggableElementListItem from './DraggableElementListItem';
 
 export default function ElementTab() {
   const [selectedElement] = useAtom(selectedElementAtom);
   const [selectedPage] = useAtom(selectedPageAtom);
   const setSelectedElement = useSetAtom(setSelectedElementAtom);
-  const [localFiles] = useAtom(filesAtom);
+  const [project, setProject] = useAtom(projectAtom);
+  const [, addUserMessageToQueue] = useAtom(addUserMessageToQueueAtom);
 
-  // Create file resolver from local files
-  const fileResolver = React.useMemo(() => {
-    return createFileResolver(localFiles);
-  }, [localFiles]);
+  if (!project?.composition?.pages) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            Page Elements
+          </h3>
+        </div>
+        <div className="text-xs text-gray-500 dark:text-gray-400 py-2">No project loaded</div>
+      </div>
+    );
+  }
+
+  const elements = selectedPage?.elements || [];
+
+  const handleDeleteElement = (element: CompositionElement) => {
+    const command = `/del-elem --id ${element.id}`;
+    addUserMessageToQueue(command);
+  };
+
+  const handleCopyElementId = (element: CompositionElement) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      // Use modern Clipboard API
+      navigator.clipboard.writeText(element.id).catch(() => {
+        console.error('Failed to copy element ID to clipboard');
+      });
+    } else {
+      // Fallback for older browsers or non-secure contexts
+      const textArea = document.createElement('textarea');
+      textArea.value = element.id;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        console.error('Failed to copy element ID to clipboard');
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
+  const handleMoveElementBefore = (dragIndex: number, hoverIndex: number) => {
+    const diff = hoverIndex - dragIndex;
+    const command = `/set-element ${elements[dragIndex].id} --before ${Math.abs(diff)}`;
+    addUserMessageToQueue(command);
+  };
+
+  const handleMoveElementAfter = (dragIndex: number, hoverIndex: number) => {
+    const diff = hoverIndex - dragIndex;
+    const command = `/set-element ${elements[dragIndex].id} --after ${Math.abs(diff)}`;
+    addUserMessageToQueue(command);
+  };
+
+  const handleElementClick = (element: CompositionElement) => {
+    setSelectedElement(element);
+    
+    if (!project) return;
+    
+    const updatedProject = {
+      ...project,
+      appState: {
+        ...project.appState,
+        selectedElementId: element.id
+      }
+    };
+    
+    setProject(updatedProject);
+  };
 
   return (
     <div>
@@ -23,46 +92,31 @@ export default function ElementTab() {
         <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
           {selectedPage ? `${selectedPage.name} Elements` : 'Page Elements'}
         </h3>
+        {selectedPage && (
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {elements.length} element{elements.length !== 1 ? 's' : ''}
+          </span>
+        )}
       </div>
       
       {selectedPage && selectedPage.elements ? (
         <div className="space-y-2">
-          {selectedPage.elements.map((element: CompositionElement) => (
-            <div
-              key={element.id}
-              className={`p-3 rounded cursor-pointer border ${
-                selectedElement?.id === element.id
-                  ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700'
-                  : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-              }`}
-              onClick={() => setSelectedElement(element)}
-            >
-              <div className="flex items-center">
-                <ElementPreview element={element} className="w-12 h-12 mr-3" fileResolver={fileResolver} />
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {element.type === 'text' ? 
-                      (element.text ? 
-                        (element.text.length > 20 ? `${element.text.substring(0, 20)}...` : element.text) 
-                        : 'Text Element'
-                      ) : 
-                      (element.src ? 
-                        element.src.split('/').pop() || `${element.type} Element` 
-                        : `${element.type} Element`)
-                    }
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 capitalize flex items-center">
-                    <span className="mr-2">{element.type}</span>
-                    {element.delay !== undefined && (
-                      <span className="text-xs bg-gray-100 dark:bg-gray-700 px-1 rounded">
-                        delay: {element.delay}ms
-                      </span>
-                    )}
-                  </div>
-                </div>
+          <DragDropProvider>
+            {selectedPage.elements.map((element: CompositionElement, index) => (
+              <div key={element.id}>
+                <DraggableElementListItem
+                  element={element}
+                  index={index}
+                  onDelete={() => handleDeleteElement(element)}
+                  onCopyId={() => handleCopyElementId(element)}
+                  onClick={() => handleElementClick(element)}
+                  isSelected={selectedElement?.id === element.id}
+                  onMoveElementBefore={handleMoveElementBefore}
+                  onMoveElementAfter={handleMoveElementAfter}
+                />
               </div>
-            </div>
-          ))}
+            ))}
+          </DragDropProvider>
         </div>
       ) : (
         <div className="text-center py-8 text-gray-500 dark:text-gray-400">
