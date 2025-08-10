@@ -289,12 +289,6 @@ export default function InputDrag({
         )}
       </div>
       
-      {/* Drag hint for number inputs */}
-      {isNumber && !disabled && (
-        <div className="text-xs text-gray-400 dark:text-gray-500">
-          Drag to adjust • Hold Shift for fine control • Hold Alt for fast control
-        </div>
-      )}
     </div>
   );
 }
