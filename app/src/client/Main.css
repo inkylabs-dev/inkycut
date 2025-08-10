@@ -19,6 +19,18 @@
   .inbox-height {
     @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
   }
+
+  /* Hide number input spinners */
+  .no-spinners input[type="number"]::-webkit-outer-spin-button,
+  .no-spinners input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .no-spinners input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
 }
 
 /* Here is an example of how to add a custom font. 

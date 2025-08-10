@@ -10,6 +10,7 @@ import {
 import { CompositionElement } from '../composition/types';
 import AudioEditPanel from './AudioEditPanel';
 import Input from './components/Input';
+import InputDrag from './components/InputDrag';
 
 export default function EditTab() {
   const [project] = useAtom(projectAtom);
@@ -71,7 +72,8 @@ export default function EditTab() {
     if (currentPage) {
       setEditName(currentPage.name);
       const fps = project?.composition?.fps || 30;
-      setEditDuration((currentPage.duration / fps).toString());
+      const durationInSeconds = currentPage.duration / fps;
+      setEditDuration(durationInSeconds.toFixed(1));
       setEditBackgroundColor(currentPage.backgroundColor || '#ffffff');
     }
   }, [currentPage, project?.composition?.fps]);
@@ -363,7 +365,7 @@ export default function EditTab() {
                   onBlur={handleNameBlur}
                   onEnter={handleNameBlur}
                 />
-                <Input
+                <InputDrag
                   label="Duration"
                   value={editDuration}
                   type="number"
@@ -444,7 +446,7 @@ export default function EditTab() {
                       onEnter={handleElementTextBlur}
                     />
                     <div className="grid grid-cols-2 gap-4">
-                      <Input
+                      <InputDrag
                         label="Font Size"
                         value={editElementFontSize}
                         type="number"
@@ -452,6 +454,7 @@ export default function EditTab() {
                         unit="px"
                         step={1}
                         min={1}
+                        max={999}
                         onChange={handleElementFontSizeChange}
                         onBlur={handleElementFontSizeBlur}
                         onEnter={handleElementFontSizeBlur}
@@ -476,7 +479,7 @@ export default function EditTab() {
               <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Position & Size</h4>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <Input
+                  <InputDrag
                     label="X Position"
                     value={editElementLeft}
                     type="number"
@@ -484,11 +487,12 @@ export default function EditTab() {
                     unit="px"
                     step={1}
                     min={0}
+                    max={9999}
                     onChange={(value) => handleElementPositionChange('left', value)}
                     onBlur={() => handleElementPositionBlur('left')}
                     onEnter={() => handleElementPositionBlur('left')}
                   />
-                  <Input
+                  <InputDrag
                     label="Y Position"
                     value={editElementTop}
                     type="number"
@@ -496,13 +500,14 @@ export default function EditTab() {
                     unit="px"
                     step={1}
                     min={0}
+                    max={9999}
                     onChange={(value) => handleElementPositionChange('top', value)}
                     onBlur={() => handleElementPositionBlur('top')}
                     onEnter={() => handleElementPositionBlur('top')}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <Input
+                  <InputDrag
                     label="Width"
                     value={editElementWidth}
                     type="number"
@@ -510,11 +515,12 @@ export default function EditTab() {
                     unit="px"
                     step={1}
                     min={1}
+                    max={9999}
                     onChange={(value) => handleElementPositionChange('width', value)}
                     onBlur={() => handleElementPositionBlur('width')}
                     onEnter={() => handleElementPositionBlur('width')}
                   />
-                  <Input
+                  <InputDrag
                     label="Height"
                     value={editElementHeight}
                     type="number"
@@ -522,6 +528,7 @@ export default function EditTab() {
                     unit="px"
                     step={1}
                     min={1}
+                    max={9999}
                     onChange={(value) => handleElementPositionChange('height', value)}
                     onBlur={() => handleElementPositionBlur('height')}
                     onEnter={() => handleElementPositionBlur('height')}
@@ -535,7 +542,7 @@ export default function EditTab() {
               <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Visual Effects</h4>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <Input
+                  <InputDrag
                     label="Opacity"
                     value={editElementOpacity}
                     type="number"
@@ -547,13 +554,15 @@ export default function EditTab() {
                     onBlur={handleElementOpacityBlur}
                     onEnter={handleElementOpacityBlur}
                   />
-                  <Input
+                  <InputDrag
                     label="Rotation"
                     value={editElementRotation}
                     type="number"
                     placeholder="0"
                     unit="°"
-                    step={1}
+                    step={15}
+                    min={-360}
+                    max={360}
                     onChange={handleElementRotationChange}
                     onBlur={handleElementRotationBlur}
                     onEnter={handleElementRotationBlur}
@@ -566,7 +575,7 @@ export default function EditTab() {
             <div>
               <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Timing</h4>
               <div className="grid grid-cols-1 gap-4">
-                <Input
+                <InputDrag
                   label="Animation Delay"
                   value={editElementDelay}
                   type="number"
@@ -574,6 +583,7 @@ export default function EditTab() {
                   unit="ms"
                   step={100}
                   min={0}
+                  max={30000}
                   onChange={handleElementDelayChange}
                   onBlur={handleElementDelayBlur}
                   onEnter={handleElementDelayBlur}
