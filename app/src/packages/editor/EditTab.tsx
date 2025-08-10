@@ -361,6 +361,7 @@ export default function EditTab() {
                   placeholder="Enter page name"
                   onChange={handleNameChange}
                   onBlur={handleNameBlur}
+                  onEnter={handleNameBlur}
                 />
                 <Input
                   label="Duration"
@@ -372,6 +373,7 @@ export default function EditTab() {
                   min={0.1}
                   onChange={handleDurationChange}
                   onBlur={handleDurationBlur}
+                  onEnter={handleDurationBlur}
                 />
                 <Input
                   label="Background Color"
@@ -380,6 +382,7 @@ export default function EditTab() {
                   placeholder="#ffffff"
                   onChange={handleBackgroundColorChange}
                   onBlur={handleBackgroundColorBlur}
+                  onEnter={handleBackgroundColorBlur}
                 />
               </div>
             </div>
@@ -438,6 +441,7 @@ export default function EditTab() {
                       placeholder="Enter text content"
                       onChange={handleElementTextChange}
                       onBlur={handleElementTextBlur}
+                      onEnter={handleElementTextBlur}
                     />
                     <div className="grid grid-cols-2 gap-4">
                       <Input
@@ -450,6 +454,7 @@ export default function EditTab() {
                         min={1}
                         onChange={handleElementFontSizeChange}
                         onBlur={handleElementFontSizeBlur}
+                        onEnter={handleElementFontSizeBlur}
                       />
                       <Input
                         label="Text Color"
@@ -458,6 +463,7 @@ export default function EditTab() {
                         placeholder="#000000"
                         onChange={handleElementColorChange}
                         onBlur={handleElementColorBlur}
+                        onEnter={handleElementColorBlur}
                       />
                     </div>
                   </div>
@@ -480,6 +486,7 @@ export default function EditTab() {
                     min={0}
                     onChange={(value) => handleElementPositionChange('left', value)}
                     onBlur={() => handleElementPositionBlur('left')}
+                    onEnter={() => handleElementPositionBlur('left')}
                   />
                   <Input
                     label="Y Position"
@@ -491,6 +498,7 @@ export default function EditTab() {
                     min={0}
                     onChange={(value) => handleElementPositionChange('top', value)}
                     onBlur={() => handleElementPositionBlur('top')}
+                    onEnter={() => handleElementPositionBlur('top')}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -504,6 +512,7 @@ export default function EditTab() {
                     min={1}
                     onChange={(value) => handleElementPositionChange('width', value)}
                     onBlur={() => handleElementPositionBlur('width')}
+                    onEnter={() => handleElementPositionBlur('width')}
                   />
                   <Input
                     label="Height"
@@ -515,6 +524,7 @@ export default function EditTab() {
                     min={1}
                     onChange={(value) => handleElementPositionChange('height', value)}
                     onBlur={() => handleElementPositionBlur('height')}
+                    onEnter={() => handleElementPositionBlur('height')}
                   />
                 </div>
               </div>
@@ -535,6 +545,7 @@ export default function EditTab() {
                     max={1}
                     onChange={handleElementOpacityChange}
                     onBlur={handleElementOpacityBlur}
+                    onEnter={handleElementOpacityBlur}
                   />
                   <Input
                     label="Rotation"
@@ -545,6 +556,7 @@ export default function EditTab() {
                     step={1}
                     onChange={handleElementRotationChange}
                     onBlur={handleElementRotationBlur}
+                    onEnter={handleElementRotationBlur}
                   />
                 </div>
               </div>
@@ -564,6 +576,7 @@ export default function EditTab() {
                   min={0}
                   onChange={handleElementDelayChange}
                   onBlur={handleElementDelayBlur}
+                  onEnter={handleElementDelayBlur}
                 />
               </div>
             </div>

@@ -11,6 +11,7 @@ interface InputProps {
   step?: number;
   onChange: (value: string) => void;
   onBlur?: () => void;
+  onEnter?: () => void;
   className?: string;
   disabled?: boolean;
 }
@@ -26,6 +27,7 @@ export default function Input({
   step = 1,
   onChange,
   onBlur,
+  onEnter,
   className = '',
   disabled = false
 }: InputProps) {
@@ -38,6 +40,13 @@ export default function Input({
   const handleBlur = () => {
     if (onBlur) {
       onBlur();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && onEnter) {
+      e.preventDefault();
+      onEnter();
     }
   };
 
@@ -59,6 +68,7 @@ export default function Input({
                 value={String(value) || '#000000'}
                 onChange={handleChange}
                 onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
                 disabled={disabled}
                 className="w-10 h-10 border-2 border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer shadow-sm hover:border-gray-300 dark:hover:border-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Pick a color"
@@ -70,6 +80,7 @@ export default function Input({
                 value={String(value)}
                 onChange={handleChange}
                 onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
                 disabled={disabled}
                 placeholder={placeholder}
                 className="w-full px-4 py-3 text-sm font-medium border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:border-gray-300 dark:hover:border-gray-500"
@@ -84,6 +95,7 @@ export default function Input({
               value={String(value)}
               onChange={handleChange}
               onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
               disabled={disabled}
               placeholder={placeholder}
               min={min}
