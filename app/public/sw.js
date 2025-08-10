@@ -263,36 +263,46 @@ function extractFileIdentifier(url) {
   }
 }
 
-// Helper function to check if file is a media file (image, video, audio)
-function isMediaFile(mimeType, filename) {
-  const mediaMimeTypes = [
-    // Video
-    'video/', 'application/mp4', 'application/x-mpegURL',
-    // Audio
-    'audio/',
-    // Image
-    'image/'
-  ];
-  
-  const mediaExtensions = [
-    // Video
-    '.mp4', '.webm', '.mov', '.avi', '.mkv', '.m4v', '.3gp', '.flv', '.wmv', '.m4v',
-    // Audio
-    '.mp3', '.wav', '.aac', '.ogg', '.m4a', '.flac', '.wma', '.opus',
-    // Image
-    '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.tiff', '.ico', '.avif'
-  ];
-  
-  if (mimeType && mediaMimeTypes.some(type => mimeType.includes(type))) {
-    return true;
+// Helper function to check if URL should be intercepted by service worker
+function shouldInterceptUrl(url) {
+  try {
+    const urlObj = new URL(url);
+    const pathname = urlObj.pathname;
+    
+    // Only intercept URLs that match FileResolver patterns:
+    // 1. Service worker files: /sw-files/{fileId}/{filename}
+    // 2. Service worker query: /sw-file?file=filename&id=fileId
+    // 3. Query parameters that indicate project files: ?file=filename or ?localfile=filename
+    
+    // Pattern 1: /sw-files/ path
+    if (pathname.includes('/sw-files/')) {
+      return true;
+    }
+    
+    // Pattern 2: /sw-file path
+    if (pathname.includes('/sw-file')) {
+      return true;
+    }
+    
+    // Pattern 3: Query parameters for project files
+    const searchParams = urlObj.searchParams;
+    if (searchParams.has('file') || searchParams.has('localfile')) {
+      return true;
+    }
+    
+    // Do NOT intercept:
+    // - Static files like favicon.ico, robots.txt, etc.
+    // - Font files in /fonts/ directory
+    // - Logo files in /logos/ directory
+    // - Any file in /public/ directory structure
+    // - External URLs
+    // - API endpoints
+    
+    return false;
+  } catch (error) {
+    console.error('Service Worker - Error checking if URL should be intercepted:', error);
+    return false;
   }
-  
-  if (filename) {
-    const lowerFilename = filename.toLowerCase();
-    return mediaExtensions.some(ext => lowerFilename.endsWith(ext));
-  }
-  
-  return false;
 }
 
 // Main fetch event handler
@@ -315,15 +325,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Try to extract file identifier
-  const fileIdentifier = extractFileIdentifier(url);
-  if (!fileIdentifier) {
+  // Check if this URL should be intercepted by the service worker
+  if (!shouldInterceptUrl(url)) {
     return;
   }
   
-  // Check if this is a media file before proceeding
-  const isMedia = isMediaFile(null, fileIdentifier.name || url);
-  if (!isMedia) {
+  // Try to extract file identifier
+  const fileIdentifier = extractFileIdentifier(url);
+  if (!fileIdentifier) {
     return;
   }
   
