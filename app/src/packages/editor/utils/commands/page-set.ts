@@ -8,7 +8,7 @@ import { parseDuration, formatFramesToDuration } from './helpers';
 
 export const setPageCommand: SlashCommand = {
   name: 'set-page',
-  description: 'Set page properties including id, name, duration (supports human-readable formats), background color, and position',
+  description: 'Set page properties including name, duration (supports human-readable formats), background color, and position',
   usage: '/set-page [id] [--id|-i id] [--name|-n name] [--duration|-d duration] [--background-color|-bg color] [--after|-a id|n] [--before|-b id|n]',
   requiresConfirmation: false,
   execute: async (context: SlashCommandContext): Promise<SlashCommandResult> => {
@@ -26,20 +26,18 @@ export const setPageCommand: SlashCommand = {
       if (args.length === 0) {
         return {
           success: false,
-          message: '❌ **Missing Parameters**\n\nPlease specify at least one option to set.\n\nUsage: `/set-page [--id|-i id] [--name|-n name] [--duration|-d duration] [--background-color|-bg color] [--after|-a id|n] [--before|-b id|n]`\n\nExamples:\n• `/set-page --name "New Title" --duration 3s`\n• `/set-page --duration 1.5m --background-color "#ff0000"`\n• `/set-page --after 1 --name "Moved Page"`',
+          message: '❌ **Missing Parameters**\n\nPlease specify at least one option to set.\n\nUsage: `/set-page [--id|-i id] [--name|-n name] [--duration|-d duration] [--background-color|-bg color] [--after|-a id|n] [--before|-b id|n]`\n\nNote: `--id` is used to target a specific page, not to change the page ID.\n\nExamples:\n• `/set-page --name "New Title" --duration 3s`\n• `/set-page --id page-123 --name "Updated Title"`\n• `/set-page --duration 1.5m --background-color "#ff0000"`\n• `/set-page --after 1 --name "Moved Page"`',
           handled: true
         };
       }
 
       // Parse arguments
       const options: {
-        id?: string;
         name?: string;
         duration?: number;
         backgroundColor?: string;
         after?: string;
         before?: string;
-        targetPageId?: string;
       } = {};
 
       let targetPageId: string | null = null;
@@ -58,7 +56,7 @@ export const setPageCommand: SlashCommand = {
                 handled: true
               };
             }
-            options.id = nextArg;
+            targetPageId = nextArg;
             i++; // Skip next arg
             break;
 
@@ -152,7 +150,7 @@ export const setPageCommand: SlashCommand = {
             } else {
               return {
                 success: false,
-                message: `❌ **Unknown Option**\n\nUnknown option: '${arg}'\n\nAvailable options: \`--id\`, \`--name\`, \`--duration\`, \`--background-color\`, \`--after\`, \`--before\``,
+                message: `❌ **Unknown Option**\n\nUnknown option: '${arg}'\n\nAvailable options: \`--id\` (for targeting), \`--name\`, \`--duration\`, \`--background-color\`, \`--after\`, \`--before\``,
                 handled: true
               };
             }
@@ -197,19 +195,6 @@ export const setPageCommand: SlashCommand = {
       let changes: string[] = [];
 
       // Apply property changes
-      if (options.id !== undefined) {
-        // Check ID uniqueness
-        if (options.id !== targetPage.id && pages.some(p => p.id === options.id)) {
-          return {
-            success: false,
-            message: `❌ **Duplicate ID**\n\nPage ID '${options.id}' already exists. Page IDs must be unique.\n\nExisting IDs: ${pages.map(p => `"${p.id}"`).join(', ')}`,
-            handled: true
-          };
-        }
-        targetPage.id = options.id;
-        changes.push(`ID: "${originalPage.id}" → "${options.id}"`);
-      }
-
       if (options.name !== undefined) {
         targetPage.name = options.name;
         changes.push(`Name: "${originalPage.name}" → "${options.name}"`);
