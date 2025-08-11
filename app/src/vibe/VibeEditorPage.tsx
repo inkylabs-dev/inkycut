@@ -256,7 +256,7 @@ export default function VibeEditorPage () {
   if (!project) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-boxdark-2">
-        <div className="text-gray-500 dark:text-gray-400 text-xl">Project not found</div>
+        <div className="text-gray-500 dark:text-gray-400 text-xl">Loading project...</div>
       </div>
     );
   }
