@@ -1,0 +1,52 @@
+{
+  "pages": [
+    {
+      "id": "title-card",
+      "type": "group",
+      "left": 100,
+      "top": 100,
+      "width": 600,
+      "height": 200,
+      "elements": [
+        {
+          "id": "title-text",
+          "type": "text",
+          "left": 50,
+          "top": 20,
+          "width": 400,
+          "height": 60,
+          "text": "Welcome",
+          "fontSize": 48,
+          "color": "#000000",
+          "fontWeight": "bold"
+        },
+        {
+          "id": "subtitle-text",
+          "type": "text",
+          "left": 50,
+          "top": 100,
+          "width": 350,
+          "height": 40,
+          "text": "to InkyCut",
+          "fontSize": 32,
+          "color": "#cccccc"
+        }
+      ],
+      "animation": {
+        "props": {
+          "opacity": [
+            0,
+            1
+          ]
+        },
+        "duration": 1000,
+        "ease": "easeInOut",
+        "autoplay": true
+      },
+      "duration": 5000
+    }
+  ],
+  "fps": 30,
+  "width": 1920,
+  "height": 1080
+}

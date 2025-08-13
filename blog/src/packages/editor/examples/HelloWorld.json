@@ -1,0 +1,24 @@
+{
+  "pages": [
+    {
+      "id": "page-1752227619677",
+      "name": "Page 1",
+      "duration": 5000,
+      "backgroundColor": "white",
+      "elements": [
+        {
+          "type": "text",
+          "text": "Hello World",
+          "left": 0,
+          "right": 0,
+          "width": 1920,
+          "height": 1080,
+          "id": "element-1753047035112-0-0"
+        }
+      ]
+    }
+  ],
+  "fps": 60,
+  "width": 1920,
+  "height": 1080
+}

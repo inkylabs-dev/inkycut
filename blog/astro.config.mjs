@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightBlog from 'starlight-blog';
+import react from '@astrojs/react';
 
 import tailwind from '@astrojs/tailwind';
 
@@ -9,6 +10,7 @@ export default defineConfig({
   site: 'https://inkycut.com',
   trailingSlash: 'always',
   integrations: [
+    react(),
     starlight({
       title: 'InkyCut',
       favicon: '/favicon.ico',
@@ -56,7 +58,7 @@ export default defineConfig({
           label: 'Start Here',
           items: [
             {
-              label: 'Introduction',
+              label: 'Use Vibe Editor',
               link: '/',
             },
           ],

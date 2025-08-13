@@ -1,0 +1,67 @@
+{
+  "pages": [
+    {
+      "id": "page-1752227619677",
+      "name": "Page 1",
+      "duration": 5000,
+      "backgroundColor": "white",
+      "elements": [
+        {
+          "type": "group",
+          "left": 0,
+          "top": 0,
+          "elements": [
+            {
+              "type": "text",
+              "text": "Hello World",
+              "left": 0,
+              "top": 0,
+              "width": 500,
+              "height": 100,
+              "fontSize": 60,
+              "id": "element-1753047035112-0-0"
+            },
+            {
+              "type": "text",
+              "text": "This is a group element",
+              "left": 0,
+              "top": 200,
+              "width": 500,
+              "height": 200,
+              "fontSize": 60,
+              "id": "element-1753047035112-0-1"
+            }
+          ],
+          "id": "group-1753047035112-0",
+          "animation": {
+            "duration": 800,
+            "props": {
+              "keyframes": {
+                "0%": {
+                  "rotate": "0deg"
+                },
+                "25%": {
+                  "rotate": "-15deg"
+                },
+                "50%": {
+                  "rotate": "0deg"
+                },
+                "75%": {
+                  "rotate": "15deg"
+                },
+                "100%": {
+                  "rotate": "0deg"
+                }
+              }
+            },
+            "ease": "linear",
+            "loop": true
+          }
+        }
+      ]
+    }
+  ],
+  "fps": 60,
+  "width": 1920,
+  "height": 1080
+}
